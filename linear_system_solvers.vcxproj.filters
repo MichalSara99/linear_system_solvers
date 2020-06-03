@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="unit_tests">
+      <UniqueIdentifier>{f0149da5-4766-43cb-893c-2666ccc65e36}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lss_sparse_solvers_cuda_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
