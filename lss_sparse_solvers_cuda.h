@@ -20,7 +20,7 @@ namespace lss_sparse_solvers_cuda {
 	using lss_types::MemorySpace;
 	using lss_types::SparseSolverFactorizationDevice;
 	using lss_types::SparseSolverFactorizationHost;
-	using lss_utility::FlatSparseMatrix;
+	using lss_utility::FlatMatrix;
 	using lss_helpers::RealSparseSolverCUDAHelpers;
 
 
@@ -39,7 +39,7 @@ namespace lss_sparse_solvers_cuda {
 	class RealSparseSolverCUDA<MemorySpace::Host, T> {
 	protected:
 		int systemSize_;
-		FlatSparseMatrix<T> matrixElements_;
+		FlatMatrix<T> matrixElements_;
 
 		thrust::host_vector<T> h_matrixValues_;
 		thrust::host_vector<T> h_vectorValues_; // of systemSize length
@@ -77,7 +77,7 @@ namespace lss_sparse_solvers_cuda {
 			h_vectorValues_[idx] = value;
 		}
 
-		inline void setFlatSparseMatrix(FlatSparseMatrix<T> matrix) {
+		inline void setFlatSparseMatrix(FlatMatrix<T> matrix) {
 			matrixElements_ = std::move(matrix);
 		}
 
@@ -104,7 +104,7 @@ namespace lss_sparse_solvers_cuda {
 	class RealSparseSolverCUDA<MemorySpace::Device, T> {
 	protected:
 		int systemSize_;
-		FlatSparseMatrix<T> matrixElements_;
+		FlatMatrix<T> matrixElements_;
 
 		thrust::host_vector<T> h_matrixValues_;
 		thrust::host_vector<T> h_vectorValues_; // of systemSize length
@@ -142,7 +142,7 @@ namespace lss_sparse_solvers_cuda {
 			h_vectorValues_[idx] = value;
 		}
 
-		inline void setFlatSparseMatrix(FlatSparseMatrix<T> matrix) {
+		inline void setFlatSparseMatrix(FlatMatrix<T> matrix) {
 			matrixElements_ = std::move(matrix);
 		}
 

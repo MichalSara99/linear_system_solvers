@@ -77,6 +77,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="lss_dense_solvers_cuda.h" />
     <ClInclude Include="lss_helpers.h" />
     <ClInclude Include="lss_macros.h" />
     <ClInclude Include="lss_sparse_solvers_cuda.h" />

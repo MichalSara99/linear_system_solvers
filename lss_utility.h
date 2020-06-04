@@ -8,34 +8,34 @@
 namespace lss_utility {
 
 	// ==========================================================================
-	// ========================= FlatSparseMatrix ===============================
+	// =============================== FlatMatrix ===============================
 	// ==========================================================================
 
 	template<typename T>
-	struct FlatSparseMatrix {
+	struct FlatMatrix {
 	private:
 		std::vector<std::tuple<int, int, T>> container_;
 		int ncols_, nrows_;
 	public:
-		explicit FlatSparseMatrix(int nrows, int ncols)
+		explicit FlatMatrix(int nrows, int ncols)
 			:nrows_{ nrows }, ncols_{ ncols }{}
 
-		explicit FlatSparseMatrix()
-			:FlatSparseMatrix<T>(0, 0) {}
+		explicit FlatMatrix()
+			:FlatMatrix<T>(0, 0) {}
 
-		virtual ~FlatSparseMatrix() {}
+		virtual ~FlatMatrix() {}
 
-		FlatSparseMatrix(FlatSparseMatrix<T> const& copy)
+		FlatMatrix(FlatMatrix<T> const& copy)
 			:ncols_{ copy.ncols_ },
 			nrows_{ copy.nrows_ },
 			container_{ copy.container_ }{}
 
-		FlatSparseMatrix(FlatSparseMatrix<T>&& other)noexcept
+		FlatMatrix(FlatMatrix<T>&& other)noexcept
 			:ncols_{ std::move(other.ncols_) },
 			nrows_{ std::move(other.nrows_) },
 			container_{ std::move(other.container_) }{}
 
-		FlatSparseMatrix<T>& operator=(FlatSparseMatrix<T> const& copy) {
+		FlatMatrix<T>& operator=(FlatMatrix<T> const& copy) {
 			if (this != &copy) {
 				ncols_ = copy.ncols_;
 				nrows_ = copy.nrows_;
@@ -44,7 +44,7 @@ namespace lss_utility {
 			return *this;
 		}
 
-		FlatSparseMatrix<T>& operator=(FlatSparseMatrix<T>&& other)noexcept {
+		FlatMatrix<T>& operator=(FlatMatrix<T>&& other)noexcept {
 			if (this != &other) {
 				ncols_ = std::move(other.ncols_);
 				nrows_ = std::move(other.nrows_);

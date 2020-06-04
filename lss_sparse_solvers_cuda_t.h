@@ -8,7 +8,7 @@
 
 void deviceQRtest() {
 
-    using lss_sparse_solvers_cuda::FlatSparseMatrix;
+    using lss_sparse_solvers_cuda::FlatMatrix;
     using lss_sparse_solvers_cuda::MemorySpace;
     using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
     using lss_sparse_solvers_cuda::SparseSolverFactorizationDevice;
@@ -35,7 +35,7 @@ void deviceQRtest() {
     */
 
     // first create and populate the sparse matrix:
-    FlatSparseMatrix<double> fsm;
+    FlatMatrix<double> fsm;
     // size of the system:
     int const m = 6;
     // set number of columns and rows:
