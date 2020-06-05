@@ -13,15 +13,16 @@
 #include"lss_types.h"
 #include"lss_utility.h"
 #include"lss_helpers.h"
-
+#include"lss_sparse_solvers_policy.h"
 
 namespace lss_sparse_solvers_cuda {
 
 	using lss_types::MemorySpace;
-	using lss_types::SparseSolverFactorizationDevice;
-	using lss_types::SparseSolverFactorizationHost;
+	using lss_types::FlatMatrixSort;
 	using lss_utility::FlatMatrix;
 	using lss_helpers::RealSparseSolverCUDAHelpers;
+	using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+	using lss_sparse_solvers_policy::SparseSolverHostQR;
 
 
 
@@ -45,13 +46,6 @@ namespace lss_sparse_solvers_cuda {
 		thrust::host_vector<T> h_vectorValues_; // of systemSize length
 		thrust::host_vector<int> h_columnIndices_; 
 		thrust::host_vector<int> h_rowCounts_; // of systemSize + 1 length
-
-		// this one is for T = double
-		void solve_impl(T const* h_matVals, int const* h_rowCounts, int const* h_colIndices, T const* h_rhs,
-			T tol, int reorder, T* h_solution, int *singularity, SparseSolverFactorizationHost ssfh, std::true_type);
-		// this one is for T = float
-		void solve_impl(T const* h_matVals, int const* h_rowCounts, int const* h_colIndices, T const* h_rhs,
-			T tol, int reorder, T* h_solution, int *singularity, SparseSolverFactorizationHost ssfh, std::false_type);
 
 		void buildCSR();
 
@@ -89,9 +83,11 @@ namespace lss_sparse_solvers_cuda {
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 
-		void solve(T* solution, SparseSolverFactorizationHost ssfh);
+		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR>
+		void solve(T* solution);
 
-		std::vector<T> const solve(SparseSolverFactorizationHost ssfh);
+		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR>
+		std::vector<T> const solve();
 
 	};
 
@@ -111,17 +107,11 @@ namespace lss_sparse_solvers_cuda {
 		thrust::host_vector<int> h_columnIndices_;
 		thrust::host_vector<int> h_rowCounts_; // of systemSize + 1 length
 
-		// this one is for T = double
-		void solve_impl(T const* d_matVals, int const * d_rowCounts,int const* d_colIndices, T const* d_rhs,
-			T tol, int reorder, T* d_solution, int *singularity, SparseSolverFactorizationDevice ssfd, std::true_type);
-		// this one is for T = float
-		void solve_impl(T const* d_matVals, int const * d_rowCounts, int const* d_colIndices, T const* d_rhs,
-			T tol, int reorder, T* d_solution, int *singularity, SparseSolverFactorizationDevice ssfd, std::false_type);
-
 		void buildCSR();
 
 	public:
-		explicit RealSparseSolverCUDA() {}
+		explicit RealSparseSolverCUDA()
+			:systemSize_{0} {}
 		virtual ~RealSparseSolverCUDA() {}
 
 		void initialize(int systemSize);
@@ -154,271 +144,13 @@ namespace lss_sparse_solvers_cuda {
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 
-		void solve(T* solution, SparseSolverFactorizationDevice ssfd);
+		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR>
+		void solve(T* solution);
 
-		std::vector<T> const solve(SparseSolverFactorizationDevice ssfd);
+		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR>
+		std::vector<T> const solve();
 
 	};
-
-
-
-
-
-}
-
-
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::
-solve_impl(T const* h_matVals,  int const* h_rowCounts, int const* h_colIndices, T const* h_rhs,
-	T tol, int reorder, T* h_solution, int *singularity, SparseSolverFactorizationHost ssfh, std::true_type) {
-	
-	int const nonZeroSize = nonZeroElements();
-
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-
-	switch (ssfh) {
-	case SparseSolverFactorizationHost::QR:
-		CUSOLVER_STATUS(cusolverSpDcsrlsvqrHost(helpers.getSolverHandle(),
-			systemSize_, 
-			nonZeroSize, 
-			helpers.getMatrixDescriptor(),
-			h_matVals, 
-			h_rowCounts, 
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	case SparseSolverFactorizationHost::Cholesky:
-		CUSOLVER_STATUS(cusolverSpDcsrlsvcholHost(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			h_matVals,
-			h_rowCounts,
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	case SparseSolverFactorizationHost::LU:
-		CUSOLVER_STATUS(cusolverSpDcsrlsvluHost(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			h_matVals,
-			h_rowCounts,
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	default:
-		CUSOLVER_STATUS(cusolverSpDcsrlsvqrHost(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			h_matVals,
-			h_rowCounts,
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	}
-
-
-}
-
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::
-solve_impl(T const* h_matVals, int const* h_rowCounts, int const* h_colIndices, T const* h_rhs,
-	T tol, int reorder, T* h_solution, int* singularity, SparseSolverFactorizationHost ssfh, std::false_type) {
-
-	int const nonZeroSize = nonZeroElements();
-
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-
-	switch (ssfh) {
-	case SparseSolverFactorizationHost::QR:
-		CUSOLVER_STATUS(cusolverSpScsrlsvqrHost(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			h_matVals,
-			h_rowCounts,
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	case SparseSolverFactorizationHost::Cholesky:
-		CUSOLVER_STATUS(cusolverSpScsrlsvcholHost(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			h_matVals,
-			h_rowCounts,
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	case SparseSolverFactorizationHost::LU:
-		CUSOLVER_STATUS(cusolverSpScsrlsvluHost(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			h_matVals,
-			h_rowCounts,
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	default:
-		CUSOLVER_STATUS(cusolverSpScsrlsvqrHost(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			h_matVals,
-			h_rowCounts,
-			h_colIndices,
-			h_rhs,
-			tol,
-			reorder,
-			h_solution,
-			singularity));
-		break;
-	}
-
-}
-
-
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device,T>::
-solve_impl(T const* d_matVals, int const* d_rowCounts, int const* d_colIndices, T const* d_rhs,
-	T tol, int reorder, T* d_solution, int *singularity, SparseSolverFactorizationDevice ssfd, std::true_type) {
-	int const nonZeroSize = nonZeroElements();
-
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-
-	switch (ssfd) {
-	case SparseSolverFactorizationDevice::QR:
-		CUSOLVER_STATUS(cusolverSpDcsrlsvqr(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			d_matVals,
-			d_rowCounts,
-			d_colIndices,
-			d_rhs,
-			tol,
-			reorder,
-			d_solution,
-			singularity));
-		break;
-	case SparseSolverFactorizationDevice::Cholesky:
-		CUSOLVER_STATUS(cusolverSpDcsrlsvchol(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			d_matVals,
-			d_rowCounts,
-			d_colIndices,
-			d_rhs,
-			tol,
-			reorder,
-			d_solution,
-			singularity));
-		break;
-	default:
-		CUSOLVER_STATUS(cusolverSpDcsrlsvqr(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			d_matVals,
-			d_rowCounts,
-			d_colIndices,
-			d_rhs,
-			tol,
-			reorder,
-			d_solution,
-			singularity));
-		break;
-	}
-
-}
-
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device,T>::
-solve_impl(T const* d_matVals, int const* d_rowCounts, int const* d_colIndices, T const* d_rhs,
-	T tol, int reorder, T* d_solution, int *singularity, SparseSolverFactorizationDevice ssfd, std::false_type) {
-
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-
-	switch (ssfd) {
-	case SparseSolverFactorizationDevice::QR:
-		CUSOLVER_STATUS(cusolverSpScsrlsvqr(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			d_matVals,
-			d_rowCounts,
-			d_colIndices,
-			d_rhs,
-			tol,
-			reorder,
-			d_solution,
-			singularity));
-		break;
-	case SparseSolverFactorizationDevice::Cholesky:
-		CUSOLVER_STATUS(cusolverSpScsrlsvchol(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			d_matVals,
-			d_rowCounts,
-			d_colIndices,
-			d_rhs,
-			tol,
-			reorder,
-			d_solution,
-			singularity));
-		break;
-	default:
-		CUSOLVER_STATUS(cusolverSpScsrlsvqr(helpers.getSolverHandle(),
-			systemSize_,
-			nonZeroSize,
-			helpers.getMatrixDescriptor(),
-			d_matVals,
-			d_rowCounts,
-			d_colIndices,
-			d_rhs,
-			tol,
-			reorder,
-			d_solution,
-			singularity));
-		break;
-	}
 
 }
 
@@ -467,6 +199,9 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,
 
 	int const nonZeroSize = nonZeroElements();
 
+	// CUDA sparse solver is row-major:
+	matrixElements_.sort(FlatMatrixSort::RowMajor);
+
 	h_columnIndices_.resize(nonZeroSize);
 	h_matrixValues_.resize(nonZeroSize);
 
@@ -494,6 +229,9 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Devic
 
 	int const nonZeroSize = nonZeroElements();
 
+	// CUDA sparse solver is row-major:
+	matrixElements_.sort(FlatMatrixSort::RowMajor);
+
 	h_columnIndices_.resize(nonZeroSize);
 	h_matrixValues_.resize(nonZeroSize);
 
@@ -517,8 +255,9 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Devic
 }
 
 template<typename T>
+template<template<typename> typename SparseSolverHostPolicy>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,T>::
-solve(T* solution, lss_types::SparseSolverFactorizationHost ssfh) {
+solve(T* solution) {
 
 	buildCSR();
 
@@ -538,8 +277,12 @@ solve(T* solution, lss_types::SparseSolverFactorizationHost ssfh) {
 	int* h_col = thrust::raw_pointer_cast(h_columnIndices_.data());
 	int* h_row = thrust::raw_pointer_cast(h_rowCounts_.data());
 
-	// call the particular implementation:
-	solve_impl(h_matVals, h_row, h_col, h_rhsVals, 0.0, 0, h_sol, &singularIdx, ssfh, std::is_same<T, double>());
+	// create the helpers:
+	RealSparseSolverCUDAHelpers helpers;
+	helpers.initialize();
+	// call the SparseSolverHostPolicy:
+	SparseSolverHostPolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
+		systemSize_, nonZeroSize, h_matVals, h_row, h_col, h_rhsVals, 0.0, 0, h_sol, &singularIdx);
 
 	if (singularIdx >= 0) {
 		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
@@ -548,8 +291,9 @@ solve(T* solution, lss_types::SparseSolverFactorizationHost ssfh) {
 }
 
 template<typename T>
+template<template<typename> typename SparseSolverDevicePolicy>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
-solve(T* solution, lss_types::SparseSolverFactorizationDevice ssfd) {
+solve(T* solution) {
 
 	buildCSR();
 
@@ -576,8 +320,12 @@ solve(T* solution, lss_types::SparseSolverFactorizationDevice ssfd) {
 	int* d_col = thrust::raw_pointer_cast(d_columnIndices.data());
 	int* d_row = thrust::raw_pointer_cast(d_rowCounts.data());
 
-	// call the particular implementation:
-	solve_impl(d_matVals, d_row, d_col, d_rhsVals, 0.0, 0, d_sol, &singularIdx, ssfd, std::is_same<T, double>());
+	// create the helpers:
+	RealSparseSolverCUDAHelpers helpers;
+	helpers.initialize();
+	// call the SparseSolverDevicePolicy:
+	SparseSolverDevicePolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
+		systemSize_, nonZeroSize, d_matVals, d_row, d_col, d_rhsVals, 0.0, 0, d_sol, &singularIdx);
 
 	if (singularIdx >= 0) {
 		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
@@ -587,8 +335,9 @@ solve(T* solution, lss_types::SparseSolverFactorizationDevice ssfd) {
 }
 
 template<typename T>
+template<template<typename> typename SparseSolverHostPolicy>
 std::vector<T> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::
-solve(lss_types::SparseSolverFactorizationHost ssfh) {
+solve() {
 
 	buildCSR();
 
@@ -608,23 +357,26 @@ solve(lss_types::SparseSolverFactorizationHost ssfh) {
 	int* h_col = thrust::raw_pointer_cast(h_columnIndices_.data());
 	int* h_row = thrust::raw_pointer_cast(h_rowCounts_.data());
 
-	// call the particular implementation:
-	solve_impl(h_matVals, h_row, h_col, h_rhsVals, 0.0, 0, h_sol, &singularIdx, ssfh, std::is_same<T, double>());
+	// create the helpers:
+	RealSparseSolverCUDAHelpers helpers;
+	helpers.initialize();
+	// call the SparseSolverHostPolicy:
+	SparseSolverHostPolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
+		systemSize_, nonZeroSize, h_matVals, h_row, h_col, h_rhsVals, 0.0, 0, h_sol, &singularIdx);
 
 	if (singularIdx >= 0) {
 		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
 	}
 
-
-	std::vector<T> solution(systemSize_);
-	for (std::size_t t = 0; t < h_solution.size(); ++t)
-		solution[t] = h_solution[t];
+	std::vector<T> solution(h_solution.size());
+	thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
 	return solution;
 }
 
 template<typename T>
+template<template<typename> typename SparseSolverDevicePolicy>
 std::vector<T> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
-solve(lss_types::SparseSolverFactorizationDevice ssfd) {
+solve() {
 
 	buildCSR();
 
@@ -651,17 +403,19 @@ solve(lss_types::SparseSolverFactorizationDevice ssfd) {
 	int* d_col = thrust::raw_pointer_cast(d_columnIndices.data());
 	int* d_row = thrust::raw_pointer_cast(d_rowCounts.data());
 
-	// call the particular implementation:
-	solve_impl(d_matVals, d_row, d_col, d_rhsVals, 0.0, 0, d_sol, &singularIdx, ssfd, std::is_same<T, double>());
+	// create the helpers:
+	RealSparseSolverCUDAHelpers helpers;
+	helpers.initialize();
+	// call the SparseSolverDevicePolicy:
+	SparseSolverDevicePolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
+		systemSize_, nonZeroSize, d_matVals, d_row, d_col, d_rhsVals, 0.0, 0, d_sol, &singularIdx);
 
 	if (singularIdx >= 0) {
 		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
 	}
 
-	thrust::host_vector<T> h_solution = d_solution;
 	std::vector<T> solution(systemSize_);
-	for (std::size_t t = 0; t < h_solution.size(); ++t)
-		solution[t] = h_solution[t];
+	thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
 
 	return solution;
 }

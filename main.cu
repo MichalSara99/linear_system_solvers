@@ -2,7 +2,7 @@
 
 
 #include"lss_sparse_solvers_cuda_t.h"
-
+#include"lss_dense_solvers_cuda_t.h"
 
 int main(int argc, char const* argv[]) {
 
@@ -11,12 +11,20 @@ int main(int argc, char const* argv[]) {
     // ========= lss_sparse_solvers_cuda_t.h =====
     // ===========================================
 
-    deviceQRtest();
+     deviceSparseQRtest();
 
 
     // ===========================================
 
 
+    // ===========================================
+    // ========= lss_dense_solvers_cuda_t.h =====
+    // ===========================================
+
+    deviceDenseQRtest();
+
+
+    // ===========================================
 
     std::cout << "\n\n";
 

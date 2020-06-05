@@ -10,9 +10,9 @@
 #define CUDA_ERROR(value){\
 cudaError_t error=value;\
 if(error != cudaSuccess) {\
-	std::cerr << "File: "<<__LINE__\
+	std::cerr << "File: "<<__FILE__\
     <<"\nLine: "<<__LINE__\
-    <<"\nWhat: %s\n" << cudaGetErrorString(error);\
+    <<"\nWhat: \n" << cudaGetErrorString(error);\
 }\
 }\
 
@@ -20,6 +20,14 @@ if(error != cudaSuccess) {\
 #define CUSOLVER_STATUS(value){\
 cusolverStatus_t status = value;\
 if(status!= CUSOLVER_STATUS_SUCCESS){\
+std::cerr << "File: "<<__FILE__\
+<<"\nLine: "<<__LINE__<<"\n";\
+}\
+}\
+
+#define CUBLAS_STATUS(value){\
+cublasStatus_t status = value;\
+if(status!= CUBLAS_STATUS_SUCCESS){\
 std::cerr << "File: "<<__FILE__\
 <<"\nLine: "<<__LINE__<<"\n";\
 }\

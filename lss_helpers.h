@@ -25,7 +25,9 @@ namespace lss_helpers {
 		explicit RealSparseSolverCUDAHelpers()
 			:solverHandle_{ NULL }, matDesc_{ NULL }{}
 
-		~RealSparseSolverCUDAHelpers(){}
+		~RealSparseSolverCUDAHelpers(){
+			cusolverSpDestroy(solverHandle_);
+		}
 
 		inline void initialize() {
 			LSS_ASSERT((cusolverSpCreate(&solverHandle_) == CUSOLVER_STATUS_SUCCESS),
@@ -57,7 +59,10 @@ namespace lss_helpers {
 		explicit RealDenseSolverCUDAHelpers()
 			:solverHandle_{NULL},cublasHandle_{NULL}{}
 
-		~RealDenseSolverCUDAHelpers(){}
+		~RealDenseSolverCUDAHelpers(){
+			cusolverDnDestroy(solverHandle_);
+			cublasDestroy_v2(cublasHandle_);
+		}
 
 		inline void initialize() {
 			LSS_ASSERT((cusolverDnCreate(&solverHandle_) == CUSOLVER_STATUS_SUCCESS),

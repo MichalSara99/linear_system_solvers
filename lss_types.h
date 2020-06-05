@@ -14,17 +14,12 @@ namespace lss_types {
 
 	enum class MemorySpace { Host, Device };
 
-	// ==========================================================================
-	// ================== SparseSolverFactorizationDevice =======================
-	// ==========================================================================
-
-	enum class SparseSolverFactorizationDevice { QR, Cholesky };
 
 	// ==========================================================================
-	// ==================== SparseSolverFactorizationHost =======================
+	// ============================= FlatMatrixSort =============================
 	// ==========================================================================
-
-	enum class SparseSolverFactorizationHost { LU, QR, Cholesky };
+	
+	enum class FlatMatrixSort { RowMajor, ColumnMajor };
 
 
 }

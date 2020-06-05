@@ -4,23 +4,25 @@
 
 
 #include<type_traits>
-
+#include<algorithm>
 #include<thrust/host_vector.h>
 #include<thrust/device_vector.h>
 
 
 #include"lss_macros.h"
 #include"lss_types.h"
+#include"lss_helpers.h"
 #include"lss_utility.h"
+#include"lss_dense_solvers_policy.h"
 
 #include<cusolverDn.h>
-
-// Very good examples:
-// https://github.com/NVIDIA/cuda-samples/blob/master/Samples/cuSolverDn_LinearSolver/cuSolverDn_LinearSolver.cpp
 
 namespace lss_dense_solvers_cuda{
 
 	using lss_utility::FlatMatrix;
+	using lss_types::FlatMatrixSort;
+	using lss_helpers::RealDenseSolverCUDAHelpers;
+	using lss_dense_solvers_policy::DenseSolverQR;
 
 	template<typename T,
 		typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
@@ -37,8 +39,11 @@ namespace lss_dense_solvers_cuda{
 		thrust::host_vector<T> h_matrixValues_;
 		thrust::host_vector<T> h_rhsValues_;
 
+		void populate();
+
 	public:
-		explicit RealDenseSolverCUDA() {}
+		explicit RealDenseSolverCUDA():
+			matrixCols_{ 0 }, matrixRows_{0} {}
 		virtual ~RealDenseSolverCUDA(){}
 
 		void initialize(int matrixRows,int matrixColumns);
@@ -82,12 +87,29 @@ namespace lss_dense_solvers_cuda{
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 	
+		template<template<typename> typename DenseSolverPolicy = DenseSolverQR>
+		void solve(T* solution);
+
+		template<template<typename> typename DenseSolverPolicy = DenseSolverQR>
+		std::vector<T> const solve();
+
 	};
 
 
 
 }
 
+
+template<typename T>
+void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::populate() {
+
+	// CUDA Dense solver is column-major:
+	matrixElements_.sort(FlatMatrixSort::ColumnMajor);
+
+	for (std::size_t t = 0; t < matrixElements_.size(); ++t) {
+		h_matrixValues_[t] = std::get<2>(matrixElements_.at(t));
+	}
+}
 
 template<typename T>
 void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::initialize(int matrixRows, int matrixColumns) {
@@ -107,7 +129,76 @@ void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::initialize(int matrixRows, 
 
 
 
+template<typename T>
+template<template<typename> typename DenseSolverPolicy>
+void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(T* solution) {
+	
+	populate();
 
+	// get the dimensions:
+	int const lda = std::max(matrixElements_.rows(), matrixElements_.columns());
+	int const m  = std::min(matrixElements_.rows(), matrixElements_.columns());
+	int const ldb = h_rhsValues_.size();
+
+	// step 1: create device containers:
+	thrust::device_vector<T> d_matrixValues = h_matrixValues_;
+	thrust::device_vector<T> d_rhsValues = h_rhsValues_;
+	thrust::device_vector<T> d_solution(m);
+
+	// step 2: cast to raw pointers:
+	T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
+	T* d_rhsVals = thrust::raw_pointer_cast(d_rhsValues.data());
+	T* d_sol = thrust::raw_pointer_cast(d_solution.data());
+	
+	// create the helpers:
+	RealDenseSolverCUDAHelpers helpers;
+	helpers.initialize();
+
+	// call the DenseSolverPolicy:
+	DenseSolverPolicy<T>::solve(helpers.getDenseSolverHandle(), helpers.getCublasHandle(),
+		m, d_matVals, lda, d_rhsVals, d_sol);
+
+	thrust::copy(d_solution.begin(), d_solution.end(), solution);
+
+}
+
+template<typename T>
+template<template<typename> typename DenseSolverPolicy>
+std::vector<T> const lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve() {
+
+	populate();
+
+	// get the dimensions:
+	int const lda = std::max(matrixElements_.rows(), matrixElements_.columns());
+	int const m = std::min(matrixElements_.rows(), matrixElements_.columns());
+	int const ldb = h_rhsValues_.size();
+
+	// prepare container for solution:
+	thrust::host_vector<T> h_solution(m);
+
+	// step 1: create device vectors:
+	thrust::device_vector<T> d_matrixValues = h_matrixValues_;
+	thrust::device_vector<T> d_rhsValues = h_rhsValues_;
+	thrust::device_vector<T> d_solution = h_solution;
+
+	// step 2: cast to raw pointers:
+	T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
+	T* d_rhsVals = thrust::raw_pointer_cast(d_rhsValues.data());
+	T* d_sol = thrust::raw_pointer_cast(d_solution.data());
+
+	// create the helpers:
+	RealDenseSolverCUDAHelpers helpers;
+	helpers.initialize();
+
+	// call the DenseSolverPolicy:
+	DenseSolverPolicy<T>::solve(helpers.getDenseSolverHandle(), helpers.getCublasHandle(),
+		m, d_matVals, lda, d_rhsVals, d_sol);
+
+	std::vector<T> solution(h_solution.size());
+	thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
+
+	return solution;
+}
 
 
 

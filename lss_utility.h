@@ -4,12 +4,16 @@
 
 #include<vector>
 #include<tuple>
+#include<algorithm>
+
+#include"lss_types.h"
 
 namespace lss_utility {
 
 	// ==========================================================================
 	// =============================== FlatMatrix ===============================
 	// ==========================================================================
+	using lss_types::FlatMatrixSort;
 
 	template<typename T>
 	struct FlatMatrix {
@@ -77,6 +81,9 @@ namespace lss_utility {
 			container_.emplace_back(std::move(tuple));
 		}
 
+
+		void sort(FlatMatrixSort sort);
+
 		std::tuple<int, int, T> const& at(int idx)const {
 			return container_.at(idx);
 		}
@@ -86,6 +93,27 @@ namespace lss_utility {
 }
 
 
+template<typename T>
+void lss_utility::FlatMatrix<T>::sort(lss_types::FlatMatrixSort sort) {
+	if (sort == lss_types::FlatMatrixSort::RowMajor) {
+		std::sort(container_.begin(), container_.end(), 
+			[this](std::tuple<int,int,T> const &lhs, 
+				std::tuple<int, int, T> const& rhs) {
+					int const flatIdxLhs = std::get<1>(lhs) + nrows_ * std::get<0>(lhs);
+					int const flatIdxRhs = std::get<1>(rhs) + nrows_ * std::get<0>(rhs);
+					return (flatIdxLhs < flatIdxRhs);
+			});
+	}
+	else {
+		std::sort(container_.begin(), container_.end(),
+			[this](std::tuple<int, int, T> const& lhs,
+				std::tuple<int, int, T> const& rhs) {
+					int const flatIdxLhs = std::get<0>(lhs) + ncols_ * std::get<1>(lhs);
+					int const flatIdxRhs = std::get<0>(rhs) + ncols_ * std::get<1>(rhs);
+					return (flatIdxLhs < flatIdxRhs);
+			});
+	}
+}
 
 
 #endif ///_LSS_UTILITY

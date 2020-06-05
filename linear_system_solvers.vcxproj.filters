@@ -17,6 +17,11 @@
     <ClInclude Include="lss_types.h" />
     <ClInclude Include="lss_utility.h" />
     <ClInclude Include="lss_dense_solvers_cuda.h" />
+    <ClInclude Include="lss_dense_solvers_cuda_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="lss_dense_solvers_policy.h" />
+    <ClInclude Include="lss_sparse_solvers_policy.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

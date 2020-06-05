@@ -4,15 +4,17 @@
 
 
 #include"lss_sparse_solvers_cuda.h"
+#include"lss_sparse_solvers_policy.h"
 
-
-void deviceQRtest() {
+void deviceSparseQRtest() {
 
     using lss_sparse_solvers_cuda::FlatMatrix;
     using lss_sparse_solvers_cuda::MemorySpace;
     using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-    using lss_sparse_solvers_cuda::SparseSolverFactorizationDevice;
-    using lss_sparse_solvers_cuda::SparseSolverFactorizationHost;
+    using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+    using lss_sparse_solvers_policy::SparseSolverHostQR;
+    using lss_sparse_solvers_policy::SparseSolverHostLU;
+
 
     /*
 
@@ -52,7 +54,7 @@ void deviceQRtest() {
     std::vector<double> b = { 0.0,2.0,4.0,6.0,8.0,10.0 };
 
     // create sparse solver on DEVICE:
-    RealSparseSolverCUDA<MemorySpace::Device, double> rss;
+    RealSparseSolverCUDA<MemorySpace::Host, double> rss;
 
     // because we used default cstor we need to call initialize
     rss.initialize(m);
@@ -61,7 +63,7 @@ void deviceQRtest() {
     rss.setFlatSparseMatrix(std::move(fsm));
     rss.setRhs(b);
 
-    auto solution = rss.solve(SparseSolverFactorizationDevice::QR);
+    auto solution = rss.solve<SparseSolverHostQR>();
 
     for (auto const& e : solution) {
         std::cout << e << ", ";
