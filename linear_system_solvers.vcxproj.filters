@@ -22,6 +22,7 @@
     </ClInclude>
     <ClInclude Include="lss_dense_solvers_policy.h" />
     <ClInclude Include="lss_sparse_solvers_policy.h" />
+    <ClInclude Include="lss_dense_solvers.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

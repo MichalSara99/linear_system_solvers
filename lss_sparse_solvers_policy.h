@@ -9,10 +9,15 @@
 
 namespace lss_sparse_solvers_policy {
 
-	/* Sparse QR factorization on Host */
+	/* Base for sparse factorization on Host */
 
 	template<typename T>
-	struct SparseSolverHostQR {
+	struct SparseSolverHost{};
+
+
+	/* Sparse QR factorization on Host */
+	template<typename T>
+	struct SparseSolverHostQR: public SparseSolverHost<T> {
 	private:
 		// for T = double
 		static void _solve_impl(cusolverSpHandle_t handle,cusparseMatDescr_t matDesc,
@@ -42,7 +47,7 @@ namespace lss_sparse_solvers_policy {
 	/* Sparse LU factorization on Host */
 
 	template<typename T>
-	struct SparseSolverHostLU {
+	struct SparseSolverHostLU:public SparseSolverHost<T> {
 	private:
 		// for T = double
 		static void _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
@@ -71,7 +76,7 @@ namespace lss_sparse_solvers_policy {
 	/* Sparse Cholesky factorization on Host */
 
 	template<typename T>
-	struct SparseSolverHostCholesky {
+	struct SparseSolverHostCholesky:public SparseSolverHost<T> {
 	private:
 		// for T = double
 		static void _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
@@ -98,10 +103,15 @@ namespace lss_sparse_solvers_policy {
 	};
 
 
+	/* Base for sparse factorization on Device */
+
+	template<typename T>
+	struct SparseSolverDevice {};
+
 	/* Sparse QR factorization on Device */
 
 	template<typename T>
-	struct SparseSolverDeviceQR {
+	struct SparseSolverDeviceQR:public SparseSolverDevice<T> {
 	private:
 		// for T = double
 		static void _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
@@ -130,7 +140,7 @@ namespace lss_sparse_solvers_policy {
 	/* Sparse Cholesky factorization on Device */
 
 	template<typename T>
-	struct SparseSolverDeviceCholesky {
+	struct SparseSolverDeviceCholesky:public SparseSolverDevice<T> {
 	private:
 		// for T = double
 		static void _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,

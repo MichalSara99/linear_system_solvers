@@ -11,8 +11,8 @@ int main(int argc, char const* argv[]) {
     // ========= lss_sparse_solvers_cuda_t.h =====
     // ===========================================
 
-    // deviceSparseQRtest();
-
+    // deviceSparseQRTest();
+    // hostSparseQRTest();
 
     // ===========================================
 
@@ -22,7 +22,7 @@ int main(int argc, char const* argv[]) {
     // ===========================================
 
     // deviceDenseQRTest();
-    deviceDenseLUTest();
+    // deviceDenseLUTest();
 
 
     // ===========================================

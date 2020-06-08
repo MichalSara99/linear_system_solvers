@@ -22,6 +22,7 @@ namespace lss_dense_solvers_cuda{
 	using lss_utility::FlatMatrix;
 	using lss_types::FlatMatrixSort;
 	using lss_helpers::RealDenseSolverCUDAHelpers;
+	using lss_dense_solvers_policy::DenseSolverDevice;
 	using lss_dense_solvers_policy::DenseSolverQR;
 
 	template<typename T,
@@ -48,11 +49,12 @@ namespace lss_dense_solvers_cuda{
 
 		void initialize(int matrixRows,int matrixColumns);
 
-		inline void setRhs(std::vector<T> const& rhs) {
+		template<template<typename T,typename Alloc> typename Container = std::vector,
+			typename Alloc = std::allocator<T>>
+		inline void setRhs(Container<T,Alloc> const& rhs) {
 			LSS_ASSERT(rhs.size() == matrixRows_, 
 				" Right-hand side vector of the system has incorrect size.");
-			for (std::size_t t = 0; t < rhs.size(); ++t)
-				h_rhsValues_[t] = rhs[t];
+			thrust::copy(rhs.begin(), rhs.end(), h_rhsValues_.begin());
 		}
 
 		inline void setRhs(T* rhs) {
@@ -87,11 +89,17 @@ namespace lss_dense_solvers_cuda{
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 	
-		template<template<typename> typename DenseSolverPolicy = DenseSolverQR>
+		template<template<typename> typename DenseSolverPolicy = DenseSolverQR,
+				typename =typename std::enable_if<std::is_base_of<DenseSolverDevice<T>,DenseSolverPolicy<T>>::value>::type>
 		void solve(T* solution);
 
-		template<template<typename> typename DenseSolverPolicy = DenseSolverQR>
-		std::vector<T> const solve();
+		template<template<typename> typename DenseSolverPolicy = DenseSolverQR,
+			template<typename T,typename Alloc> typename Container = std::vector,
+			typename Alloc = std::allocator<T>,
+			typename = typename std::enable_if<std::is_base_of<DenseSolverDevice<T>, DenseSolverPolicy<T>>::value>::type>
+		Container<T,Alloc> const solve();
+
+
 
 	};
 
@@ -130,7 +138,7 @@ void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::initialize(int matrixRows, 
 
 
 template<typename T>
-template<template<typename> typename DenseSolverPolicy>
+template<template<typename> typename DenseSolverPolicy,typename >
 void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(T* solution) {
 	
 	populate();
@@ -163,8 +171,11 @@ void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(T* solution) {
 }
 
 template<typename T>
-template<template<typename> typename DenseSolverPolicy>
-std::vector<T> const lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve() {
+template<template<typename> typename DenseSolverPolicy,
+		template<typename T,typename Alloc> typename Container,
+		typename Alloc,
+		typename>
+Container<T,Alloc> const lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve() {
 
 	populate();
 
@@ -194,7 +205,7 @@ std::vector<T> const lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve() {
 	DenseSolverPolicy<T>::solve(helpers.getDenseSolverHandle(), helpers.getCublasHandle(),
 		m, d_matVals, lda, d_rhsVals, d_sol);
 
-	std::vector<T> solution(h_solution.size());
+	Container<T,Alloc> solution(h_solution.size());
 	thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
 
 	return solution;

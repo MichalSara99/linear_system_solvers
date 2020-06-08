@@ -10,10 +10,13 @@
 
 namespace lss_dense_solvers_policy {
 
+    template<typename T>
+    struct DenseSolverDevice{};
+
 	/* Dense QR factorization */
 
 	template<typename T>
-	struct DenseSolverQR {
+	struct DenseSolverQR:public DenseSolverDevice<T> {
 	private:
 		// T = double
 		static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
@@ -32,7 +35,7 @@ namespace lss_dense_solvers_policy {
 	/* Dense LU factorization */
 
 	template<typename T>
-	struct DenseSolverLU {
+	struct DenseSolverLU:public DenseSolverDevice<T> {
 	private:
 		// T = double
         static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
@@ -51,7 +54,7 @@ namespace lss_dense_solvers_policy {
 	/* Dense Cholesky factorization */
 
 	template<typename T>
-	struct DenseSolverCholesky {
+	struct DenseSolverCholesky:public DenseSolverDevice<T> {
 	private:
 		// T = double
         static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,

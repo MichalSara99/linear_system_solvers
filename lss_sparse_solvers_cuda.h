@@ -21,8 +21,13 @@ namespace lss_sparse_solvers_cuda {
 	using lss_types::FlatMatrixSort;
 	using lss_utility::FlatMatrix;
 	using lss_helpers::RealSparseSolverCUDAHelpers;
+	using lss_sparse_solvers_policy::SparseSolverDevice;
+	using lss_sparse_solvers_policy::SparseSolverDeviceCholesky;
 	using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+	using lss_sparse_solvers_policy::SparseSolverHost;
 	using lss_sparse_solvers_policy::SparseSolverHostQR;
+	using lss_sparse_solvers_policy::SparseSolverHostLU;
+	using lss_sparse_solvers_policy::SparseSolverHostCholesky;
 
 
 
@@ -57,9 +62,12 @@ namespace lss_sparse_solvers_cuda {
 
 		inline int const nonZeroElements()const { return matrixElements_.size(); }
 
-		inline void setRhs(std::vector<T> const &rhs) {
-			for (std::size_t t = 0; t < h_vectorValues_.size(); ++t)
-				h_vectorValues_[t] = rhs[t];
+		template<template<typename T,typename Alloc> typename Container = std::vector,
+			typename Alloc = std::allocator<T>>
+		inline void setRhs(Container<T,Alloc> const &rhs) {
+			LSS_ASSERT(rhs.size() == systemSize_,
+				" rhs has incorrect size");
+			thrust::copy(rhs.begin(), rhs.end(), h_vectorValues_.begin());
 		}
 
 		inline void setRhs(T const *rhs) {
@@ -83,11 +91,15 @@ namespace lss_sparse_solvers_cuda {
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 
-		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR>
+		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR,
+				typename  = typename std::enable_if<std::is_base_of<SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
 		void solve(T* solution);
 
-		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR>
-		std::vector<T> const solve();
+		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR,
+			template<typename T,typename Alloc> typename Container = std::vector,
+			typename Alloc = std::allocator<T>,
+			typename = typename std::enable_if<std::is_base_of<SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
+		Container<T,Alloc> const solve();
 
 	};
 
@@ -118,9 +130,14 @@ namespace lss_sparse_solvers_cuda {
 
 		inline int const nonZeroElements()const { return matrixElements_.size(); }
 
-		inline void setRhs(std::vector<T> const& rhs) {
-			for (std::size_t t = 0; t < h_vectorValues_.size(); ++t)
-				h_vectorValues_[t] = rhs[t];
+		template<template<typename T, typename Alloc> typename Container = std::vector,
+			typename Alloc = std::allocator<T>>
+		inline void setRhs(Container<T,Alloc> const& rhs) {
+			LSS_ASSERT(rhs.size() == systemSize_,
+				" rhs has incorrect size");
+			thrust::copy(rhs.begin(), rhs.end(), h_vectorValues_.begin());
+			//for (std::size_t t = 0; t < h_vectorValues_.size(); ++t)
+			//	h_vectorValues_[t] = rhs[t];
 		}
 
 		inline void setRhs(T const* rhs) {
@@ -144,11 +161,15 @@ namespace lss_sparse_solvers_cuda {
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 
-		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR>
+		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
+			typename =typename std::enable_if<std::is_base_of<SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
 		void solve(T* solution);
 
-		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR>
-		std::vector<T> const solve();
+		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
+			template<typename T,typename Alloc> typename Container = std::vector,
+			typename Alloc = std::allocator<T>,
+			typename = typename std::enable_if<std::is_base_of<SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
+		Container<T,Alloc> const solve();
 
 	};
 
@@ -255,7 +276,7 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Devic
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverHostPolicy>
+template<template<typename> typename SparseSolverHostPolicy,typename>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,T>::
 solve(T* solution) {
 
@@ -291,7 +312,7 @@ solve(T* solution) {
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverDevicePolicy>
+template<template<typename> typename SparseSolverDevicePolicy,typename>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
 solve(T* solution) {
 
@@ -335,8 +356,11 @@ solve(T* solution) {
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverHostPolicy>
-std::vector<T> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::
+template<template<typename> typename SparseSolverHostPolicy,
+template<typename T,typename Alloc> typename Container,
+typename Alloc,
+typename>
+Container<T,Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::
 solve() {
 
 	buildCSR();
@@ -368,14 +392,17 @@ solve() {
 		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
 	}
 
-	std::vector<T> solution(h_solution.size());
+	Container<T,Alloc> solution(h_solution.size());
 	thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
 	return solution;
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverDevicePolicy>
-std::vector<T> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
+template<template<typename> typename SparseSolverDevicePolicy,
+	template<typename T, typename Alloc> typename Container,
+	typename Alloc,
+	typename>
+Container<T,Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
 solve() {
 
 	buildCSR();
@@ -414,7 +441,7 @@ solve() {
 		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
 	}
 
-	std::vector<T> solution(systemSize_);
+	Container<T,Alloc> solution(systemSize_);
 	thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
 
 	return solution;
