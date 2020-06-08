@@ -11,7 +11,7 @@ int main(int argc, char const* argv[]) {
     // ========= lss_sparse_solvers_cuda_t.h =====
     // ===========================================
 
-     deviceSparseQRtest();
+    // deviceSparseQRtest();
 
 
     // ===========================================
@@ -21,7 +21,8 @@ int main(int argc, char const* argv[]) {
     // ========= lss_dense_solvers_cuda_t.h =====
     // ===========================================
 
-    deviceDenseQRtest();
+    // deviceDenseQRTest();
+    deviceDenseLUTest();
 
 
     // ===========================================
