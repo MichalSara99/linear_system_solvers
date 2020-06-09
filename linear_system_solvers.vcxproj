@@ -88,6 +88,7 @@
     <ClInclude Include="lss_sparse_solvers_cuda_t.h" />
     <ClInclude Include="lss_sparse_solvers_tridiagonal.h" />
     <ClInclude Include="lss_sparse_solvers_policy.h" />
+    <ClInclude Include="lss_sparse_solvers_tridiagonal_t.h" />
     <ClInclude Include="lss_types.h" />
     <ClInclude Include="lss_utility.h" />
   </ItemGroup>

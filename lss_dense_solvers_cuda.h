@@ -43,6 +43,7 @@ namespace lss_dense_solvers_cuda{
 		void populate();
 
 	public:
+		typedef T value_type;
 		explicit RealDenseSolverCUDA():
 			matrixCols_{ 0 }, matrixRows_{0} {}
 		virtual ~RealDenseSolverCUDA(){}
@@ -55,10 +56,6 @@ namespace lss_dense_solvers_cuda{
 			LSS_ASSERT(rhs.size() == matrixRows_, 
 				" Right-hand side vector of the system has incorrect size.");
 			thrust::copy(rhs.begin(), rhs.end(), h_rhsValues_.begin());
-		}
-
-		inline void setRhs(T* rhs) {
-			thrust::copy(rhs, rhs + matrixRows_, h_rhsValues_.begin());
 		}
 
 		inline void setRhsValue(int idx, T value) {
@@ -90,8 +87,10 @@ namespace lss_dense_solvers_cuda{
 		}
 	
 		template<template<typename> typename DenseSolverPolicy = DenseSolverQR,
+			template<typename T,typename Alloc> typename Container = std::vector,
+			typename Alloc = std::allocator<T>,
 				typename =typename std::enable_if<std::is_base_of<DenseSolverDevice<T>,DenseSolverPolicy<T>>::value>::type>
-		void solve(T* solution);
+		void solve(Container<T,Alloc> &container);
 
 		template<template<typename> typename DenseSolverPolicy = DenseSolverQR,
 			template<typename T,typename Alloc> typename Container = std::vector,
@@ -138,8 +137,11 @@ void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::initialize(int matrixRows, 
 
 
 template<typename T>
-template<template<typename> typename DenseSolverPolicy,typename >
-void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(T* solution) {
+template<template<typename> typename DenseSolverPolicy,
+	template<typename T,typename Alloc> typename Container,
+	typename Alloc,
+	typename>
+void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(Container<T, Alloc>& container) {
 	
 	populate();
 
@@ -166,7 +168,7 @@ void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(T* solution) {
 	DenseSolverPolicy<T>::solve(helpers.getDenseSolverHandle(), helpers.getCublasHandle(),
 		m, d_matVals, lda, d_rhsVals, d_sol);
 
-	thrust::copy(d_solution.begin(), d_solution.end(), solution);
+	thrust::copy(d_solution.begin(), d_solution.end(), container.begin());
 
 }
 

@@ -137,7 +137,7 @@ void deviceDenseDefaultQRPointersTest() {
     rds.setFlatDenseMatrix(std::move(fsm));
     rds.setRhs(b);
 
-    double* solution = (double*)malloc(sizeof(double)*m);
+    std::vector<double> solution(m);
     rds.solve<DenseSolverQR>(solution);
 
     std::cout << "Solution is: \n[";
@@ -146,8 +146,6 @@ void deviceDenseDefaultQRPointersTest() {
     }
     std::cout << "]\n";
 
-
-    free(solution);
 }
 
 void deviceDenseFloatQRTest() {
@@ -278,7 +276,7 @@ void deviceDenseFloatQRPointersTest() {
     rds.setFlatDenseMatrix(std::move(fsm));
     rds.setRhs(b);
 
-    float* solution = (float*)malloc(sizeof(float) * m);
+    std::vector<float> solution(m);
     rds.solve<DenseSolverQR>(solution);
 
     std::cout << "Solution is: \n[";
@@ -287,7 +285,6 @@ void deviceDenseFloatQRPointersTest() {
     }
     std::cout << "]\n";
 
-    free(solution);
 }
 
 void deviceDenseQRTest() {
@@ -434,7 +431,7 @@ void deviceDenseDefaultLUPointersTest() {
     rds.setFlatDenseMatrix(std::move(fsm));
     rds.setRhs(b);
 
-    double* solution = (double*)malloc(sizeof(double) * m);
+    std::vector<double> solution(m);
     rds.solve<DenseSolverLU>(solution);
     
     std::cout << "Solution is: \n[";
@@ -443,7 +440,6 @@ void deviceDenseDefaultLUPointersTest() {
     }
     std::cout << "]\n";
 
-    free(solution);
 }
 
 
@@ -577,7 +573,7 @@ void deviceDenseFloatLUPointersTest() {
     rds.setFlatDenseMatrix(std::move(fsm));
     rds.setRhs(b);
 
-    float* solution = (float*)malloc(sizeof(float) * m);
+    std::vector<float> solution(m);
     rds.solve<DenseSolverLU>(solution);
 
     std::cout << "Solution is: \n[";
@@ -586,7 +582,6 @@ void deviceDenseFloatLUPointersTest() {
     }
     std::cout << "]\n";
 
-    free(solution);
 }
 
 void deviceDenseLUTest() {

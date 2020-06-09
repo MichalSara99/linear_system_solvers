@@ -23,6 +23,9 @@
     <ClInclude Include="lss_dense_solvers_policy.h" />
     <ClInclude Include="lss_sparse_solvers_policy.h" />
     <ClInclude Include="lss_dense_solvers.h" />
+    <ClInclude Include="lss_sparse_solvers_tridiagonal_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
