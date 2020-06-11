@@ -60,6 +60,11 @@ namespace lss_sparse_solvers_cuda {
 			:systemSize_{ 0 } {}
 		virtual ~RealSparseSolverCUDA(){}
 
+		RealSparseSolverCUDA(RealSparseSolverCUDA const&) = delete;
+		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA const&) = delete;
+		RealSparseSolverCUDA(RealSparseSolverCUDA &&) = delete;
+		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA &&) = delete;
+
 		void initialize(int systemSize);
 
 		inline int const nonZeroElements()const { return matrixElements_.size(); }
@@ -127,6 +132,11 @@ namespace lss_sparse_solvers_cuda {
 		explicit RealSparseSolverCUDA()
 			:systemSize_{0} {}
 		virtual ~RealSparseSolverCUDA() {}
+
+		RealSparseSolverCUDA(RealSparseSolverCUDA const&) = delete;
+		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA const&) = delete;
+		RealSparseSolverCUDA(RealSparseSolverCUDA &&) = delete;
+		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA &&) = delete;
 
 		void initialize(int systemSize);
 

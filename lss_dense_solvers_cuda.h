@@ -48,6 +48,11 @@ namespace lss_dense_solvers_cuda{
 			matrixCols_{ 0 }, matrixRows_{0} {}
 		virtual ~RealDenseSolverCUDA(){}
 
+		RealDenseSolverCUDA(RealDenseSolverCUDA const&) = delete;
+		RealDenseSolverCUDA& operator=(RealDenseSolverCUDA const &) = delete;
+		RealDenseSolverCUDA(RealDenseSolverCUDA &&) = delete;
+		RealDenseSolverCUDA& operator=(RealDenseSolverCUDA &&) = delete;
+
 		void initialize(int matrixRows,int matrixColumns);
 
 		template<template<typename T,typename Alloc> typename Container = std::vector,
