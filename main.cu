@@ -3,7 +3,7 @@
 
 #include"lss_sparse_solvers_cuda_t.h"
 #include"lss_dense_solvers_cuda_t.h"
-#include"lss_sparse_solvers_tridiagonal_t.h"
+#include"lss_fdm_tridiagonal_solvers_t.h"
 
 int main(int argc, char const* argv[]) {
 
@@ -12,8 +12,8 @@ int main(int argc, char const* argv[]) {
     // ==================================================
 
      // testDoubleSweep();
-    // testThomasLUSolver();
-
+     // testThomasLUSolver();
+     testBVPTridiagonalSolver();
 
     // ==================================================
 

@@ -1,13 +1,14 @@
 #pragma once
-#if !defined(_LSS_SPARSE_SOLVERS_TRIDIAGONAL_T)
-#define _LSS_SPARSE_SOLVERS_TRIDIAGONAL_T
+#if !defined(_LSS_FDM_TRIDIAGONAL_SOLVERS_T)
+#define _LSS_FDM_TRIDIAGONAL_SOLVERS_T
 
-#include"lss_sparse_solvers_tridiagonal.h"
+#include"lss_fdm_tridiagonal_solvers_policy.h"
+#include"lss_fdm_tridiagonal_solvers.h"
 
 
 void testBVPDoubleDoubleSweep() {
 
-	using lss_sparse_solvers_tridiagonal::DoubleSweepSolver;
+	using lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver;
 
 	/*
 	
@@ -72,7 +73,7 @@ void testBVPDoubleDoubleSweep() {
 
 void testBVPFloatDoubleSweep() {
 
-	using lss_sparse_solvers_tridiagonal::DoubleSweepSolver;
+	using lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver;
 
 	/*
 
@@ -151,7 +152,7 @@ void testDoubleSweep() {
 
 void testBVPDoubleThomasLUSolver() {
 
-	using lss_sparse_solvers_tridiagonal::ThomasLUSolver;
+	using lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver;
 
 	/*
 
@@ -217,7 +218,7 @@ void testBVPDoubleThomasLUSolver() {
 
 void testBVPFloatThomasLUSolver() {
 
-	using lss_sparse_solvers_tridiagonal::ThomasLUSolver;
+	using lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver;
 
 	/*
 
@@ -262,6 +263,7 @@ void testBVPFloatThomasLUSolver() {
 	float left = 0.0f;
 	float right = 0.0f;
 
+
 	ThomasLUSolver<float> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setDirichletBC(right, left);
@@ -288,10 +290,159 @@ void testThomasLUSolver() {
 	testBVPDoubleThomasLUSolver();
 	testBVPFloatThomasLUSolver();
 
+
+
 	std::cout << "==================================================\n";
 }
 
 
 
 
-#endif ///_LSS_SPARSE_SOLVERS_TRIDIAGONAL_T
+void testBVPTridiagonalThomasSolver() {
+
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSparseSolver;
+	using lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver;
+	/*
+
+		Solve BVP:
+
+				u''(t) = - 2,
+
+		where
+
+				t \in (0, 1)
+				u(0) = 0 ,  u(1) = 0
+
+
+		Exact solution is
+
+				u(t) = t(1-t)
+
+	*/
+	std::cout << "=================================\n";
+	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " u''(t) = -2, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " t in <0,1>,\n";
+	std::cout << " u(0) = u(1) = 0\n\n";
+	std::cout << "Exact solution is:\n\n";
+	std::cout << " u(t) = t(1-t)\n";
+	std::cout << "=================================\n";
+
+	// discretization:
+	std::size_t N{ 20 };
+	// step size:
+	double h = 1.0 / static_cast<double>(N);
+	// upper,mid, and lower diagonal:
+	std::vector<double> upperDiag(N + 1, 1.0);
+	std::vector<double> diagonal(N + 1, -2.0);
+	std::vector<double> lowerDiag(N + 1, 1.0);
+
+	// right-hand side:
+	std::vector<double> rhs(N + 1, -2.0 * h * h);
+
+	// boundary conditions:
+	double left = 0.0;
+	double right = 0.0;
+	std::cout << "Using Thomas solver:\n";
+	FDMTridiagonalSparseSolver<double, ThomasLUSolver> tds{ N + 1 };
+	tds.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
+	tds.setDirichletBC(right, left);
+	tds.setRhs(std::move(rhs));
+	//get the solution:
+	auto solution = tds.solve();
+
+	//exact value:
+	auto exact = [](double x) { return x * (1.0 - x); };
+
+	std::cout << "tp : FDM | Exact\n";
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		std::cout << "t_" << j << ": " << solution[j] << " |  "
+			<< exact(j * h) << '\n';
+	}
+}
+
+
+
+void testBVPTridiagonalDSSolver() {
+
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSparseSolver;
+	using lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver;
+	/*
+
+		Solve BVP:
+
+				u''(t) = - 2,
+
+		where
+
+				t \in (0, 1)
+				u(0) = 0 ,  u(1) = 0
+
+
+		Exact solution is
+
+				u(t) = t(1-t)
+
+	*/
+	std::cout << "=================================\n";
+	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " u''(t) = -2, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " t in <0,1>,\n";
+	std::cout << " u(0) = u(1) = 0\n\n";
+	std::cout << "Exact solution is:\n\n";
+	std::cout << " u(t) = t(1-t)\n";
+	std::cout << "=================================\n";
+
+	// discretization:
+	std::size_t N{ 20 };
+	// step size:
+	double h = 1.0 / static_cast<double>(N);
+	// upper,mid, and lower diagonal:
+	std::vector<double> upperDiag(N + 1, 1.0);
+	std::vector<double> diagonal(N + 1, -2.0);
+	std::vector<double> lowerDiag(N + 1, 1.0);
+
+	// right-hand side:
+	std::vector<double> rhs(N + 1, -2.0 * h * h);
+
+	// boundary conditions:
+	double left = 0.0;
+	double right = 0.0;
+	std::cout << "Using Double Sweep solver:\n";
+	FDMTridiagonalSparseSolver<double, DoubleSweepSolver> tds{ N + 1 };
+	tds.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
+	tds.setDirichletBC(right, left);
+	tds.setRhs(std::move(rhs));
+	//get the solution:
+	auto solution = tds.solve();
+
+	//exact value:
+	auto exact = [](double x) { return x * (1.0 - x); };
+
+	std::cout << "tp : FDM | Exact\n";
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		std::cout << "t_" << j << ": " << solution[j] << " |  "
+			<< exact(j * h) << '\n';
+	}
+}
+
+
+
+void testBVPTridiagonalSolver() {
+	std::cout << "==================================================\n";
+	std::cout << "============== Tridiagonal Solver ================\n";
+	std::cout << "==================================================\n";
+
+	testBVPTridiagonalThomasSolver();
+	testBVPTridiagonalDSSolver();
+
+
+
+	std::cout << "==================================================\n";
+}
+
+#endif ///_LSS_FDM_TRIDIAGONAL_SOLVERS_T

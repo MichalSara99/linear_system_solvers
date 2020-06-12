@@ -1,12 +1,19 @@
 #pragma once
-#if !defined(_LSS_SPARSE_SOLVERS_TRIDIAGONAL)
-#define _LSS_SPARSE_SOLVERS_TRIDIAGONAL
+#if !defined(_LSS_FDM_TRIDIAGONAL_SOLVERS_POLICY)
+#define _LSS_FDM_TRIDIAGONAL_SOLVERS_POLICY
 
 #include<vector>
 #include<type_traits>
 #include"lss_macros.h"
 
-namespace lss_sparse_solvers_tridiagonal {
+namespace lss_fdm_tridiagonal_solvers_policy{
+
+
+	template<typename T,
+			template<typename T,typename Allocator> typename Container = std::vector,
+			typename Alloc = std::allocator<T>>
+	class FDMTridiagonalSolversPolicyBase{};
+
 
 	// =====================================================================================
 	// ============================= DoubleSweepSolver =====================================
@@ -14,9 +21,8 @@ namespace lss_sparse_solvers_tridiagonal {
 
 	template<typename T,
 			template<typename T,typename Allocator> typename Container = std::vector,
-			typename Alloc = std::allocator<T>,
-			typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
-	class DoubleSweepSolver {
+			typename Alloc = std::allocator<T>>
+	class DoubleSweepSolver:public FDMTridiagonalSolversPolicyBase<T, Container,Alloc> {
 	private:
 		std::size_t discretizationSize_;
 		Container<T, Alloc>  a_, b_, c_, f_;
@@ -65,9 +71,8 @@ namespace lss_sparse_solvers_tridiagonal {
 
 	template<typename T,
 		template<typename T, typename Allocator> typename Container = std::vector,
-		typename Alloc = std::allocator<T>,
-		typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
-	class ThomasLUSolver {
+		typename Alloc = std::allocator<T>>
+	class ThomasLUSolver:public FDMTridiagonalSolversPolicyBase<T, Container, Alloc> {
 	private:
 		std::size_t systemSize_, discretizationSize_;
 		Container<T, Alloc>  a_, b_, c_, f_;
@@ -121,9 +126,8 @@ namespace lss_sparse_solvers_tridiagonal {
 
 template<typename T,
 		template<typename T,typename Alloc> typename Container,
-		typename Alloc,
-		typename U>
-void lss_sparse_solvers_tridiagonal::ThomasLUSolver<T,Container,Alloc,U>::
+		typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver<T,Container,Alloc>::
 kernel(Container<T, Alloc>& solution) {
 	// clear the working containers:
 	beta_.clear();
@@ -162,9 +166,8 @@ kernel(Container<T, Alloc>& solution) {
 
 template<typename T,
 		template<typename T,typename Alloc> typename Container,
-		typename Alloc,
-		typename U>
-bool lss_sparse_solvers_tridiagonal::ThomasLUSolver<T, Container, Alloc, U>::
+		typename Alloc>
+bool lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver<T, Container, Alloc>::
 isDiagonallyDominant()const {
 	if (std::abs(b_[0]) < std::abs(c_[0])) return false;
 	if (std::abs(b_[systemSize_ - 1]) < std::abs(c_[systemSize_ - 1]))return false;
@@ -177,9 +180,8 @@ isDiagonallyDominant()const {
 
 template<typename T,
 		template<typename T,typename Alloc> typename Container,
-		typename Alloc,
-		typename U>
-void lss_sparse_solvers_tridiagonal::ThomasLUSolver<T,Container,Alloc,U>::
+		typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver<T,Container,Alloc>::
 setRhs(Container<T, Alloc> rhs) {
 	LSS_ASSERT(rhs.size() == discretizationSize_,
 		"Inncorect size for right-hand side");
@@ -190,9 +192,8 @@ setRhs(Container<T, Alloc> rhs) {
 
 template<typename T,
 		template<typename T,typename Alloc> typename Container,
-		typename Alloc,
-		typename U>
-void lss_sparse_solvers_tridiagonal::ThomasLUSolver<T,Container,Alloc,U>::
+		typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver<T,Container,Alloc>::
 setDiagonals(Container<T, Alloc> lowerDiagonal,
 	Container<T, Alloc> diagonal,
 	Container<T, Alloc> upperDiagonal) {
@@ -219,9 +220,8 @@ setDiagonals(Container<T, Alloc> lowerDiagonal,
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
-	typename Alloc,
-	typename U>
-void lss_sparse_solvers_tridiagonal::ThomasLUSolver<T,Container,Alloc,U>::
+	typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver<T,Container,Alloc>::
 solve(Container<T, Alloc>& solution) {
 	LSS_ASSERT(solution.size() == discretizationSize_,
 		"Incorrect size of solution container");
@@ -230,9 +230,8 @@ solve(Container<T, Alloc>& solution) {
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
-	typename Alloc,
-	typename U>
-Container<T,Alloc> const lss_sparse_solvers_tridiagonal::ThomasLUSolver<T, Container, Alloc, U>::
+	typename Alloc>
+Container<T,Alloc> const lss_fdm_tridiagonal_solvers_policy::ThomasLUSolver<T, Container, Alloc>::
 solve() {
 	Container<T, Alloc> solution(discretizationSize_);
 	kernel(solution);
@@ -245,9 +244,8 @@ solve() {
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
-	typename Alloc,
-	typename U>
-void lss_sparse_solvers_tridiagonal::DoubleSweepSolver<T, Container, Alloc,U>::
+	typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver<T, Container, Alloc>::
 setDiagonals(Container<T, Alloc> lowerDiagonal,
 	Container<T, Alloc> diagonal,
 	Container<T, Alloc> upperDiagonal) {
@@ -265,9 +263,8 @@ setDiagonals(Container<T, Alloc> lowerDiagonal,
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
-	typename Alloc,
-	typename U>
-void lss_sparse_solvers_tridiagonal::DoubleSweepSolver<T, Container, Alloc,U>::
+	typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver<T, Container, Alloc>::
 setRhs(Container<T, Alloc> rhs) {
 
 	LSS_ASSERT(rhs.size() == discretizationSize_,
@@ -278,9 +275,8 @@ setRhs(Container<T, Alloc> rhs) {
 
 template<typename T,
 	template<typename T,typename Alloc> typename Container,
-	typename Alloc,
-	typename U>
-void lss_sparse_solvers_tridiagonal::DoubleSweepSolver<T,Container,Alloc,U>::
+	typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver<T,Container,Alloc>::
 solve(Container<T, Alloc>& solution) {
 	LSS_ASSERT(solution.size() == discretizationSize_,
 		"Incorrect size of solution container");
@@ -290,9 +286,8 @@ solve(Container<T, Alloc>& solution) {
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
-	typename Alloc,
-	typename U>
-Container<T, Alloc> const lss_sparse_solvers_tridiagonal::DoubleSweepSolver<T, Container, Alloc,U>::
+	typename Alloc>
+Container<T, Alloc> const lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver<T, Container, Alloc>::
 solve() {
 	Container<T, Alloc> solution(discretizationSize_);
 	kernel(solution);
@@ -302,9 +297,8 @@ solve() {
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
-	typename Alloc,
-	typename U>
-void lss_sparse_solvers_tridiagonal::DoubleSweepSolver<T, Container, Alloc,U>::
+	typename Alloc>
+void lss_fdm_tridiagonal_solvers_policy::DoubleSweepSolver<T, Container, Alloc>::
 kernel(Container<T, Alloc>& solution) {
 	// clear coefficients:
 	K_.clear();
@@ -332,4 +326,4 @@ kernel(Container<T, Alloc>& solution) {
 	std::copy(f_.begin(), f_.end(), solution.begin());
 }
 
-#endif ///_LSS_SPARSE_SOLVERS_TRIDIAGONAL
+#endif ///_LSS_FDM_TRIDIAGONAL_SOLVERS_POLICY
