@@ -11,9 +11,14 @@ int main(int argc, char const* argv[]) {
     // ========= lss_sparse_solvers_tridiagonal_t.h =====
     // ==================================================
 
-     // testDoubleSweep();
-     // testThomasLUSolver();
-     testBVPTridiagonalSolver();
+     // testDoubleSweepDirichletBC(); 
+     // testThomasLUSolverDirichletBC();
+	 //  testDoubleSweepDirichletBC1();
+	 // testThomasLUSolverDirichletBC1();
+
+	 testDoubleSweepRobinBC();
+	 testThomasLUSolverRobinBC();
+     // testBVPTridiagonalSolver();
 
     // ==================================================
 

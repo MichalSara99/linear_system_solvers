@@ -22,11 +22,12 @@
     <ClInclude Include="lss_dense_solvers_policy.h" />
     <ClInclude Include="lss_sparse_solvers_policy.h" />
     <ClInclude Include="lss_dense_solvers.h" />
-    <ClInclude Include="lss_fdm_tridiagonal_solvers.h" />
-    <ClInclude Include="lss_fdm_tridiagonal_solvers_policy.h" />
     <ClInclude Include="lss_fdm_tridiagonal_solvers_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="lss_fdm_tridiagonal_solvers.h" />
+    <ClInclude Include="lss_fdm_double_sweep_solver.h" />
+    <ClInclude Include="lss_fdm_thomas_lu_solver.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

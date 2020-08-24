@@ -21,6 +21,11 @@ namespace lss_types {
 	
 	enum class FlatMatrixSort { RowMajor, ColumnMajor };
 
+	// ==========================================================================
+	// ======================== BoundaryConditionType ===========================
+	// ==========================================================================
+
+	enum class BoundaryConditionType { Dirichlet, Robin };
 
 }
 
