@@ -181,8 +181,8 @@ setDiagonals(Container<T, Alloc> lowerDiagonal,
 		c_[t] = std::move(upperDiagonal[t + 1]);
 	}
 
-	LSS_ASSERT(isDiagonallyDominant() == true,
-		"Tridiagonal matrix must be diagonally dominant.");
+	//LSS_ASSERT(isDiagonallyDominant() == true,
+	//	"Tridiagonal matrix must be diagonally dominant.");
 }
 
 
