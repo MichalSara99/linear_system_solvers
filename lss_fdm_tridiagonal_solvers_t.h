@@ -7,9 +7,11 @@
 #include"lss_types.h"
 #include"lss_fdm_double_sweep_solver.h"
 #include"lss_fdm_thomas_lu_solver.h"
+#include"lss_fdm_tridiagonal_solvers.h"
 
 
-void testBVPDoubleDoubleSweepDirichletBC() {
+template<typename T>
+void testBVPDoubleSweepDirichletBC() {
 
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
 	using lss_types::BoundaryConditionType;
@@ -33,6 +35,7 @@ void testBVPDoubleDoubleSweepDirichletBC() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -44,20 +47,20 @@ void testBVPDoubleDoubleSweepDirichletBC() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	double h = 1.0 / static_cast<double>(N);
+	double h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<double> upperDiag(N + 1, 1.0);
-	std::vector<double> diagonal(N + 1, -2.0);
-	std::vector<double> lowerDiag(N + 1, 1.0);
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<double> rhs(N + 1, -2.0 * h * h );
+	std::vector<T> rhs(N + 1, -2.0 * h * h );
 
 	// boundary conditions:
-	double left = 0.0;
-	double right = 0.0;
+	T left = 0.0;
+	T right = 0.0;
 
-	FDMDoubleSweepSolver<double, BoundaryConditionType::Dirichlet,std::vector,std::allocator<double>> dss{ N + 1 };
+	FDMDoubleSweepSolver<T, BoundaryConditionType::Dirichlet,std::vector,std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
 	dss.setRhs(std::move(rhs));
@@ -65,7 +68,7 @@ void testBVPDoubleDoubleSweepDirichletBC() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](double x) { return x * (1.0 - x); };
+	auto exact = [](T x) { return x * (1.0 - x); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -75,30 +78,34 @@ void testBVPDoubleDoubleSweepDirichletBC() {
 	}
 }
 
-void testBVPFloatDoubleSweepDirichletBC() {
 
+template<typename T>
+void testBVPFDMSolverDirichletBC_0() {
+
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
 	using lss_types::BoundaryConditionType;
 
 	/*
 
-		Solve BVP:
+	Solve BVP:
 
-				u''(t) = - 2,
+	u''(t) = - 2,
 
-		where
+	where
 
-				t \in (0, 1)
-				u(0) = 0 ,  u(1) = 0
+	t \in (0, 1)
+	u(0) = 0 ,  u(1) = 0
 
 
-		Exact solution is
+	Exact solution is
 
-				u(t) = t(1-t)
+	u(t) = t(1-t)
 
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -110,20 +117,27 @@ void testBVPFloatDoubleSweepDirichletBC() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<float> upperDiag(N + 1, 1.0f);
-	std::vector<float> diagonal(N + 1, -2.0f);
-	std::vector<float> lowerDiag(N + 1, 1.0f);
+	std::vector<T> upperDiag(N + 1, 1.0f);
+	std::vector<T> diagonal(N + 1, -2.0f);
+	std::vector<T> lowerDiag(N + 1, 1.0f);
 
 	// right-hand side:
-	std::vector<float> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	float left = 0.0f;
-	float right = 0.0f;
+	T left = 0.0f;
+	T right = 0.0f;
 
-	FDMDoubleSweepSolver<float, BoundaryConditionType::Dirichlet, std::vector, std::allocator<float>> dss{ N + 1 };
+	// typedef the solver
+	typedef FDMTridiagonalSolver<T,
+		BoundaryConditionType::Dirichlet,
+		FDMDoubleSweepSolver,
+		std::vector,
+		std::allocator<T>> DoubleSweep;
+
+	DoubleSweep dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
 	dss.setRhs(std::move(rhs));
@@ -131,7 +145,7 @@ void testBVPFloatDoubleSweepDirichletBC() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](float x) { return x * (1.0 - x); };
+	auto exact = [](T x) { return x * (1.0 - x); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -140,7 +154,6 @@ void testBVPFloatDoubleSweepDirichletBC() {
 			<< exact(j * h) << '\n';
 	}
 }
-
 
 
 void testDoubleSweepDirichletBC() {
@@ -148,14 +161,16 @@ void testDoubleSweepDirichletBC() {
 	std::cout << "=========== Double Sweep (Dirichlet BC) ==========\n";
 	std::cout << "==================================================\n";
 
-	testBVPDoubleDoubleSweepDirichletBC();
-	testBVPFloatDoubleSweepDirichletBC();
+	testBVPDoubleSweepDirichletBC<double>();
+	testBVPDoubleSweepDirichletBC<float>();
+	testBVPFDMSolverDirichletBC_0<double>();
+	testBVPFDMSolverDirichletBC_0<float>();
 
 	std::cout << "==================================================\n";
 }
 
-
-void testBVPDoubleThomasLUSolverDirichletBC() {
+template<typename T>
+void testBVPThomasLUSolverDirichletBC() {
 
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
 	using lss_types::BoundaryConditionType;
@@ -179,6 +194,7 @@ void testBVPDoubleThomasLUSolverDirichletBC() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -190,21 +206,21 @@ void testBVPDoubleThomasLUSolverDirichletBC() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	double h = 1.0 / static_cast<double>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
-	std::vector<double> upperDiag(N + 1, 1.0);
-	std::vector<double> diagonal(N + 1, -2.0);
-	std::vector<double> lowerDiag(N + 1, 1.0);
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<double> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	double left = 0.0;
-	double right = 0.0;
+	T left = 0.0;
+	T right = 0.0;
 
-	FDMThomasLUSolver<double,BoundaryConditionType::Dirichlet,std::vector,std::allocator<double>> dss{ N + 1 };
+	FDMThomasLUSolver<T,BoundaryConditionType::Dirichlet,std::vector,std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
 	dss.setRhs(std::move(rhs));
@@ -212,7 +228,7 @@ void testBVPDoubleThomasLUSolverDirichletBC() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](double x) { return x * (1.0 - x); };
+	auto exact = [](T x) { return x * (1.0 - x); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -222,29 +238,34 @@ void testBVPDoubleThomasLUSolverDirichletBC() {
 	}
 }
 
-void testBVPFloatThomasLUSolverDirichletBC() {
 
+template<typename T>
+void testBVPFDMSolverDirichletBC_1() {
+
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
 	using lss_types::BoundaryConditionType;
+
 	/*
 
-		Solve BVP:
+	Solve BVP:
 
-				u''(t) = - 2,
+	u''(t) = - 2,
 
-		where
+	where
 
-				t \in (0, 1)
-				u(0) = 0 ,  u(1) = 0
+	t \in (0, 1)
+	u(0) = 0 ,  u(1) = 0
 
 
-		Exact solution is
+	Exact solution is
 
-				u(t) = t(1-t)
+	u(t) = t(1-t)
 
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -256,29 +277,36 @@ void testBVPFloatThomasLUSolverDirichletBC() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<float> upperDiag(N + 1, 1.0f);
-	std::vector<float> diagonal(N + 1, -2.0f);
-	std::vector<float> lowerDiag(N + 1, 1.0f);
+	// must be of size N+1 because we need to add the t_0 point:
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<float> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	float left = 0.0f;
-	float right = 0.0f;
+	T left = 0.0;
+	T right = 0.0;
 
+	// typedef the solver
+	typedef FDMTridiagonalSolver<T,
+		BoundaryConditionType::Dirichlet,
+		FDMThomasLUSolver,
+		std::vector,
+		std::allocator<T>> ThomasLU;
 
-	FDMThomasLUSolver<float, BoundaryConditionType::Dirichlet, std::vector, std::allocator<float>> dss{ N + 1 };
-	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
-	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	ThomasLU ts{ N + 1 };
+	ts.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
+	ts.setBoundaryCondition(std::make_pair(left, right));
+	ts.setRhs(std::move(rhs));
 	//get the solution:
-	auto solution = dss.solve();
+	auto solution = ts.solve();
 
 	//exact value:
-	auto exact = [](float x) { return x * (1.0 - x); };
+	auto exact = [](T x) { return x * (1.0 - x); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -293,16 +321,17 @@ void testThomasLUSolverDirichletBC() {
 	std::cout << "========= Thomas LU Solver (Dirichlet BC) ========\n";
 	std::cout << "==================================================\n";
 
-	testBVPDoubleThomasLUSolverDirichletBC();
-	testBVPFloatThomasLUSolverDirichletBC();
-
+	testBVPThomasLUSolverDirichletBC<double>();
+	testBVPThomasLUSolverDirichletBC<float>();
+	testBVPFDMSolverDirichletBC_1<double>();
+	testBVPFDMSolverDirichletBC_1<float>();
 
 
 	std::cout << "==================================================\n";
 }
-
-
-void testBVPDoubleDoubleSweepDirichletBC1() {
+//
+template<typename T>
+void testBVPDoubleSweepDirichletBC1() {
 
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
 	using lss_types::BoundaryConditionType;
@@ -326,6 +355,7 @@ void testBVPDoubleDoubleSweepDirichletBC1() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -337,20 +367,20 @@ void testBVPDoubleDoubleSweepDirichletBC1() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	double h = 1.0 / static_cast<double>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<double> upperDiag(N + 1, 1.0);
-	std::vector<double> diagonal(N + 1, -2.0);
-	std::vector<double> lowerDiag(N + 1, 1.0);
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<double> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	double left = 1.0;
-	double right = 1.0;
+	T left = 1.0;
+	T right = 1.0;
 
-	FDMDoubleSweepSolver<double, BoundaryConditionType::Dirichlet, std::vector, std::allocator<double>> dss{ N + 1 };
+	FDMDoubleSweepSolver<T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
 	dss.setRhs(std::move(rhs));
@@ -358,7 +388,7 @@ void testBVPDoubleDoubleSweepDirichletBC1() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](double x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -368,8 +398,11 @@ void testBVPDoubleDoubleSweepDirichletBC1() {
 	}
 }
 
-void testBVPFloatDoubleSweepDirichletBC1() {
 
+template<typename T>
+void testBVPFDMSolverDirichletBC_2() {
+
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
 	using lss_types::BoundaryConditionType;
 
@@ -382,7 +415,7 @@ void testBVPFloatDoubleSweepDirichletBC1() {
 	where
 
 	t \in (0, 1)
-	u(0) = 0 ,  u(1) = 0
+	u(0) = 1 ,  u(1) = 1
 
 
 	Exact solution is
@@ -392,9 +425,9 @@ void testBVPFloatDoubleSweepDirichletBC1() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
-
 	std::cout << " t in <0,1>,\n";
 	std::cout << " u(0) = u(1) = 1\n\n";
 	std::cout << "Exact solution is:\n\n";
@@ -404,20 +437,27 @@ void testBVPFloatDoubleSweepDirichletBC1() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<float> upperDiag(N + 1, 1.0f);
-	std::vector<float> diagonal(N + 1, -2.0f);
-	std::vector<float> lowerDiag(N + 1, 1.0f);
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<float> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	float left = 1.0f;
-	float right = 1.0f;
+	T left = 1.0;
+	T right = 1.0;
 
-	FDMDoubleSweepSolver<float, BoundaryConditionType::Dirichlet, std::vector, std::allocator<float>> dss{ N + 1 };
+	// typedef the solver
+	typedef FDMTridiagonalSolver<T,
+		BoundaryConditionType::Dirichlet,
+		FDMDoubleSweepSolver,
+		std::vector,
+		std::allocator<T>> DoubleSweep;
+
+	DoubleSweep dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
 	dss.setRhs(std::move(rhs));
@@ -425,16 +465,15 @@ void testBVPFloatDoubleSweepDirichletBC1() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](float x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
-			<< exact(j * h) << '\n';
+			<< exact(j*h) << '\n';
 	}
 }
-
 
 
 void testDoubleSweepDirichletBC1() {
@@ -442,14 +481,16 @@ void testDoubleSweepDirichletBC1() {
 	std::cout << "=========== Double Sweep (Dirichlet BC) ==========\n";
 	std::cout << "==================================================\n";
 
-	testBVPDoubleDoubleSweepDirichletBC1();
-	testBVPFloatDoubleSweepDirichletBC1();
+	testBVPDoubleSweepDirichletBC1<double>();
+	testBVPDoubleSweepDirichletBC1<float>();
+	testBVPFDMSolverDirichletBC_2<double>();
+	testBVPFDMSolverDirichletBC_2<float>();
 
 	std::cout << "==================================================\n";
 }
-
-
-void testBVPDoubleThomasLUSolverDirichletBC1() {
+//
+template<typename T>
+void testBVPThomasLUSolverDirichletBC1() {
 
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
 	using lss_types::BoundaryConditionType;
@@ -473,6 +514,7 @@ void testBVPDoubleThomasLUSolverDirichletBC1() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -484,21 +526,21 @@ void testBVPDoubleThomasLUSolverDirichletBC1() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	double h = 1.0 / static_cast<double>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
-	std::vector<double> upperDiag(N + 1, 1.0);
-	std::vector<double> diagonal(N + 1, -2.0);
-	std::vector<double> lowerDiag(N + 1, 1.0);
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<double> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	double left = 1.0;
-	double right = 1.0;
+	T left = 1.0;
+	T right = 1.0;
 
-	FDMThomasLUSolver<double, BoundaryConditionType::Dirichlet, std::vector, std::allocator<double>> dss{ N + 1 };
+	FDMThomasLUSolver<T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
 	dss.setRhs(std::move(rhs));
@@ -506,7 +548,7 @@ void testBVPDoubleThomasLUSolverDirichletBC1() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](double x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -516,10 +558,13 @@ void testBVPDoubleThomasLUSolverDirichletBC1() {
 	}
 }
 
-void testBVPFloatThomasLUSolverDirichletBC1() {
+template<typename T>
+void testBVPFDMSolverDirichletBC_3() {
 
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
 	using lss_types::BoundaryConditionType;
+
 	/*
 
 	Solve BVP:
@@ -539,6 +584,7 @@ void testBVPFloatThomasLUSolverDirichletBC1() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -550,29 +596,36 @@ void testBVPFloatThomasLUSolverDirichletBC1() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<float> upperDiag(N + 1, 1.0f);
-	std::vector<float> diagonal(N + 1, -2.0f);
-	std::vector<float> lowerDiag(N + 1, 1.0f);
+	// must be of size N+1 because we need to add the t_0 point:
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<float> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	float left = 1.0f;
-	float right = 1.0f;
+	T left = 1.0;
+	T right = 1.0;
 
+	// typedef the solver
+	typedef FDMTridiagonalSolver<T,
+		BoundaryConditionType::Dirichlet,
+		FDMThomasLUSolver,
+		std::vector,
+		std::allocator<T>> ThomasLU;
 
-	FDMThomasLUSolver<float, BoundaryConditionType::Dirichlet, std::vector, std::allocator<float>> dss{ N + 1 };
-	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
-	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	ThomasLU ts{ N + 1 };
+	ts.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
+	ts.setBoundaryCondition(std::make_pair(left, right));
+	ts.setRhs(std::move(rhs));
 	//get the solution:
-	auto solution = dss.solve();
+	auto solution = ts.solve();
 
 	//exact value:
-	auto exact = [](float x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -587,16 +640,18 @@ void testThomasLUSolverDirichletBC1() {
 	std::cout << "======== Thomas LU Solver (Dirichlet BC) =========\n";
 	std::cout << "==================================================\n";
 
-	testBVPDoubleThomasLUSolverDirichletBC1();
-	testBVPFloatThomasLUSolverDirichletBC1();
+	testBVPThomasLUSolverDirichletBC1<double>();
+	testBVPThomasLUSolverDirichletBC1<float>();
+	testBVPFDMSolverDirichletBC_3<double>();
+	testBVPFDMSolverDirichletBC_3<float>();
 
 
 
 	std::cout << "==================================================\n";
 }
-
-
-void testBVPDoubleDoubleSweepRobinBC() {
+//
+template<typename T>
+void testBVPDoubleSweepRobinBC() {
 
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
 	using lss_types::BoundaryConditionType;
@@ -620,6 +675,7 @@ void testBVPDoubleDoubleSweepRobinBC() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -632,25 +688,25 @@ void testBVPDoubleDoubleSweepRobinBC() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	double h = 1.0 / static_cast<double>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<double> upperDiag(N + 1, 1.0);
-	std::vector<double> diagonal(N + 1, -2.0);
-	std::vector<double> lowerDiag(N + 1, 1.0);
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<double> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	double leftLin = 0.0;
-	double leftConst = 1.0;
+	T leftLin = 0.0;
+	T leftConst = 1.0;
 	auto left = std::make_pair(leftLin, leftConst);
 
-	double rightLin = (2.0 + h) / (2.0 - h);
-	double rightConst = 0.0;
+	T rightLin = (2.0 + h) / (2.0 - h);
+	T rightConst = 0.0;
 	auto right = std::make_pair(rightLin, rightConst);
 
-	FDMDoubleSweepSolver<double, BoundaryConditionType::Robin, std::vector, std::allocator<double>> dss{ N + 1 };
+	FDMDoubleSweepSolver<T, BoundaryConditionType::Robin, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(left, right);
 	dss.setRhs(std::move(rhs));
@@ -658,7 +714,7 @@ void testBVPDoubleDoubleSweepRobinBC() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](double x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact | Abs Diff\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -668,8 +724,10 @@ void testBVPDoubleDoubleSweepRobinBC() {
 	}
 }
 
-void testBVPFloatDoubleSweepRobinBC() {
 
+template<typename T>
+void testBVPFDMSolverRobinBC_0() {
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
 	using lss_types::BoundaryConditionType;
 
@@ -692,6 +750,7 @@ void testBVPFloatDoubleSweepRobinBC() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -704,25 +763,32 @@ void testBVPFloatDoubleSweepRobinBC() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<float> upperDiag(N + 1, 1.0f);
-	std::vector<float> diagonal(N + 1, -2.0f);
-	std::vector<float> lowerDiag(N + 1, 1.0f);
+	std::vector<T> upperDiag(N + 1, 1.0f);
+	std::vector<T> diagonal(N + 1, -2.0f);
+	std::vector<T> lowerDiag(N + 1, 1.0f);
 
 	// right-hand side:
-	std::vector<float> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	float leftLin = 0.0f;
-	float leftConst = 1.0f;
+	T leftLin = 0.0f;
+	T leftConst = 1.0f;
 	auto left = std::make_pair(leftLin, leftConst);
 
-	float rightLin = (2.0 + h) / (2.0 - h);
-	float rightConst = 0.0f;
+	T rightLin = (2.0 + h) / (2.0 - h);
+	T rightConst = 0.0f;
 	auto right = std::make_pair(rightLin, rightConst);
 
-	FDMDoubleSweepSolver<float, BoundaryConditionType::Robin, std::vector, std::allocator<float>> dss{ N + 1 };
+	// typedef the solver
+	typedef FDMTridiagonalSolver<T,
+		BoundaryConditionType::Robin,
+		FDMDoubleSweepSolver,
+		std::vector,
+		std::allocator<T>> DoubleSweep;
+
+	DoubleSweep dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(left, right);
 	dss.setRhs(std::move(rhs));
@@ -730,7 +796,7 @@ void testBVPFloatDoubleSweepRobinBC() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](float x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact | Abs Diff\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -747,14 +813,17 @@ void testDoubleSweepRobinBC() {
 	std::cout << "=========== Double Sweep (Robin BC) ==============\n";
 	std::cout << "==================================================\n";
 
-	testBVPDoubleDoubleSweepRobinBC();
-	testBVPFloatDoubleSweepRobinBC();
+	testBVPDoubleSweepRobinBC<double>();
+	testBVPDoubleSweepRobinBC<float>();
+	testBVPFDMSolverRobinBC_0<double>();
+	testBVPFDMSolverRobinBC_0<float>();
 
 	std::cout << "==================================================\n";
 }
 
-
-void testBVPDoubleThomasLUSolverRobinBC() {
+//
+template<typename T>
+void testBVPThomasLUSolverRobinBC() {
 
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
 	using lss_types::BoundaryConditionType;
@@ -778,6 +847,7 @@ void testBVPDoubleThomasLUSolverRobinBC() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -790,26 +860,26 @@ void testBVPDoubleThomasLUSolverRobinBC() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	double h = 1.0 / static_cast<double>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
-	std::vector<double> upperDiag(N + 1, 1.0);
-	std::vector<double> diagonal(N + 1, -2.0);
-	std::vector<double> lowerDiag(N + 1, 1.0);
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<double> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	double leftLin = 0.0;
-	double leftConst = 1.0;
+	T leftLin = 0.0;
+	T leftConst = 1.0;
 	auto left = std::make_pair(leftLin, leftConst);
 
-	double rightLin = (2.0 + h) / (2.0 - h);
-	double rightConst = 0.0;
+	T rightLin = (2.0 + h) / (2.0 - h);
+	T rightConst = 0.0;
 	auto right = std::make_pair(rightLin, rightConst);
 
-	FDMThomasLUSolver<double, BoundaryConditionType::Robin, std::vector, std::allocator<double>> dss{ N + 1 };
+	FDMThomasLUSolver<T, BoundaryConditionType::Robin, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(left, right);
 	dss.setRhs(std::move(rhs));
@@ -817,7 +887,7 @@ void testBVPDoubleThomasLUSolverRobinBC() {
 	auto solution = dss.solve();
 
 	//exact value:
-	auto exact = [](float x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact | Abs Diff\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
@@ -827,10 +897,14 @@ void testBVPDoubleThomasLUSolverRobinBC() {
 	}
 }
 
-void testBVPFloatThomasLUSolverRobinBC() {
 
+template<typename T>
+void testBVPFDMSolverRobinBC_1() {
+
+	using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
 	using lss_types::BoundaryConditionType;
+
 	/*
 
 	Solve BVP:
@@ -850,6 +924,7 @@ void testBVPFloatThomasLUSolverRobinBC() {
 	*/
 	std::cout << "=================================\n";
 	std::cout << "Solving Boundary-value problem: \n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -862,55 +937,68 @@ void testBVPFloatThomasLUSolverRobinBC() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	T h = 1.0 / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
-	std::vector<float> upperDiag(N + 1, 1.0f);
-	std::vector<float> diagonal(N + 1, -2.0f);
-	std::vector<float> lowerDiag(N + 1, 1.0f);
+	// must be of size N+1 because we need to add the t_0 point:
+	std::vector<T> upperDiag(N + 1, 1.0);
+	std::vector<T> diagonal(N + 1, -2.0);
+	std::vector<T> lowerDiag(N + 1, 1.0);
 
 	// right-hand side:
-	std::vector<float> rhs(N + 1, -2.0 * h * h);
+	std::vector<T> rhs(N + 1, -2.0 * h * h);
 
 	// boundary conditions:
-	float leftLin = 0.0f;
-	float leftConst = 1.0f;
+	T leftLin = 0.0;
+	T leftConst = 1.0;
 	auto left = std::make_pair(leftLin, leftConst);
 
-	float rightLin = (2.0 + h) / (2.0 - h);
-	float rightConst = 0.0f;
+	T rightLin = (2.0 + h) / (2.0 - h);
+	T rightConst = 0.0;
 	auto right = std::make_pair(rightLin, rightConst);
 
+	// typedef the solver
+	typedef FDMTridiagonalSolver<T,
+		BoundaryConditionType::Robin,
+		FDMThomasLUSolver,
+		std::vector,
+		std::allocator<T>> ThomasLU;
 
-	FDMThomasLUSolver<float, BoundaryConditionType::Robin, std::vector, std::allocator<float>> dss{ N + 1 };
-	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
-	dss.setBoundaryCondition(left, right);
-	dss.setRhs(std::move(rhs));
+	ThomasLU ts{ N + 1 };
+	ts.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
+	ts.setBoundaryCondition(left, right);
+	ts.setRhs(std::move(rhs));
 	//get the solution:
-	auto solution = dss.solve();
+	auto solution = ts.solve();
 
 	//exact value:
-	auto exact = [](float x) { return (-x * x + x + 1.0); };
+	auto exact = [](T x) { return (-x * x + x + 1.0); };
 
 	std::cout << "tp : FDM | Exact | Abs Diff\n";
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
-			<< exact(j * h) <<" | "<<(solution[j] - exact(j * h)) << '\n';
+			<< exact(j * h) << " | " << (solution[j] - exact(j * h)) << '\n';
 	}
 }
+
 
 void testThomasLUSolverRobinBC() {
 	std::cout << "==================================================\n";
 	std::cout << "========= Thomas LU Solver (Robin BC) ========\n";
 	std::cout << "==================================================\n";
 
-	testBVPDoubleThomasLUSolverRobinBC();
-	testBVPFloatThomasLUSolverRobinBC();
-
-
+	testBVPThomasLUSolverRobinBC<double>();
+	testBVPThomasLUSolverRobinBC<float>();
+	testBVPFDMSolverRobinBC_1<double>();
+	testBVPFDMSolverRobinBC_1<float>();
 
 	std::cout << "==================================================\n";
 }
+
+
+
+
+
 
 
 #endif ///_LSS_FDM_TRIDIAGONAL_SOLVERS_T

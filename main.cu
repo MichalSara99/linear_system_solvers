@@ -16,9 +16,12 @@ int main(int argc, char const* argv[]) {
 	 //  testDoubleSweepDirichletBC1();
 	 // testThomasLUSolverDirichletBC1();
 
-	 testDoubleSweepRobinBC();
-	 testThomasLUSolverRobinBC();
-     // testBVPTridiagonalSolver();
+	// testDoubleSweepDirichletBC();
+	// testThomasLUSolverDirichletBC();
+	// testDoubleSweepDirichletBC1();
+	// testThomasLUSolverDirichletBC1();
+	// testDoubleSweepRobinBC();
+	// testThomasLUSolverRobinBC();
 
     // ==================================================
 
