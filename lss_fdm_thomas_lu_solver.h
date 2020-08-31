@@ -26,7 +26,7 @@ namespace lss_fdm_thomas_lu_solver{
 		Container<T, Alloc> beta_, gamma_;
 
 		virtual void kernel(Container<T, Alloc>& solution) = 0;
-		bool isDiagonallyDominant()const;
+		virtual bool isDiagonallyDominant()const = 0;
 
 	public:
 		typedef T value_type;
@@ -90,6 +90,7 @@ namespace lss_fdm_thomas_lu_solver{
 			{ boundary_ = boundaryPair; }
 
 		protected:
+			bool isDiagonallyDominant()const override;
 			void kernel(Container<T, Alloc>& solution) override;
 
 	};
@@ -124,6 +125,7 @@ namespace lss_fdm_thomas_lu_solver{
 			}
 
 		protected:
+			bool isDiagonallyDominant()const override;
 			void kernel(Container<T, Alloc>& solution) override;
 
 	};
@@ -132,19 +134,6 @@ namespace lss_fdm_thomas_lu_solver{
 
 // =============================== FDMThomasLUSolverBase implementation ========================================
 
-template<typename T,
-		template<typename T,typename Alloc> typename Container,
-		typename Alloc>
-bool lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<T, Container, Alloc>::
-isDiagonallyDominant()const {
-	if (std::abs(b_[0]) < std::abs(c_[0])) return false;
-	if (std::abs(b_[systemSize_ - 1]) < std::abs(c_[systemSize_ - 1]))return false;
-
-	for (std::size_t t = 0; t < systemSize_ - 1; ++t)
-		if (std::abs(b_[t]) < (std::abs(a_[t]) + std::abs(c_[t])))
-			return false;
-	return true;
-}
 
 template<typename T,
 		template<typename T,typename Alloc> typename Container,
@@ -208,12 +197,30 @@ solve() {
 
 // =============================== ThomasLUSolver implementation ========================================
 
+template<typename T,
+	template<typename T, typename Alloc> typename Container,
+	typename Alloc>
+	bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<T, lss_types::BoundaryConditionType::Dirichlet, Container, Alloc>::
+	isDiagonallyDominant()const {
+	if (std::abs(b_[0]) < std::abs(c_[0])) return false;
+	if (std::abs(b_[systemSize_ - 1]) < std::abs(a_[systemSize_ - 1]))return false;
+
+	for (std::size_t t = 0; t < systemSize_ - 1; ++t)
+		if (std::abs(b_[t]) < (std::abs(a_[t]) + std::abs(c_[t])))
+			return false;
+	return true;
+}
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
 	typename Alloc>
 	void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<T,lss_types::BoundaryConditionType::Dirichlet, Container, Alloc>::
 	kernel(Container<T, Alloc>& solution) {
+
+	// check the diagonal dominance:
+	LSS_ASSERT(isDiagonallyDominant() == true,
+		"Tridiagonal matrix must be diagonally dominant.");
+
 	// clear the working containers:
 	beta_.clear();
 	gamma_.clear();
@@ -251,12 +258,31 @@ template<typename T,
 }
 
 
+template<typename T,
+	template<typename T, typename Alloc> typename Container,
+	typename Alloc>
+	bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<T, lss_types::BoundaryConditionType::Robin, Container, Alloc>::
+	isDiagonallyDominant()const {
+	auto alpha = left_.first;
+	auto beta = right_.first;
+	if (std::abs(alpha*a_[0]  + b_[0]) < std::abs(c_[0])) return false;
+	if (std::abs(b_[systemSize_ - 1] + (c_[systemSize_ - 1]/beta)) < std::abs(a_[systemSize_ - 1]))return false;
+	for (std::size_t t = 0; t < systemSize_ - 1; ++t)
+		if (std::abs(b_[t]) < (std::abs(a_[t]) + std::abs(c_[t])))
+			return false;
+	return true;
+}
 
 template<typename T,
 	template<typename T, typename Alloc> typename Container,
 	typename Alloc>
 	void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<T, lss_types::BoundaryConditionType::Robin, Container, Alloc>::
 	kernel(Container<T, Alloc>& solution) {
+
+	// check the diagonal dominance:
+	LSS_ASSERT(isDiagonallyDominant() == true,
+		"Tridiagonal matrix must be diagonally dominant.");
+
 	// clear the working containers:
 	beta_.clear();
 	gamma_.clear();
