@@ -101,7 +101,7 @@ namespace lss_sparse_solvers_cuda {
 				typename  = typename std::enable_if<std::is_base_of<SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
 		void solve(Container<T,Alloc> &solution);
 
-		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR,
+		template<template<typename T> typename  SparseSolverHostPolicy = SparseSolverHostQR,
 			template<typename T,typename Alloc> typename Container = std::vector,
 			typename Alloc = std::allocator<T>,
 			typename = typename std::enable_if<std::is_base_of<SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
@@ -167,13 +167,14 @@ namespace lss_sparse_solvers_cuda {
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 
-		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
+		template<template<typename T> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
 			template<typename T,typename Alloc> typename Container = std::vector,
 			typename Alloc = std::allocator<T>,
 			typename =typename std::enable_if<std::is_base_of<SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
 		void solve(Container<T,Alloc> &solution);
 
-		template<template<typename> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
+		template<
+			template<typename T> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
 			template<typename T,typename Alloc> typename Container = std::vector,
 			typename Alloc = std::allocator<T>,
 			typename = typename std::enable_if<std::is_base_of<SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
@@ -284,7 +285,7 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Devic
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverHostPolicy,
+template<template<typename T> typename SparseSolverHostPolicy,
 	template<typename T,typename Alloc> typename Container,
 	typename Alloc,
 	typename>
@@ -323,10 +324,11 @@ solve(Container<T,Alloc> &solution) {
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverDevicePolicy,
-template<typename T,typename Alloc> typename Container,
-typename Alloc,
-typename>
+template<
+	template<typename T> typename SparseSolverDevicePolicy,
+	template<typename T,typename Alloc> typename Container,
+	typename Alloc,
+	typename>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
 solve(Container<T,Alloc> &solution) {
 
@@ -370,10 +372,11 @@ solve(Container<T,Alloc> &solution) {
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverHostPolicy,
-template<typename T,typename Alloc> typename Container,
-typename Alloc,
-typename>
+template<
+		template<typename T> typename SparseSolverHostPolicy,
+		template<typename T,typename Alloc> typename Container,
+		typename Alloc,
+		typename>
 Container<T,Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::
 solve() {
 
@@ -412,7 +415,8 @@ solve() {
 }
 
 template<typename T>
-template<template<typename> typename SparseSolverDevicePolicy,
+template<
+	template<typename T> typename SparseSolverDevicePolicy,
 	template<typename T, typename Alloc> typename Container,
 	typename Alloc,
 	typename>

@@ -28,6 +28,7 @@
     <ClInclude Include="lss_fdm_tridiagonal_solvers.h" />
     <ClInclude Include="lss_fdm_double_sweep_solver.h" />
     <ClInclude Include="lss_fdm_thomas_lu_solver.h" />
+    <ClInclude Include="lss_one_dimensional_pde_solvers.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

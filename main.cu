@@ -13,7 +13,7 @@ int main(int argc, char const* argv[]) {
 
      // testDoubleSweepDirichletBC(); 
      // testThomasLUSolverDirichletBC();
-	 //  testDoubleSweepDirichletBC1();
+	 // testDoubleSweepDirichletBC1();
 	 // testThomasLUSolverDirichletBC1();
 
 	// testDoubleSweepDirichletBC();
@@ -33,6 +33,7 @@ int main(int argc, char const* argv[]) {
     // hostSparseQRTest();
     // testBVPOnHost();
     // testBVPOnDevice();
+
     // ===========================================
 
 
