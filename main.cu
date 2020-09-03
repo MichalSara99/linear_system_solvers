@@ -31,8 +31,10 @@ int main(int argc, char const* argv[]) {
 
     // deviceSparseQRTest();
     // hostSparseQRTest();
-    // testBVPOnHost();
-    // testBVPOnDevice();
+    // testDirichletBCBVPOnHost();
+    // testDirichletBCBVPOnDevice();
+	// testRobinBCBVPOnHost();
+	// testRobinBCBVPOnDevice();
 
     // ===========================================
 
