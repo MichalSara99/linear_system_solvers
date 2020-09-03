@@ -11,6 +11,53 @@
 namespace lss_utility {
 
 	// ==========================================================================
+	// ==================================== Range ===============================
+	// ==========================================================================
+	template<typename T>
+	class Range {
+	private:
+		T l_, u_;
+	public:
+		explicit Range(T lower, T upper)
+			:l_{ lower }, u_{ upper } {}
+		explicit Range()
+			:Range(T{}, T{}){}
+		
+		~Range(){}
+
+		Range(Range const &copy)
+			:l_{copy.l_},
+			u_{copy.u_}{}
+		Range(Range && other)noexcept
+			:l_{std::move(other.l_)},
+			u_{std::move(other.u_)}{}
+
+		Range& operator=(Range const &copy) {
+			if (this != &copy) {
+				l_ = copy.l_;
+				u_ = copy.u_;
+			}
+			return *this;
+		}
+
+		Range& operator=(Range&& other)noexcept {
+			if (this != &other) {
+				l_ = std::move(other.l_);
+				u_ = std::move(other.u_);
+			}
+			return *this;
+		}
+
+		inline T lower()const { return l_; }
+		inline T upper()const { return u_; }
+		inline T spread()const { return (u_ - l_); }
+		inline T midPoint()const { return 0.5*(l_ + u_); }
+	};
+
+
+
+
+	// ==========================================================================
 	// =============================== FlatMatrix ===============================
 	// ==========================================================================
 	using lss_types::FlatMatrixSort;

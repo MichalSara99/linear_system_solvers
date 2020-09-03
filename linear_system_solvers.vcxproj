@@ -86,7 +86,8 @@
     <ClInclude Include="lss_fdm_tridiagonal_solvers.h" />
     <ClInclude Include="lss_helpers.h" />
     <ClInclude Include="lss_macros.h" />
-    <ClInclude Include="lss_one_dimensional_pde_solvers.h" />
+    <ClInclude Include="lss_one_dim_heat_equation_solvers.h" />
+    <ClInclude Include="lss_one_dim_pde_solvers.h" />
     <ClInclude Include="lss_sparse_solvers_cuda.h" />
     <ClInclude Include="lss_sparse_solvers.h" />
     <ClInclude Include="lss_sparse_solvers_cuda_t.h" />
