@@ -59,8 +59,8 @@ namespace lss_fdm_tridiagonal_solvers {
 			solver_.setBoundaryCondition(boundaryPair);
 		}
 
-		void setRhs(Container<T, Alloc> rhs) {
-			solver_.setRhs(std::move(rhs));
+		void setRhs(Container<T, Alloc> const &rhs) {
+			solver_.setRhs(rhs);
 		}
 
 		void solve(Container<T, Alloc>& solution) {
@@ -109,8 +109,8 @@ namespace lss_fdm_tridiagonal_solvers {
 			solver_.setBoundaryCondition(left, right);
 		}
 
-		void setRhs(Container<T, Alloc> rhs) {
-			solver_.setRhs(std::move(rhs));
+		void setRhs(Container<T, Alloc> const &rhs) {
+			solver_.setRhs(rhs);
 		}
 
 		void solve(Container<T, Alloc>& solution) {

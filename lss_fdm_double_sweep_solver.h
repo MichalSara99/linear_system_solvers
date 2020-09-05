@@ -42,7 +42,7 @@ namespace lss_fdm_double_sweep_solver {
 				Container<T, Alloc> diagonal,
 				Container<T, Alloc> upperDiagonal);
 
-			void setRhs(Container<T, Alloc> rhs);
+			void setRhs(Container<T, Alloc> const &rhs);
 
 			void solve(Container<T, Alloc>& solution);
 
@@ -153,11 +153,11 @@ template<typename T,
 	template<typename T, typename Alloc> typename Container,
 	typename Alloc>
 	void lss_fdm_double_sweep_solver::FDMDoubleSweepSolverBase<T, Container, Alloc>::
-	setRhs(Container<T, Alloc> rhs) {
+	setRhs(Container<T, Alloc> const& rhs) {
 
 	LSS_ASSERT(rhs.size() == discretizationSize_,
 		"Inncorect size for right-hand side");
-	f_ = std::move(rhs);
+	f_ = rhs;
 }
 
 

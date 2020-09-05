@@ -63,7 +63,7 @@ void testBVPDoubleSweepDirichletBC() {
 	FDMDoubleSweepSolver<T, BoundaryConditionType::Dirichlet,std::vector,std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -140,7 +140,7 @@ void testBVPFDMSolverDirichletBC_0() {
 	DoubleSweep dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -223,7 +223,7 @@ void testBVPThomasLUSolverDirichletBC() {
 	FDMThomasLUSolver<T,BoundaryConditionType::Dirichlet,std::vector,std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -301,7 +301,7 @@ void testBVPFDMSolverDirichletBC_1() {
 	ThomasLU ts{ N + 1 };
 	ts.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	ts.setBoundaryCondition(std::make_pair(left, right));
-	ts.setRhs(std::move(rhs));
+	ts.setRhs(rhs);
 	//get the solution:
 	auto solution = ts.solve();
 
@@ -383,7 +383,7 @@ void testBVPDoubleSweepDirichletBC1() {
 	FDMDoubleSweepSolver<T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -460,7 +460,7 @@ void testBVPFDMSolverDirichletBC_2() {
 	DoubleSweep dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -543,7 +543,7 @@ void testBVPThomasLUSolverDirichletBC1() {
 	FDMThomasLUSolver<T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(std::make_pair(left, right));
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -620,7 +620,7 @@ void testBVPFDMSolverDirichletBC_3() {
 	ThomasLU ts{ N + 1 };
 	ts.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	ts.setBoundaryCondition(std::make_pair(left, right));
-	ts.setRhs(std::move(rhs));
+	ts.setRhs(rhs);
 	//get the solution:
 	auto solution = ts.solve();
 
@@ -709,7 +709,7 @@ void testBVPDoubleSweepRobinBC() {
 	FDMDoubleSweepSolver<T, BoundaryConditionType::Robin, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(left, right);
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -791,7 +791,7 @@ void testBVPFDMSolverRobinBC_0() {
 	DoubleSweep dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(left, right);
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -882,7 +882,7 @@ void testBVPThomasLUSolverRobinBC() {
 	FDMThomasLUSolver<T, BoundaryConditionType::Robin, std::vector, std::allocator<T>> dss{ N + 1 };
 	dss.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	dss.setBoundaryCondition(left, right);
-	dss.setRhs(std::move(rhs));
+	dss.setRhs(rhs);
 	//get the solution:
 	auto solution = dss.solve();
 
@@ -966,7 +966,7 @@ void testBVPFDMSolverRobinBC_1() {
 	ThomasLU ts{ N + 1 };
 	ts.setDiagonals(std::move(lowerDiag), std::move(diagonal), std::move(upperDiag));
 	ts.setBoundaryCondition(left, right);
-	ts.setRhs(std::move(rhs));
+	ts.setRhs(rhs);
 	//get the solution:
 	auto solution = ts.solve();
 

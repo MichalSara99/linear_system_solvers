@@ -41,7 +41,7 @@ namespace lss_fdm_thomas_lu_solver{
 			Container<T, Alloc> diagonal,
 			Container<T, Alloc> upperDiagonal);
 
-		void setRhs(Container<T, Alloc> rhs);
+		void setRhs(Container<T, Alloc> const &rhs);
 
 		void solve(Container<T, Alloc>& solution);
 
@@ -139,12 +139,12 @@ template<typename T,
 		template<typename T,typename Alloc> typename Container,
 		typename Alloc>
 void lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<T,Container,Alloc>::
-setRhs(Container<T, Alloc> rhs) {
+setRhs(Container<T, Alloc> const &rhs) {
 	LSS_ASSERT(rhs.size() == discretizationSize_,
 		"Inncorect size for right-hand side");
 	f_.clear();f_.resize(systemSize_);
 	for (std::size_t t = 0; t < systemSize_; ++t)
-		f_[t] = std::move(rhs[t + 1]);
+		f_[t] = rhs[t + 1];
 }
 
 template<typename T,

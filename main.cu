@@ -4,12 +4,13 @@
 #include"lss_sparse_solvers_cuda_t.h"
 #include"lss_dense_solvers_cuda_t.h"
 #include"lss_fdm_tridiagonal_solvers_t.h"
+#include"lss_one_dim_heat_equation_solvers_t.h"
 
 int main(int argc, char const* argv[]) {
 
-    // ==================================================
-    // ========= lss_sparse_solvers_tridiagonal_t.h =====
-    // ==================================================
+	// =====================================================
+    // ========= lss_sparse_solvers_tridiagonal_t.h ========
+	// =====================================================
 
      // testDoubleSweepDirichletBC(); 
      // testThomasLUSolverDirichletBC();
@@ -23,11 +24,11 @@ int main(int argc, char const* argv[]) {
 	// testDoubleSweepRobinBC();
 	// testThomasLUSolverRobinBC();
 
-    // ==================================================
+	// =====================================================
 
-    // ===========================================
-    // ========= lss_sparse_solvers_cuda_t.h =====
-    // ===========================================
+	// =====================================================
+    // ============= lss_sparse_solvers_cuda_t.h ===========
+	// =====================================================
 
     // deviceSparseQRTest();
     // hostSparseQRTest();
@@ -36,18 +37,27 @@ int main(int argc, char const* argv[]) {
 	// testRobinBCBVPOnHost();
 	// testRobinBCBVPOnDevice();
 
-    // ===========================================
+	// =====================================================
 
 
-    // ===========================================
-    // ========= lss_dense_solvers_cuda_t.h =====
-    // ===========================================
+	// =====================================================
+    // ============== lss_dense_solvers_cuda_t.h ===========
+	// =====================================================
 
      // deviceDenseQRTest();
      // deviceDenseLUTest();
 
 
-    // ===========================================
+	 // =====================================================
+
+	// =====================================================
+	// ========= lss_one_dim_heat_equation_solvers_t.h =====
+	// =====================================================
+
+	// testImplHeatEquationDirichletBCDoubleSweep();
+	// testImplHeatEquationDirichletBCThomasLU();
+
+	// =====================================================
 
     std::cout << "\n\n";
 
