@@ -13,6 +13,7 @@ namespace lss_one_dim_heat_equation_solvers {
 
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
+	using lss_types::ExplicitPDESchemes;
 	using lss_one_dim_pde_schemes::ImplicitHeatEquationSchemes;
 	using lss_utility::Range;
 
@@ -149,19 +150,87 @@ namespace lss_one_dim_heat_equation_solvers {
 
 		};
 
-
-
-
 	}
+
+
+
+
+
 
 	namespace explicit_solvers {
 
+		template<typename T,
+				BoundaryConditionType BType,
+				template<typename, typename> typename Container,
+				typename Alloc>
+		class Explicit1DHeatEquation{};
+
+
+		template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+		class Explicit1DHeatEquation<T,BoundaryConditionType::Dirichlet,Container,Alloc> {
+		private:
+			T terminalT_;												// terminal time
+			std::size_t timeN_;											// number of time subdivisions
+			std::size_t spaceN_;										// number of space subdivisions
+			std::function<T(T)> init_;									// initi condition
+			std::pair<T, T> boundary_;									// boundaries
+			T diffusivity_;												// diffusivity = c^2 in PDE
+
+		public:
+			explicit Explicit1DHeatEquation() = delete;
+			explicit Explicit1DHeatEquation(Range<T> const &spaceRange,
+											T terminalTime,
+											std::size_t const &spaceDiscretization,
+											std::size_t const &timeDiscretization)
+				:spacer_{ spaceRange },
+				terminalT_{ terminalTime },
+				timeN_{ timeDiscretization },
+				spaceN_{ spaceDiscretization } {}
+
+			~Explicit1DHeatEquation(){}
+
+			Explicit1DHeatEquation(Explicit1DHeatEquation const &) = delete;
+			Explicit1DHeatEquation(Explicit1DHeatEquation &&) = delete;
+			Explicit1DHeatEquation& operator=(Explicit1DHeatEquation const &) = delete;
+			Explicit1DHeatEquation& operator=(Explicit1DHeatEquation &&) = delete;
+
+			inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
+			inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
+
+			inline void setBoundaryCondition(std::pair<T, T> const &boundaryPair) {
+				boundary_ = boundaryPair;
+			}
+			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
+				init_ = initialCondition;
+			}
+
+			inline void setThermalDiffusivity(T value) {
+				diffusivity_ = value;
+			}
+
+			void solve(Container<T, Alloc> &solution,
+				ExplicitPDESchemes scheme = ExplicitPDESchemes::ADE);
+		};
+
+
+		template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+		class Explicit1DHeatEquation<T, BoundaryConditionType::Robin, Container, Alloc> {
+
+
+
+		};
+
 
 	}
 
 
-
-	// =============================== Implicit1DHeatEquation implementation ========================================
+	// ==============================================================================================================
+	// ========================== Implicit1DHeatEquation (Dirichlet) implementation =================================
+	// ==============================================================================================================
 
 	template<typename T,
 			template<typename,
@@ -246,6 +315,12 @@ namespace lss_one_dim_heat_equation_solvers {
 			xinput[t] = init_(xinput[t]);
 		}
 	}
+
+
+
+	// ==============================================================================================================
+	// ============================== Implicit1DHeatEquation (Robin) implementation =================================
+	// ==============================================================================================================
 
 
 	template<typename T,
