@@ -15,6 +15,8 @@ namespace lss_one_dim_heat_equation_solvers {
 	using lss_types::ImplicitPDESchemes;
 	using lss_types::ExplicitPDESchemes;
 	using lss_one_dim_pde_schemes::ImplicitHeatEquationSchemes;
+	using lss_one_dim_pde_schemes::ExplicitEulerScheme;
+	using lss_one_dim_pde_schemes::ADEBakaratClarkScheme;
 	using lss_utility::Range;
 
 	namespace implicit_solvers {
@@ -171,12 +173,15 @@ namespace lss_one_dim_heat_equation_solvers {
 			typename Alloc>
 		class Explicit1DHeatEquation<T,BoundaryConditionType::Dirichlet,Container,Alloc> {
 		private:
+			Range<T> spacer_;											// space range
 			T terminalT_;												// terminal time
 			std::size_t timeN_;											// number of time subdivisions
 			std::size_t spaceN_;										// number of space subdivisions
 			std::function<T(T)> init_;									// initi condition
 			std::pair<T, T> boundary_;									// boundaries
 			T diffusivity_;												// diffusivity = c^2 in PDE
+			void createSpaceMesh(Container<T, Alloc> &container)const;
+			void discretizeInitialCondition(Container<T, Alloc> &xinput)const;
 
 		public:
 			explicit Explicit1DHeatEquation() = delete;
@@ -338,6 +343,61 @@ namespace lss_one_dim_heat_equation_solvers {
 
 
 
+	// ==============================================================================================================
+	// ========================== Explicit1DHeatEquation (Dirichlet) implementation =================================
+	// ==============================================================================================================
+	template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+	void explicit_solvers::Explicit1DHeatEquation<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
+		createSpaceMesh(Container<T, Alloc> &container) const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		container[0] = boundary_.first;
+		T const h = spaceStep();
+		for (std::size_t t = 1; t < container.size(); ++t) {
+			container[t] = container[t - 1] + h;
+		}
+	}
+
+	template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+	void explicit_solvers::Explicit1DHeatEquation<T, BoundaryConditionType::Dirichlet,Container, Alloc>::
+		discretizeInitialCondition(Container<T, Alloc> &xinput) const {
+		LSS_ASSERT(xinput.size() > 0, "The input container must be initialized.");
+		for (std::size_t t = 0; t < xinput.size(); ++t) {
+			xinput[t] = init_(xinput[t]);
+		}
+	}
+	
+	
+	template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+		void explicit_solvers::Explicit1DHeatEquation<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
+		solve(Container<T, Alloc> &solution, ExplicitPDESchemes scheme) {
+
+		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
+		// get space step:
+		T const h = spaceStep();
+		// get time step:
+		T const k = timeStep();
+		// create container to carry mesh in space and then previous solution:
+		Container<T, Alloc> initCondition(spaceN_ + 1, T{});
+		// populate the container with mesh in space
+		createSpaceMesh(initCondition);
+		// use the mesh in space to get values of initial condition
+		discretizeInitialCondition(initCondition);
+		// get the correct scheme:
+		if (scheme == ExplicitPDESchemes::Euler) {
+			ExplicitEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
+			euler(boundary_, solution);
+		}
+		else {
+			ADEBakaratClarkScheme<T> ade{ initCondition,h,k,terminalT_,diffusivity_ };
+			ade(boundary_, solution);
+		}
+	}
 
 
 }

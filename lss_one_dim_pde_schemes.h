@@ -81,6 +81,9 @@ namespace lss_one_dim_pde_schemes {
 		ExplicitEulerScheme& operator=(ExplicitEulerScheme const&) = delete;
 		ExplicitEulerScheme& operator=(ExplicitEulerScheme &&) = delete;
 
+		// stability check:
+		bool inline isStable()const { return ((2.0*thermalDiffusivity_*timeStep_ / (spaceStep_*spaceStep_)) <= 1.0); }
+
 		// for Dirichlet BC
 		void operator()(std::pair<T,T> const &dirichletBCPair, std::vector<T> &solution)const;
 
@@ -131,11 +134,14 @@ namespace lss_one_dim_pde_schemes {
 
 
 template<typename T>
-void lss_one_dim_pde_schemes::ExplicitEulerScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution)const {
+void lss_one_dim_pde_schemes::ExplicitEulerScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair, 
+	std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
 		"Entered solution vector size differs from initialCondition vector.");
+	LSS_ASSERT(isStable() == true, 
+		"This discretization is not stable.");
 	// create first time point:
 	T time = timeStep_;
 	// calculate lambda:
@@ -159,14 +165,60 @@ void lss_one_dim_pde_schemes::ExplicitEulerScheme<T>::operator()(std::pair<T, T>
 			solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]);
 		}
 		prevSol = solution;
-		time += k;
+		time += timeStep_;
 	}
 }
 
 
 template<typename T>
-void lss_one_dim_pde_schemes::ADEBakaratClarkScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution)const {
-
+void lss_one_dim_pde_schemes::ADEBakaratClarkScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
+	std::vector<T> &solution)const {
+	LSS_ASSERT(solution.size() > 0,
+		"The input solution container must be initialized.");
+	LSS_ASSERT(solution.size() == initialCondition_.size(),
+		"Entered solution vector size differs from initialCondition vector.");
+	// create first time point:
+	T time = timeStep_;
+	// calculate lambda:
+	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	// set up coefficients:
+	T const divisor = 1.0 + lambda;
+	T const a = (1.0 - lambda) / divisor;
+	T const b = lambda / divisor;
+	// left space boundary:
+	T const left = dirichletBCPair.first;
+	// right space boundary:
+	T const right = dirichletBCPair.second;
+	// conmponents of the solution:
+	std::vector<T> component1 = initialCondition_;
+	std::vector<T> component2 = initialCondition_;
+	// size of the space vector:
+	std::size_t const spaceSize = solution.size();
+	// create upsweep anonymous function:
+	auto upSweep = [=](std::vector<T>& upComponent) {
+		for (std::size_t t = 1; t < upComponent.size() - 1; ++t) {
+			upComponent[t] = a * upComponent[t] + b * (upComponent[t + 1] + upComponent[t - 1]);
+		}
+	};
+	// create downsweep anonymous function:
+	auto downSweep = [=](std::vector<T>& downComponent) {
+		for (std::size_t t = downComponent.size() - 2; t >= 1; --t) {
+			downComponent[t] = a * downComponent[t] + b * (downComponent[t + 1] + downComponent[t - 1]);
+		}
+	};
+	// loop for stepping in time:
+	while (time <= terminalTime_) {
+		solution[0] = left;
+		solution[solution.size() - 1] = right;
+		std::thread upSweepTr(std::move(upSweep), std::ref(component1));
+		std::thread downSweepTr(std::move(downSweep), std::ref(component2));
+		upSweepTr.join();
+		downSweepTr.join();
+		for (std::size_t t = 0; t < solution.size(); ++t) {
+			solution[t] = 0.5*(component1[t] + component2[t]);
+		}
+		time += timeStep_;
+	}
 }
 
 
