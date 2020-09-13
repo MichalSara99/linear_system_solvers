@@ -190,32 +190,32 @@ void lss_one_dim_pde_schemes::ADEBakaratClarkScheme<T>::operator()(std::pair<T, 
 	// right space boundary:
 	T const right = dirichletBCPair.second;
 	// conmponents of the solution:
-	std::vector<T> component1 = initialCondition_;
-	std::vector<T> component2 = initialCondition_;
+	std::vector<T> com1(initialCondition_);
+	std::vector<T> com2(initialCondition_);
 	// size of the space vector:
 	std::size_t const spaceSize = solution.size();
 	// create upsweep anonymous function:
 	auto upSweep = [=](std::vector<T>& upComponent) {
-		for (std::size_t t = 1; t < upComponent.size() - 1; ++t) {
+		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
 			upComponent[t] = a * upComponent[t] + b * (upComponent[t + 1] + upComponent[t - 1]);
 		}
 	};
 	// create downsweep anonymous function:
 	auto downSweep = [=](std::vector<T>& downComponent) {
-		for (std::size_t t = downComponent.size() - 2; t >= 1; --t) {
+		for (std::size_t t = spaceSize - 2; t >= 1; --t) {
 			downComponent[t] = a * downComponent[t] + b * (downComponent[t + 1] + downComponent[t - 1]);
 		}
 	};
 	// loop for stepping in time:
 	while (time <= terminalTime_) {
-		solution[0] = left;
-		solution[solution.size() - 1] = right;
-		std::thread upSweepTr(std::move(upSweep), std::ref(component1));
-		std::thread downSweepTr(std::move(downSweep), std::ref(component2));
+		com1[0] = com2[0] = left;
+		com1[solution.size() - 1] = com2[solution.size() - 1] = right;
+		std::thread upSweepTr(std::move(upSweep), std::ref(com1));
+		std::thread downSweepTr(std::move(downSweep), std::ref(com2));
 		upSweepTr.join();
 		downSweepTr.join();
-		for (std::size_t t = 0; t < solution.size(); ++t) {
-			solution[t] = 0.5*(component1[t] + component2[t]);
+		for (std::size_t t = 0; t < spaceSize; ++t) {
+			solution[t] = 0.5*(com1[t] + com2[t]);
 		}
 		time += timeStep_;
 	}

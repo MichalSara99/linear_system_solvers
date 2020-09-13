@@ -433,7 +433,7 @@ void testExplHeatEquationDirichletBCADE() {
 	std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
 	std::cout << " where\n\n";
 	std::cout << " x in <0,1> and t > 0,\n";
-	std::cout << " U(0,t) = U(0,t) = 0, t > 0 \n\n";
+	std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << " Exact solution: \n";
 	std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
@@ -448,7 +448,7 @@ void testExplHeatEquationDirichletBCADE() {
 	// number of space subdivisions:
 	std::size_t const Sd = 100;
 	// number of time subdivisions:
-	std::size_t const Td = 100;
+	std::size_t const Td = 10000;
 	// initial condition:
 	auto initialCondition = [](T x) {return x; };
 	// boundary conditions:
@@ -457,7 +457,7 @@ void testExplHeatEquationDirichletBCADE() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -485,7 +485,7 @@ void testExplHeatEquationDirichletBCADE() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.50, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
