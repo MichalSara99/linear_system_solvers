@@ -37,7 +37,7 @@ namespace lss_types {
 	// =========================== ExplicitPDESchemes ===========================
 	// ==========================================================================
 
-	enum class ExplicitPDESchemes { Euler, ADE };
+	enum class ExplicitPDESchemes { Euler, ADEBarakatClark, ADESaulyev };
 
 }
 

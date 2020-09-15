@@ -17,6 +17,7 @@ namespace lss_one_dim_heat_equation_solvers {
 	using lss_one_dim_pde_schemes::ImplicitHeatEquationSchemes;
 	using lss_one_dim_pde_schemes::ExplicitEulerScheme;
 	using lss_one_dim_pde_schemes::ADEBakaratClarkScheme;
+	using lss_one_dim_pde_schemes::ADESaulyevScheme;
 	using lss_utility::Range;
 
 	namespace implicit_solvers {
@@ -216,7 +217,7 @@ namespace lss_one_dim_heat_equation_solvers {
 			}
 
 			void solve(Container<T, Alloc> &solution,
-				ExplicitPDESchemes scheme = ExplicitPDESchemes::ADE);
+				ExplicitPDESchemes scheme = ExplicitPDESchemes::ADEBarakatClark);
 		};
 
 
@@ -393,9 +394,13 @@ namespace lss_one_dim_heat_equation_solvers {
 			ExplicitEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
 			euler(boundary_, solution);
 		}
+		else if(scheme == ExplicitPDESchemes::ADEBarakatClark) {
+			ADEBakaratClarkScheme<T> adebc{ initCondition,h,k,terminalT_,diffusivity_ };
+			adebc(boundary_, solution);
+		}
 		else {
-			ADEBakaratClarkScheme<T> ade{ initCondition,h,k,terminalT_,diffusivity_ };
-			ade(boundary_, solution);
+			ADESaulyevScheme<T> ades{ initCondition,h,k,terminalT_,diffusivity_ };
+			ades(boundary_, solution);
 		}
 	}
 

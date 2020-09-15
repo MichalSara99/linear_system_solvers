@@ -49,12 +49,12 @@ namespace lss_one_dim_pde_schemes {
 	};
 
 	// ==============================================================================================================
-	// ============================================= ExplicitEulerScheme  ===========================================
+	// ============================================= ExplicitSchemeBase  ============================================
 	// ==============================================================================================================
 
 	template<typename T>
-	class ExplicitEulerScheme {
-	private:
+	class ExplicitSchemeBase {
+	protected:
 		std::vector<T> initialCondition_;
 		T spaceStep_;
 		T timeStep_;
@@ -62,8 +62,8 @@ namespace lss_one_dim_pde_schemes {
 		T thermalDiffusivity_;
 
 	public:
-		explicit ExplicitEulerScheme() = delete;
-		explicit ExplicitEulerScheme(std::vector<T> const& initialCondition,
+		explicit ExplicitSchemeBase() = delete;
+		explicit ExplicitSchemeBase(std::vector<T> const& initialCondition,
 									T spaceStep,
 									T timeStep,
 									T terminalTime,
@@ -74,6 +74,35 @@ namespace lss_one_dim_pde_schemes {
 			terminalTime_{ terminalTime },
 			thermalDiffusivity_{ thermalDiffusivity } {}
 
+		virtual ~ExplicitSchemeBase() {}
+
+		// stability check:
+		virtual bool inline isStable()const = 0;
+
+		// for Dirichlet BC
+		virtual void operator()(std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution)const=0;
+
+	};
+
+	// ==============================================================================================================
+	// ============================================= ExplicitEulerScheme  ===========================================
+	// ==============================================================================================================
+
+	template<typename T>
+	class ExplicitEulerScheme:public ExplicitSchemeBase<T> {
+	public:
+		explicit ExplicitEulerScheme() = delete;
+		explicit ExplicitEulerScheme(std::vector<T> const& initialCondition,
+									T spaceStep,
+									T timeStep,
+									T terminalTime,
+									T thermalDiffusivity)
+			:ExplicitSchemeBase<T>(initialCondition,
+									spaceStep,
+									timeStep,
+									terminalTime,
+									thermalDiffusivity){}
+
 		~ExplicitEulerScheme(){}
 
 		ExplicitEulerScheme(ExplicitEulerScheme const &) = delete;
@@ -82,10 +111,10 @@ namespace lss_one_dim_pde_schemes {
 		ExplicitEulerScheme& operator=(ExplicitEulerScheme &&) = delete;
 
 		// stability check:
-		bool inline isStable()const { return ((2.0*thermalDiffusivity_*timeStep_ / (spaceStep_*spaceStep_)) <= 1.0); }
+		bool inline isStable()const override{ return ((2.0*thermalDiffusivity_*timeStep_ / (spaceStep_*spaceStep_)) <= 1.0); }
 
 		// for Dirichlet BC
-		void operator()(std::pair<T,T> const &dirichletBCPair, std::vector<T> &solution)const;
+		void operator()(std::pair<T,T> const &dirichletBCPair, std::vector<T> &solution)const override;
 
 	};
 
@@ -96,14 +125,7 @@ namespace lss_one_dim_pde_schemes {
 
 
 	template<typename T>
-	class ADEBakaratClarkScheme {
-	private:
-		std::vector<T> initialCondition_;
-		T spaceStep_;
-		T timeStep_;
-		T terminalTime_;
-		T thermalDiffusivity_;
-	
+	class ADEBakaratClarkScheme:public ExplicitSchemeBase<T> {	
 	public:
 		explicit ADEBakaratClarkScheme() = delete;
 		explicit ADEBakaratClarkScheme(std::vector<T> const& initialCondition,
@@ -111,11 +133,11 @@ namespace lss_one_dim_pde_schemes {
 										T timeStep,
 										T terminalTime,
 										T thermalDiffusivity)
-			:initialCondition_{ initialCondition },
-			spaceStep_{ spaceStep },
-			timeStep_{ timeStep },
-			terminalTime_{ terminalTime },
-			thermalDiffusivity_{ thermalDiffusivity } {}
+			:ExplicitSchemeBase<T>(initialCondition,
+									spaceStep,
+									timeStep,
+									terminalTime,
+									thermalDiffusivity){}
 
 		~ADEBakaratClarkScheme() {}
 
@@ -124,8 +146,45 @@ namespace lss_one_dim_pde_schemes {
 		ADEBakaratClarkScheme& operator=(ADEBakaratClarkScheme const&) = delete;
 		ADEBakaratClarkScheme& operator=(ADEBakaratClarkScheme &&) = delete;
 
+		// stability check:
+		bool inline isStable()const override { return true; };
+
 		// for Dirichlet BC
-		void operator()(std::pair<T, T> const &dirichletBCPair,std::vector<T> &solution)const;
+		void operator()(std::pair<T, T> const &dirichletBCPair,std::vector<T> &solution)const override;
+
+	};
+
+	// ==============================================================================================================
+	// ============================================= ADESaulyevScheme  ==============================================
+	// ==============================================================================================================
+
+	template<typename T>
+	class ADESaulyevScheme:public ExplicitSchemeBase<T> {
+	public:
+		explicit ADESaulyevScheme() = delete;
+		explicit ADESaulyevScheme(std::vector<T> const &initialCondition,
+								T spaceStep,
+								T timeStep,
+								T terminalTime,
+								T thermalDiffusivity)
+			:ExplicitSchemeBase<T>(initialCondition,
+									spaceStep,
+									timeStep, 
+									terminalTime, 
+									thermalDiffusivity){}
+
+		~ADESaulyevScheme(){}
+
+		ADESaulyevScheme(ADESaulyevScheme const &) = delete;
+		ADESaulyevScheme(ADESaulyevScheme &&) = delete;
+		ADESaulyevScheme& operator=(ADESaulyevScheme const &) = delete;
+		ADESaulyevScheme& operator=(ADESaulyevScheme &&) = delete;
+
+		// stability check:
+		bool inline isStable()const override { return true; };
+
+		// for Dirichlet BC
+		void operator()(std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution) const override;
 
 	};
 
@@ -217,6 +276,56 @@ void lss_one_dim_pde_schemes::ADEBakaratClarkScheme<T>::operator()(std::pair<T, 
 		for (std::size_t t = 0; t < spaceSize; ++t) {
 			solution[t] = 0.5*(com1[t] + com2[t]);
 		}
+		time += timeStep_;
+	}
+}
+
+
+template<typename T>
+void lss_one_dim_pde_schemes::ADESaulyevScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
+	std::vector<T> &solution)const {
+	LSS_ASSERT(solution.size() > 0,
+		"The input solution container must be initialized.");
+	LSS_ASSERT(solution.size() == initialCondition_.size(),
+		"Entered solution vector size differs from initialCondition vector.");
+	// create first time point:
+	T time = timeStep_;
+	// calculate lambda:
+	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	// set up coefficients:
+	T const divisor = 1.0 + lambda;
+	T const a = (1.0 - lambda) / divisor;
+	T const b = lambda / divisor;
+	// left space boundary:
+	T const left = dirichletBCPair.first;
+	// right space boundary:
+	T const right = dirichletBCPair.second;
+	// get the initial condition :
+	solution = initialCondition_;
+	// size of the space vector:
+	std::size_t const spaceSize = solution.size();
+	// create upsweep anonymous function:
+	auto upSweep = [=](std::vector<T>& upComponent) {
+		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
+			upComponent[t] = a * upComponent[t] + b * (upComponent[t + 1] + upComponent[t - 1]);
+		}
+	};
+	// create downsweep anonymous function:
+	auto downSweep = [=](std::vector<T>& downComponent) {
+		for (std::size_t t = spaceSize - 2; t >= 1; --t) {
+			downComponent[t] = a * downComponent[t] + b * (downComponent[t + 1] + downComponent[t - 1]);
+		}
+	};
+	// loop for stepping in time:
+	std::size_t t = 1;
+	while (time <= terminalTime_) {
+		solution[0] = left;
+		solution[solution.size() - 1] = right;
+		if(t%2==0)
+			downSweep(solution);
+		else
+			upSweep(solution);
+		++t;
 		time += timeStep_;
 	}
 }
