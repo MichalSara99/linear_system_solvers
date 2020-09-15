@@ -5,6 +5,7 @@
 #include"lss_dense_solvers_cuda_t.h"
 #include"lss_fdm_tridiagonal_solvers_t.h"
 #include"lss_one_dim_heat_equation_solvers_t.h"
+#include"lss_one_dim_heat_equation_solvers_cuda_t.h"
 
 int main(int argc, char const* argv[]) {
 
@@ -33,6 +34,7 @@ int main(int argc, char const* argv[]) {
     // deviceSparseQRTest();
     // hostSparseQRTest();
     // testDirichletBCBVPOnHost();
+	
     // testDirichletBCBVPOnDevice();
 	// testRobinBCBVPOnHost();
 	// testRobinBCBVPOnDevice();
@@ -56,7 +58,15 @@ int main(int argc, char const* argv[]) {
 
 	// testImplHeatEquationDirichletBCDoubleSweep();
 	// testImplHeatEquationDirichletBCThomasLU();
-	testExplHeatEquationDirichletBC();
+	// testExplHeatEquationDirichletBC();
+
+	// =====================================================
+
+	// =====================================================
+	// ==== lss_one_dim_heat_equation_solvers_cuda_t.h =====
+	// =====================================================
+
+	testImplHeatEquationDirichletBCDevice();
 
 	// =====================================================
 

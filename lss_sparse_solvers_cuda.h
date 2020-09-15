@@ -32,8 +32,7 @@ namespace lss_sparse_solvers_cuda {
 
 
 	template<MemorySpace MemSpace,
-			typename T,
-			typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+			typename T>
 	class RealSparseSolverCUDA{};
 
 

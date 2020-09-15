@@ -696,6 +696,7 @@ void hostBVPDirichletBCDefaultQRTest() {
 	std::cout << "=================================\n";
 	std::cout << " Using QR decomposition to \n";
 	std::cout << " solve Boundary Value Problem: \n\n";
+	std::cout << " type: double					\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -774,6 +775,7 @@ void hostBVPDirichletBCDefaultLUTest() {
 	std::cout << "=================================\n";
 	std::cout << " Using LU decomposition to \n";
 	std::cout << " solve Boundary Value Problem: \n\n";
+	std::cout << " type: double					\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -852,6 +854,7 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
 	std::cout << "=================================\n";
 	std::cout << " Using Cholesky decomposition to \n";
 	std::cout << " solve Boundary Value Problem: \n\n";
+	std::cout << " type: double					\n\n";
 	std::cout << " u''(t) = -2, \n\n";
 	std::cout << " where\n\n";
 	std::cout << " t in <0,1>,\n";
@@ -919,7 +922,241 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
 
 }
 
+void hostBVPDirichletBCFloatQRTest() {
 
+	using lss_sparse_solvers_cuda::FlatMatrix;
+	using lss_sparse_solvers_cuda::MemorySpace;
+	using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+	using lss_sparse_solvers_policy::SparseSolverHostQR;
+
+	std::cout << "=================================\n";
+	std::cout << " Using QR decomposition to \n";
+	std::cout << " solve Boundary Value Problem: \n\n";
+	std::cout << " type: float					\n\n";
+	std::cout << " u''(t) = -2, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " t in <0,1>,\n";
+	std::cout << " u(0) = u(1) = 0\n\n";
+	std::cout << "Exact solution is:\n\n";
+	std::cout << " u(t) = t(1-t)\n";
+	std::cout << "=================================\n";
+
+
+	// first create and populate the sparse matrix:
+	FlatMatrix<float> fsm;
+	// discretization:
+	// t_0,t_1,t_2,...,t_20
+	int const N = 20;
+	// step size:
+	float h = 1.0 / static_cast<float>(N);
+	// set number of columns and rows:
+	// because we already know the boundary values
+	// at t_0 = 0 and t_20 = 0:
+	int const m = N - 1;
+	fsm.setColumns(m); fsm.setRows(m);
+	// populate the matrix:
+	fsm.emplace_back(0, 0, -2.0); fsm.emplace_back(0, 1, 1.0);
+	for (std::size_t t = 1; t < m - 1; ++t) {
+		fsm.emplace_back(t, t - 1, 1.0);
+		fsm.emplace_back(t, t, -2.0);
+		fsm.emplace_back(t, t + 1, 1.0);
+	}
+	fsm.emplace_back(m - 1, m - 2, 1.0); fsm.emplace_back(m - 1, m - 1, -2.0);
+
+	// lets use std::vector to populate vector b:
+	std::vector<float> b(m, -2.0 * h * h);
+	// set the Dirichlet boundary conditions:
+	float left = 0.0;
+	float right = 0.0;
+	b[0] = b[0] - left;
+	b[b.size() - 1] = b[b.size() - 1] - right;
+
+	// create sparse solver on HOST:
+	RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+
+	// because we used default cstor we need to call initialize
+	rss.initialize(m);
+
+	// insert sparse matrix A and vector b:
+	rss.setFlatSparseMatrix(std::move(fsm));
+	rss.setRhs(b);
+
+	std::vector<float> solution(m);
+	rss.solve<SparseSolverHostQR>(solution);
+
+	//exact value:
+	auto exact = [](float x) { return x * (1.0 - x); };
+
+	std::cout << "tp : FDM | Exact\n";
+	std::cout << "t_" << 0 << ": " << left << " |  "
+		<< exact(0) << '\n';
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		std::cout << "t_" << j + 1 << ": " << solution[j] << " |  "
+			<< exact((j + 1) * h) << '\n';
+	}
+	std::cout << "t_" << N << ": " << right << " |  "
+		<< exact(N*h) << '\n';
+
+}
+
+
+void hostBVPDirichletBCFloatLUTest() {
+
+	using lss_sparse_solvers_cuda::FlatMatrix;
+	using lss_sparse_solvers_cuda::MemorySpace;
+	using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+	using lss_sparse_solvers_policy::SparseSolverHostLU;
+
+	std::cout << "=================================\n";
+	std::cout << " Using LU decomposition to \n";
+	std::cout << " solve Boundary Value Problem: \n\n";
+	std::cout << " type: float					\n\n";
+	std::cout << " u''(t) = -2, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " t in <0,1>,\n";
+	std::cout << " u(0) = u(1) = 0\n\n";
+	std::cout << "Exact solution is:\n\n";
+	std::cout << " u(t) = t(1-t)\n";
+	std::cout << "=================================\n";
+
+
+	// first create and populate the sparse matrix:
+	FlatMatrix<float> fsm;
+	// discretization:
+	// t_0,t_1,t_2,...,t_20
+	int const N = 20;
+	// step size:
+	float h = 1.0 / static_cast<float>(N);
+	// set number of columns and rows:
+	// because we already know the boundary values
+	// at t_0 = 0 and t_20 = 0:
+	int const m = N - 1;
+	fsm.setColumns(m); fsm.setRows(m);
+	// populate the matrix:
+	fsm.emplace_back(0, 0, -2.0); fsm.emplace_back(0, 1, 1.0);
+	for (std::size_t t = 1; t < m - 1; ++t) {
+		fsm.emplace_back(t, t - 1, 1.0);
+		fsm.emplace_back(t, t, -2.0);
+		fsm.emplace_back(t, t + 1, 1.0);
+	}
+	fsm.emplace_back(m - 1, m - 2, 1.0); fsm.emplace_back(m - 1, m - 1, -2.0);
+
+	// lets use std::vector to populate vector b:
+	std::vector<float> b(m, -2.0 * h * h);
+	// set the Dirichlet boundary conditions:
+	float left = 0.0;
+	float right = 0.0;
+	b[0] = b[0] - left;
+	b[b.size() - 1] = b[b.size() - 1] - right;
+
+	// create sparse solver on HOST:
+	RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+
+	// because we used default cstor we need to call initialize
+	rss.initialize(m);
+
+	// insert sparse matrix A and vector b:
+	rss.setFlatSparseMatrix(std::move(fsm));
+	rss.setRhs(b);
+
+	std::vector<float> solution(m);
+	rss.solve<SparseSolverHostLU>(solution);
+
+	//exact value:
+	auto exact = [](float x) { return x * (1.0 - x); };
+
+	std::cout << "tp : FDM | Exact\n";
+	std::cout << "t_" << 0 << ": " << left << " |  "
+		<< exact(0) << '\n';
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		std::cout << "t_" << j + 1 << ": " << solution[j] << " |  "
+			<< exact((j + 1) * h) << '\n';
+	}
+	std::cout << "t_" << N << ": " << right << " |  "
+		<< exact(N * h) << '\n';
+
+}
+
+
+void hostBVPDirichletBCFloatCholeskyTest() {
+
+	using lss_sparse_solvers_cuda::FlatMatrix;
+	using lss_sparse_solvers_cuda::MemorySpace;
+	using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+	using lss_sparse_solvers_policy::SparseSolverHostCholesky;
+
+	std::cout << "=================================\n";
+	std::cout << " Using Cholesky decomposition to \n";
+	std::cout << " solve Boundary Value Problem: \n\n";
+	std::cout << " type: float					\n\n";
+	std::cout << " u''(t) = -2, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " t in <0,1>,\n";
+	std::cout << " u(0) = u(1) = 0\n\n";
+	std::cout << "Exact solution is:\n\n";
+	std::cout << " u(t) = t(1-t)\n";
+	std::cout << "=================================\n";
+
+
+	// first create and populate the sparse matrix:
+	FlatMatrix<float> fsm;
+	// discretization:
+	// t_0,t_1,t_2,...,t_20
+	int const N = 20;
+	// step size:
+	float h = 1.0 / static_cast<float>(N);
+	// set number of columns and rows:
+	// because we already know the boundary values
+	// at t_0 = 0 and t_20 = 0:
+	int const m = N - 1;
+	fsm.setColumns(m); fsm.setRows(m);
+	// populate the matrix:
+	fsm.emplace_back(0, 0, -2.0); fsm.emplace_back(0, 1, 1.0);
+	for (std::size_t t = 1; t < m - 1; ++t) {
+		fsm.emplace_back(t, t - 1, 1.0);
+		fsm.emplace_back(t, t, -2.0);
+		fsm.emplace_back(t, t + 1, 1.0);
+	}
+	fsm.emplace_back(m - 1, m - 2, 1.0); fsm.emplace_back(m - 1, m - 1, -2.0);
+
+	// lets use std::vector to populate vector b:
+	std::vector<float> b(m, -2.0 * h * h);
+	// set the Dirichlet boundary conditions:
+	float left = 0.0;
+	float right = 0.0;
+	b[0] = b[0] - left;
+	b[b.size() - 1] = b[b.size() - 1] - right;
+
+	// create sparse solver on HOST:
+	RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+
+	// because we used default cstor we need to call initialize
+	rss.initialize(m);
+
+	// insert sparse matrix A and vector b:
+	rss.setFlatSparseMatrix(std::move(fsm));
+	rss.setRhs(b);
+
+	std::vector<float> solution(m);
+	rss.solve<SparseSolverHostCholesky>(solution);
+
+	//exact value:
+	auto exact = [](float x) { return x * (1.0 - x); };
+
+	std::cout << "tp : FDM | Exact\n";
+	std::cout << "t_" << 0 << ": " << left << " |  "
+		<< exact(0) << '\n';
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		std::cout << "t_" << j + 1 << ": " << solution[j] << " |  "
+			<< exact((j + 1) * h) << '\n';
+	}
+	std::cout << "t_" << N << ": " << right << " |  "
+		<< exact(N * h) << '\n';
+
+}
 
 void testDirichletBCBVPOnHost() {
 	std::cout << "==================================================\n";
@@ -927,8 +1164,11 @@ void testDirichletBCBVPOnHost() {
 	std::cout << "==================================================\n";
 
 	hostBVPDirichletBCDefaultQRTest();
+	hostBVPDirichletBCFloatQRTest();
 	hostBVPDirichletBCDefaultLUTest();
+	hostBVPDirichletBCFloatLUTest();
 	hostBVPDirichletBCDefaultCholeskyTest();
+	hostBVPDirichletBCFloatCholeskyTest();
 
 	std::cout << "==================================================\n";
 }
