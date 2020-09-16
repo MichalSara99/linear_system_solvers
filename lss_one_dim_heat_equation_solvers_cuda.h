@@ -146,7 +146,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
 		// get the correct scheme:
-		auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
+		auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(scheme);
 		// get correct theta according to the scheme:
 		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
 		// get space step:
@@ -163,14 +163,11 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		createSpaceMesh(prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(prevSol);
-		// adjust the end point to account for dirichlet BC:
-		prevSol[0] = prevSol[0] - ((-1.0*lambda*theta)*boundary_.first);
-		prevSol[prevSol.size() - 1] = prevSol[prevSol.size() - 1] - ((-1.0*lambda*theta)*boundary_.second);
 		// first create and populate the sparse matrix:
 		FlatMatrix<T> fsm;
 		fsm.setColumns(m); fsm.setRows(m);
 		// populate the matrix:
-		fsm.emplace_back(0, 0, (1.0 + 2.0*lambda*theta)); fsm.emplace_back(0, 1, 1.0);
+		fsm.emplace_back(0, 0, (1.0 + 2.0*lambda*theta)); fsm.emplace_back(0, 1, -1.0*lambda*theta);
 		for (std::size_t t = 1; t < m - 1; ++t) {
 			fsm.emplace_back(t, t - 1, -1.0*lambda*theta);
 			fsm.emplace_back(t, t, (1.0 + 2.0*lambda*theta));
@@ -190,7 +187,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solver_.setFlatSparseMatrix(std::move(fsm));
 		// loop for stepping in time:
 		while (time <= lastTime) {
-			schemeFun(lambda, prevSol, rhs);
+			schemeFun(lambda, prevSol, rhs, boundary_);
 			solver_.setRhs(rhs);
 			solver_.solve(nextSol);
 			prevSol = nextSol;

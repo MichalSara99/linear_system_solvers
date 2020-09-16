@@ -41,7 +41,7 @@ void testImplHeatEquationDoubleDirichletBCDeviceEuler() {
 	// number of space subdivisions:
 	std::size_t const Sd = 100;
 	// number of time subdivisions:
-	std::size_t const Td = 10000;
+	std::size_t const Td = 100;
 	// initial condition:
 	auto initialCondition = [](double x) {return x; };
 	// boundary conditions:
@@ -50,7 +50,7 @@ void testImplHeatEquationDoubleDirichletBCDeviceEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<double> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.2, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -78,7 +78,7 @@ void testImplHeatEquationDoubleDirichletBCDeviceEuler() {
 	double benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.2, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -118,7 +118,7 @@ void testImplHeatEquationFloatDirichletBCDeviceEuler() {
 	// number of space subdivisions:
 	std::size_t const Sd = 100;
 	// number of time subdivisions:
-	std::size_t const Td = 10000;
+	std::size_t const Td = 100;
 	// initial condition:
 	auto initialCondition = [](float x) {return x; };
 	// boundary conditions:
@@ -127,7 +127,7 @@ void testImplHeatEquationFloatDirichletBCDeviceEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -155,7 +155,7 @@ void testImplHeatEquationFloatDirichletBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.2, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -194,7 +194,7 @@ void testImplHeatEquationDoubleDirichletBCDeviceCN() {
 	// number of space subdivisions:
 	std::size_t const Sd = 100;
 	// number of time subdivisions:
-	std::size_t const Td = 10000;
+	std::size_t const Td = 100;
 	// initial condition:
 	auto initialCondition = [](double x) {return x; };
 	// boundary conditions:
@@ -203,7 +203,7 @@ void testImplHeatEquationDoubleDirichletBCDeviceCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<double> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.2, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -231,7 +231,7 @@ void testImplHeatEquationDoubleDirichletBCDeviceCN() {
 	double benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.2, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -268,9 +268,9 @@ void testImplHeatEquationFloatDirichletBCDeviceCN() {
 		std::allocator<float>> implicit_solver;
 
 	// number of space subdivisions:
-	std::size_t const Sd = 100;
+	std::size_t const Sd = 1000;
 	// number of time subdivisions:
-	std::size_t const Td = 10000;
+	std::size_t const Td = 1000;
 	// initial condition:
 	auto initialCondition = [](float x) {return x; };
 	// boundary conditions:
@@ -279,7 +279,7 @@ void testImplHeatEquationFloatDirichletBCDeviceCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -307,7 +307,7 @@ void testImplHeatEquationFloatDirichletBCDeviceCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.2, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
