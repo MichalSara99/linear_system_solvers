@@ -140,6 +140,7 @@ namespace lss_one_dim_heat_equation_solvers {
 			inline void setBoundaryCondition(std::pair<T, T> const &left,std::pair<T,T> const &right) { 
 				fdmSolver_.setBoundaryCondition(left, right);
 			}
+
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) { 
 				init_ = initialCondition; 
 			}

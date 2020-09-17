@@ -91,6 +91,66 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 
 
 
+		template<typename T,
+			MemorySpace MemSpace,
+			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
+			template<typename, typename> typename Container,
+			typename Alloc>
+			class Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc> {
+			private:
+				RealSparsePolicyCUDA<MemSpace, T> solver_;									// finite-difference solver
+				Range<T> spacer_;															// space range
+				T terminalT_;																// terminal time
+				std::size_t timeN_;															// number of time subdivisions
+				std::size_t spaceN_;														// number of space subdivisions
+				std::function<T(T)> init_;													// initi condition
+				std::pair<T, T> leftPair_;													// boundaries
+				std::pair<T, T> rightPair_;													// boundaries
+				T diffusivity_;																// diffusivity = c^2 in PDE
+				void createSpaceMesh(Container<T, Alloc> &container)const;
+				void discretizeInitialCondition(Container<T, Alloc> &xinput)const;
+
+
+			public:
+				typedef T value_type;
+				explicit Implicit1DHeatEquationCUDA() = delete;
+				explicit Implicit1DHeatEquationCUDA(Range<T> const &spaceRange,
+													T terminalTime,
+													std::size_t const &spaceDiscretization,
+													std::size_t const &timeDiscretization)
+					:spacer_{ spaceRange },
+					terminalT_{ terminalTime },
+					timeN_{ timeDiscretization },
+					spaceN_{ spaceDiscretization } {}
+
+				~Implicit1DHeatEquationCUDA() {}
+
+				Implicit1DHeatEquationCUDA(Implicit1DHeatEquationCUDA const &) = delete;
+				Implicit1DHeatEquationCUDA(Implicit1DHeatEquationCUDA &&) = delete;
+				Implicit1DHeatEquationCUDA& operator=(Implicit1DHeatEquationCUDA const&) = delete;
+				Implicit1DHeatEquationCUDA& operator=(Implicit1DHeatEquationCUDA &&) = delete;
+
+				inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
+				inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
+
+				inline void setBoundaryCondition(std::pair<T, T> const &left, std::pair<T, T> const &right) {
+					leftPair_ = left;
+					rightPair_ = right;
+				}
+
+				inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
+					init_ = initialCondition;
+				}
+
+				inline void setThermalDiffusivity(T value) {
+					diffusivity_ = value;
+				}
+
+				void solve(Container<T, Alloc> &solution,
+					ImplicitPDESchemes scheme = ImplicitPDESchemes::CrankNicolson);
+		};
+
+
 
 	}
 
@@ -197,6 +257,23 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solution[0] = boundary_.first;
 		std::copy(prevSol.begin(), prevSol.end(), std::next(solution.begin()));
 		solution[solution.size() - 1] = boundary_.second;
+	}
+
+
+	// ==============================================================================================================
+	// ========================= Implicit1DHeatEquationCUDA (Robin BC) implementation ===============================
+	// ==============================================================================================================
+
+	template<typename T,
+			MemorySpace MemSpace,
+			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
+			template<typename, typename> typename Container,
+			typename Alloc>
+		void implicit_solvers::Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc>::
+		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
+
+		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
+
 	}
 
 

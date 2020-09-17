@@ -56,7 +56,7 @@ int main(int argc, char const* argv[]) {
 	// ========= lss_one_dim_heat_equation_solvers_t.h =====
 	// =====================================================
 
-	 testImplHeatEquationDirichletBCDoubleSweep();
+	// testImplHeatEquationDirichletBCDoubleSweep();
 	// testImplHeatEquationDirichletBCThomasLU();
 	// testExplHeatEquationDirichletBC();
 
@@ -66,8 +66,8 @@ int main(int argc, char const* argv[]) {
 	// ==== lss_one_dim_heat_equation_solvers_cuda_t.h =====
 	// =====================================================
 
-	testImplHeatEquationDirichletBCDevice();
-
+	// testImplHeatEquationDirichletBCDevice();
+	testImplHeatEquationDirichletBCHost();
 	// =====================================================
 
     std::cout << "\n\n";
