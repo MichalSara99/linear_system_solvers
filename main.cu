@@ -59,6 +59,9 @@ int main(int argc, char const* argv[]) {
 	// testImplHeatEquationDirichletBCDoubleSweep();
 	// testImplHeatEquationDirichletBCThomasLU();
 	// testExplHeatEquationDirichletBC();
+	// testImplNonHomHeatEquationDirichletBCDoubleSweep();
+	// testImplNonHomHeatEquationDirichletBCThomasLU();
+	// testExplNonHomHeatEquationDirichletBC();
 
 	// =====================================================
 
@@ -67,7 +70,11 @@ int main(int argc, char const* argv[]) {
 	// =====================================================
 
 	// testImplHeatEquationDirichletBCDevice();
-	testImplHeatEquationDirichletBCHost();
+	// testImplHeatEquationDirichletBCHost();
+	// testImplNonHomHeatEquationDirichletBCDevice();
+	// testImplNonHomHeatEquationDirichletBCHost();
+
+
 	// =====================================================
 
     std::cout << "\n\n";

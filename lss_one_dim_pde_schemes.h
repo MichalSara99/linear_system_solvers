@@ -64,21 +64,19 @@ namespace lss_one_dim_pde_schemes {
 					T const right = boundaryPair.second;
 					std::size_t const lastIdx = solution.size() - 1;
 
-					solution[1] = (lambda*(1.0 - theta)*input[2])
-						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[1]
-						+ (lambda*(1.0 - theta)*input[0])
-						+ (lambda*theta*left);
+					solution[0] = (lambda*(1.0 - theta)*input[1])
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[0]
+						+ (lambda*left);
 
-					for (std::size_t t = 2; t < lastIdx - 1; ++t) {
+					for (std::size_t t = 1; t < lastIdx; ++t) {
 						solution[t] = (lambda*(1.0 - theta)*input[t + 1])
 							+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
 							+ (lambda*(1.0 - theta)*input[t - 1]);
 					}
 					
-					solution[lastIdx - 1] = (lambda*(1.0 - theta)*input[lastIdx])
-						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx - 1]
-						+ (lambda*(1.0 - theta)*input[lastIdx - 2])
-						+ (lambda*theta*right);
+					solution[lastIdx] = (lambda*right)
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
+						+ (lambda*(1.0 - theta)*input[lastIdx - 1]);
 				};
 				return schemeFun;
 			}
