@@ -6,6 +6,7 @@
 #include"lss_types.h"
 #include"lss_utility.h"
 #include"lss_macros.h"
+#include"lss_one_dim_pde_utility.h"
 #include"lss_one_dim_pde_schemes.h"
 
 
@@ -19,6 +20,7 @@ namespace lss_one_dim_heat_equation_solvers {
 	using lss_one_dim_pde_schemes::ADEBakaratClarkScheme;
 	using lss_one_dim_pde_schemes::ADESaulyevScheme;
 	using lss_utility::Range;
+	using lss_one_dim_pde_utility::Discretization;
 
 	namespace implicit_solvers {
 
@@ -43,7 +45,8 @@ namespace lss_one_dim_heat_equation_solvers {
 						typename> typename FDMSolver,
 				template<typename, typename> typename Container,
 				typename Alloc>
-		class Implicit1DHeatEquation<T,BoundaryConditionType::Dirichlet, FDMSolver,Container,Alloc> {
+		class Implicit1DHeatEquation<T,BoundaryConditionType::Dirichlet, FDMSolver,Container,Alloc>
+		:public Discretization<T,Container,Alloc>{
 		private:
 			FDMSolver<T, BoundaryConditionType::Dirichlet, Container, Alloc> fdmSolver_;// finite-difference solver
 			Range<T> spacer_;															// space range
@@ -53,8 +56,11 @@ namespace lss_one_dim_heat_equation_solvers {
 			std::function<T(T)> init_;													// initi condition
 			std::pair<T, T> boundary_;													// boundaries
 			T diffusivity_;																// diffusivity = c^2 in PDE
-			void createSpaceMesh(Container<T,Alloc> &container)const;
-			void discretizeInitialCondition(Container<T, Alloc> &xinput)const;
+			void discretizeSpace(T const &step,
+								std::pair<T,T> const &dirichletBC,
+								Container<T,Alloc> &container)const override;
+			void discretizeInitialCondition(std::function<T(T)> const &init,
+											Container<T, Alloc> &container)const override;
 
 		public:
 			typedef T value_type;
@@ -96,6 +102,7 @@ namespace lss_one_dim_heat_equation_solvers {
 		};
 
 
+		// To be done soon:
 		template<typename T,
 				template<typename,
 						BoundaryConditionType,
@@ -173,7 +180,8 @@ namespace lss_one_dim_heat_equation_solvers {
 		template<typename T,
 			template<typename, typename> typename Container,
 			typename Alloc>
-		class Explicit1DHeatEquation<T,BoundaryConditionType::Dirichlet,Container,Alloc> {
+		class Explicit1DHeatEquation<T,BoundaryConditionType::Dirichlet,Container,Alloc>:
+		public Discretization<T,Container,Alloc>{
 		private:
 			Range<T> spacer_;											// space range
 			T terminalT_;												// terminal time
@@ -182,10 +190,14 @@ namespace lss_one_dim_heat_equation_solvers {
 			std::function<T(T)> init_;									// initi condition
 			std::pair<T, T> boundary_;									// boundaries
 			T diffusivity_;												// diffusivity = c^2 in PDE
-			void createSpaceMesh(Container<T, Alloc> &container)const;
-			void discretizeInitialCondition(Container<T, Alloc> &xinput)const;
+			void discretizeSpace(T const &step,
+								std::pair<T, T> const &dirichletBC,
+								Container<T, Alloc> &container)const override;
+			void discretizeInitialCondition(std::function<T(T)> const &init,
+											Container<T, Alloc> &container)const override;
 
 		public:
+			typedef T value_type;
 			explicit Explicit1DHeatEquation() = delete;
 			explicit Explicit1DHeatEquation(Range<T> const &spaceRange,
 											T terminalTime,
@@ -263,9 +275,9 @@ namespace lss_one_dim_heat_equation_solvers {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		createSpaceMesh(prevSol);
+		discretizeSpace(h, boundary_, prevSol);
 		// use the mesh in space to get values of initial condition
-		discretizeInitialCondition(prevSol);
+		discretizeInitialCondition(init_, prevSol);
 		// prepare containers for diagonal vectors for FDMSolver:
 		Container<T, Alloc> low(spaceN_ + 1, -1.0*lambda*theta);
 		Container<T, Alloc> diag(spaceN_ + 1, (1.0 + 2.0*lambda*theta));
@@ -299,12 +311,13 @@ namespace lss_one_dim_heat_equation_solvers {
 			template<typename, typename> typename Container,
 			typename Alloc>
 	void implicit_solvers::Implicit1DHeatEquation<T, BoundaryConditionType::Dirichlet, FDMSolver, Container, Alloc>::
-		createSpaceMesh(Container<T, Alloc> &container) const {
+		discretizeSpace(T const &step,
+			std::pair<T, T> const &dirichletBC,
+			Container<T, Alloc> & container) const {
 		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		container[0] = boundary_.first;
-		T const h = spaceStep();
+		container[0] = dirichletBC.first;
 		for (std::size_t t = 1; t < container.size(); ++t) {
-			container[t] = container[t - 1] + h;
+			container[t] = container[t - 1] + step;
 		}
 	}
 
@@ -316,10 +329,11 @@ namespace lss_one_dim_heat_equation_solvers {
 			template<typename, typename> typename Container,
 			typename Alloc>
 	void implicit_solvers::Implicit1DHeatEquation<T, BoundaryConditionType::Dirichlet, FDMSolver, Container, Alloc>::
-		discretizeInitialCondition(Container<T, Alloc> &xinput) const {
-		LSS_ASSERT(xinput.size() > 0, "The input container must be initialized.");
-		for (std::size_t t = 0; t < xinput.size(); ++t) {
-			xinput[t] = init_(xinput[t]);
+		discretizeInitialCondition(std::function<T(T)> const &init,
+								Container<T, Alloc> &container) const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		for (std::size_t t = 0; t < container.size(); ++t) {
+			container[t] = init(container[t]);
 		}
 	}
 
@@ -352,12 +366,13 @@ namespace lss_one_dim_heat_equation_solvers {
 			template<typename, typename> typename Container,
 			typename Alloc>
 	void explicit_solvers::Explicit1DHeatEquation<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
-		createSpaceMesh(Container<T, Alloc> &container) const {
+		discretizeSpace(T const &step,
+						std::pair<T, T> const &dirichletBC,
+						Container<T, Alloc> & container) const {
 		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		container[0] = boundary_.first;
-		T const h = spaceStep();
+		container[0] = dirichletBC.first;
 		for (std::size_t t = 1; t < container.size(); ++t) {
-			container[t] = container[t - 1] + h;
+			container[t] = container[t - 1] + step;
 		}
 	}
 
@@ -365,10 +380,11 @@ namespace lss_one_dim_heat_equation_solvers {
 			template<typename, typename> typename Container,
 			typename Alloc>
 	void explicit_solvers::Explicit1DHeatEquation<T, BoundaryConditionType::Dirichlet,Container, Alloc>::
-		discretizeInitialCondition(Container<T, Alloc> &xinput) const {
-		LSS_ASSERT(xinput.size() > 0, "The input container must be initialized.");
-		for (std::size_t t = 0; t < xinput.size(); ++t) {
-			xinput[t] = init_(xinput[t]);
+		discretizeInitialCondition(std::function<T(T)> const &init,
+									Container<T, Alloc> &container) const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		for (std::size_t t = 0; t < container.size(); ++t) {
+			container[t] = init(container[t]);
 		}
 	}
 	
@@ -387,9 +403,9 @@ namespace lss_one_dim_heat_equation_solvers {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> initCondition(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		createSpaceMesh(initCondition);
+		discretizeSpace(h, boundary_, initCondition);
 		// use the mesh in space to get values of initial condition
-		discretizeInitialCondition(initCondition);
+		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		if (scheme == ExplicitPDESchemes::Euler) {
 			ExplicitEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };

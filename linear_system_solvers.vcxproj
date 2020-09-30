@@ -91,7 +91,9 @@
     <ClInclude Include="lss_one_dim_heat_equation_solvers_cuda_t.h" />
     <ClInclude Include="lss_one_dim_heat_equation_solvers_t.h" />
     <ClInclude Include="lss_one_dim_pde_schemes.h" />
+    <ClInclude Include="lss_one_dim_pde_schemes_cuda.h" />
     <ClInclude Include="lss_one_dim_pde_solvers.h" />
+    <ClInclude Include="lss_one_dim_pde_utility.h" />
     <ClInclude Include="lss_sparse_solvers_cuda.h" />
     <ClInclude Include="lss_sparse_solvers.h" />
     <ClInclude Include="lss_sparse_solvers_cuda_t.h" />
