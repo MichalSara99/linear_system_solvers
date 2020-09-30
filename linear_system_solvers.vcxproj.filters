@@ -43,5 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
+    <CudaCompile Include="lss_one_dim_pde_schemes_cuda.cu" />
   </ItemGroup>
 </Project>

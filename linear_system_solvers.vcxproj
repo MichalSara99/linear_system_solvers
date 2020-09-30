@@ -104,6 +104,7 @@
     <ClInclude Include="lss_utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="lss_one_dim_pde_schemes_cuda.cu" />
     <CudaCompile Include="main.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

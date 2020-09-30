@@ -397,8 +397,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			typename Alloc>
 	void explicit_solvers::Explicit1DHeatEquationCUDA<T,BoundaryConditionType::Dirichlet,Container,Alloc>::
 		solve(Container<T, Alloc> &solution) {
-
-		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
+		LSS_ASSERT(isStable() == true,
+			"This discretization is not stable.");
+		LSS_ASSERT(solution.size() > 0, 
+			"The input solution container must be initialized.");
 		// get space step:
 		T const h = spaceStep();
 		// get time step:
