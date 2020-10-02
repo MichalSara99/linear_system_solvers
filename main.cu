@@ -74,7 +74,7 @@ int main(int argc, char const* argv[]) {
 	// testImplNonHomHeatEquationDirichletBCDevice();
 	// testImplNonHomHeatEquationDirichletBCHost();
 	// testExplHeatEquationDirichletBCDevice();
-	// testExplNonHomHeatEquationDirichletBCDevice();
+	 testExplNonHomHeatEquationDirichletBCDevice();
 
 	// =====================================================
 

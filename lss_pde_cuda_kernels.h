@@ -13,7 +13,7 @@ namespace lss_pde_cuda_kernels {
 
 	template<typename T>
 	__global__
-	void fillDirichletBC(T *solution,T left,T right, unsigned long long size) {
+	void fillDirichletBC1D(T *solution,T left,T right, unsigned long long size) {
 		unsigned long long tid = blockDim.x*blockIdx.x + threadIdx.x;
 		if (tid >= size)return;
 		if (tid == 0)

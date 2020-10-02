@@ -9,7 +9,7 @@
 namespace lss_one_dim_pde_schemes_cuda {
 
 	using lss_pde_cuda_kernels::explicitEulerIterate1D;
-	using lss_pde_cuda_kernels::fillDirichletBC;
+	using lss_pde_cuda_kernels::fillDirichletBC1D;
 	using lss_utility::swap;
 
 	void ExplicitEulerLoopSP::operator()(float const *input, float *solution, unsigned long long size)const {
@@ -32,7 +32,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 			// populate new solution in d_next:
 			explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_, size);
 			// fill in the dirichlet boundaries in d_next:
-			fillDirichletBC<float><<<threadsPerBlock, blocksPerGrid>>>(d_next, left_, right_, size);
+			fillDirichletBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_next, left_, right_, size);
 			// swap the two pointers:
 			swap(d_prev, d_next);
 			time += k;
@@ -64,7 +64,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 			// populate new solution in d_next:
 			explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_, size);
 			// fill in the dirichlet boundaries in d_next:
-			fillDirichletBC<double><<<threadsPerBlock, blocksPerGrid>>>(d_next, left_, right_, size);
+			fillDirichletBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_next, left_, right_, size);
 			// swap the two pointers:
 			swap(d_prev, d_next);
 			time += k;
