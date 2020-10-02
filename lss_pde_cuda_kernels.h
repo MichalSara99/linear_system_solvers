@@ -4,12 +4,28 @@
 
 #include<device_launch_parameters.h>
 
+#define THREADS_PER_BLOCK 256
+
+
+
 namespace lss_pde_cuda_kernels {
 
 
 	template<typename T>
 	__global__
-		void explicitEulerIterate1D(T* prev, T* next, T lambda, unsigned long long size) {
+	void fillDirichletBC(T *solution,T left,T right, unsigned long long size) {
+		unsigned long long tid = blockDim.x*blockIdx.x + threadIdx.x;
+		if (tid >= size)return;
+		if (tid == 0)
+			solution[tid] = left;
+		if (tid == (size - 1))
+			solution[tid] = right;
+	}
+
+
+	template<typename T>
+	__global__
+	void explicitEulerIterate1D(T* prev, T* next, T lambda, unsigned long long size) {
 		unsigned long long const t_id = blockDim.x * blockIdx.x + threadIdx.x;
 		if (t_id >= size)return;
 		if (t_id == 0)return;

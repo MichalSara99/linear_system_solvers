@@ -7,6 +7,7 @@
 #include"lss_utility.h"
 #include"lss_one_dim_pde_utility.h"
 #include"lss_one_dim_pde_schemes.h"
+#include"lss_one_dim_pde_schemes_cuda.h"
 #include"lss_sparse_solvers_cuda.h"
 
 
@@ -20,6 +21,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 	using lss_utility::Range;
 	using lss_utility::FlatMatrix;
 	using lss_one_dim_pde_utility::Discretization;
+	using lss_one_dim_pde_schemes_cuda::ExplicitEulerHeatEquationScheme;
 
 	namespace implicit_solvers {
 
@@ -224,7 +226,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			}
 
 			// stability check:
-			bool inline isStable()const override
+			bool inline isStable()const
 			{ return ((2.0*diffusivity_*timeStep() / (spaceStep()*spaceStep())) <= 1.0); }
 
 			void solve(Container<T, Alloc> &solution);
@@ -374,7 +376,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 						std::pair<T, T> const &dirichletBC,
 						Container<T, Alloc> & container)const {
 		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		container[0] = dirichletBC.first + step;
+		container[0] = dirichletBC.first;
 		for (std::size_t t = 1; t < container.size(); ++t) {
 			container[t] = container[t - 1] + step;
 		}
@@ -385,7 +387,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			typename Alloc>
 	void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
 		discretizeInitialCondition(std::function<T(T)> const &init,
-			Container<T, Alloc> &container) const {
+									Container<T, Alloc> &container) const {
 		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
 		for (std::size_t t = 0; t < container.size(); ++t) {
 			container[t] = init(container[t]);
@@ -407,7 +409,15 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		T const k = timeStep();
 		// calculate lambda:
 		T const lambda = (diffusivity_ *  k) / (h*h);
+		// create container to carry mesh in space and then previous solution:
+		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
+		// populate the container with mesh in space
+		discretizeSpace(h, boundary_, prevSol);
+		// use the mesh in space to get values of initial condition
+		discretizeInitialCondition(init_, prevSol);
 
+		ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(lambda, k, terminalT_, prevSol);
+		eulerScheme(boundary_, solution);
 	}
 
 

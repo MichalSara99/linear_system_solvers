@@ -73,7 +73,8 @@ int main(int argc, char const* argv[]) {
 	// testImplHeatEquationDirichletBCHost();
 	// testImplNonHomHeatEquationDirichletBCDevice();
 	// testImplNonHomHeatEquationDirichletBCHost();
-
+	// testExplHeatEquationDirichletBCDevice();
+	// testExplNonHomHeatEquationDirichletBCDevice();
 
 	// =====================================================
 
