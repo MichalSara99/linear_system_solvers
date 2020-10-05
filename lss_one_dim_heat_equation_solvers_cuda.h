@@ -176,7 +176,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				template<typename,typename> typename Container,
 				typename Alloc>
 		class Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Dirichlet, Container, Alloc>:
-		public Discretization<T,Container,Alloc>{
+			public Discretization<T,Container,Alloc>{
 		private:
 			Range<T> spacer_;
 			T terminalT_;
@@ -237,8 +237,65 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		template<typename T,
 			template<typename, typename> typename Container,
 			typename Alloc>
-		class Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc> {
+		class Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc>:
+			public Discretization<T, Container, Alloc> {
+		private:
+			Range<T> spacer_;
+			T terminalT_;
+			std::size_t timeN_;
+			std::size_t spaceN_;
+			std::function<T(T)> init_;
+			std::pair<T, T> leftBoundary_;
+			std::pair<T, T> rightBoundary_;
+			T diffusivity_;
+			void discretizeSpace(T const &step,
+				std::pair<T, T> const &dirichletBC,
+				Container<T, Alloc> & container)const override;
+			void discretizeInitialCondition(std::function<T(T)> const &init,
+				Container<T, Alloc> &container)const override;
 
+		public:
+			typedef T value_type;
+			explicit Explicit1DHeatEquationCUDA() = delete;
+			explicit Explicit1DHeatEquationCUDA(Range<T> const &spaceRange,
+				T terminalTime,
+				std::size_t const &spaceDiscretization,
+				std::size_t const &timeDiscretization)
+				:spacer_{ spaceRange },
+				terminalT_{ terminalTime },
+				timeN_{ timeDiscretization },
+				spaceN_{ spaceDiscretization } {}
+
+			~Explicit1DHeatEquationCUDA() {}
+
+			Explicit1DHeatEquationCUDA(Explicit1DHeatEquationCUDA const &) = delete;
+			Explicit1DHeatEquationCUDA(Explicit1DHeatEquationCUDA &&) = delete;
+			Explicit1DHeatEquationCUDA& operator=(Explicit1DHeatEquationCUDA const&) = delete;
+			Explicit1DHeatEquationCUDA& operator=(Explicit1DHeatEquationCUDA &&) = delete;
+
+			inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
+			inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
+
+			inline void setBoundaryCondition(std::pair<T, T> const &left, std::pair<T, T> const &right) {
+				leftBoundary_ = left;
+				rightBoundary_ = right;
+			}
+
+			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
+				init_ = initialCondition;
+			}
+
+			inline void setThermalDiffusivity(T value) {
+				diffusivity_ = value;
+			}
+
+			// stability check:
+			bool inline isStable()const
+			{
+				return ((2.0*diffusivity_*timeStep() / (spaceStep()*spaceStep())) <= 1.0);
+			}
+
+			void solve(Container<T, Alloc> &solution);
 
 		};
 
@@ -420,21 +477,62 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		eulerScheme(boundary_, solution);
 	}
 
+	// ==============================================================================================================
+	// ========================= Explicit1DHeatEquationCUDA (Robin BC) implementation ===============================
+	// ==============================================================================================================
+
+	template<typename T,
+		template<typename, typename> typename Container,
+		typename Alloc>
+		void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc>::
+		discretizeSpace(T const &step,
+			std::pair<T, T> const &dirichletBC,
+			Container<T, Alloc> & container)const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		container[0] = dirichletBC.first;
+		for (std::size_t t = 1; t < container.size(); ++t) {
+			container[t] = container[t - 1] + step;
+		}
+	}
+
+	template<typename T,
+		template<typename, typename> typename Container,
+		typename Alloc>
+		void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc>::
+		discretizeInitialCondition(std::function<T(T)> const &init,
+			Container<T, Alloc> &container) const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		for (std::size_t t = 0; t < container.size(); ++t) {
+			container[t] = init(container[t]);
+		}
+	}
+
+	template<typename T,
+		template<typename, typename> typename Container,
+		typename Alloc>
+		void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc>::
+		solve(Container<T, Alloc> &solution) {
+		LSS_ASSERT(isStable() == true,
+			"This discretization is not stable.");
+		LSS_ASSERT(solution.size() > 0,
+			"The input solution container must be initialized.");
+		// get space step:
+		T const h = spaceStep();
+		// get time step:
+		T const k = timeStep();
+		// calculate lambda:
+		T const lambda = (diffusivity_ *  k) / (h*h);
+		// create container to carry mesh in space and then previous solution:
+		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
+		// populate the container with mesh in space
+		discretizeSpace(h, boundary_, prevSol);
+		// use the mesh in space to get values of initial condition
+		discretizeInitialCondition(init_, prevSol);
+
+		ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(lambda, k, terminalT_, prevSol);
+		eulerScheme(leftBoundary_, rightBoundary_, solution);
+	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif ///_LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_CUDA

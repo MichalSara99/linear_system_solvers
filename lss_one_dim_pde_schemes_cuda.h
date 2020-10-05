@@ -9,48 +9,46 @@
 namespace lss_one_dim_pde_schemes_cuda {
 
 
+
 	class ExplicitEulerLoopSP {
 	private:
 		float timeStep_;
 		float lambda_, terminalT_;
-		float left_, right_;
 	public:
 		~ExplicitEulerLoopSP(){}
 		explicit ExplicitEulerLoopSP() = delete;
 		explicit ExplicitEulerLoopSP(float timeStep,
 									float lambda,
-									float terminalTime,
-									float left,
-									float right):
+									float terminalTime):
 			timeStep_{ timeStep },
 			lambda_{ lambda },
-			terminalT_{ terminalTime },
-			left_{left},
-			right_{right} {}
+			terminalT_{ terminalTime } {}
 
-		void operator()(float const *input,float *solution,unsigned long long size)const;
+
+		void operator()(float const *input, std::pair<float, float> const &dirichletBC,
+						unsigned long long const size, float *solution)const;
+		void operator()(float const *input, std::pair<float, float> const &leftRobinBC, 
+						std::pair<float, float> const &rightRobinBC, unsigned long long const size, float *solution)const;
 	};
 	
 	class ExplicitEulerLoopDP {
 	private:
 		double timeStep_;
 		double lambda_, terminalT_;
-		double left_, right_;
 	public:
 		~ExplicitEulerLoopDP() {}
 		explicit ExplicitEulerLoopDP() = delete;
 		explicit ExplicitEulerLoopDP(double timeStep,
 									double lambda,
-									double terminalTime,
-									double left,
-									double right):
+									double terminalTime):
 			timeStep_{timeStep},
 			lambda_{lambda},
-			terminalT_{ terminalTime },
-			left_{left},
-			right_{right} {}
+			terminalT_{ terminalTime } {}
 
-		void operator()(double const *input,double *solution, unsigned long long size)const;
+		void operator()(double const *input, std::pair<double, double> const &dirichletBC,
+						unsigned long long const size, double *solution)const;
+		void operator()(double const *input, std::pair<double, double> const &leftRobinBC,
+						std::pair<double, double> const &rightRobinBC, unsigned long long const size, double *solution)const;
 	};
 
 
@@ -62,7 +60,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 	template<template<typename, typename> typename Container,
 			typename Alloc>
-		class ExplicitEulerHeatEquationScheme<float,Container,Alloc> {
+		class ExplicitEulerHeatEquationScheme<float, Container,Alloc> {
 		private:
 			float lambda_;
 			float timeStep_;
@@ -88,7 +86,10 @@ namespace lss_one_dim_pde_schemes_cuda {
 			ExplicitEulerHeatEquationScheme& operator=(ExplicitEulerHeatEquationScheme const &) = delete;
 			ExplicitEulerHeatEquationScheme& operator=(ExplicitEulerHeatEquationScheme &&) = delete;
 
-			void operator()(std::pair<float, float> const &dirichletBCPair, Container<float, Alloc> &solution)const;
+			void operator()(std::pair<float, float> const &boundaryPair, Container<float, Alloc> &solution)const;
+			void operator()(std::pair<float, float> const &leftPair, std::pair<float, float> const &rightPair,
+				Container<float, Alloc> &solution)const;
+			
 	};
 
 
@@ -120,9 +121,11 @@ namespace lss_one_dim_pde_schemes_cuda {
 			ExplicitEulerHeatEquationScheme& operator=(ExplicitEulerHeatEquationScheme const &) = delete;
 			ExplicitEulerHeatEquationScheme& operator=(ExplicitEulerHeatEquationScheme &&) = delete;
 
-			void operator()(std::pair<double, double> const &dirichletBCPair, Container<double, Alloc> &solution)const;
+			void operator()(std::pair<double, double> const &boundaryPair, Container<double, Alloc> &solution)const;
+			void operator()(std::pair<double, double> const &leftPair, std::pair<double, double> const &rightPair,
+				Container<double, Alloc> &solution)const;
+		
 	};
-
 
 
 
@@ -132,8 +135,8 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 	template<template<typename, typename> typename Container,
 			typename Alloc>
-	void ExplicitEulerHeatEquationScheme<float,Container,Alloc>::
-		operator()(std::pair<float, float> const &dirichletBCPair, Container<float, Alloc> &solution)const {
+	void ExplicitEulerHeatEquationScheme<float, Container,Alloc>::
+		operator()(std::pair<float, float> const &boundaryPair, Container<float, Alloc> &solution)const {
 		LSS_ASSERT(init_.size() == solution.size(),
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
@@ -144,9 +147,8 @@ namespace lss_one_dim_pde_schemes_cuda {
 		// create next pointer:
 		float *next = (float*)malloc(size * sizeof(float));
 		// launch the Euler loop:
-		ExplicitEulerLoopSP loop{ timeStep_,lambda_,terminalT_,
-			dirichletBCPair.first,dirichletBCPair.second};
-		loop(prev, next, size);
+		ExplicitEulerLoopSP loop{ timeStep_,lambda_,terminalT_};
+		loop(prev, boundaryPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
 		free(prev);
@@ -156,7 +158,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 	template<template<typename, typename> typename Container,
 		typename Alloc>
 		void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::
-		operator()(std::pair<double, double> const &dirichletBCPair, Container<double, Alloc> &solution)const {
+		operator()(std::pair<double, double> const &boundaryPair, Container<double, Alloc> &solution)const {
 		LSS_ASSERT(init_.size() == solution.size(),
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
@@ -168,15 +170,60 @@ namespace lss_one_dim_pde_schemes_cuda {
 		// create next pointer:
 		double *next = (double*)malloc(size * sizeof(double));
 		// launch the Euler loop:
-		ExplicitEulerLoopDP loop{ timeStep_,lambda_,terminalT_ ,
-			dirichletBCPair.first,dirichletBCPair.second };
-		loop(prev, next, size);
+		ExplicitEulerLoopDP loop{ timeStep_,lambda_,terminalT_ };
+		loop(prev, boundaryPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
 		free(prev);
 		free(next);
 	}
 
+	template<template<typename, typename> typename Container,
+		typename Alloc>
+		void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::
+		operator()(std::pair<float, float> const &leftPair, std::pair<float, float> const &rightPair,
+					Container<float, Alloc> &solution)const {
+		LSS_ASSERT(init_.size() == solution.size(),
+			"Initial and final solution must have the same size");
+		// get the size of the vector:
+		std::size_t const size = solution.size();
+		// create prev pointer:
+		float *prev = (float*)malloc(size * sizeof(float));
+		std::copy(init_.begin(), init_.end(), prev);
+		// create next pointer:
+		float *next = (float*)malloc(size * sizeof(float));
+		// launch the Euler loop:
+		ExplicitEulerLoopSP loop{ timeStep_,lambda_,terminalT_ };
+		loop(prev, leftPair, rightPair, size, next);
+		// next point to the solution
+		std::copy(next, next + size, solution.begin());
+		free(prev);
+		free(next);
+	}
+
+	template<template<typename, typename> typename Container,
+		typename Alloc>
+		void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::
+		operator()(std::pair<double, double> const &leftPair, std::pair<double, double> const &rightPair,
+			Container<double, Alloc> &solution)const {
+		LSS_ASSERT(init_.size() == solution.size(),
+			"Initial and final solution must have the same size");
+		// get the size of the vector:
+		std::size_t const size = solution.size();
+		// create prev pointer:
+		double *prev = (double*)malloc(size * sizeof(double));
+		std::copy(init_.begin(), init_.end(), prev);
+
+		// create next pointer:
+		double *next = (double*)malloc(size * sizeof(double));
+		// launch the Euler loop:
+		ExplicitEulerLoopDP loop{ timeStep_,lambda_,terminalT_ };
+		loop(prev, leftPair, rightPair, size, next);
+		// next point to the solution
+		std::copy(next, next + size, solution.begin());
+		free(prev);
+		free(next);
+	}
 
 
 }
