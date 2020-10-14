@@ -26,6 +26,11 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 	namespace implicit_solvers {
 
 
+		// ==============================================================================================================
+		// ================================= Implicit1DHeatEquationCUDA General Template ================================
+		// ==============================================================================================================
+
+
 		template<typename T,
 				BoundaryConditionType BType,
 				MemorySpace MemSpace,
@@ -34,6 +39,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				typename Alloc>
 		class Implicit1DHeatEquationCUDA{};
 
+		// ==============================================================================================================
+		// =================== Implicit1DHeatEquationCUDA Dirichlet Specialisation Template =============================
+		// ==============================================================================================================
 
 
 		template<typename T,
@@ -97,6 +105,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				ImplicitPDESchemes scheme = ImplicitPDESchemes::CrankNicolson);
 		};
 
+		// ==============================================================================================================
+		// ======================= Implicit1DHeatEquationCUDA Robin Specialisation Template =============================
+		// ==============================================================================================================
 
 		// to be done soon:
 		template<typename T,
@@ -165,12 +176,22 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 
 	namespace explicit_solvers {
 
+
+		// ==============================================================================================================
+		// ================================= Explicit1DHeatEquationCUDA General Template ================================
+		// ==============================================================================================================
+
+
 		template<typename T,
 				BoundaryConditionType BType,
 				template<typename,typename> typename Container,
 				typename Alloc>
 		class Explicit1DHeatEquationCUDA {};
 
+
+		// ==============================================================================================================
+		// =================== Explicit1DHeatEquationCUDA Dirichlet Specialisation Template =============================
+		// ==============================================================================================================
 
 		template<typename T,
 				template<typename,typename> typename Container,
@@ -232,6 +253,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			void solve(Container<T, Alloc> &solution);
 		};
 
+		// ==============================================================================================================
+		// ======================= Explicit1DHeatEquationCUDA Robin Specialisation Template =============================
+		// ==============================================================================================================
 
 
 		template<typename T,
@@ -278,7 +302,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 
 			inline void setBoundaryCondition(std::pair<T, T> const &left, std::pair<T, T> const &right) {
 				leftBoundary_ = left;
-				rightBoundary_ = right;
+				T beta_ = 1.0 / right.first;
+				T psi_ = -1.0*right.second / right.first;
+				rightBoundary_ = std::make_pair(beta_, psi_);
 			}
 
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -298,12 +324,14 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			void solve(Container<T, Alloc> &solution);
 
 		};
-
-
-
 	}
 
 
+
+
+
+
+	// ====================================== IMPLEMENTATIONS =======================================================
 
 	// ==============================================================================================================
 	// ======================== Implicit1DHeatEquationCUDA (Dirichlet) implementation ===============================
@@ -525,7 +553,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, boundary_, prevSol);
+		discretizeSpace(h, std::make_pair(spacer_.lower(), T{}), prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 
