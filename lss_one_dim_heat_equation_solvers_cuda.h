@@ -109,13 +109,13 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// ======================= Implicit1DHeatEquationCUDA Robin Specialisation Template =============================
 		// ==============================================================================================================
 
-		// to be done soon:
 		template<typename T,
 			MemorySpace MemSpace,
 			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
 			template<typename, typename> typename Container,
 			typename Alloc>
-			class Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc> {
+		class Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc>:
+		public Discretization<T,Container,Alloc>{
 			private:
 				RealSparsePolicyCUDA<MemSpace, T> solver_;									// finite-difference solver
 				Range<T> spacer_;															// space range
@@ -123,11 +123,14 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				std::size_t timeN_;															// number of time subdivisions
 				std::size_t spaceN_;														// number of space subdivisions
 				std::function<T(T)> init_;													// initi condition
-				std::pair<T, T> leftPair_;													// boundaries
-				std::pair<T, T> rightPair_;													// boundaries
+				std::pair<T, T> leftBoundary_;													// boundaries
+				std::pair<T, T> rightBoundary_;													// boundaries
 				T diffusivity_;																// diffusivity = c^2 in PDE
-				//void createSpaceMesh(Container<T, Alloc> &container)const;
-				//void discretizeInitialCondition(Container<T, Alloc> &xinput)const;
+				void discretizeSpace(T const &step,
+									std::pair<T, T> const &dirichletBC,
+									Container<T, Alloc> & container)const override;
+				void discretizeInitialCondition(std::function<T(T)> const &init,
+												Container<T, Alloc> &container)const override;
 
 
 			public:
@@ -153,8 +156,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
 
 				inline void setBoundaryCondition(std::pair<T, T> const &left, std::pair<T, T> const &right) {
-					leftPair_ = left;
-					rightPair_ = right;
+					leftBoundary_ = left;
+					T beta_ = 1.0 / right.first;
+					T psi_ = -1.0*right.second / right.first;
+					rightBoundary_ = std::make_pair(beta_, psi_);
 				}
 
 				inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -378,7 +383,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
 		// get the correct scheme:
-		auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(scheme);
+		auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Dirichlet,scheme);
 		// get correct theta according to the scheme:
 		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
 		// get space step:
@@ -419,7 +424,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solver_.setFlatSparseMatrix(std::move(fsm));
 		// loop for stepping in time:
 		while (time <= lastTime) {
-			schemeFun(lambda, prevSol, rhs, boundary_);
+			schemeFun(lambda, prevSol, rhs, boundary_, std::pair<T, T>());
 			solver_.setRhs(rhs);
 			solver_.solve(nextSol);
 			prevSol = nextSol;
@@ -437,6 +442,37 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 	// ==============================================================================================================
 
 	template<typename T,
+		MemorySpace MemSpace,
+		template<MemorySpace, typename> typename RealSparsePolicyCUDA,
+		template<typename, typename> typename Container,
+		typename Alloc>
+	void implicit_solvers::Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc>::
+	discretizeSpace(T const &step,
+					std::pair<T, T> const &dirichletBC,
+					Container<T, Alloc> & container)const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		container[0] = dirichletBC.first;
+		for (std::size_t t = 1; t < container.size(); ++t) {
+			container[t] = container[t - 1] + step;
+		}
+	}
+
+	template<typename T,
+		MemorySpace MemSpace,
+		template<MemorySpace, typename> typename RealSparsePolicyCUDA,
+		template<typename, typename> typename Container,
+		typename Alloc>
+	void implicit_solvers::Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc>::
+		discretizeInitialCondition(std::function<T(T)> const &init,
+									Container<T, Alloc> &container) const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		for (std::size_t t = 0; t < container.size(); ++t) {
+			container[t] = init(container[t]);
+		}
+	}
+
+
+	template<typename T,
 			MemorySpace MemSpace,
 			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
 			template<typename, typename> typename Container,
@@ -445,7 +481,58 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
-
+		// get the correct scheme:
+		auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Robin,scheme);
+		// get correct theta according to the scheme:
+		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
+		// get space step:
+		T const h = spaceStep();
+		// get time step:
+		T const k = timeStep();
+		// calculate lambda:
+		T const lambda = (diffusivity_ *  k) / (h*h);
+		// store size of matrix:
+		std::size_t const m = spaceN_ + 1;
+		// create container to carry mesh in space and then previous solution:
+		Container<T, Alloc> prevSol(m, T{});
+		// populate the container with mesh in space
+		discretizeSpace(h, std::make_pair(spacer_.lower(), T{}), prevSol);
+		// use the mesh in space to get values of initial condition
+		discretizeInitialCondition(init_, prevSol);
+		// first create and populate the sparse matrix:
+		FlatMatrix<T> fsm;
+		fsm.setColumns(m); fsm.setRows(m);
+		// populate the matrix:
+		fsm.emplace_back(0, 0, (1.0 + 2.0*lambda*theta)); 
+		fsm.emplace_back(0, 1, -1.0*lambda*theta*(1.0 + leftBoundary_.first));
+		for (std::size_t t = 1; t < m - 1; ++t) {
+			fsm.emplace_back(t, t - 1, -1.0*lambda*theta);
+			fsm.emplace_back(t, t, (1.0 + 2.0*lambda*theta));
+			fsm.emplace_back(t, t + 1, -1.0*lambda*theta);
+		}
+		fsm.emplace_back(m - 1, m - 2, -1.0*lambda*theta*(1.0 + rightBoundary_.first));
+		fsm.emplace_back(m - 1, m - 1, (1.0 + 2.0*lambda*theta));
+		Container<T, Alloc> rhs(m, T{});
+		// create container to carry new solution:
+		Container<T, Alloc> nextSol(m, T{});
+		// create first time point:
+		T time = k;
+		// store terminal time:
+		T const lastTime = terminalT_;
+		// initialize the solver:
+		solver_.initialize(m);
+		// insert sparse matrix A and vector b:
+		solver_.setFlatSparseMatrix(std::move(fsm));
+		// loop for stepping in time:
+		while (time <= lastTime) {
+			schemeFun(lambda, prevSol, rhs, leftBoundary_, rightBoundary_);
+			solver_.setRhs(rhs);
+			solver_.solve(nextSol);
+			prevSol = nextSol;
+			time += k;
+		}
+		// copy into solution vector
+		std::copy(prevSol.begin(), prevSol.end(), solution.begin());
 	}
 
 

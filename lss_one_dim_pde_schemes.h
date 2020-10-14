@@ -9,7 +9,7 @@ namespace lss_one_dim_pde_schemes {
 
 	using lss_types::ImplicitPDESchemes;
 	using lss_types::ExplicitPDESchemes;
-
+	using lss_types::BoundaryConditionType;
 
 	// ==============================================================================================================
 	// ========================================= ImplicitHeatEquationSchemes  =======================================
@@ -19,7 +19,8 @@ namespace lss_one_dim_pde_schemes {
 	class ImplicitHeatEquationSchemes {
 		public:
 			typedef std::function<void(T,std::vector<T> const&,std::vector<T> &)> SchemeFunction;
-			typedef std::function<void(T, std::vector<T> const&, std::vector<T> &, std::pair<T, T> const &)> SchemeFunctionCUDA;
+			typedef std::function<void(T, std::vector<T> const&, std::vector<T> &,
+									std::pair<T, T> const &,std::pair<T,T> const &)> SchemeFunctionCUDA;
 
 			static T const getTheta(ImplicitPDESchemes scheme) {
 				double theta{};
@@ -48,20 +49,22 @@ namespace lss_one_dim_pde_schemes {
 				return schemeFun;
 			}
 
-			static SchemeFunctionCUDA const getSchemeCUDA(ImplicitPDESchemes scheme) {
+			static SchemeFunctionCUDA const getSchemeCUDA(BoundaryConditionType bcType,
+														ImplicitPDESchemes scheme) {
 				double theta{};
 				if (scheme == ImplicitPDESchemes::Euler)
 					theta = 1.0;
 				else
 					theta = 0.5;
 
-				auto schemeFun = [=](T lambda,
+				auto schemeFunDirichlet = [=](T lambda,
 					std::vector<T> const& input,
 					std::vector<T> &solution,
-					std::pair<T,T> const &boundaryPair) {
+					std::pair<T,T> const &boundaryPair0,
+					std::pair<T,T> const &boundaryPair1) {
 					
-					T const left = boundaryPair.first;
-					T const right = boundaryPair.second;
+					T const left = boundaryPair0.first;
+					T const right = boundaryPair0.second;
 					std::size_t const lastIdx = solution.size() - 1;
 
 					solution[0] = (lambda*(1.0 - theta)*input[1])
@@ -78,7 +81,38 @@ namespace lss_one_dim_pde_schemes {
 						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
 						+ (lambda*(1.0 - theta)*input[lastIdx - 1]);
 				};
-				return schemeFun;
+
+				auto schemeFunRobin = [=](T lambda,
+					std::vector<T> const& input,
+					std::vector<T> &solution,
+					std::pair<T, T> const &boundaryPair0,
+					std::pair<T, T> const &boundaryPair1) {
+
+					T const leftLinear = boundaryPair0.first;
+					T const leftConst = boundaryPair0.second;
+					T const rightLinear = boundaryPair1.first;
+					T const rightConst = boundaryPair1.second;
+					std::size_t const lastIdx = solution.size() - 1;
+
+					solution[0] = (lambda*(1.0 - theta)*(1.0 + leftLinear)*input[1])
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[0]
+						+ (lambda*leftConst);
+
+					for (std::size_t t = 1; t < lastIdx; ++t) {
+						solution[t] = (lambda*(1.0 - theta)*input[t + 1])
+							+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
+							+ (lambda*(1.0 - theta)*input[t - 1]);
+					}
+
+					solution[lastIdx] = (lambda*(1.0 - theta)*(1.0 + rightLinear)*input[lastIdx - 1])
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
+						+ (lambda*rightConst);
+				};
+
+				if (bcType == BoundaryConditionType::Dirichlet)
+					return schemeFunDirichlet;
+				else
+					return schemeFunRobin;
 			}
 	};
 
