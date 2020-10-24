@@ -24,6 +24,10 @@ namespace lss_one_dim_heat_equation_solvers {
 
 	namespace implicit_solvers {
 
+		// ==============================================================================================================
+		// ===================================== Implicit1DHeatEquation General Template ================================
+		// ==============================================================================================================
+
 
 		template<typename T,
 			BoundaryConditionType BType,
@@ -36,7 +40,9 @@ namespace lss_one_dim_heat_equation_solvers {
 		class Implicit1DHeatEquation{};
 
 
-
+		// ==============================================================================================================
+		// ======================= Implicit1DHeatEquation Dirichlet Specialisation Template =============================
+		// ==============================================================================================================
 
 		template<typename T,
 				template<typename,
@@ -101,6 +107,9 @@ namespace lss_one_dim_heat_equation_solvers {
 				ImplicitPDESchemes scheme = ImplicitPDESchemes::CrankNicolson);
 		};
 
+		// ==============================================================================================================
+		// =========================== Implicit1DHeatEquation Robin Specialisation Template =============================
+		// ==============================================================================================================
 
 		// To be done soon:
 		template<typename T,
@@ -110,7 +119,8 @@ namespace lss_one_dim_heat_equation_solvers {
 						typename> typename FDMSolver,
 				template<typename, typename> typename Container,
 				typename Alloc>
-		class Implicit1DHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc> {
+		class Implicit1DHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>:
+			public Discretization<T, Container, Alloc> {
 		private:
 			FDMSolver<T, BoundaryConditionType::Robin, Container, Alloc> fdmSolver_;	// finite-difference solver
 			Range<T> spacer_;															// space range
@@ -118,8 +128,14 @@ namespace lss_one_dim_heat_equation_solvers {
 			std::size_t timeN_;															// number of time subdivisions
 			std::size_t spaceN_;														// number of space subdivisions
 			std::function<T(T)> init_;													// initi condition
-			std::pair<T, T> boundary_;													// boundaries
+			std::pair<T, T> left_;														// left boundary pair
+			std::pair<T, T> right_;														// right boundary pair
 			T diffusivity_;																// diffusivity = c^2 in PDE
+			void discretizeSpace(T const &step,
+				std::pair<T, T> const &dirichletBC,
+				Container<T, Alloc> &container)const override;
+			void discretizeInitialCondition(std::function<T(T)> const &init,
+				Container<T, Alloc> &container)const override;
 
 		public:
 			typedef T value_type;
@@ -145,6 +161,8 @@ namespace lss_one_dim_heat_equation_solvers {
 			inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
 
 			inline void setBoundaryCondition(std::pair<T, T> const &left,std::pair<T,T> const &right) { 
+				left_ = left;
+				right_ = right;
 				fdmSolver_.setBoundaryCondition(left, right);
 			}
 
@@ -170,12 +188,20 @@ namespace lss_one_dim_heat_equation_solvers {
 
 	namespace explicit_solvers {
 
+		// ==============================================================================================================
+		// ===================================== Explicit1DHeatEquation General Template ================================
+		// ==============================================================================================================
+
 		template<typename T,
 				BoundaryConditionType BType,
 				template<typename, typename> typename Container,
 				typename Alloc>
 		class Explicit1DHeatEquation{};
 
+
+		// ==============================================================================================================
+		// ======================= Explicit1DHeatEquation Dirichlet Specialisation Template =============================
+		// ==============================================================================================================
 
 		template<typename T,
 			template<typename, typename> typename Container,
@@ -234,6 +260,10 @@ namespace lss_one_dim_heat_equation_solvers {
 		};
 
 
+		// ==============================================================================================================
+		// =========================== Explicit1DHeatEquation Robin Specialisation Template =============================
+		// ==============================================================================================================
+
 		template<typename T,
 			template<typename, typename> typename Container,
 			typename Alloc>
@@ -246,6 +276,8 @@ namespace lss_one_dim_heat_equation_solvers {
 
 	}
 
+
+	// ====================================== IMPLEMENTATIONS =======================================================
 
 	// ==============================================================================================================
 	// ========================== Implicit1DHeatEquation (Dirichlet) implementation =================================
@@ -355,7 +387,82 @@ namespace lss_one_dim_heat_equation_solvers {
 		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
+		// get the correct scheme:
+		auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
+		// get correct theta according to the scheme:
+		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
+		// get space step:
+		T const h = spaceStep();
+		// get time step:
+		T const k = timeStep();
+		// calculate lambda:
+		T const lambda = (diffusivity_ *  k) / (h*h);
+		// create container to carry mesh in space and then previous solution:
+		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
+		// populate the container with mesh in space
+		discretizeSpace(h, std::make_pair(spacer_.lower(),T{}), prevSol);
+		// use the mesh in space to get values of initial condition
+		discretizeInitialCondition(init_, prevSol);
+		// prepare containers for diagonal vectors for FDMSolver:
+		Container<T, Alloc> low(spaceN_ + 1, -1.0*lambda*theta);
+		Container<T, Alloc> diag(spaceN_ + 1, (1.0 + 2.0*lambda*theta));
+		Container<T, Alloc> up(spaceN_ + 1, -1.0*lambda*theta);
+		Container<T, Alloc> rhs(spaceN_ + 1, T{});
+		// create container to carry new solution:
+		Container<T, Alloc> nextSol(spaceN_ + 1, T{});
+		// create first time point:
+		T time = k;
+		// store terminal time:
+		T const lastTime = terminalT_;
+		// set properties of FDMSolver:
+		fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
+		// loop for stepping in time:
+		while (time <= lastTime) {
+			schemeFun(lambda, prevSol, rhs);
+			fdmSolver_.setRhs(rhs);
+			fdmSolver_.solve(nextSol);
+			prevSol = nextSol;
+			time += k;
+		}
+		// copy into solution vector
+		std::copy(prevSol.begin(), prevSol.end(), solution.begin());
 	}
+
+
+	template<typename T,
+			template<typename,
+					BoundaryConditionType,
+					template<typename, typename> typename Cont,
+					typename> typename FDMSolver,
+		template<typename, typename> typename Container,
+		typename Alloc>
+	void implicit_solvers::Implicit1DHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>::
+		discretizeSpace(T const &step,
+						std::pair<T, T> const &dirichletBC,
+						Container<T, Alloc> & container) const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		container[0] = dirichletBC.first;
+		for (std::size_t t = 1; t < container.size(); ++t) {
+			container[t] = container[t - 1] + step;
+		}
+	}
+
+	template<typename T,
+			template<typename,
+					BoundaryConditionType,
+					template<typename, typename> typename Cont,
+					typename> typename FDMSolver,
+			template<typename, typename> typename Container,
+			typename Alloc>
+	void implicit_solvers::Implicit1DHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>::
+		discretizeInitialCondition(std::function<T(T)> const &init,
+									Container<T, Alloc> &container) const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		for (std::size_t t = 0; t < container.size(); ++t) {
+			container[t] = init(container[t]);
+		}
+	}
+
 
 
 

@@ -250,7 +250,7 @@ template<typename T,
 		f_[t] = (L_[t] * f_[t + 1]) + K_[t];
 	}
 
-	f_[0] = left_.first*f_[1] + left_.second;
+	f_[0] = L_[0]*f_[1] + K_[0];
 	std::copy(f_.begin(), f_.end(), solution.begin());
 }
 
