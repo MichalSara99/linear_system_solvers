@@ -148,7 +148,12 @@ namespace lss_one_dim_pde_schemes {
 		virtual bool inline isStable()const = 0;
 
 		// for Dirichlet BC
-		virtual void operator()(std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution)const=0;
+		virtual void operator()(std::pair<T, T> const &dirichletBCPair,
+								std::vector<T> &solution)const=0;
+		// for Robin BC
+		virtual void operator()(std::pair<T, T> const &leftRobinBCPair,
+								std::pair<T, T> const &rightRobinBCPair,
+								std::vector<T> &solution)const=0;
 
 	};
 
@@ -182,7 +187,12 @@ namespace lss_one_dim_pde_schemes {
 		bool inline isStable()const override{ return ((2.0*thermalDiffusivity_*timeStep_ / (spaceStep_*spaceStep_)) <= 1.0); }
 
 		// for Dirichlet BC
-		void operator()(std::pair<T,T> const &dirichletBCPair, std::vector<T> &solution)const override;
+		void operator()(std::pair<T,T> const &dirichletBCPair, 
+						std::vector<T> &solution)const override;
+		// for Robin BC
+		void operator()(std::pair<T, T> const &leftRobinBCPair,
+						std::pair<T, T> const &rightRobinBCPair,
+						std::vector<T> &solution)const override;
 
 	};
 
@@ -218,7 +228,12 @@ namespace lss_one_dim_pde_schemes {
 		bool inline isStable()const override { return true; };
 
 		// for Dirichlet BC
-		void operator()(std::pair<T, T> const &dirichletBCPair,std::vector<T> &solution)const override;
+		void operator()(std::pair<T, T> const &dirichletBCPair,
+						std::vector<T> &solution)const override;
+		// for Robin BC
+		void operator()(std::pair<T, T> const &leftRobinBCPair,
+						std::pair<T, T> const &rightRobinBCPair,
+						std::vector<T> &solution)const override;
 
 	};
 
@@ -252,17 +267,22 @@ namespace lss_one_dim_pde_schemes {
 		bool inline isStable()const override { return true; };
 
 		// for Dirichlet BC
-		void operator()(std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution) const override;
+		void operator()(std::pair<T, T> const &dirichletBCPair, 
+						std::vector<T> &solution) const override;
+		// for Robin BC
+		void operator()(std::pair<T, T> const &leftRobinBCPair, 
+						std::pair<T, T> const &rightRobinBCPair,
+						std::vector<T> &solution)const override;
 
 	};
 
 }
 
-
+// ====================================== IMPLEMENTATIONS =======================================================
 
 template<typename T>
 void lss_one_dim_pde_schemes::ExplicitEulerScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair, 
-	std::vector<T> &solution)const {
+																std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
@@ -296,10 +316,53 @@ void lss_one_dim_pde_schemes::ExplicitEulerScheme<T>::operator()(std::pair<T, T>
 	}
 }
 
+template<typename T>
+void lss_one_dim_pde_schemes::ExplicitEulerScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
+																std::pair<T, T> const &rightRobinBCPair,
+																std::vector<T> &solution)const {
+	LSS_ASSERT(solution.size() > 0,
+		"The input solution container must be initialized.");
+	LSS_ASSERT(solution.size() == initialCondition_.size(),
+		"Entered solution vector size differs from initialCondition vector.");
+	LSS_ASSERT(isStable() == true,
+		"This discretization is not stable.");
+	// create first time point:
+	T time = timeStep_;
+	// calculate lambda:
+	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	// left space boundary:
+	T const leftLin = leftRobinBCPair.first;
+	T const leftConst = leftRobinBCPair.second;
+	// right space boundary:
+	T const rightLin = rightRobinBCPair.first;
+	T const rightConst = rightRobinBCPair.second;
+	// set up coefficients:
+	T const a = 1.0 - 2.0*lambda;
+	T const b = lambda;
+	T const c = 1.0 + leftLin;
+	T const d = 1.0 + rightLin;
+	// previous solution:
+	std::vector<T> prevSol = initialCondition_;
+	// size of the space vector:
+	std::size_t const spaceSize = solution.size();
+	// loop for stepping in time:
+	while (time <= terminalTime_) {
+		solution[0] = b * c*prevSol[1] + a * prevSol[0] + b * leftConst;
+		solution[solution.size() - 1] = b * d*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
+		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
+			solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]);
+		}
+		prevSol = solution;
+		time += timeStep_;
+	}
+}
+
+
+
 
 template<typename T>
 void lss_one_dim_pde_schemes::ADEBakaratClarkScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
-	std::vector<T> &solution)const {
+																std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
@@ -348,10 +411,17 @@ void lss_one_dim_pde_schemes::ADEBakaratClarkScheme<T>::operator()(std::pair<T, 
 	}
 }
 
+template<typename T>
+void lss_one_dim_pde_schemes::ADEBakaratClarkScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
+																	std::pair<T,T> const &rightRobinBCPair,
+																	std::vector<T> &solution)const {
+	throw new std::exception("Not available.");
+}
+
 
 template<typename T>
 void lss_one_dim_pde_schemes::ADESaulyevScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
-	std::vector<T> &solution)const {
+															std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
@@ -396,6 +466,13 @@ void lss_one_dim_pde_schemes::ADESaulyevScheme<T>::operator()(std::pair<T, T> co
 		++t;
 		time += timeStep_;
 	}
+}
+
+template<typename T>
+void lss_one_dim_pde_schemes::ADESaulyevScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
+															std::pair<T,T> const &rightRobinBCPair,	
+															std::vector<T> &solution)const {
+	throw new std::exception("Not available.");
 }
 
 

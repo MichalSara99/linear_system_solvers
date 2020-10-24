@@ -4,6 +4,7 @@
 
 #include<functional>
 #include<tuple>
+#include"lss_macros.h"
 
 namespace lss_one_dim_pde_utility {
 
@@ -13,14 +14,38 @@ namespace lss_one_dim_pde_utility {
 	class Discretization {
 	public:
 		virtual ~Discretization(){}
-		virtual void discretizeSpace(T const &step,
-									std::pair<T, T> const &dirichletBC,
-									Container<T,Alloc> & container)const = 0;
+		void discretizeSpace(T const &step,
+							T const &init,
+							Container<T,Alloc> & container)const;
 
-		virtual void discretizeInitialCondition(std::function<T(T)> const &init,
-												Container<T,Alloc> &container)const = 0;
+		void discretizeInitialCondition(std::function<T(T)> const &init,
+										Container<T,Alloc> &container)const;
 	};
 
+
+	template<typename T,
+			template<typename,typename> typename Container,
+			typename Alloc>
+	void Discretization<T, Container, Alloc>::discretizeSpace(T const &step,
+																T const &init,
+																Container<T, Alloc> &container)const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		container[0] = init;
+		for (std::size_t t = 1; t < container.size(); ++t) {
+			container[t] = container[t - 1] + step;
+		}
+	}
+
+	template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+	void Discretization<T, Container, Alloc>::discretizeInitialCondition(std::function<T(T)> const &init,
+																		Container<T, Alloc> &container)const {
+		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
+		for (std::size_t t = 0; t < container.size(); ++t) {
+			container[t] = init(container[t]);
+		}
+	}
 
 
 

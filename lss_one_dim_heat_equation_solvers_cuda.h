@@ -60,12 +60,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			std::function<T(T)> init_;													// initi condition
 			std::pair<T, T> boundary_;													// boundaries
 			T diffusivity_;																// diffusivity = c^2 in PDE
-			void discretizeSpace(T const &step,
-								std::pair<T, T> const &dirichletBC,
-								Container<T, Alloc> & container)const override;
-			void discretizeInitialCondition(std::function<T(T)> const &init,
-											Container<T, Alloc> &container)const override;
-
 
 		public:
 			typedef T value_type;
@@ -126,12 +120,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				std::pair<T, T> leftBoundary_;													// boundaries
 				std::pair<T, T> rightBoundary_;													// boundaries
 				T diffusivity_;																// diffusivity = c^2 in PDE
-				void discretizeSpace(T const &step,
-									std::pair<T, T> const &dirichletBC,
-									Container<T, Alloc> & container)const override;
-				void discretizeInitialCondition(std::function<T(T)> const &init,
-												Container<T, Alloc> &container)const override;
-
 
 			public:
 				typedef T value_type;
@@ -211,11 +199,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			std::function<T(T)> init_;
 			std::pair<T, T> boundary_;
 			T diffusivity_;
-			void discretizeSpace(T const &step,
-								std::pair<T, T> const &dirichletBC,
-								Container<T, Alloc> & container)const override;
-			void discretizeInitialCondition(std::function<T(T)> const &init,
-											Container<T, Alloc> &container)const override;
 
 		public:
 			typedef T value_type;
@@ -277,11 +260,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			std::pair<T, T> leftBoundary_;
 			std::pair<T, T> rightBoundary_;
 			T diffusivity_;
-			void discretizeSpace(T const &step,
-				std::pair<T, T> const &dirichletBC,
-				Container<T, Alloc> & container)const override;
-			void discretizeInitialCondition(std::function<T(T)> const &init,
-				Container<T, Alloc> &container)const override;
 
 		public:
 			typedef T value_type;
@@ -347,37 +325,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
 			template<typename, typename> typename Container,
 			typename Alloc>
-	void implicit_solvers::Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Dirichlet, MemSpace, RealSparsePolicyCUDA, Container, Alloc>::
-		discretizeSpace(T const &step,
-						std::pair<T, T> const &dirichletBC,
-						Container<T, Alloc> & container)const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		container[0] = dirichletBC.first + step;
-		for (std::size_t t = 1; t < container.size(); ++t) {
-			container[t] = container[t - 1] + step;
-		}
-	}
-
-	template<typename T,
-			MemorySpace MemSpace,
-			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
-			template<typename, typename> typename Container,
-			typename Alloc>
-	void implicit_solvers::Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Dirichlet, MemSpace, RealSparsePolicyCUDA, Container, Alloc>::
-		discretizeInitialCondition(std::function<T(T)> const &init,
-									Container<T, Alloc> &container) const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		for (std::size_t t = 0; t < container.size(); ++t) {
-			container[t] = init(container[t]);
-		}
-	}
-
-
-	template<typename T,
-			MemorySpace MemSpace,
-			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
-			template<typename, typename> typename Container,
-			typename Alloc>
 	void implicit_solvers::Implicit1DHeatEquationCUDA<T,BoundaryConditionType::Dirichlet,MemSpace,RealSparsePolicyCUDA,Container,Alloc>::
 		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
 
@@ -397,7 +344,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(m, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, boundary_, prevSol);
+		discretizeSpace(h, (boundary_.first + h), prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 		// first create and populate the sparse matrix:
@@ -441,36 +388,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 	// ========================= Implicit1DHeatEquationCUDA (Robin BC) implementation ===============================
 	// ==============================================================================================================
 
-	template<typename T,
-		MemorySpace MemSpace,
-		template<MemorySpace, typename> typename RealSparsePolicyCUDA,
-		template<typename, typename> typename Container,
-		typename Alloc>
-	void implicit_solvers::Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc>::
-	discretizeSpace(T const &step,
-					std::pair<T, T> const &dirichletBC,
-					Container<T, Alloc> & container)const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		container[0] = dirichletBC.first;
-		for (std::size_t t = 1; t < container.size(); ++t) {
-			container[t] = container[t - 1] + step;
-		}
-	}
-
-	template<typename T,
-		MemorySpace MemSpace,
-		template<MemorySpace, typename> typename RealSparsePolicyCUDA,
-		template<typename, typename> typename Container,
-		typename Alloc>
-	void implicit_solvers::Implicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container, Alloc>::
-		discretizeInitialCondition(std::function<T(T)> const &init,
-									Container<T, Alloc> &container) const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		for (std::size_t t = 0; t < container.size(); ++t) {
-			container[t] = init(container[t]);
-		}
-	}
-
 
 	template<typename T,
 			MemorySpace MemSpace,
@@ -496,7 +413,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(m, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, std::make_pair(spacer_.lower(), T{}), prevSol);
+		discretizeSpace(h, spacer_.lower(), prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 		// first create and populate the sparse matrix:
@@ -540,31 +457,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 	// ========================= Explicit1DHeatEquationCUDA (Dirichlet BC) implementation ===========================
 	// ==============================================================================================================
 	
-	template<typename T,
-			template<typename, typename> typename Container,
-			typename Alloc>
-	void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
-		discretizeSpace(T const &step,
-						std::pair<T, T> const &dirichletBC,
-						Container<T, Alloc> & container)const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		container[0] = dirichletBC.first;
-		for (std::size_t t = 1; t < container.size(); ++t) {
-			container[t] = container[t - 1] + step;
-		}
-	}
-
-	template<typename T,
-			template<typename, typename> typename Container,
-			typename Alloc>
-	void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
-		discretizeInitialCondition(std::function<T(T)> const &init,
-									Container<T, Alloc> &container) const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		for (std::size_t t = 0; t < container.size(); ++t) {
-			container[t] = init(container[t]);
-		}
-	}
 
 	template<typename T,
 			template<typename,typename> typename Container,
@@ -584,7 +476,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, boundary_, prevSol);
+		discretizeSpace(h, boundary_.first, prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 
@@ -595,32 +487,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 	// ==============================================================================================================
 	// ========================= Explicit1DHeatEquationCUDA (Robin BC) implementation ===============================
 	// ==============================================================================================================
-
-	template<typename T,
-		template<typename, typename> typename Container,
-		typename Alloc>
-		void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc>::
-		discretizeSpace(T const &step,
-			std::pair<T, T> const &dirichletBC,
-			Container<T, Alloc> & container)const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		container[0] = dirichletBC.first;
-		for (std::size_t t = 1; t < container.size(); ++t) {
-			container[t] = container[t - 1] + step;
-		}
-	}
-
-	template<typename T,
-		template<typename, typename> typename Container,
-		typename Alloc>
-		void explicit_solvers::Explicit1DHeatEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc>::
-		discretizeInitialCondition(std::function<T(T)> const &init,
-			Container<T, Alloc> &container) const {
-		LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-		for (std::size_t t = 0; t < container.size(); ++t) {
-			container[t] = init(container[t]);
-		}
-	}
 
 	template<typename T,
 		template<typename, typename> typename Container,
@@ -640,7 +506,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, std::make_pair(spacer_.lower(), T{}), prevSol);
+		discretizeSpace(h, spacer_.lower(), prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 
