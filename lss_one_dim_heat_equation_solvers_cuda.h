@@ -344,7 +344,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(m, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, (boundary_.first + h), prevSol);
+		discretizeSpace(h, (spacer_.lower() + h), prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 		// first create and populate the sparse matrix:
@@ -371,7 +371,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solver_.setFlatSparseMatrix(std::move(fsm));
 		// loop for stepping in time:
 		while (time <= lastTime) {
-			schemeFun(lambda, prevSol, rhs, boundary_, std::pair<T, T>());
+			schemeFun(lambda, T{}, prevSol, rhs, boundary_, std::pair<T, T>());
 			solver_.setRhs(rhs);
 			solver_.solve(nextSol);
 			prevSol = nextSol;
@@ -442,7 +442,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solver_.setFlatSparseMatrix(std::move(fsm));
 		// loop for stepping in time:
 		while (time <= lastTime) {
-			schemeFun(lambda, prevSol, rhs, leftBoundary_, rightBoundary_);
+			schemeFun(lambda, T{}, prevSol, rhs, leftBoundary_, rightBoundary_);
 			solver_.setRhs(rhs);
 			solver_.solve(nextSol);
 			prevSol = nextSol;
@@ -476,7 +476,7 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, boundary_.first, prevSol);
+		discretizeSpace(h, spacer_.lower(), prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 

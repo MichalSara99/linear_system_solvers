@@ -41,6 +41,10 @@
     <ClInclude Include="lss_one_dim_pde_utility.h" />
     <ClInclude Include="lss_one_dim_pde_schemes_cuda.h" />
     <ClInclude Include="lss_pde_cuda_kernels.h" />
+    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers.h" />
+    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

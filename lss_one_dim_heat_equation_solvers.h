@@ -16,9 +16,9 @@ namespace lss_one_dim_heat_equation_solvers {
 	using lss_types::ImplicitPDESchemes;
 	using lss_types::ExplicitPDESchemes;
 	using lss_one_dim_pde_schemes::ImplicitHeatEquationSchemes;
-	using lss_one_dim_pde_schemes::ExplicitEulerScheme;
-	using lss_one_dim_pde_schemes::ADEBakaratClarkScheme;
-	using lss_one_dim_pde_schemes::ADESaulyevScheme;
+	using lss_one_dim_pde_schemes::ExplicitHeatEulerScheme;
+	using lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme;
+	using lss_one_dim_pde_schemes::ADEHeatSaulyevScheme;
 	using lss_utility::Range;
 	using lss_one_dim_pde_utility::Discretization;
 
@@ -106,7 +106,6 @@ namespace lss_one_dim_heat_equation_solvers {
 		// =========================== Implicit1DHeatEquation Robin Specialisation Template =============================
 		// ==============================================================================================================
 
-		// To be done soon:
 		template<typename T,
 				template<typename,
 						BoundaryConditionType,
@@ -337,7 +336,7 @@ namespace lss_one_dim_heat_equation_solvers {
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, boundary_.first, prevSol);
+		discretizeSpace(h, spacer_.lower(), prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 		// prepare containers for diagonal vectors for FDMSolver:
@@ -355,7 +354,7 @@ namespace lss_one_dim_heat_equation_solvers {
 		fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
 		// loop for stepping in time:
 		while (time <= lastTime) {
-			schemeFun(lambda, prevSol, rhs);
+			schemeFun(lambda, T{}, prevSol, rhs);
 			fdmSolver_.setRhs(rhs);
 			fdmSolver_.solve(nextSol);
 			prevSol = nextSol;
@@ -413,7 +412,7 @@ namespace lss_one_dim_heat_equation_solvers {
 		fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
 		// loop for stepping in time:
 		while (time <= lastTime) {
-			schemeFun(lambda, prevSol, rhs);
+			schemeFun(lambda, T{}, prevSol, rhs);
 			fdmSolver_.setRhs(rhs);
 			fdmSolver_.solve(nextSol);
 			prevSol = nextSol;
@@ -448,15 +447,15 @@ namespace lss_one_dim_heat_equation_solvers {
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		if (scheme == ExplicitPDESchemes::Euler) {
-			ExplicitEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
+			ExplicitHeatEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
 			euler(boundary_, solution);
 		}
 		else if(scheme == ExplicitPDESchemes::ADEBarakatClark) {
-			ADEBakaratClarkScheme<T> adebc{ initCondition,h,k,terminalT_,diffusivity_ };
+			ADEHeatBakaratClarkScheme<T> adebc{ initCondition,h,k,terminalT_,diffusivity_ };
 			adebc(boundary_, solution);
 		}
 		else {
-			ADESaulyevScheme<T> ades{ initCondition,h,k,terminalT_,diffusivity_ };
+			ADEHeatSaulyevScheme<T> ades{ initCondition,h,k,terminalT_,diffusivity_ };
 			ades(boundary_, solution);
 		}
 	}
@@ -485,7 +484,7 @@ namespace lss_one_dim_heat_equation_solvers {
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		// Here we have only ExplicitEulerScheme available
-		ExplicitEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
+		ExplicitHeatEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
 		euler(left_, right_, solution);
 		
 	}

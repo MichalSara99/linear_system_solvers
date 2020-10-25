@@ -6,6 +6,7 @@
 #include"lss_fdm_tridiagonal_solvers_t.h"
 #include"lss_one_dim_heat_equation_solvers_t.h"
 #include"lss_one_dim_heat_equation_solvers_cuda_t.h"
+#include"lss_one_dim_advection_diffusion_equation_solvers_t.h"
 
 int main(int argc, char const* argv[]) {
 
@@ -83,6 +84,17 @@ int main(int argc, char const* argv[]) {
 
 
 	// =====================================================
+
+	// ==========================================================
+	// == lss_one_dim_advection_diffusion_equation_solvers_t.h ==
+	// ==========================================================
+	
+	// testImplAdvectionDiffEquationDirichletBCDoubleSweep();
+	testExplAdvectionDiffEquationDirichletBC();
+
+	// ==========================================================
+
+
 
     std::cout << "\n\n";
 

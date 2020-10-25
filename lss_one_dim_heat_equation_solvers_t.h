@@ -4,6 +4,8 @@
 
 #include"lss_types.h"
 #include"lss_utility.h"
+#include"lss_fdm_double_sweep_solver.h"
+#include"lss_fdm_thomas_lu_solver.h"
 #include"lss_one_dim_heat_equation_solvers.h"
 
 
