@@ -514,8 +514,11 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 	T const leftLin = leftRobinBCPair.first;
 	T const leftConst = leftRobinBCPair.second;
 	// right space boundary:
-	T const rightLin = rightRobinBCPair.first;
-	T const rightConst = rightRobinBCPair.second;
+	T const rightLin_ = rightRobinBCPair.first;
+	T const rightConst_ = rightRobinBCPair.second;
+	// conversion of right hand boundaries:
+	T const rightLin = 1.0 / rightLin_;
+	T const rightConst = -1.0*(rightConst_ / rightLin_);
 	// set up coefficients:
 	T const a = 1.0 - 2.0*lambda;
 	T const b = lambda;
@@ -699,8 +702,49 @@ template<typename T>
 void lss_one_dim_pde_schemes::ExplicitAdvectionDiffusionEulerScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
 																				std::pair<T, T> const &rightRobinBCPair,
 																				std::vector<T> &solution)const {
-	throw new std::exception("Not yet implemented");
+	LSS_ASSERT(solution.size() > 0,
+		"The input solution container must be initialized.");
+	LSS_ASSERT(solution.size() == initialCondition_.size(),
+		"Entered solution vector size differs from initialCondition vector.");
+	LSS_ASSERT(isStable() == true,
+		"This discretization is not stable.");
+	// create first time point:
+	T time = timeStep_;
+	// calculate lambda:
+	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	// calculate gamma:
+	T const gamma = (convection_ *  timeStep_) / (2.0*spaceStep_);
+	// left space boundary:
+	T const leftLin = leftRobinBCPair.first;
+	T const leftConst = leftRobinBCPair.second;
+	// right space boundary:
+	T const rightLin_ = rightRobinBCPair.first;
+	T const rightConst_ = rightRobinBCPair.second;
+	// conversion of right hand boundaries:
+	T const rightLin = 1.0 / rightLin_;
+	T const rightConst = -1.0*(rightConst_ / rightLin_);
+	// set up coefficients:
+	T const a = 1.0 - 2.0*lambda;
+	T const b = lambda + gamma;
+	T const c = lambda - gamma;
+	T const alpha = (c + leftLin * b);
+	T const beta = (b + rightLin * c);
+	// previous solution:
+	std::vector<T> prevSol = initialCondition_;
+	// size of the space vector:
+	std::size_t const spaceSize = solution.size();
+	// loop for stepping in time:
+	while (time <= terminalTime_) {
+		solution[0] = alpha * prevSol[1] + a * prevSol[0] + b * leftConst;
+		solution[solution.size() - 1] = beta * prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + c * rightConst;
+		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
+			solution[t] = a * prevSol[t] + c * prevSol[t + 1] + b * prevSol[t - 1];
+		}
+		prevSol = solution;
+		time += timeStep_;
+	}
 }
+
 
 
 template<typename T>

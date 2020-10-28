@@ -90,7 +90,11 @@ int main(int argc, char const* argv[]) {
 	// ==========================================================
 	
 	// testImplAdvectionDiffEquationDirichletBCDoubleSweep();
-	testExplAdvectionDiffEquationDirichletBC();
+	// testExplAdvectionDiffEquationDirichletBC();
+	// testImplAdvectionDiffEquationRobinBCDoubleSweep();
+	// testImplAdvectionDiffEquationRobinBCThomasLU();
+	testExplAdvectionDiffEquationRobinBC();
+
 
 	// ==========================================================
 
