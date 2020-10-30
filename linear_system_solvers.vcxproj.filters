@@ -45,6 +45,7 @@
     <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_cuda.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

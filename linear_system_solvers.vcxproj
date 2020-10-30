@@ -87,6 +87,7 @@
     <ClInclude Include="lss_helpers.h" />
     <ClInclude Include="lss_macros.h" />
     <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers.h" />
+    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_cuda.h" />
     <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_t.h" />
     <ClInclude Include="lss_one_dim_heat_equation_solvers.h" />
     <ClInclude Include="lss_one_dim_heat_equation_solvers_cuda.h" />

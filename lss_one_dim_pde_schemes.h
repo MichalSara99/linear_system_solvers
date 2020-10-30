@@ -154,6 +154,73 @@ namespace lss_one_dim_pde_schemes {
 			return schemeFun;
 		}
 
+		static SchemeFunctionCUDA<T> const getSchemeCUDA(BoundaryConditionType bcType,
+			ImplicitPDESchemes scheme) {
+			double theta{};
+			if (scheme == ImplicitPDESchemes::Euler)
+				theta = 1.0;
+			else
+				theta = 0.5;
+
+			auto schemeFunDirichlet = [=](T lambda, T gamma,
+				std::vector<T> const& input,
+				std::vector<T> &solution,
+				std::pair<T, T> const &boundaryPair0,
+				std::pair<T, T> const &boundaryPair1) {
+
+				T const left = boundaryPair0.first;
+				T const right = boundaryPair0.second;
+				std::size_t const lastIdx = solution.size() - 1;
+
+				solution[0] = ((lambda - gamma)*(1.0 - theta)*input[1])
+					+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[0]
+					+ ((lambda + gamma)*left);
+
+				for (std::size_t t = 1; t < lastIdx; ++t) {
+					solution[t] = ((lambda - gamma)*(1.0 - theta)*input[t + 1])
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
+						+ ((lambda + gamma)*(1.0 - theta)*input[t - 1]);
+				}
+
+				solution[lastIdx] = ((lambda - gamma)*right)
+					+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
+					+ (lambda*(1.0 - theta)*input[lastIdx - 1]);
+			};
+
+			// not yet modified !!!
+			auto schemeFunRobin = [=](T lambda, T gamma,
+				std::vector<T> const& input,
+				std::vector<T> &solution,
+				std::pair<T, T> const &boundaryPair0,
+				std::pair<T, T> const &boundaryPair1) {
+
+				T const leftLinear = boundaryPair0.first;
+				T const leftConst = boundaryPair0.second;
+				T const rightLinear = boundaryPair1.first;
+				T const rightConst = boundaryPair1.second;
+				std::size_t const lastIdx = solution.size() - 1;
+
+				solution[0] = (lambda*(1.0 - theta)*(1.0 + leftLinear)*input[1])
+					+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[0]
+					+ (lambda*leftConst);
+
+				for (std::size_t t = 1; t < lastIdx; ++t) {
+					solution[t] = (lambda*(1.0 - theta)*input[t + 1])
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
+						+ (lambda*(1.0 - theta)*input[t - 1]);
+				}
+
+				solution[lastIdx] = (lambda*(1.0 - theta)*(1.0 + rightLinear)*input[lastIdx - 1])
+					+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
+					+ (lambda*rightConst);
+			};
+
+			if (bcType == BoundaryConditionType::Dirichlet)
+				return schemeFunDirichlet;
+			else
+				return schemeFunRobin;
+		}
+
 
 
 
