@@ -20,7 +20,7 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 	using lss_utility::Range;
 	using lss_utility::FlatMatrix;
 	using lss_one_dim_pde_utility::Discretization;
-	using lss_one_dim_pde_schemes_cuda::ExplicitEulerHeatEquationScheme;
+	using lss_one_dim_pde_schemes_cuda::ExplicitAdvectionDiffusionEquationScheme;
 
 	namespace implicit_solvers {
 
@@ -175,8 +175,156 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 
 	namespace explicit_solvers {
 
+		// ==============================================================================================================
+		// ============================= Explicit1DAdvectionDiffusionEquationCUDA General Template ======================
+		// ==============================================================================================================
 
 
+		template<typename T,
+				BoundaryConditionType BType,
+				template<typename, typename> typename Container,
+				typename Alloc>
+		class Explicit1DAdvectionDiffusionEquationCUDA {};
+
+
+		// ==============================================================================================================
+		// =================== Explicit1DAdvectionDiffusionEquationCUDA Dirichlet Specialisation Template ===============
+		// ==============================================================================================================
+
+		template<typename T,
+				template<typename, typename> typename Container,
+				typename Alloc>
+		class Explicit1DAdvectionDiffusionEquationCUDA<T, BoundaryConditionType::Dirichlet, Container, Alloc> :
+			public Discretization<T, Container, Alloc> {
+			private:
+				Range<T> spacer_;
+				T terminalT_;
+				std::size_t timeN_;
+				std::size_t spaceN_;
+				std::function<T(T)> init_;
+				std::pair<T, T> boundary_;
+				T diffusivity_;
+				T convection_;
+
+			public:
+				typedef T value_type;
+				explicit Explicit1DAdvectionDiffusionEquationCUDA() = delete;
+				explicit Explicit1DAdvectionDiffusionEquationCUDA(Range<T> const &spaceRange,
+																T terminalTime,
+																std::size_t const &spaceDiscretization,
+																std::size_t const &timeDiscretization)
+					:spacer_{ spaceRange },
+					terminalT_{ terminalTime },
+					timeN_{ timeDiscretization },
+					spaceN_{ spaceDiscretization } {}
+
+				~Explicit1DAdvectionDiffusionEquationCUDA() {}
+
+				Explicit1DAdvectionDiffusionEquationCUDA(Explicit1DAdvectionDiffusionEquationCUDA const &) = delete;
+				Explicit1DAdvectionDiffusionEquationCUDA(Explicit1DAdvectionDiffusionEquationCUDA &&) = delete;
+				Explicit1DAdvectionDiffusionEquationCUDA& operator=(Explicit1DAdvectionDiffusionEquationCUDA const&) = delete;
+				Explicit1DAdvectionDiffusionEquationCUDA& operator=(Explicit1DAdvectionDiffusionEquationCUDA &&) = delete;
+
+				inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
+				inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
+
+				inline void setBoundaryCondition(std::pair<T, T> const &boundaryPair) {
+					boundary_ = boundaryPair;
+				}
+
+				inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
+					init_ = initialCondition;
+				}
+
+				inline void setThermalDiffusivity(T value) {
+					diffusivity_ = value;
+				}
+
+				inline void setConvection(T value) {
+					convection_ = value;
+				}
+
+				// stability check:
+				bool inline isStable()const
+				{
+					return ((2.0*diffusivity_*timeStep() / (spaceStep()*spaceStep())) <= 1.0)
+						&& (convection_*(timeStep() / spaceStep()) <= 1.0);
+				}
+
+				void solve(Container<T, Alloc> &solution);
+		};
+
+		// ==============================================================================================================
+		// ======================= Explicit1DAdvectionDiffusionEquationCUDA Robin Specialisation Template ===============
+		// ==============================================================================================================
+
+		template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+			class Explicit1DAdvectionDiffusionEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc> :
+			public Discretization<T, Container, Alloc> {
+			private:
+				Range<T> spacer_;
+				T terminalT_;
+				std::size_t timeN_;
+				std::size_t spaceN_;
+				std::function<T(T)> init_;
+				std::pair<T, T> leftBoundary_;
+				std::pair<T, T> rightBoundary_;
+				T diffusivity_;
+				T convection_;
+
+			public:
+				typedef T value_type;
+				explicit Explicit1DAdvectionDiffusionEquationCUDA() = delete;
+				explicit Explicit1DAdvectionDiffusionEquationCUDA(Range<T> const &spaceRange,
+																T terminalTime,
+																std::size_t const &spaceDiscretization,
+																std::size_t const &timeDiscretization)
+					:spacer_{ spaceRange },
+					terminalT_{ terminalTime },
+					timeN_{ timeDiscretization },
+					spaceN_{ spaceDiscretization } {}
+
+				~Explicit1DAdvectionDiffusionEquationCUDA() {}
+
+				Explicit1DAdvectionDiffusionEquationCUDA(Explicit1DAdvectionDiffusionEquationCUDA const &) = delete;
+				Explicit1DAdvectionDiffusionEquationCUDA(Explicit1DAdvectionDiffusionEquationCUDA &&) = delete;
+				Explicit1DAdvectionDiffusionEquationCUDA& operator=(Explicit1DAdvectionDiffusionEquationCUDA const&) = delete;
+				Explicit1DAdvectionDiffusionEquationCUDA& operator=(Explicit1DAdvectionDiffusionEquationCUDA &&) = delete;
+
+				inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
+				inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
+
+				inline void setBoundaryCondition(std::pair<T, T> const &left, std::pair<T, T> const &right) {
+					leftBoundary_ = left;
+					T beta_ = 1.0 / right.first;
+					T psi_ = -1.0*right.second / right.first;
+					rightBoundary_ = std::make_pair(beta_, psi_);
+				}
+
+				inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
+					init_ = initialCondition;
+				}
+
+				inline void setThermalDiffusivity(T value) {
+					diffusivity_ = value;
+				}
+
+				inline void setConvection(T value) {
+					convection_ = value;
+				}
+
+				// stability check:
+				bool inline isStable()const
+				{
+					return ((2.0*diffusivity_*timeStep() / (spaceStep()*spaceStep())) <= 1.0)
+						&& (convection_*(timeStep() / spaceStep()) <= 1.0);
+				}
+
+				void solve(Container<T, Alloc> &solution);
+
+		};
 
 
 
@@ -262,7 +410,6 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 	// ===================== Implicit1DAdvectionDiffusionEquationCUDA (Robin BC) implementation =====================
 	// ==============================================================================================================
 
-	// not yet modified !!!!
 	template<typename T,
 			MemorySpace MemSpace,
 			template<MemorySpace, typename> typename RealSparsePolicyCUDA,
@@ -273,9 +420,9 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
 		// get the correct scheme:
-		auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Robin, scheme);
+		auto schemeFun = ImplicitAdvectionDiffusionEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Robin, scheme);
 		// get correct theta according to the scheme:
-		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
+		T const theta = ImplicitAdvectionDiffusionEquationSchemes<T>::getTheta(scheme);
 		// get space step:
 		T const h = spaceStep();
 		// get time step:
@@ -297,13 +444,13 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 		fsm.setColumns(m); fsm.setRows(m);
 		// populate the matrix:
 		fsm.emplace_back(0, 0, (1.0 + 2.0*lambda*theta));
-		fsm.emplace_back(0, 1, -1.0*lambda*theta*(1.0 + leftBoundary_.first));
+		fsm.emplace_back(0, 1, -1.0*(lambda - gamma)*theta);
 		for (std::size_t t = 1; t < m - 1; ++t) {
-			fsm.emplace_back(t, t - 1, -1.0*lambda*theta);
+			fsm.emplace_back(t, t - 1, -1.0*(lambda + gamma)*theta);
 			fsm.emplace_back(t, t, (1.0 + 2.0*lambda*theta));
-			fsm.emplace_back(t, t + 1, -1.0*lambda*theta);
+			fsm.emplace_back(t, t + 1, -1.0*(lambda - gamma)*theta);
 		}
-		fsm.emplace_back(m - 1, m - 2, -1.0*lambda*theta*(1.0 + rightBoundary_.first));
+		fsm.emplace_back(m - 1, m - 2, -1.0*(lambda + gamma)*theta);
 		fsm.emplace_back(m - 1, m - 1, (1.0 + 2.0*lambda*theta));
 		Container<T, Alloc> rhs(m, T{});
 		// create container to carry new solution:
@@ -318,7 +465,7 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 		solver_.setFlatSparseMatrix(std::move(fsm));
 		// loop for stepping in time:
 		while (time <= lastTime) {
-			schemeFun(lambda, T{}, prevSol, rhs, leftBoundary_, rightBoundary_);
+			schemeFun(lambda, gamma, prevSol, rhs, leftBoundary_, rightBoundary_);
 			solver_.setRhs(rhs);
 			solver_.solve(nextSol);
 			prevSol = nextSol;
@@ -327,6 +474,74 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 		// copy into solution vector
 		std::copy(prevSol.begin(), prevSol.end(), solution.begin());
 	}
+
+
+
+	// ==============================================================================================================
+	// =================== Explicit1DAdvectionDiffusionEquationCUDA (Dirichlet) implementation ======================
+	// ==============================================================================================================
+
+	template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+	void explicit_solvers::Explicit1DAdvectionDiffusionEquationCUDA<T,BoundaryConditionType::Dirichlet,Container,Alloc>::
+	solve(Container<T, Alloc> &solution) {
+		LSS_ASSERT(isStable() == true,
+			"This discretization is not stable.");
+		LSS_ASSERT(solution.size() > 0,
+			"The input solution container must be initialized.");
+		// get space step:
+		T const h = spaceStep();
+		// get time step:
+		T const k = timeStep();
+		// calculate lambda:
+		T const lambda = (diffusivity_ *  k) / (h*h);
+		// calculate gamma:
+		T const gamma = (convection_ * k) / (2.0*h);
+		// create container to carry mesh in space and then previous solution:
+		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
+		// populate the container with mesh in space
+		discretizeSpace(h, spacer_.lower(), prevSol);
+		// use the mesh in space to get values of initial condition
+		discretizeInitialCondition(init_, prevSol);
+
+		ExplicitAdvectionDiffusionEquationScheme<T, Container, Alloc> eulerScheme(lambda, gamma, k, terminalT_, prevSol);
+		eulerScheme(boundary_, solution);
+	}
+
+	// ==============================================================================================================
+	// ======================= Explicit1DAdvectionDiffusionEquationCUDA (Robin) implementation ======================
+	// ==============================================================================================================
+
+	template<typename T,
+			template<typename, typename> typename Container,
+			typename Alloc>
+	void explicit_solvers::Explicit1DAdvectionDiffusionEquationCUDA<T, BoundaryConditionType::Robin, Container, Alloc>::
+		solve(Container<T, Alloc> &solution) {
+		LSS_ASSERT(isStable() == true,
+			"This discretization is not stable.");
+		LSS_ASSERT(solution.size() > 0,
+			"The input solution container must be initialized.");
+		// get space step:
+		T const h = spaceStep();
+		// get time step:
+		T const k = timeStep();
+		// calculate lambda:
+		T const lambda = (diffusivity_ *  k) / (h*h);
+		// calculate gamma:
+		T const gamma = (convection_ * k) / (2.0*h);
+		// create container to carry mesh in space and then previous solution:
+		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
+		// populate the container with mesh in space
+		discretizeSpace(h, spacer_.lower(), prevSol);
+		// use the mesh in space to get values of initial condition
+		discretizeInitialCondition(init_, prevSol);
+
+		ExplicitAdvectionDiffusionEquationScheme<T, Container, Alloc> eulerScheme(lambda, gamma, k, terminalT_, prevSol);
+		eulerScheme(leftBoundary_, rightBoundary_, solution);
+	}
+
+
 
 
 

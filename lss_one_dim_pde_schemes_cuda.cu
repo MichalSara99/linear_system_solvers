@@ -34,7 +34,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 		float right = boundaryPair.second;
 		while (time <= terminalT_) {
 			// populate new solution in d_next:
-			explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_, size);
+			explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_,gamma_, size);
 			// fill in the dirichlet boundaries in d_next:
 			fillDirichletBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
 			// swap the two pointers:
@@ -69,7 +69,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 		double right = boundaryPair.second;
 		while (time <= terminalT_) {
 			// populate new solution in d_next:
-			explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_, size);
+			explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_,gamma_, size);
 			// fill in the dirichlet boundaries in d_next:
 			fillDirichletBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
 			// swap the two pointers:
@@ -109,9 +109,9 @@ namespace lss_one_dim_pde_schemes_cuda {
 		float rightConst = rightPair.second;
 		while (time <= terminalT_) {
 			// populate new solution in d_next:
-			explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_, size);
+			explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_,gamma_, size);
 			// fill in the dirichlet boundaries in d_next:
-			fillRobinBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_next, lambda_, leftLinear, leftConst, rightLinear, rightConst, size);
+			fillRobinBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_next, lambda_,gamma_, leftLinear, leftConst, rightLinear, rightConst, size);
 			// swap the two pointers:
 			swap(d_prev, d_next);
 			time += k;
@@ -147,9 +147,9 @@ namespace lss_one_dim_pde_schemes_cuda {
 		double rightConst = rightPair.second;
 		while (time <= terminalT_) {
 			// populate new solution in d_next:
-			explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_, size);
+			explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_,gamma_, size);
 			// fill in the dirichlet boundaries in d_next:
-			fillRobinBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_next, lambda_, leftLinear, leftConst, rightLinear, rightConst, size);
+			fillRobinBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_next, lambda_,gamma_, leftLinear, leftConst, rightLinear, rightConst, size);
 			// swap the two pointers:
 			swap(d_prev, d_next);
 			time += k;

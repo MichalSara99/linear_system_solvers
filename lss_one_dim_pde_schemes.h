@@ -184,10 +184,10 @@ namespace lss_one_dim_pde_schemes {
 
 				solution[lastIdx] = ((lambda - gamma)*right)
 					+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
-					+ (lambda*(1.0 - theta)*input[lastIdx - 1]);
+					+ ((lambda + gamma)*(1.0 - theta)*input[lastIdx - 1]);
 			};
 
-			// not yet modified !!!
+			
 			auto schemeFunRobin = [=](T lambda, T gamma,
 				std::vector<T> const& input,
 				std::vector<T> &solution,
@@ -200,19 +200,19 @@ namespace lss_one_dim_pde_schemes {
 				T const rightConst = boundaryPair1.second;
 				std::size_t const lastIdx = solution.size() - 1;
 
-				solution[0] = (lambda*(1.0 - theta)*(1.0 + leftLinear)*input[1])
+				solution[0] = (((lambda - gamma)*(1.0 - theta) + leftLinear * (lambda + gamma))*input[1])
 					+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[0]
-					+ (lambda*leftConst);
+					+ ((lambda + gamma)*leftConst);
 
 				for (std::size_t t = 1; t < lastIdx; ++t) {
-					solution[t] = (lambda*(1.0 - theta)*input[t + 1])
+					solution[t] = ((lambda-gamma)*(1.0 - theta)*input[t + 1])
 						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
-						+ (lambda*(1.0 - theta)*input[t - 1]);
+						+ ((lambda + gamma)*(1.0 - theta)*input[t - 1]);
 				}
 
-				solution[lastIdx] = (lambda*(1.0 - theta)*(1.0 + rightLinear)*input[lastIdx - 1])
+				solution[lastIdx] = (((lambda + gamma)*(1.0 - theta) + rightLinear * (lambda - gamma))*input[lastIdx - 1])
 					+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
-					+ (lambda*rightConst);
+					+ ((lambda - gamma)*rightConst);
 			};
 
 			if (bcType == BoundaryConditionType::Dirichlet)

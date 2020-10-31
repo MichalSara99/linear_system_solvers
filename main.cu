@@ -7,6 +7,7 @@
 #include"lss_one_dim_heat_equation_solvers_t.h"
 #include"lss_one_dim_heat_equation_solvers_cuda_t.h"
 #include"lss_one_dim_advection_diffusion_equation_solvers_t.h"
+#include"lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h"
 
 int main(int argc, char const* argv[]) {
 
@@ -93,10 +94,21 @@ int main(int argc, char const* argv[]) {
 	// testExplAdvectionDiffEquationDirichletBC();
 	// testImplAdvectionDiffEquationRobinBCDoubleSweep();
 	// testImplAdvectionDiffEquationRobinBCThomasLU();
-	testExplAdvectionDiffEquationRobinBC();
+	// testExplAdvectionDiffEquationRobinBC();
 
 
 	// ==========================================================
+
+	// ====================================================================
+	// ==== lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h =====
+	// ====================================================================
+
+	// testImplAdvectionDiffusionEquationDirichletBCDevice();
+	// testImplAdvectionDiffusionEquationRobinBCDevice();
+	// testExplAdvectionDiffusionEquationDirichletBC();
+	// testExplAdvectionDiffusionEquationRobinBC();
+
+	// ====================================================================
 
 
 
