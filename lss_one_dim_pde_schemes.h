@@ -14,6 +14,8 @@ namespace lss_one_dim_pde_schemes {
 	template<typename T>
 	using  SchemeFunction = std::function<void(T,T, std::vector<T> const&, std::vector<T> &)>;
 	template<typename T>
+	using InhomSchemeFunction = std::function<void(T, T,T, std::vector<T> const &, std::vector<T> const &, std::vector<T>&)>;
+	template<typename T>
 	using  SchemeFunctionCUDA = std::function<void(T,T, std::vector<T> const&, std::vector<T> &,
 													std::pair<T, T> const &, std::pair<T, T> const &)>;
 
@@ -48,6 +50,27 @@ namespace lss_one_dim_pde_schemes {
 						solution[t] = (lambda*(1.0 - theta)*input[t + 1])
 							+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
 							+ (lambda*(1.0 - theta)*input[t - 1]);
+					}
+				};
+				return schemeFun;
+			}
+
+
+			static InhomSchemeFunction<T> const getInhomScheme(ImplicitPDESchemes scheme) {
+				double theta{};
+				if (scheme == ImplicitPDESchemes::Euler)
+					theta = 1.0;
+				else
+					theta = 0.5;
+				auto schemeFun = [=](T lambda, T gamma,T timeStep,
+									std::vector<T> const& input,
+									std::vector<T> const& inhomInput,
+									std::vector<T> &solution) {
+					for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+						solution[t] = (lambda*(1.0 - theta)*input[t + 1])
+							+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
+							+ (lambda*(1.0 - theta)*input[t - 1])
+							+ timeStep * inhomInput[t];
 					}
 				};
 				return schemeFun;

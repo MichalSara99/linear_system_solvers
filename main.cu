@@ -59,6 +59,8 @@ int main(int argc, char const* argv[]) {
 	// =====================================================
 
 	// testImplHeatEquationDirichletBCDoubleSweep();
+	// testImplHeatEquationSourceDirichletBCDoubleSweep();
+	// testImplHeatEquationSourceDirichletBCThomasLU();
 	// testImplHeatEquationRobinBCDoubleSweep();
 	// testImplHeatEquationDirichletBCThomasLU();
 	// testImplHeatEquationRobinBCThomasLU();

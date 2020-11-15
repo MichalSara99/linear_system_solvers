@@ -756,6 +756,359 @@ void testImplHeatEquationRobinBCThomasLU() {
 }
 
 
+// ================================================================================================================
+// ============================ Heat problem with homogeneous boundary conditions and source ======================
+// ================================================================================================================
+
+
+template<typename T>
+void testImplHeatEquationSourceDirichletBCDoubleSweepEuler() {
+
+	using lss_utility::Range;
+	using lss_types::BoundaryConditionType;
+	using lss_types::ImplicitPDESchemes;
+	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+
+	std::cout << "==============================================================================\n";
+	std::cout << "Solving Boundary-value Heat equation with source: \n\n";
+	std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
+	std::cout << " U_t(x,t) = U_xx(x,t) + x, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " x in <0,1> and t > 0,\n";
+	std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
+	std::cout << "===============================================================================\n";
+
+	// typedef the Implicit1DHeatEquation
+	typedef Implicit1DHeatEquation<T,
+		BoundaryConditionType::Dirichlet,
+		FDMDoubleSweepSolver,
+		std::vector,
+		std::allocator<T>> implicit_solver;
+
+	// number of space subdivisions:
+	std::size_t const Sd = 100;
+	// number of time subdivisions:
+	std::size_t const Td = 100;
+	// initial condition:
+	auto initialCondition = [](T x) {return 1.0; };
+	// boundary conditions:
+	auto boundary = std::make_pair(0.0, 0.0);
+	// prepare container for solution:
+	// note: size is Sd+1 since we must include space point at x = 0
+	std::vector<T> solution(Sd + 1, T{});
+	// initialize solver
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	// set boundary conditions:
+	impl_solver.setBoundaryCondition(boundary);
+	// set initial condition:
+	impl_solver.setInitialCondition(initialCondition);
+	// set thermal diffusivity (C^2 in PDE)
+	impl_solver.setThermalDiffusivity(1.0);
+	// set heat source: 
+	impl_solver.setHeatSource([](T x,T t) {return x; });
+	// get the solution:
+	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+	// get exact solution:
+	auto exact = [](T x, T t, std::size_t n) {
+		T sum{};
+		T q_n{};
+		T f_n{};
+		T lam_n{};
+		T lam_2{};
+		T var1{};
+		for (std::size_t i = 1; i <= n; ++i) {
+			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
+			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			lam_n = i * PI;
+			lam_2 = lam_n * lam_n;
+			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			sum += var1;
+		}
+		return sum;
+	};
+
+	T const h = impl_solver.spaceStep();
+	std::cout << "tp : FDM | Exact | Abs Diff\n";
+	T benchmark{};
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		benchmark = exact(j * h, 0.5, 20);
+		std::cout << "t_" << j << ": " << solution[j] << " |  "
+			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
+	}
+}
+
+
+template<typename T>
+void testImplHeatEquationSourceDirichletBCDoubleSweepCN() {
+
+	using lss_utility::Range;
+	using lss_types::BoundaryConditionType;
+	using lss_types::ImplicitPDESchemes;
+	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+
+	std::cout << "==============================================================================\n";
+	std::cout << "Solving Boundary-value Heat equation: \n\n";
+	std::cout << " Using Double Sweep algorithm with implicit Crank-Nicolson method\n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
+	std::cout << " U_t(x,t) = U_xx(x,t) + x, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " x in <0,1> and t > 0,\n";
+	std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
+	std::cout << "===============================================================================\n";
+
+	// typedef the Implicit1DHeatEquation
+	typedef Implicit1DHeatEquation<T,
+		BoundaryConditionType::Dirichlet,
+		FDMDoubleSweepSolver,
+		std::vector,
+		std::allocator<T>> implicit_solver;
+
+	// number of space subdivisions:
+	std::size_t const Sd = 100;
+	// number of time subdivisions:
+	std::size_t const Td = 100;
+	// initial condition:
+	auto initialCondition = [](T x) {return 1.0; };
+	// boundary conditions:
+	auto boundary = std::make_pair(0.0, 0.0);
+	// prepare container for solution:
+	// note: size is Sd+1 since we must include space point at x = 0
+	std::vector<T> solution(Sd + 1, T{});
+	// initialize solver
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	// set boundary conditions:
+	impl_solver.setBoundaryCondition(boundary);
+	// set initial condition:
+	impl_solver.setInitialCondition(initialCondition);
+	// set thermal diffusivity (C^2 in PDE)
+	impl_solver.setThermalDiffusivity(1.0);
+	// set heat source: 
+	impl_solver.setHeatSource([](T x, T t) {return x; });
+	// get the solution:
+	impl_solver.solve(solution);
+	// get exact solution:
+	auto exact = [](T x, T t, std::size_t n) {
+		T sum{};
+		T q_n{};
+		T f_n{};
+		T lam_n{};
+		T lam_2{};
+		T var1{};
+		for (std::size_t i = 1; i <= n; ++i) {
+			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
+			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			lam_n = i * PI;
+			lam_2 = lam_n * lam_n;
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			sum += var1;
+		}
+		return sum;
+	};
+
+	T const h = impl_solver.spaceStep();
+	std::cout << "tp : FDM | Exact | Abs Diff\n";
+	T benchmark{};
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		benchmark = exact(j * h, 0.20, 20);
+		std::cout << "t_" << j << ": " << solution[j] << " |  "
+			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
+	}
+}
+
+void testImplHeatEquationSourceDirichletBCDoubleSweep() {
+	std::cout << "================================================================================\n";
+	std::cout << "================= Implicit Heat Equation with source (Dirichlet BC) ============\n";
+	std::cout << "================================================================================\n";
+
+	testImplHeatEquationSourceDirichletBCDoubleSweepEuler<double>();
+	testImplHeatEquationSourceDirichletBCDoubleSweepEuler<float>();
+	testImplHeatEquationSourceDirichletBCDoubleSweepCN<double>();
+	testImplHeatEquationSourceDirichletBCDoubleSweepCN<float>();
+
+	std::cout << "================================================================================\n";
+}
+
+
+template<typename T>
+void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
+
+	using lss_utility::Range;
+	using lss_types::BoundaryConditionType;
+	using lss_types::ImplicitPDESchemes;
+	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+
+	std::cout << "==============================================================================\n";
+	std::cout << "Solving Boundary-value Heat equation: \n\n";
+	std::cout << " Using Thomas LU algorithm with implicit Euler method\n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
+	std::cout << " U_t(x,t) = U_xx(x,t) + x, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " x in <0,1> and t > 0,\n";
+	std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
+	std::cout << "===============================================================================\n";
+
+	// typedef the Implicit1DHeatEquation
+	typedef Implicit1DHeatEquation<T,
+		BoundaryConditionType::Dirichlet,
+		FDMThomasLUSolver,
+		std::vector,
+		std::allocator<T>> implicit_solver;
+
+	// number of space subdivisions:
+	std::size_t const Sd = 100;
+	// number of time subdivisions:
+	std::size_t const Td = 100;
+	// initial condition:
+	auto initialCondition = [](T x) {return x; };
+	// boundary conditions:
+	auto boundary = std::make_pair(0.0, 0.0);
+	// prepare container for solution:
+	// note: size is Sd+1 since we must include space point at x = 0
+	std::vector<T> solution(Sd + 1, T{});
+	// initialize solver
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	// set boundary conditions:
+	impl_solver.setBoundaryCondition(boundary);
+	// set initial condition:
+	impl_solver.setInitialCondition(initialCondition);
+	// set thermal diffusivity (C^2 in PDE)
+	impl_solver.setThermalDiffusivity(1.0);
+	// set heat source: 
+	impl_solver.setHeatSource([](T x, T t) {return x; });
+	// get the solution:
+	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+	// get exact solution:
+	auto exact = [](T x, T t, std::size_t n) {
+		T sum{};
+		T q_n{};
+		T f_n{};
+		T lam_n{};
+		T lam_2{};
+		T var1{};
+		for (std::size_t i = 1; i <= n; ++i) {
+			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
+			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			lam_n = i * PI;
+			lam_2 = lam_n * lam_n;
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			sum += var1;
+		}
+		return sum;
+	};
+
+	T const h = impl_solver.spaceStep();
+	std::cout << "tp : FDM | Exact | Abs Diff\n";
+	T benchmark{};
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		benchmark = exact(j * h, 0.5, 20);
+		std::cout << "t_" << j << ": " << solution[j] << " |  "
+			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
+	}
+}
+
+
+template<typename T>
+void testImplHeatEquationSourceDirichletBCThomasLUCN() {
+
+	using lss_utility::Range;
+	using lss_types::BoundaryConditionType;
+	using lss_types::ImplicitPDESchemes;
+	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+
+	std::cout << "==============================================================================\n";
+	std::cout << "Solving Boundary-value Heat equation with source: \n\n";
+	std::cout << " Using Thomas LU algorithm with implicit Crank-Nicolson method\n\n";
+	std::cout << " Value type: " << typeid(T).name() << "\n\n";
+	std::cout << " U_t(x,t) = U_xx(x,t) + x, \n\n";
+	std::cout << " where\n\n";
+	std::cout << " x in <0,1> and t > 0,\n";
+	std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
+	std::cout << "===============================================================================\n";
+
+	// typedef the Implicit1DHeatEquation
+	typedef Implicit1DHeatEquation<T,
+		BoundaryConditionType::Dirichlet,
+		FDMThomasLUSolver,
+		std::vector,
+		std::allocator<T>> implicit_solver;
+
+	// number of space subdivisions:
+	std::size_t const Sd = 1000;
+	// number of time subdivisions:
+	std::size_t const Td = 1000;
+	// initial condition:
+	auto initialCondition = [](T x) {return 1.0; };
+	// boundary conditions:
+	auto boundary = std::make_pair(0.0, 0.0);
+	// prepare container for solution:
+	// note: size is Sd+1 since we must include space point at x = 0
+	std::vector<T> solution(Sd + 1, T{});
+	// initialize solver
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	// set boundary conditions:
+	impl_solver.setBoundaryCondition(boundary);
+	// set initial condition:
+	impl_solver.setInitialCondition(initialCondition);
+	// set thermal diffusivity (C^2 in PDE)
+	impl_solver.setThermalDiffusivity(1.0);
+	// set heat source: 
+	impl_solver.setHeatSource([](T x, T t) {return x; });
+	// get the solution:
+	impl_solver.solve(solution);
+	// get exact solution:
+	auto exact = [](T x, T t, std::size_t n) {
+		T sum{};
+		T q_n{};
+		T f_n{};
+		T lam_n{};
+		T lam_2{};
+		T var1{};
+		for (std::size_t i = 1; i <= n; ++i) {
+			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
+			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			lam_n = i * PI;
+			lam_2 = lam_n * lam_n;
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			sum += var1;
+		}
+		return sum;
+	};
+
+	T const h = impl_solver.spaceStep();
+	std::cout << "tp : FDM | Exact | Abs Diff\n";
+	T benchmark{};
+	for (std::size_t j = 0; j < solution.size(); ++j)
+	{
+		benchmark = exact(j * h, 0.20, 20);
+		std::cout << "t_" << j << ": " << solution[j] << " |  "
+			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
+	}
+}
+
+void testImplHeatEquationSourceDirichletBCThomasLU() {
+	std::cout << "================================================================================\n";
+	std::cout << "================= Implicit Heat Equation with source (Dirichlet BC) ============\n";
+	std::cout << "================================================================================\n";
+
+	testImplHeatEquationSourceDirichletBCThomasLUEuler<double>();
+	testImplHeatEquationSourceDirichletBCThomasLUEuler<float>();
+	testImplHeatEquationSourceDirichletBCThomasLUCN<double>();
+	testImplHeatEquationSourceDirichletBCThomasLUCN<float>();
+
+	std::cout << "================================================================================\n";
+}
 
 
 
