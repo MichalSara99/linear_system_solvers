@@ -362,14 +362,18 @@ namespace lss_one_dim_heat_equation_solvers {
 			// get the correct scheme:
 			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomScheme(scheme);
 			// create a container to carry discretized source heat
-			Container<T, Alloc> sourceCont(spaceN_ + 1, T{});
+			Container<T, Alloc> sourceCurr(spaceN_ + 1, T{});
+			Container<T, Alloc> sourceNext(spaceN_ + 1, T{});
+			discretizeInSpace(h, spacer_.lower(), 0.0, source_, sourceCurr);
+			discretizeInSpace(h, spacer_.lower(), time, source_, sourceNext);
 			// loop for stepping in time:
 			while (time <= lastTime) {
-				discretizeInSpace(h, spacer_.lower(), time, source_, sourceCont);
-				schemeFun(lambda, T{}, k, prevSol, sourceCont, rhs);
+				schemeFun(lambda, T{}, k, prevSol, sourceCurr, sourceNext, rhs);
 				fdmSolver_.setRhs(rhs);
 				fdmSolver_.solve(nextSol);
 				prevSol = nextSol;
+				discretizeInSpace(h, spacer_.lower(), time, source_, sourceCurr);
+				discretizeInSpace(h, spacer_.lower(), 2.0*time, source_, sourceNext);
 				time += k;
 			}
 		}
