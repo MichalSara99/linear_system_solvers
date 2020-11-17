@@ -77,7 +77,7 @@ namespace lss_one_dim_heat_equation_solvers {
 				terminalT_{ terminalTime },
 				timeN_{ timeDiscretization },
 				spaceN_{ spaceDiscretization },
-				source_{ [](T arg1,T arg2) {return T{}; } },
+				source_{ nullptr },
 				isSourceSet_{false} {}
 
 			~Implicit1DHeatEquation(){}
@@ -210,8 +210,10 @@ namespace lss_one_dim_heat_equation_solvers {
 			std::size_t timeN_;											// number of time subdivisions
 			std::size_t spaceN_;										// number of space subdivisions
 			std::function<T(T)> init_;									// initi condition
+			std::function<T(T, T)> source_;								// heat source
 			std::pair<T, T> boundary_;									// boundaries
 			T diffusivity_;												// diffusivity = c^2 in PDE
+			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
@@ -223,7 +225,9 @@ namespace lss_one_dim_heat_equation_solvers {
 				:spacer_{ spaceRange },
 				terminalT_{ terminalTime },
 				timeN_{ timeDiscretization },
-				spaceN_{ spaceDiscretization } {}
+				spaceN_{ spaceDiscretization },
+				source_{nullptr },
+				isSourceSet_{ false } {}
 
 			~Explicit1DHeatEquation(){}
 
@@ -241,7 +245,10 @@ namespace lss_one_dim_heat_equation_solvers {
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 				init_ = initialCondition;
 			}
-
+			inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+				isSourceSet_ = true;
+				source_ = heatSource;
+			}
 			inline void setThermalDiffusivity(T value) {
 				diffusivity_ = value;
 			}
@@ -476,15 +483,15 @@ namespace lss_one_dim_heat_equation_solvers {
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		if (scheme == ExplicitPDESchemes::Euler) {
-			ExplicitHeatEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
+			ExplicitHeatEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
 			euler(boundary_, solution);
 		}
 		else if(scheme == ExplicitPDESchemes::ADEBarakatClark) {
-			ADEHeatBakaratClarkScheme<T> adebc{ initCondition,h,k,terminalT_,diffusivity_ };
+			ADEHeatBakaratClarkScheme<T> adebc{ initCondition,h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
 			adebc(boundary_, solution);
 		}
 		else {
-			ADEHeatSaulyevScheme<T> ades{ initCondition,h,k,terminalT_,diffusivity_ };
+			ADEHeatSaulyevScheme<T> ades{ initCondition,h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
 			ades(boundary_, solution);
 		}
 	}
