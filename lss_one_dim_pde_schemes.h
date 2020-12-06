@@ -315,6 +315,7 @@ namespace lss_one_dim_pde_schemes {
 		public Discretization<T,std::vector,std::allocator<T>> {
 	protected:
 		std::vector<T> initialCondition_;
+		T spaceStart_;
 		T spaceStep_;
 		T timeStep_;
 		T terminalTime_;
@@ -323,11 +324,13 @@ namespace lss_one_dim_pde_schemes {
 	public:
 		explicit ExplicitSchemeBase() = delete;
 		explicit ExplicitSchemeBase(std::vector<T> const& initialCondition,
+									T spaceStart,
 									T spaceStep,
 									T timeStep,
 									T terminalTime,
 									T thermalDiffusivity)
 			:initialCondition_{ initialCondition },
+			spaceStart_{ spaceStart },
 			spaceStep_{ spaceStep },
 			timeStep_{ timeStep },
 			terminalTime_{ terminalTime },
@@ -360,6 +363,7 @@ namespace lss_one_dim_pde_schemes {
 	public:
 		explicit ExplicitHeatEulerScheme() = delete;
 		explicit ExplicitHeatEulerScheme(std::vector<T> const& initialCondition,
+									T spaceStart,
 									T spaceStep,
 									T timeStep,
 									T terminalTime,
@@ -367,6 +371,7 @@ namespace lss_one_dim_pde_schemes {
 									bool isSourceSet = false,
 									std::function<T(T, T)> const &source = nullptr)
 			:ExplicitSchemeBase<T>(initialCondition,
+									spaceStart,
 									spaceStep,
 									timeStep,
 									terminalTime,
@@ -408,6 +413,7 @@ namespace lss_one_dim_pde_schemes {
 	public:
 		explicit ADEHeatBakaratClarkScheme() = delete;
 		explicit ADEHeatBakaratClarkScheme(std::vector<T> const& initialCondition,
+										T spaceStart,
 										T spaceStep,
 										T timeStep,
 										T terminalTime,
@@ -415,6 +421,7 @@ namespace lss_one_dim_pde_schemes {
 										bool isSourceSet = false,
 										std::function<T(T, T)> const &source = nullptr)
 			:ExplicitSchemeBase<T>(initialCondition,
+									spaceStart,
 									spaceStep,
 									timeStep,
 									terminalTime,
@@ -454,13 +461,15 @@ namespace lss_one_dim_pde_schemes {
 	public:
 		explicit ADEHeatSaulyevScheme() = delete;
 		explicit ADEHeatSaulyevScheme(std::vector<T> const &initialCondition,
+									T spaceStart,
 									T spaceStep,
 									T timeStep,
 									T terminalTime,
 									T thermalDiffusivity,
 									bool isSourceSet = false,
 									std::function<T(T, T)> const &source = nullptr)
-			:ExplicitSchemeBase<T>(initialCondition,
+			:ExplicitSchemeBase<T>(initialCondition, 
+									spaceStart,
 									spaceStep,
 									timeStep,
 									terminalTime,
@@ -499,12 +508,14 @@ namespace lss_one_dim_pde_schemes {
 	public:
 		explicit ExplicitAdvectionDiffusionEulerScheme() = delete;
 		explicit ExplicitAdvectionDiffusionEulerScheme(std::vector<T> const& initialCondition,
+														T spaceStart,
 														T spaceStep,
 														T timeStep,
 														T terminalTime,
 														T thermalDiffusivity,
 														T convection)
 			:ExplicitSchemeBase<T>(initialCondition,
+									spaceStart,
 									spaceStep,
 									timeStep,
 									terminalTime,
@@ -547,12 +558,14 @@ namespace lss_one_dim_pde_schemes {
 	public:
 		explicit ADEAdvectionDiffusionBakaratClarkScheme() = delete;
 		explicit ADEAdvectionDiffusionBakaratClarkScheme(std::vector<T> const& initialCondition,
+														T spaceStart,
 														T spaceStep,
 														T timeStep,
 														T terminalTime,
 														T thermalDiffusivity,
 														T convection)
 			:ExplicitSchemeBase<T>(initialCondition,
+				spaceStart,
 				spaceStep,
 				timeStep,
 				terminalTime,
@@ -590,12 +603,14 @@ namespace lss_one_dim_pde_schemes {
 	public:
 		explicit ADEAdvectionDiffusionSaulyevScheme() = delete;
 		explicit ADEAdvectionDiffusionSaulyevScheme(std::vector<T> const &initialCondition,
+													T spaceStart,
 													T spaceStep,
 													T timeStep,
 													T terminalTime,
 													T thermalDiffusivity,
 													T convection)
 			:ExplicitSchemeBase<T>(initialCondition,
+									spaceStart,
 									spaceStep,
 									timeStep,
 									terminalTime,
@@ -665,7 +680,7 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 	else {
 		// create a container to carry discretized source heat
 		std::vector<T> sourceCurr(solution.size(), T{});
-		discretizeInSpace(spaceStep_, left, 0.0, source_, sourceCurr);
+		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
 			solution[0] = left;
@@ -674,7 +689,7 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 				solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]) +
 					timeStep_ * sourceCurr[t];
 			}
-			discretizeInSpace(spaceStep_, left, time, source_, sourceCurr);
+			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
 			prevSol = solution;
 			time += timeStep_;
 		}
@@ -714,15 +729,37 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 	std::vector<T> prevSol = initialCondition_;
 	// size of the space vector:
 	std::size_t const spaceSize = solution.size();
-	// loop for stepping in time:
-	while (time <= terminalTime_) {
-		solution[0] = b * c*prevSol[1] + a * prevSol[0] + b * leftConst;
-		solution[solution.size() - 1] = b * d*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
-		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-			solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]);
+	if (!isSourceSet_) {
+		// loop for stepping in time:
+		while (time <= terminalTime_) {
+			solution[0] = b * c*prevSol[1] + a * prevSol[0] + b * leftConst;
+			solution[solution.size() - 1] = b * d*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
+			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
+				solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]);
+			}
+			prevSol = solution;
+			time += timeStep_;
 		}
-		prevSol = solution;
-		time += timeStep_;
+	}
+	else {
+		// create a container to carry discretized source heat
+		std::vector<T> sourceCurr(solution.size(), T{});
+		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		// loop for stepping in time:
+		// loop for stepping in time:
+		while (time <= terminalTime_) {
+			solution[0] = b * c*prevSol[1] + a * prevSol[0] + b * leftConst;
+			solution[solution.size() - 1] = b * d*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
+			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
+				solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]) +
+					timeStep_ * sourceCurr[t];
+			}
+			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			prevSol = solution;
+			time += timeStep_;
+		}
+
+
 	}
 }
 
@@ -786,8 +823,8 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 		}
 	}
 	else {
-		discretizeInSpace(spaceStep_, left, 0.0, source_, sourceCurr);
-		discretizeInSpace(spaceStep_, left, time, source_, sourceNext);
+		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
 			com1[0] = com2[0] = left;
@@ -799,8 +836,8 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 			for (std::size_t t = 0; t < spaceSize; ++t) {
 				solution[t] = 0.5*(com1[t] + com2[t]);
 			}
-			discretizeInSpace(spaceStep_, left, time, source_, sourceCurr);
-			discretizeInSpace(spaceStep_, left, 2.0*time, source_, sourceNext);
+			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
 			time += timeStep_;
 		}
 	}
@@ -870,8 +907,8 @@ void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T
 		}
 	}
 	else {
-		discretizeInSpace(spaceStep_, left, 0.0, source_, sourceCurr);
-		discretizeInSpace(spaceStep_, left, time, source_, sourceNext);
+		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
 		// loop for stepping in time:
 		std::size_t t = 1;
 		while (time <= terminalTime_) {
@@ -882,8 +919,8 @@ void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T
 			else
 				upSweep(solution, sourceNext, 1.0);
 			++t;
-			discretizeInSpace(spaceStep_, left, time, source_, sourceCurr);
-			discretizeInSpace(spaceStep_, left, 2.0*time, source_, sourceNext);
+			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
 			time += timeStep_;
 		}
 	}

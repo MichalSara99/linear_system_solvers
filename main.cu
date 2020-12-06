@@ -65,13 +65,16 @@ int main(int argc, char const* argv[]) {
 	// testImplHeatEquationDirichletBCThomasLU();
 	// testImplHeatEquationRobinBCThomasLU();
 	// testImplHeatEquationSourceDirichletBC();
-	testExplHeatEquationSourceDirichletBCEuler();
+	// testImplHeatEquationSourceRobinBCDoubleSweep();
+	// testImplHeatEquationSourceRobinBCThomasLU();
+	// testExplHeatEquationSourceDirichletBCEuler();
 	// testExplHeatEquationDirichletBC();
 	// testExplHeatEquationSourceDirichletBC();
 	// testImplNonHomHeatEquationDirichletBCDoubleSweep();
 	// testImplNonHomHeatEquationDirichletBCThomasLU();
 	// testExplNonHomHeatEquationDirichletBC();
 	// testExplHomHeatEquationRobinBC();
+	// testExplHomHeatEquationSourceRobinBC();
 
 	// =====================================================
 

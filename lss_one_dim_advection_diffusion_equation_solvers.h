@@ -461,15 +461,15 @@ namespace lss_one_dim_advection_diffusion_equation_solvers {
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		if (scheme == ExplicitPDESchemes::Euler) {
-			ExplicitAdvectionDiffusionEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_,convection_ };
+			ExplicitAdvectionDiffusionEulerScheme<T> euler{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,convection_ };
 			euler(boundary_, solution);
 		}
 		else if (scheme == ExplicitPDESchemes::ADEBarakatClark) {
-			ADEAdvectionDiffusionBakaratClarkScheme<T> adebc{ initCondition,h,k,terminalT_,diffusivity_,convection_ };
+			ADEAdvectionDiffusionBakaratClarkScheme<T> adebc{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,convection_ };
 			adebc(boundary_, solution);
 		}
 		else {
-			ADEAdvectionDiffusionSaulyevScheme<T> ades{ initCondition,h,k,terminalT_,diffusivity_,convection_ };
+			ADEAdvectionDiffusionSaulyevScheme<T> ades{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,convection_ };
 			ades(boundary_, solution);
 		}
 
@@ -498,7 +498,7 @@ namespace lss_one_dim_advection_diffusion_equation_solvers {
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
-		ExplicitAdvectionDiffusionEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_,convection_ };
+		ExplicitAdvectionDiffusionEulerScheme<T> euler{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,convection_ };
 		euler(left_,right_, solution);
 
 

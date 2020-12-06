@@ -128,10 +128,12 @@ namespace lss_one_dim_heat_equation_solvers {
 			T terminalT_;																// terminal time
 			std::size_t timeN_;															// number of time subdivisions
 			std::size_t spaceN_;														// number of space subdivisions
+			std::function<T(T, T)> source_;												// heat source
 			std::function<T(T)> init_;													// initi condition
 			std::pair<T, T> left_;														// left boundary pair
 			std::pair<T, T> right_;														// right boundary pair
 			T diffusivity_;																// diffusivity = c^2 in PDE
+			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
@@ -144,7 +146,9 @@ namespace lss_one_dim_heat_equation_solvers {
 				spacer_{ spaceRange },
 				terminalT_{ terminalTime },
 				timeN_{ timeDiscretization },
-				spaceN_{ spaceDiscretization } {}
+				spaceN_{ spaceDiscretization },
+				source_{ nullptr },
+				isSourceSet_{ false } {}
 
 			~Implicit1DHeatEquation() {}
 
@@ -165,7 +169,10 @@ namespace lss_one_dim_heat_equation_solvers {
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) { 
 				init_ = initialCondition; 
 			}
-
+			inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+				isSourceSet_ = true;
+				source_ = heatSource;
+			}
 			inline void setThermalDiffusivity(T value) {
 				diffusivity_ = value;
 			}
@@ -272,11 +279,12 @@ namespace lss_one_dim_heat_equation_solvers {
 			T terminalT_;												// terminal time
 			std::size_t timeN_;											// number of time subdivisions
 			std::size_t spaceN_;										// number of space subdivisions
+			std::function<T(T, T)> source_;								// heat source
 			std::function<T(T)> init_;									// initi condition
 			std::pair<T, T> left_;										// left boundary pair
 			std::pair<T, T> right_;										// right boundary pair
 			T diffusivity_;												// diffusivity = c^2 in PDE
-
+			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
@@ -288,7 +296,9 @@ namespace lss_one_dim_heat_equation_solvers {
 				:spacer_{ spaceRange },
 				terminalT_{ terminalTime },
 				timeN_{ timeDiscretization },
-				spaceN_{ spaceDiscretization } {}
+				spaceN_{ spaceDiscretization },
+				source_{ nullptr },
+				isSourceSet_{ false } {}
 
 			~Explicit1DHeatEquation() {}
 
@@ -307,7 +317,10 @@ namespace lss_one_dim_heat_equation_solvers {
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 				init_ = initialCondition;
 			}
-
+			inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+				isSourceSet_ = true;
+				source_ = heatSource;
+			}
 			inline void setThermalDiffusivity(T value) {
 				diffusivity_ = value;
 			}
@@ -417,8 +430,6 @@ namespace lss_one_dim_heat_equation_solvers {
 		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
-		// get the correct scheme:
-		auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
 		// get correct theta according to the scheme:
 		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
 		// get space step:
@@ -446,13 +457,37 @@ namespace lss_one_dim_heat_equation_solvers {
 		T const lastTime = terminalT_;
 		// set properties of FDMSolver:
 		fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
-		// loop for stepping in time:
-		while (time <= lastTime) {
-			schemeFun(lambda, T{}, prevSol, rhs);
-			fdmSolver_.setRhs(rhs);
-			fdmSolver_.solve(nextSol);
-			prevSol = nextSol;
-			time += k;
+		// differentiate between inhomogeneous and homogeneous PDE:
+		if (isSourceSet_) {
+			// get the correct scheme:
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomScheme(scheme);
+			// create a container to carry discretized source heat
+			Container<T, Alloc> sourceCurr(spaceN_ + 1, T{});
+			Container<T, Alloc> sourceNext(spaceN_ + 1, T{});
+			discretizeInSpace(h, spacer_.lower(), 0.0, source_, sourceCurr);
+			discretizeInSpace(h, spacer_.lower(), time, source_, sourceNext);
+			// loop for stepping in time:
+			while (time <= lastTime) {
+				schemeFun(lambda, T{}, k, prevSol, sourceCurr, sourceNext, rhs);
+				fdmSolver_.setRhs(rhs);
+				fdmSolver_.solve(nextSol);
+				prevSol = nextSol;
+				discretizeInSpace(h, spacer_.lower(), time, source_, sourceCurr);
+				discretizeInSpace(h, spacer_.lower(), 2.0*time, source_, sourceNext);
+				time += k;
+			}
+		}
+		else {
+			// get the correct scheme:
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
+			// loop for stepping in time:
+			while (time <= lastTime) {
+				schemeFun(lambda, T{}, prevSol, rhs);
+				fdmSolver_.setRhs(rhs);
+				fdmSolver_.solve(nextSol);
+				prevSol = nextSol;
+				time += k;
+			}
 		}
 		// copy into solution vector
 		std::copy(prevSol.begin(), prevSol.end(), solution.begin());
@@ -483,15 +518,15 @@ namespace lss_one_dim_heat_equation_solvers {
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		if (scheme == ExplicitPDESchemes::Euler) {
-			ExplicitHeatEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
+			ExplicitHeatEulerScheme<T> euler{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
 			euler(boundary_, solution);
 		}
 		else if(scheme == ExplicitPDESchemes::ADEBarakatClark) {
-			ADEHeatBakaratClarkScheme<T> adebc{ initCondition,h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
+			ADEHeatBakaratClarkScheme<T> adebc{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
 			adebc(boundary_, solution);
 		}
 		else {
-			ADEHeatSaulyevScheme<T> ades{ initCondition,h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
+			ADEHeatSaulyevScheme<T> ades{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
 			ades(boundary_, solution);
 		}
 	}
@@ -520,7 +555,7 @@ namespace lss_one_dim_heat_equation_solvers {
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		// Here we have only ExplicitEulerScheme available
-		ExplicitHeatEulerScheme<T> euler{ initCondition,h,k,terminalT_,diffusivity_ };
+		ExplicitHeatEulerScheme<T> euler{ initCondition,spacer_.lower(),h,k,terminalT_,diffusivity_,isSourceSet_,source_ };
 		euler(left_, right_, solution);
 		
 	}
