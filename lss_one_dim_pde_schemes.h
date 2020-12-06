@@ -21,7 +21,10 @@ namespace lss_one_dim_pde_schemes {
 	template<typename T>
 	using  SchemeFunctionCUDA = std::function<void(T,T, std::vector<T> const&, std::vector<T> &,
 													std::pair<T, T> const &, std::pair<T, T> const &)>;
-
+	template<typename T>
+	using InhomSchemeFunctionCUDA = std::function<void(T, T, T, std::vector<T> const&, std::vector<T> const&,
+														std::vector<T> const&, std::vector<T>&,
+														std::pair<T, T> const&, std::pair<T, T> const&)>;
 
 	// ==============================================================================================================
 	// ========================================= ImplicitHeatEquationSchemes  =======================================
@@ -146,6 +149,52 @@ namespace lss_one_dim_pde_schemes {
 				else
 					return schemeFunRobin;
 			}
+
+			static InhomSchemeFunctionCUDA<T> const getInhomSchemeCUDA(BoundaryConditionType bcType,
+																		ImplicitPDESchemes scheme) {
+				double theta{};
+				if (scheme == ImplicitPDESchemes::Euler)
+					theta = 1.0;
+				else
+					theta = 0.5;
+
+				auto schemeFunDirichlet = [=](T lambda, T gamma, T timeStep,
+					std::vector<T> const& input,
+					std::vector<T> const& inhomInput,
+					std::vector<T> const& inhomInputNext,
+					std::vector<T> &solution,
+					std::pair<T, T> const &boundaryPair0,
+					std::pair<T, T> const &boundaryPair1) {
+
+					T const left = boundaryPair0.first;
+					T const right = boundaryPair0.second;
+					std::size_t const lastIdx = solution.size() - 1;
+
+					solution[0] = (lambda*(1.0 - theta)*input[1])
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[0]
+						+ (lambda*left) + 
+						timeStep * (theta*inhomInputNext[0] +
+						(1.0 - theta)*inhomInput[0]);
+
+					for (std::size_t t = 1; t < lastIdx; ++t) {
+						solution[t] = (lambda*(1.0 - theta)*input[t + 1])
+							+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
+							+ (lambda*(1.0 - theta)*input[t - 1]) +
+							timeStep * (theta*inhomInputNext[t] +
+							(1.0 - theta)*inhomInput[t]);
+					}
+
+					solution[lastIdx] = (lambda*right)
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[lastIdx]
+						+ (lambda*(1.0 - theta)*input[lastIdx - 1]) + 
+						timeStep * (theta*inhomInputNext[lastIdx] +
+						(1.0 - theta)*inhomInput[lastIdx]);
+				};
+
+				return schemeFunDirichlet;
+
+			}
+
 	};
 
 	// ==============================================================================================================

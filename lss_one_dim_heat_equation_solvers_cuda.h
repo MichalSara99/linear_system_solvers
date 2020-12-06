@@ -58,8 +58,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			std::size_t timeN_;															// number of time subdivisions
 			std::size_t spaceN_;														// number of space subdivisions
 			std::function<T(T)> init_;													// initi condition
+			std::function<T(T, T)> source_;												// heat source
 			std::pair<T, T> boundary_;													// boundaries
 			T diffusivity_;																// diffusivity = c^2 in PDE
+			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
@@ -71,7 +73,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				:spacer_{ spaceRange },
 				terminalT_{ terminalTime },
 				timeN_{ timeDiscretization },
-				spaceN_{ spaceDiscretization } {}
+				spaceN_{ spaceDiscretization },
+				source_{nullptr},
+				isSourceSet_{false} {}
 
 			~Implicit1DHeatEquationCUDA() {}
 
@@ -90,7 +94,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 				init_ = initialCondition;
 			}
-
+			inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+				isSourceSet_ = true;
+				source_ = heatSource;
+			}
 			inline void setThermalDiffusivity(T value) {
 				diffusivity_ = value;
 			}
@@ -197,8 +204,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			std::size_t timeN_;
 			std::size_t spaceN_;
 			std::function<T(T)> init_;
+			std::function<T(T, T)> source_;								// heat source
 			std::pair<T, T> boundary_;
 			T diffusivity_;
+			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
@@ -210,7 +219,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				:spacer_{ spaceRange },
 				terminalT_{ terminalTime },
 				timeN_{ timeDiscretization },
-				spaceN_{ spaceDiscretization } {}
+				spaceN_{ spaceDiscretization },
+				source_{nullptr},
+				isSourceSet_{false} {}
 
 			~Explicit1DHeatEquationCUDA() {}
 
@@ -229,7 +240,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 				init_ = initialCondition;
 			}
-
+			inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+				isSourceSet_ = true;
+				source_ = heatSource;
+			}
 			inline void setThermalDiffusivity(T value) {
 				diffusivity_ = value;
 			}
@@ -257,9 +271,11 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			std::size_t timeN_;
 			std::size_t spaceN_;
 			std::function<T(T)> init_;
+			std::function<T(T, T)> source_;
 			std::pair<T, T> leftBoundary_;
 			std::pair<T, T> rightBoundary_;
 			T diffusivity_;
+			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
@@ -271,7 +287,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				:spacer_{ spaceRange },
 				terminalT_{ terminalTime },
 				timeN_{ timeDiscretization },
-				spaceN_{ spaceDiscretization } {}
+				spaceN_{ spaceDiscretization },
+				source_{ nullptr },
+				isSourceSet_{ false } {}
 
 			~Explicit1DHeatEquationCUDA() {}
 
@@ -293,7 +311,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 			inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 				init_ = initialCondition;
 			}
-
+			inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+				isSourceSet_ = true;
+				source_ = heatSource;
+			}
 			inline void setThermalDiffusivity(T value) {
 				diffusivity_ = value;
 			}
@@ -329,8 +350,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
-		// get the correct scheme:
-		auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Dirichlet,scheme);
 		// get correct theta according to the scheme:
 		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
 		// get space step:
@@ -369,14 +388,38 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solver_.initialize(m);
 		// insert sparse matrix A and vector b:
 		solver_.setFlatSparseMatrix(std::move(fsm));
-		// loop for stepping in time:
-		while (time <= lastTime) {
-			schemeFun(lambda, T{}, prevSol, rhs, boundary_, std::pair<T, T>());
-			solver_.setRhs(rhs);
-			solver_.solve(nextSol);
-			prevSol = nextSol;
-			time += k;
+		if (isSourceSet_) {
+			// get the correct scheme:
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomSchemeCUDA(BoundaryConditionType::Dirichlet, scheme);
+			// create a container to carry discretized source heat
+			Container<T, Alloc> sourceCurr(m, T{});
+			Container<T, Alloc> sourceNext(m, T{});
+			discretizeInSpace(h, (spacer_.lower() + h), 0.0, source_, sourceCurr);
+			discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceNext);
+			// loop for stepping in time:
+			while (time <= lastTime) {
+				schemeFun(lambda, T{},k, prevSol, sourceCurr, sourceNext, rhs, boundary_, std::pair<T, T>());
+				solver_.setRhs(rhs);
+				solver_.solve(nextSol);
+				prevSol = nextSol;
+				discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceCurr);
+				discretizeInSpace(h, (spacer_.lower() + h), 2.0*time, source_, sourceNext);
+				time += k;
+			}
 		}
+		else {
+			// get the correct scheme:
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Dirichlet, scheme);
+			// loop for stepping in time:
+			while (time <= lastTime) {
+				schemeFun(lambda, T{}, prevSol, rhs, boundary_, std::pair<T, T>());
+				solver_.setRhs(rhs);
+				solver_.solve(nextSol);
+				prevSol = nextSol;
+				time += k;
+			}
+		}
+
 		// copy into solution vector
 		solution[0] = boundary_.first;
 		std::copy(prevSol.begin(), prevSol.end(), std::next(solution.begin()));
@@ -471,16 +514,17 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
-		// calculate lambda:
-		T const lambda = (diffusivity_ *  k) / (h*h);
+		// space start:
+		T const spaceStart = spacer_.lower();
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, spacer_.lower(), prevSol);
+		discretizeSpace(h, spaceStart, prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 
-		ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(lambda, k, terminalT_, prevSol);
+		ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(spaceStart, h, k, terminalT_, diffusivity_,
+			prevSol, isSourceSet_, source_);
 		eulerScheme(boundary_, solution);
 	}
 
@@ -501,16 +545,17 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
-		// calculate lambda:
-		T const lambda = (diffusivity_ *  k) / (h*h);
+		// space start:
+		T const spaceStart = spacer_.lower();
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, spacer_.lower(), prevSol);
+		discretizeSpace(h, spaceStart, prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 
-		ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(lambda, k, terminalT_, prevSol);
+		ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(spaceStart, h, k, terminalT_, diffusivity_,
+			prevSol, isSourceSet_, source_);
 		eulerScheme(leftBoundary_, rightBoundary_, solution);
 	}
 

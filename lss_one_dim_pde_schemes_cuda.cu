@@ -30,20 +30,51 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 		float time = timeStep_;
 		float k = timeStep_;
+		float h = spaceStep_;
 		float left = boundaryPair.first;
 		float right = boundaryPair.second;
-		while (time <= terminalT_) {
-			// populate new solution in d_next:
-			explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_,gamma_, size);
-			// fill in the dirichlet boundaries in d_next:
-			fillDirichletBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
-			// swap the two pointers:
-			swap(d_prev, d_next);
-			time += k;
+
+		if (isSourceSet_) {
+			// prepare a pointer for source on device:
+			float *d_source = NULL;
+			// allocate block memory on device:
+			cudaMalloc((void**)&d_source, size * sizeof(float));
+			// create vector on host:
+			std::vector<float> h_source(size, 0.0f);
+			// source is zero:
+			while (time <= terminalT_) {
+				// discretize source function on host:
+				discretizeInSpace(h,spaceStart_, time, source_, h_source);
+				// copy h_source contents to d_source (host => device ):
+				cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
+					cudaMemcpyKind::cudaMemcpyHostToDevice);
+				// populate new solution in d_next:
+				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> > (d_prev, d_next, d_source, lambda_, gamma_, k, size);
+				// fill in the dirichlet boundaries in d_next:
+				fillDirichletBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
+				// swap the two pointers:
+				swap(d_prev, d_next);
+				time += k;
+			}
+			// free allocated memory blocks on device:
+			cudaFree(d_source);
+		}
+		else {
+			// source is zero:
+			while (time <= terminalT_) {
+				// populate new solution in d_next:
+				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_, gamma_, size);
+				// fill in the dirichlet boundaries in d_next:
+				fillDirichletBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
+				// swap the two pointers:
+				swap(d_prev, d_next);
+				time += k;
+			}
 		}
 		// copy the contents of d_next to the solution pointer:
 		cudaMemcpy(solution, d_prev, size * sizeof(float),
 			cudaMemcpyKind::cudaMemcpyDeviceToHost);
+		// free allocated memory blocks on device:
 		cudaFree(d_prev);
 		cudaFree(d_next);
 	}
@@ -65,17 +96,47 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 		double time = timeStep_;
 		double k = timeStep_;
+		double h = spaceStep_;
 		double left = boundaryPair.first;
 		double right = boundaryPair.second;
-		while (time <= terminalT_) {
-			// populate new solution in d_next:
-			explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_prev, d_next, lambda_,gamma_, size);
-			// fill in the dirichlet boundaries in d_next:
-			fillDirichletBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
-			// swap the two pointers:
-			swap(d_prev, d_next);
-			time += k;
+
+		if (isSourceSet_) {
+			// prepare a pointer for source on device:
+			double *d_source = NULL;
+			// allocate block memory on device:
+			cudaMalloc((void**)&d_source, size * sizeof(double));
+			// create vector on host:
+			std::vector<double> h_source(size, 0.0);
+			// source is zero:
+			while (time <= terminalT_) {
+				// discretize source function on host:
+				discretizeInSpace(h, spaceStart_, time, source_, h_source);
+				// copy h_source contents to d_source (host => device ):
+				cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
+					cudaMemcpyKind::cudaMemcpyHostToDevice);
+				// populate new solution in d_next:
+				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, d_source, lambda_, gamma_, k, size);
+				// fill in the dirichlet boundaries in d_next:
+				fillDirichletBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
+				// swap the two pointers:
+				swap(d_prev, d_next);
+				time += k;
+			}
+			// free allocated memory blocks on device:
+			cudaFree(d_source);
 		}
+		else {
+			while (time <= terminalT_) {
+				// populate new solution in d_next:
+				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_, gamma_, size);
+				// fill in the dirichlet boundaries in d_next:
+				fillDirichletBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
+				// swap the two pointers:
+				swap(d_prev, d_next);
+				time += k;
+			}
+		}
+
 		// copy the contents of d_next to the solution pointer:
 		cudaMemcpy(solution, d_prev, size * sizeof(double),
 			cudaMemcpyKind::cudaMemcpyDeviceToHost);

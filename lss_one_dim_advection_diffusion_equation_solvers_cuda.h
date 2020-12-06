@@ -202,9 +202,11 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 				std::size_t timeN_;
 				std::size_t spaceN_;
 				std::function<T(T)> init_;
+				std::function<T(T, T)> source_;
 				std::pair<T, T> boundary_;
 				T diffusivity_;
 				T convection_;
+				bool isSourceSet_;
 
 			public:
 				typedef T value_type;
@@ -216,7 +218,9 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 					:spacer_{ spaceRange },
 					terminalT_{ terminalTime },
 					timeN_{ timeDiscretization },
-					spaceN_{ spaceDiscretization } {}
+					spaceN_{ spaceDiscretization },
+					source_{ nullptr },
+					isSourceSet_{ false } {}
 
 				~Explicit1DAdvectionDiffusionEquationCUDA() {}
 
@@ -235,7 +239,10 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 				inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 					init_ = initialCondition;
 				}
-
+				inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+					isSourceSet_ = true;
+					source_ = heatSource;
+				}
 				inline void setThermalDiffusivity(T value) {
 					diffusivity_ = value;
 				}
@@ -269,10 +276,12 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 				std::size_t timeN_;
 				std::size_t spaceN_;
 				std::function<T(T)> init_;
+				std::function<T(T, T)> source_;
 				std::pair<T, T> leftBoundary_;
 				std::pair<T, T> rightBoundary_;
 				T diffusivity_;
 				T convection_;
+				bool isSourceSet_;
 
 			public:
 				typedef T value_type;
@@ -284,7 +293,9 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 					:spacer_{ spaceRange },
 					terminalT_{ terminalTime },
 					timeN_{ timeDiscretization },
-					spaceN_{ spaceDiscretization } {}
+					spaceN_{ spaceDiscretization }, 
+					source_ {nullptr},
+					isSourceSet_{ false } {}
 
 				~Explicit1DAdvectionDiffusionEquationCUDA() {}
 
@@ -306,7 +317,10 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 				inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 					init_ = initialCondition;
 				}
-
+				inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+					isSourceSet_ = true;
+					source_ = heatSource;
+				}
 				inline void setThermalDiffusivity(T value) {
 					diffusivity_ = value;
 				}
@@ -494,18 +508,17 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
-		// calculate lambda:
-		T const lambda = (diffusivity_ *  k) / (h*h);
-		// calculate gamma:
-		T const gamma = (convection_ * k) / (2.0*h);
+		// space start:
+		T const spaceStart = spacer_.lower();
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
-		discretizeSpace(h, spacer_.lower(), prevSol);
+		discretizeSpace(h, spaceStart, prevSol);
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 
-		ExplicitAdvectionDiffusionEquationScheme<T, Container, Alloc> eulerScheme(lambda, gamma, k, terminalT_, prevSol);
+		ExplicitAdvectionDiffusionEquationScheme<T, Container, Alloc> eulerScheme(spaceStart,h,k,terminalT_, diffusivity_,
+			convection_, prevSol, isSourceSet_, source_);
 		eulerScheme(boundary_, solution);
 	}
 
@@ -526,10 +539,8 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
-		// calculate lambda:
-		T const lambda = (diffusivity_ *  k) / (h*h);
-		// calculate gamma:
-		T const gamma = (convection_ * k) / (2.0*h);
+		// space start:
+		T const spaceStart = spacer_.lower();
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
@@ -537,7 +548,8 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 
-		ExplicitAdvectionDiffusionEquationScheme<T, Container, Alloc> eulerScheme(lambda, gamma, k, terminalT_, prevSol);
+		ExplicitAdvectionDiffusionEquationScheme<T, Container, Alloc> eulerScheme(spaceStart, h, k, terminalT_, diffusivity_,
+			convection_, prevSol, isSourceSet_, source_);
 		eulerScheme(leftBoundary_, rightBoundary_, solution);
 	}
 

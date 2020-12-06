@@ -5,28 +5,44 @@
 
 #include<tuple>
 #include"lss_macros.h"
+#include"lss_one_dim_pde_utility.h"
 
 namespace lss_one_dim_pde_schemes_cuda {
 
+	using lss_one_dim_pde_utility::Discretization;
 
 
-	class ExplicitEulerLoopSP {
+	class ExplicitEulerLoopSP:
+		public Discretization<float,std::vector,std::allocator<float>> {
 	private:
+		float spaceStart_;
+		float spaceStep_;
 		float timeStep_;
 		float lambda_;
 		float gamma_;
 		float terminalT_;
+		std::function<float(float, float)> source_;
+		bool isSourceSet_;
+
 	public:
 		~ExplicitEulerLoopSP(){}
 		explicit ExplicitEulerLoopSP() = delete;
-		explicit ExplicitEulerLoopSP(float timeStep,
+		explicit ExplicitEulerLoopSP(float spaceStart,
+									float spaceStep,
+									float timeStep,
 									float lambda,
 									float gamma,
-									float terminalTime):
+									float terminalTime,
+									std::function<float(float, float)> const &source,
+									bool isSourceSet = false):
+			spaceStart_{ spaceStart },
+			spaceStep_{ spaceStep },
 			timeStep_{ timeStep },
 			lambda_{ lambda },
 			gamma_{gamma},
-			terminalT_{ terminalTime } {}
+			terminalT_{ terminalTime },
+			source_{source},
+			isSourceSet_{ isSourceSet } {}
 
 
 		void operator()(float const *input, std::pair<float, float> const &dirichletBC,
@@ -35,23 +51,37 @@ namespace lss_one_dim_pde_schemes_cuda {
 						std::pair<float, float> const &rightRobinBC, unsigned long long const size, float *solution)const;
 	};
 	
-	class ExplicitEulerLoopDP {
+	class ExplicitEulerLoopDP:
+		public Discretization<double, std::vector, std::allocator<double>> {
 	private:
+		double spaceStart_;
+		double spaceStep_;
 		double timeStep_;
 		double lambda_;
 		double gamma_;
 		double terminalT_;
+		std::function<double(double, double)> source_;
+		bool isSourceSet_;
+
 	public:
 		~ExplicitEulerLoopDP() {}
 		explicit ExplicitEulerLoopDP() = delete;
-		explicit ExplicitEulerLoopDP(double timeStep,
+		explicit ExplicitEulerLoopDP(double spaceStart,
+									double spaceStep,
+									double timeStep,
 									double lambda,
 									double gamma,
-									double terminalTime):
+									double terminalTime,
+									std::function<double(double, double)> const &source,
+									bool isSourceSet = false):
+			spaceStart_{ spaceStart },
+			spaceStep_{ spaceStep },
 			timeStep_{timeStep},
 			lambda_{lambda},
 			gamma_{gamma},
-			terminalT_{ terminalTime } {}
+			terminalT_{ terminalTime },
+			source_{source},
+			isSourceSet_{ isSourceSet } {}
 
 		void operator()(double const *input, std::pair<double, double> const &dirichletBC,
 						unsigned long long const size, double *solution)const;
@@ -77,22 +107,35 @@ namespace lss_one_dim_pde_schemes_cuda {
 			typename Alloc>
 		class ExplicitEulerHeatEquationScheme<float, Container,Alloc> {
 		private:
-			float lambda_;
+			float spaceStart_;
+			float spaceStep_;
 			float timeStep_;
 			float terminalT_;
+			float diffusivity_;
 			Container<float, Alloc> init_;
+			bool isSourceSet_;
+			std::function<float(float, float)> source_;
+
 
 		public:
 			typedef float value_type;
 			explicit ExplicitEulerHeatEquationScheme() = delete;
-			explicit ExplicitEulerHeatEquationScheme(float lambda,
+			explicit ExplicitEulerHeatEquationScheme(float spaceStart,
+													float spaceStep,
 													float timeStep,
 													float terminalTime,
-													Container<float, Alloc> const &init)
-				:lambda_{ lambda },
+													float diffusivity,
+													Container<float, Alloc> const &init,
+													bool isSourceSet,
+													std::function<float(float, float)> const &source = nullptr)
+				:spaceStart_{ spaceStart },
+				spaceStep_{ spaceStep },
 				timeStep_{timeStep},
 				terminalT_{ terminalTime },
-				init_{init} {}
+				diffusivity_{ diffusivity },
+				init_{init},
+				isSourceSet_{ isSourceSet },
+				source_{ source } {}
 
 			~ExplicitEulerHeatEquationScheme() {}
 
@@ -117,22 +160,34 @@ namespace lss_one_dim_pde_schemes_cuda {
 			typename Alloc>
 		class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
 		private:
-			double lambda_;
+			double spaceStart_;
+			double spaceStep_;
 			double timeStep_;
 			double terminalT_;
+			double diffusivity_;
 			Container<double, Alloc> init_;
+			bool isSourceSet_;
+			std::function<double(double, double)> source_;
 
 		public:
 			typedef double value_type;
 			explicit ExplicitEulerHeatEquationScheme() = delete;
-			explicit ExplicitEulerHeatEquationScheme(double lambda,
+			explicit ExplicitEulerHeatEquationScheme(double spaceStart,
+													double spaceStep,
 													double timeStep,
 													double terminalTime,
-													Container<double, Alloc> const &init)
-				:lambda_{ lambda },
+													double diffusivity,
+													Container<double, Alloc> const &init,
+													bool isSourceSet,
+													std::function<double(double, double)> const &source = nullptr)
+				:spaceStart_{ spaceStart },
+				spaceStep_{ spaceStep },
 				timeStep_{timeStep},
 				terminalT_{ terminalTime },
-				init_{ init } {}
+				diffusivity_{ diffusivity },
+				init_{ init },				
+				isSourceSet_ {isSourceSet},
+				source_{ source } {}
 
 			~ExplicitEulerHeatEquationScheme() {}
 
@@ -165,25 +220,37 @@ namespace lss_one_dim_pde_schemes_cuda {
 		typename Alloc>
 		class ExplicitAdvectionDiffusionEquationScheme<float, Container, Alloc> {
 		private:
-			float lambda_;
-			float gamma_;
+			float spaceStart_;
+			float spaceStep_;
 			float timeStep_;
 			float terminalT_;
+			float diffusivity_;
+			float convection_;
 			Container<float, Alloc> init_;
+			bool isSourceSet_;
+			std::function<float(float, float)> source_;
 
 		public:
 			typedef float value_type;
 			explicit ExplicitAdvectionDiffusionEquationScheme() = delete;
-			explicit ExplicitAdvectionDiffusionEquationScheme(float lambda,
-															float gamma,
+			explicit ExplicitAdvectionDiffusionEquationScheme(float spaceStart,
+															float spaceStep,
 															float timeStep,
 															float terminalTime,
-															Container<float, Alloc> const &init)
-				:lambda_{ lambda },
-				gamma_{ gamma },
+															float diffusivity,
+															float convection,
+															Container<float, Alloc> const &init,
+															bool isSourceSet,
+															std::function<float(float, float)> const &source = nullptr)
+				:spaceStart_{ spaceStart },
+				spaceStep_{ spaceStep },
 				timeStep_{ timeStep },
 				terminalT_{ terminalTime },
-				init_{ init } {}
+				diffusivity_{ diffusivity },
+				convection_{ convection },
+				init_{ init },
+				isSourceSet_{ isSourceSet },
+				source_{ source } {}
 
 			~ExplicitAdvectionDiffusionEquationScheme() {}
 
@@ -208,25 +275,37 @@ namespace lss_one_dim_pde_schemes_cuda {
 		typename Alloc>
 		class ExplicitAdvectionDiffusionEquationScheme<double, Container, Alloc> {
 		private:
-			double lambda_;
-			double gamma_;
+			double spaceStart_;
+			double spaceStep_;
 			double timeStep_;
 			double terminalT_;
+			double diffusivity_;
+			double convection_;
 			Container<double, Alloc> init_;
+			bool isSourceSet_;
+			std::function<double(double, double)> source_;
 
 		public:
 			typedef double value_type;
 			explicit ExplicitAdvectionDiffusionEquationScheme() = delete;
-			explicit ExplicitAdvectionDiffusionEquationScheme(double lambda,
-															double gamma,
+			explicit ExplicitAdvectionDiffusionEquationScheme(double spaceStart,
+															double spaceStep,
 															double timeStep,
 															double terminalTime,
-															Container<double, Alloc> const &init)
-				:lambda_{ lambda },
-				gamma_{gamma},
+															double diffusivity,
+															double convection,
+															Container<double, Alloc> const &init,
+															bool isSourceSet,
+															std::function<double(double, double)> const &source = nullptr)
+				:spaceStart_{ spaceStart },
+				spaceStep_{ spaceStep },
 				timeStep_{ timeStep },
 				terminalT_{ terminalTime },
-				init_{ init } {}
+				diffusivity_{ diffusivity },
+				convection_{ convection },
+				init_{ init },
+				isSourceSet_{ isSourceSet },
+				source_{ source } {}
 
 			~ExplicitAdvectionDiffusionEquationScheme() {}
 
@@ -260,13 +339,15 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		float const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
 		// create prev pointer:
 		float *prev = (float*)malloc(size * sizeof(float));
 		std::copy(init_.begin(), init_.end(), prev);
 		// create next pointer:
 		float *next = (float*)malloc(size * sizeof(float));
 		// launch the Euler loop:
-		ExplicitEulerLoopSP loop{ timeStep_,lambda_,0.0f,terminalT_ };
+		ExplicitEulerLoopSP loop{spaceStart_, spaceStep_,timeStep_,lambda,0.0f,terminalT_,source_,isSourceSet_ };
 		loop(prev, boundaryPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
@@ -282,6 +363,8 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		double const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
 		// create prev pointer:
 		double *prev = (double*)malloc(size * sizeof(double));
 		std::copy(init_.begin(), init_.end(), prev);
@@ -289,7 +372,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 		// create next pointer:
 		double *next = (double*)malloc(size * sizeof(double));
 		// launch the Euler loop:
-		ExplicitEulerLoopDP loop{ timeStep_,lambda_,0.0,terminalT_ };
+		ExplicitEulerLoopDP loop{ spaceStart_, spaceStep_, timeStep_,lambda,0.0,terminalT_,source_,isSourceSet_ };
 		loop(prev, boundaryPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
@@ -306,13 +389,15 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		float const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
 		// create prev pointer:
 		float *prev = (float*)malloc(size * sizeof(float));
 		std::copy(init_.begin(), init_.end(), prev);
 		// create next pointer:
 		float *next = (float*)malloc(size * sizeof(float));
 		// launch the Euler loop:
-		ExplicitEulerLoopSP loop{ timeStep_,lambda_,0.0f,terminalT_ };
+		ExplicitEulerLoopSP loop{ spaceStart_, spaceStep_, timeStep_,lambda,0.0f,terminalT_,source_,isSourceSet_ };
 		loop(prev, leftPair, rightPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
@@ -329,6 +414,8 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		double const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
 		// create prev pointer:
 		double *prev = (double*)malloc(size * sizeof(double));
 		std::copy(init_.begin(), init_.end(), prev);
@@ -336,7 +423,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 		// create next pointer:
 		double *next = (double*)malloc(size * sizeof(double));
 		// launch the Euler loop:
-		ExplicitEulerLoopDP loop{ timeStep_,lambda_,0.0,terminalT_ };
+		ExplicitEulerLoopDP loop{ spaceStart_, spaceStep_, timeStep_,lambda,0.0,terminalT_,source_,isSourceSet_ };
 		loop(prev, leftPair, rightPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
@@ -358,13 +445,17 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		float const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
+		// calculate gamma:
+		float const gamma = (convection_ *  timeStep_) / (2.0f*spaceStep_);
 		// create prev pointer:
 		float *prev = (float*)malloc(size * sizeof(float));
 		std::copy(init_.begin(), init_.end(), prev);
 		// create next pointer:
 		float *next = (float*)malloc(size * sizeof(float));
 		// launch the Euler loop:
-		ExplicitEulerLoopSP loop{ timeStep_,lambda_,gamma_,terminalT_ };
+		ExplicitEulerLoopSP loop{ spaceStart_, spaceStep_, timeStep_,lambda,gamma,terminalT_,source_,isSourceSet_ };
 		loop(prev, boundaryPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
@@ -380,6 +471,10 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		double const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
+		// calculate gamma:
+		double const gamma = (convection_ *  timeStep_) / (2.0*spaceStep_);
 		// create prev pointer:
 		double *prev = (double*)malloc(size * sizeof(double));
 		std::copy(init_.begin(), init_.end(), prev);
@@ -387,7 +482,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 		// create next pointer:
 		double *next = (double*)malloc(size * sizeof(double));
 		// launch the Euler loop:
-		ExplicitEulerLoopDP loop{ timeStep_,lambda_,gamma_,terminalT_ };
+		ExplicitEulerLoopDP loop{ spaceStart_, spaceStep_, timeStep_,lambda,gamma,terminalT_,source_,isSourceSet_ };
 		loop(prev, boundaryPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
@@ -404,13 +499,17 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		float const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
+		// calculate gamma:
+		float const gamma = (convection_ *  timeStep_) / (2.0f*spaceStep_);
 		// create prev pointer:
 		float *prev = (float*)malloc(size * sizeof(float));
 		std::copy(init_.begin(), init_.end(), prev);
 		// create next pointer:
 		float *next = (float*)malloc(size * sizeof(float));
 		// launch the Euler loop:
-		ExplicitEulerLoopSP loop{ timeStep_,lambda_,gamma_,terminalT_ };
+		ExplicitEulerLoopSP loop{ spaceStart_, spaceStep_, timeStep_,lambda,gamma,terminalT_,source_,isSourceSet_ };
 		loop(prev, leftPair, rightPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
@@ -427,6 +526,10 @@ namespace lss_one_dim_pde_schemes_cuda {
 			"Initial and final solution must have the same size");
 		// get the size of the vector:
 		std::size_t const size = solution.size();
+		// construct lambda:
+		double const lambda = (diffusivity_*timeStep_) / (spaceStep_*spaceStep_);
+		// calculate gamma:
+		double const gamma = (convection_ *  timeStep_) / (2.0*spaceStep_);
 		// create prev pointer:
 		double *prev = (double*)malloc(size * sizeof(double));
 		std::copy(init_.begin(), init_.end(), prev);
@@ -434,7 +537,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 		// create next pointer:
 		double *next = (double*)malloc(size * sizeof(double));
 		// launch the Euler loop:
-		ExplicitEulerLoopDP loop{ timeStep_,lambda_,gamma_,terminalT_ };
+		ExplicitEulerLoopDP loop{ spaceStart_, spaceStep_, timeStep_,lambda,gamma,terminalT_,source_,isSourceSet_ };
 		loop(prev, leftPair, rightPair, size, next);
 		// next point to the solution
 		std::copy(next, next + size, solution.begin());
