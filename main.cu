@@ -64,10 +64,8 @@ int main(int argc, char const* argv[]) {
 	// testImplHeatEquationRobinBCDoubleSweep();
 	// testImplHeatEquationDirichletBCThomasLU();
 	// testImplHeatEquationRobinBCThomasLU();
-	// testImplHeatEquationSourceDirichletBC();
 	// testImplHeatEquationSourceRobinBCDoubleSweep();
 	// testImplHeatEquationSourceRobinBCThomasLU();
-	// testExplHeatEquationSourceDirichletBCEuler();
 	// testExplHeatEquationDirichletBC();
 	// testExplHeatEquationSourceDirichletBC();
 	// testImplNonHomHeatEquationDirichletBCDoubleSweep();
@@ -82,15 +80,18 @@ int main(int argc, char const* argv[]) {
 	// ==== lss_one_dim_heat_equation_solvers_cuda_t.h =====
 	// =====================================================
 
-	// testImplHeatEquationDirichletBCDevice();
-	// testImplHeatEquationDirichletBCHost();
-	// testImplHeatEquationRobinBCDevice();
-	// testImplNonHomHeatEquationDirichletBCDevice();
-	// testImplNonHomHeatEquationDirichletBCHost();
-	// testExplHeatEquationDirichletBCDevice();
-	// testExplNonHomHeatEquationDirichletBCDevice();
-	// testExplHeatEquationRobinBCDevice();
-
+	// testImplHeatEquationDirichletBCDeviceCUDA();
+	// testImplHeatEquationDirichletBCHostCUDA();
+	// testImplHeatEquationRobinBCDeviceCUDA();
+	// testImplHeatEquationSourceDirichletBCCUDA();
+	// testImplHeatEquationSourceRobinBCCUDA();
+	// testImplNonHomHeatEquationDirichletBCDeviceCUDA();
+	// testImplNonHomHeatEquationDirichletBCHostCUDA();
+	// testExplHeatEquationDirichletBCDeviceCUDA();
+	// testExplNonHomHeatEquationDirichletBCDeviceCUDA();
+	// testExplHeatEquationSourceDirichletBCEulerCUDA();
+	// testExplHeatEquationRobinBCDeviceCUDA();
+	// testExplHomHeatEquationSourceRobinBCCUDA();
 
 	// =====================================================
 

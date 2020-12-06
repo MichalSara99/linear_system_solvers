@@ -124,9 +124,11 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				std::size_t timeN_;															// number of time subdivisions
 				std::size_t spaceN_;														// number of space subdivisions
 				std::function<T(T)> init_;													// initi condition
-				std::pair<T, T> leftBoundary_;													// boundaries
-				std::pair<T, T> rightBoundary_;													// boundaries
+				std::function<T(T, T)> source_;												// heat source
+				std::pair<T, T> leftBoundary_;												// left boundaries
+				std::pair<T, T> rightBoundary_;												// right boundaries
 				T diffusivity_;																// diffusivity = c^2 in PDE
+				bool isSourceSet_;
 
 			public:
 				typedef T value_type;
@@ -138,7 +140,9 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 					:spacer_{ spaceRange },
 					terminalT_{ terminalTime },
 					timeN_{ timeDiscretization },
-					spaceN_{ spaceDiscretization } {}
+					spaceN_{ spaceDiscretization },
+					source_{ nullptr },
+					isSourceSet_{ false } {}
 
 				~Implicit1DHeatEquationCUDA() {}
 
@@ -160,7 +164,10 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 				inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
 					init_ = initialCondition;
 				}
-
+				inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
+					isSourceSet_ = true;
+					source_ = heatSource;
+				}
 				inline void setThermalDiffusivity(T value) {
 					diffusivity_ = value;
 				}
@@ -441,8 +448,6 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
-		// get the correct scheme:
-		auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Robin,scheme);
 		// get correct theta according to the scheme:
 		T const theta = ImplicitHeatEquationSchemes<T>::getTheta(scheme);
 		// get space step:
@@ -483,13 +488,37 @@ namespace lss_one_dim_heat_equation_solvers_cuda {
 		solver_.initialize(m);
 		// insert sparse matrix A and vector b:
 		solver_.setFlatSparseMatrix(std::move(fsm));
-		// loop for stepping in time:
-		while (time <= lastTime) {
-			schemeFun(lambda, T{}, prevSol, rhs, leftBoundary_, rightBoundary_);
-			solver_.setRhs(rhs);
-			solver_.solve(nextSol);
-			prevSol = nextSol;
-			time += k;
+		// differentiate between inhomogeneous and homogeneous PDE:
+		if (isSourceSet_) {
+			// get the correct scheme:
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomSchemeCUDA(BoundaryConditionType::Robin, scheme);
+			// create a container to carry discretized source heat
+			Container<T, Alloc> sourceCurr(m, T{});
+			Container<T, Alloc> sourceNext(m, T{});
+			discretizeInSpace(h, (spacer_.lower() + h), 0.0, source_, sourceCurr);
+			discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceNext);
+			// loop for stepping in time:
+			while (time <= lastTime) {
+				schemeFun(lambda, T{},k, prevSol, sourceCurr, sourceNext, rhs, leftBoundary_, rightBoundary_);
+				solver_.setRhs(rhs);
+				solver_.solve(nextSol);
+				prevSol = nextSol;
+				discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceCurr);
+				discretizeInSpace(h, (spacer_.lower() + h), 2.0*time, source_, sourceNext);
+				time += k;
+			}
+		}
+		else {
+			// get the correct scheme:
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeCUDA(BoundaryConditionType::Robin, scheme);
+			// loop for stepping in time:
+			while (time <= lastTime) {
+				schemeFun(lambda, T{}, prevSol, rhs, leftBoundary_, rightBoundary_);
+				solver_.setRhs(rhs);
+				solver_.solve(nextSol);
+				prevSol = nextSol;
+				time += k;
+			}
 		}
 		// copy into solution vector
 		std::copy(prevSol.begin(), prevSol.end(), solution.begin());
