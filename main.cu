@@ -104,7 +104,9 @@ int main(int argc, char const* argv[]) {
 	// testImplAdvectionDiffEquationRobinBCDoubleSweep();
 	// testImplAdvectionDiffEquationRobinBCThomasLU();
 	// testExplAdvectionDiffEquationRobinBC();
-
+	// testImplAdvectionDiffEquationSourceDirichletBCDoubleSweep();
+	// testImplAdvectionDiffEquationSourceDirichletBCThomasLU();
+	// testExplAdvectionDiffEquationSourceDirichletBC();
 
 	// ==========================================================
 

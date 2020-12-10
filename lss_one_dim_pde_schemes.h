@@ -269,6 +269,28 @@ namespace lss_one_dim_pde_schemes {
 			return schemeFun;
 		}
 
+		static InhomSchemeFunction<T> const getInhomScheme(ImplicitPDESchemes scheme) {
+			double theta{};
+			if (scheme == ImplicitPDESchemes::Euler)
+				theta = 1.0;
+			else
+				theta = 0.5;
+			auto schemeFun = [=](T lambda, T gamma, T timeStep,
+				std::vector<T> const& input,
+				std::vector<T> const& inhomInput,
+				std::vector<T> const& inhomInputNext,
+				std::vector<T> &solution) {
+				for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+					solution[t] = ((lambda - gamma)*(1.0 - theta)*input[t + 1])
+						+ (1.0 - (2.0*lambda*(1.0 - theta)))*input[t]
+						+ ((lambda + gamma)*(1.0 - theta)*input[t - 1])
+						+ timeStep * (theta*inhomInputNext[t] +
+						(1.0 - theta)*inhomInput[t]);
+				}
+			};
+			return schemeFun;
+		}
+
 		static SchemeFunctionCUDA<T> const getSchemeCUDA(BoundaryConditionType bcType,
 			ImplicitPDESchemes scheme) {
 			double theta{};
@@ -542,6 +564,8 @@ namespace lss_one_dim_pde_schemes {
 	template<typename T>
 	class ExplicitAdvectionDiffusionEulerScheme :public ExplicitSchemeBase<T> {
 	private:
+		std::function<T(T, T)> source_;
+		bool isSourceSet_;
 		T convection_;
 	public:
 		explicit ExplicitAdvectionDiffusionEulerScheme() = delete;
@@ -551,14 +575,18 @@ namespace lss_one_dim_pde_schemes {
 														T timeStep,
 														T terminalTime,
 														T thermalDiffusivity,
-														T convection)
+														T convection,
+														bool isSourceSet = false,
+														std::function<T(T, T)> const &source = nullptr)
 			:ExplicitSchemeBase<T>(initialCondition,
 									spaceStart,
 									spaceStep,
 									timeStep,
 									terminalTime,
 									thermalDiffusivity),
-			convection_{convection}{}
+			convection_{convection},
+			isSourceSet_{ isSourceSet },
+			source_{source}{}
 
 		~ExplicitAdvectionDiffusionEulerScheme() {}
 
@@ -592,6 +620,8 @@ namespace lss_one_dim_pde_schemes {
 	template<typename T>
 	class ADEAdvectionDiffusionBakaratClarkScheme :public ExplicitSchemeBase<T> {
 	private:
+		std::function<T(T, T)> source_;
+		bool isSourceSet_;
 		T convection_;
 	public:
 		explicit ADEAdvectionDiffusionBakaratClarkScheme() = delete;
@@ -601,14 +631,18 @@ namespace lss_one_dim_pde_schemes {
 														T timeStep,
 														T terminalTime,
 														T thermalDiffusivity,
-														T convection)
+														T convection,
+														bool isSourceSet = false,
+														std::function<T(T, T)> const &source = nullptr)
 			:ExplicitSchemeBase<T>(initialCondition,
 				spaceStart,
 				spaceStep,
 				timeStep,
 				terminalTime,
 				thermalDiffusivity),
-			convection_{ convection }{}
+			convection_{ convection },
+			isSourceSet_{ isSourceSet},
+			source_{source}{}
 
 		~ADEAdvectionDiffusionBakaratClarkScheme() {}
 
@@ -637,6 +671,8 @@ namespace lss_one_dim_pde_schemes {
 	template<typename T>
 	class ADEAdvectionDiffusionSaulyevScheme :public ExplicitSchemeBase<T> {
 	private:
+		std::function<T(T, T)> source_;
+		bool isSourceSet_;
 		T convection_;
 	public:
 		explicit ADEAdvectionDiffusionSaulyevScheme() = delete;
@@ -646,14 +682,18 @@ namespace lss_one_dim_pde_schemes {
 													T timeStep,
 													T terminalTime,
 													T thermalDiffusivity,
-													T convection)
+													T convection,
+													bool isSourceSet = false,
+													std::function<T(T, T)> const &source = nullptr)
 			:ExplicitSchemeBase<T>(initialCondition,
 									spaceStart,
 									spaceStep,
 									timeStep,
 									terminalTime,
 									thermalDiffusivity),
-			convection_{ convection }{}
+			convection_{ convection },
+			isSourceSet_{ isSourceSet },
+			source_{ source }{}
 
 		~ADEAdvectionDiffusionSaulyevScheme() {}
 
@@ -1000,15 +1040,34 @@ void lss_one_dim_pde_schemes::ExplicitAdvectionDiffusionEulerScheme<T>::operator
 	T const right = dirichletBCPair.second;
 	// size of the space vector:
 	std::size_t const spaceSize = solution.size();
-	// loop for stepping in time:
-	while (time <= terminalTime_) {
-		solution[0] = left;
-		solution[solution.size() - 1] = right;
-		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-			solution[t] = a * prevSol[t] + b * prevSol[t - 1] + c * prevSol[t + 1];
+	if (!isSourceSet_) {
+		// loop for stepping in time:
+		while (time <= terminalTime_) {
+			solution[0] = left;
+			solution[solution.size() - 1] = right;
+			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
+				solution[t] = a * prevSol[t] + b * prevSol[t - 1] + c * prevSol[t + 1];
+			}
+			prevSol = solution;
+			time += timeStep_;
 		}
-		prevSol = solution;
-		time += timeStep_;
+	}
+	else {
+		// create a container to carry discretized source heat
+		std::vector<T> sourceCurr(solution.size(), T{});
+		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		// loop for stepping in time:
+		while (time <= terminalTime_) {
+			solution[0] = left;
+			solution[solution.size() - 1] = right;
+			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
+				solution[t] = a * prevSol[t] + b * prevSol[t - 1] + c * prevSol[t + 1];
+					timeStep_ * sourceCurr[t];
+			}
+			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			prevSol = solution;
+			time += timeStep_;
+		}
 	}
 }
 
@@ -1079,6 +1138,7 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionBakaratClarkScheme<T>::operat
 	T const a = (1.0 - lambda) / divisor;
 	T const b = (lambda - gamma) / divisor;
 	T const c = (lambda + gamma) / divisor;
+	T const d = timeStep_ / divisor;
 	// left space boundary:
 	T const left = dirichletBCPair.first;
 	// right space boundary:
@@ -1088,30 +1148,57 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionBakaratClarkScheme<T>::operat
 	std::vector<T> com2(initialCondition_);
 	// size of the space vector:
 	std::size_t const spaceSize = solution.size();
+
+	// create a container to carry discretized source heat
+	std::vector<T> sourceCurr(spaceSize, T{});
+	std::vector<T> sourceNext(spaceSize, T{});
+
 	// create upsweep anonymous function:
-	auto upSweep = [=](std::vector<T>& upComponent) {
+	auto upSweep = [=](std::vector<T>& upComponent, std::vector<T> const &rhs, T rhsCoeff) {
 		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-			upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] + c * upComponent[t - 1];
+			upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] + c * upComponent[t - 1] + d * rhsCoeff *rhs[t];
 		}
 	};
 	// create downsweep anonymous function:
-	auto downSweep = [=](std::vector<T>& downComponent) {
+	auto downSweep = [=](std::vector<T>& downComponent, std::vector<T> const &rhs, T rhsCoeff) {
 		for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-			downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] + c * downComponent[t - 1];
+			downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] + c * downComponent[t - 1] + d * rhsCoeff *rhs[t];;
 		}
 	};
-	// loop for stepping in time:
-	while (time <= terminalTime_) {
-		com1[0] = com2[0] = left;
-		com1[solution.size() - 1] = com2[solution.size() - 1] = right;
-		std::thread upSweepTr(std::move(upSweep), std::ref(com1));
-		std::thread downSweepTr(std::move(downSweep), std::ref(com2));
-		upSweepTr.join();
-		downSweepTr.join();
-		for (std::size_t t = 0; t < spaceSize; ++t) {
-			solution[t] = 0.5*(com1[t] + com2[t]);
+
+	if (!isSourceSet_) {
+		// loop for stepping in time:
+		while (time <= terminalTime_) {
+			com1[0] = com2[0] = left;
+			com1[solution.size() - 1] = com2[solution.size() - 1] = right;
+			std::thread upSweepTr(std::move(upSweep), std::ref(com1), sourceCurr,0.0);
+			std::thread downSweepTr(std::move(downSweep), std::ref(com2), sourceCurr,0.0);
+			upSweepTr.join();
+			downSweepTr.join();
+			for (std::size_t t = 0; t < spaceSize; ++t) {
+				solution[t] = 0.5*(com1[t] + com2[t]);
+			}
+			time += timeStep_;
 		}
-		time += timeStep_;
+	}
+	else {
+		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
+		// loop for stepping in time:
+		while (time <= terminalTime_) {
+			com1[0] = com2[0] = left;
+			com1[solution.size() - 1] = com2[solution.size() - 1] = right;
+			std::thread upSweepTr(std::move(upSweep), std::ref(com1), sourceNext, 1.0);
+			std::thread downSweepTr(std::move(downSweep), std::ref(com2), sourceCurr, 1.0);
+			upSweepTr.join();
+			downSweepTr.join();
+			for (std::size_t t = 0; t < spaceSize; ++t) {
+				solution[t] = 0.5*(com1[t] + com2[t]);
+			}
+			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
+			time += timeStep_;
+		}
 	}
 }
 
@@ -1141,6 +1228,7 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionSaulyevScheme<T>::operator()(
 	T const a = (1.0 - lambda) / divisor;
 	T const b = (lambda - gamma) / divisor;
 	T const c = (lambda + gamma) / divisor;
+	T const d = timeStep_ / divisor;
 	// left space boundary:
 	T const left = dirichletBCPair.first;
 	// right space boundary:
@@ -1149,29 +1237,53 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionSaulyevScheme<T>::operator()(
 	solution = initialCondition_;
 	// size of the space vector:
 	std::size_t const spaceSize = solution.size();
+	// create a container to carry discretized source heat
+	std::vector<T> sourceCurr(spaceSize, T{});
+	std::vector<T> sourceNext(spaceSize, T{});
+
 	// create upsweep anonymous function:
-	auto upSweep = [=](std::vector<T>& upComponent) {
+	auto upSweep = [=](std::vector<T>& upComponent, std::vector<T> const &rhs, T rhsCoeff) {
 		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-			upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] + c * upComponent[t - 1];
+			upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] + c * upComponent[t - 1] + d * rhsCoeff *rhs[t];
 		}
 	};
 	// create downsweep anonymous function:
-	auto downSweep = [=](std::vector<T>& downComponent) {
+	auto downSweep = [=](std::vector<T>& downComponent, std::vector<T> const &rhs, T rhsCoeff) {
 		for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-			downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] + c * downComponent[t - 1];
+			downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] + c * downComponent[t - 1] + d * rhsCoeff *rhs[t];;
 		}
 	};
-	// loop for stepping in time:
-	std::size_t t = 1;
-	while (time <= terminalTime_) {
-		solution[0] = left;
-		solution[solution.size() - 1] = right;
-		if (t % 2 == 0)
-			downSweep(solution);
-		else
-			upSweep(solution);
-		++t;
-		time += timeStep_;
+	if (!isSourceSet_) {
+		// loop for stepping in time:
+		std::size_t t = 1;
+		while (time <= terminalTime_) {
+			solution[0] = left;
+			solution[solution.size() - 1] = right;
+			if (t % 2 == 0)
+				downSweep(solution, sourceCurr,0.0);
+			else
+				upSweep(solution, sourceCurr,0.0);
+			++t;
+			time += timeStep_;
+		}
+	}
+	else {
+		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
+		// loop for stepping in time:
+		std::size_t t = 1;
+		while (time <= terminalTime_) {
+			solution[0] = left;
+			solution[solution.size() - 1] = right;
+			if (t % 2 == 0)
+				downSweep(solution, sourceCurr, 1.0);
+			else
+				upSweep(solution, sourceNext, 1.0);
+			++t;
+			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
+			time += timeStep_;
+		}
 	}
 }
 
