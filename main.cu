@@ -59,7 +59,7 @@ int main(int argc, char const* argv[]) {
 	// ================ lss_one_dim_heat_equation_solvers_t.h =============
 	// ====================================================================
 
-		// testImplHeatEquationDirichletBCDoubleSweep();
+		 testImplHeatEquationDirichletBCDoubleSweep();
 		// testImplHeatEquationSourceDirichletBCDoubleSweep();
 		// testImplHeatEquationSourceDirichletBCThomasLU();
 		// testImplHeatEquationRobinBCDoubleSweep();
