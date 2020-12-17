@@ -2,9 +2,11 @@
 #if !defined(_LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_CUDA_T)
 #define _LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_CUDA_T
 
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_one_dim_heat_equation_solvers_cuda.h"
+#pragma warning(disable: 4305)
+
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"pde_solvers/one_dim/classic/lss_one_dim_heat_equation_solvers_cuda.h"
 
 #define PI 3.14159
 
@@ -136,7 +138,7 @@ void testImplHeatEquationFloatDirichletBCDeviceEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -147,12 +149,12 @@ void testImplHeatEquationFloatDirichletBCDeviceEuler() {
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
+		float const first = 2.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i + 1) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i + 1) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
@@ -164,7 +166,7 @@ void testImplHeatEquationFloatDirichletBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -288,7 +290,7 @@ void testImplHeatEquationFloatDirichletBCDeviceCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -299,12 +301,12 @@ void testImplHeatEquationFloatDirichletBCDeviceCN() {
 	impl_solver.solve(solution, ImplicitPDESchemes::CrankNicolson);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
+		float const first = 2.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i + 1) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i + 1) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
@@ -316,7 +318,7 @@ void testImplHeatEquationFloatDirichletBCDeviceCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -456,7 +458,7 @@ void testImplHeatEquationFloatDirichletBCHostEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -467,12 +469,12 @@ void testImplHeatEquationFloatDirichletBCHostEuler() {
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
+		float const first = 2.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i + 1) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i + 1) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
@@ -484,7 +486,7 @@ void testImplHeatEquationFloatDirichletBCHostEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -608,7 +610,7 @@ void testImplHeatEquationFloatDirichletBCHostCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -619,12 +621,12 @@ void testImplHeatEquationFloatDirichletBCHostCN() {
 	impl_solver.solve(solution, ImplicitPDESchemes::CrankNicolson);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
+		float const first = 2.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i + 1) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i + 1) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
@@ -636,7 +638,7 @@ void testImplHeatEquationFloatDirichletBCHostCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -733,7 +735,7 @@ void testImplHeatEquationDoubleRobinBCDeviceEuler() {
 		double var1{};
 		double var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var0 = (2 * i - 1);
+			var0 = (2.0 * i - 1.0);
 			var1 = std::exp(-1.0*pipi*var0*var0*t);
 			var2 = std::cos(var0*PI*x) / (var0*var0);
 			sum += (var1*var2);
@@ -793,7 +795,7 @@ void testImplHeatEquationFloatRobinBCDeviceEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -823,18 +825,18 @@ void testImplHeatEquationFloatRobinBCDeviceEuler() {
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
 		float const pipi = PI * PI;
-		float const first = 4.0 / pipi;
+		float const first = 4.0f / pipi;
 		float sum{};
 		float var0{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var0 = (2 * i - 1);
-			var1 = std::exp(-1.0*pipi*var0*var0*t);
+			var0 = (2.0f * i - 1.0f);
+			var1 = std::exp(-1.0f*pipi*var0*var0*t);
 			var2 = std::cos(var0*PI*x) / (var0*var0);
 			sum += (var1*var2);
 		}
-		return (0.5 - first * sum);
+		return (0.5f - first * sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -842,7 +844,7 @@ void testImplHeatEquationFloatRobinBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -924,7 +926,7 @@ void testImplHeatEquationDoubleRobinBCDeviceCN() {
 		double var1{};
 		double var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var0 = (2 * i - 1);
+			var0 = (2.0 * i - 1.0);
 			var1 = std::exp(-1.0*pipi*var0*var0*t);
 			var2 = std::cos(var0*PI*x) / (var0*var0);
 			sum += (var1*var2);
@@ -983,7 +985,7 @@ void testImplHeatEquationFloatRobinBCDeviceCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -1013,18 +1015,18 @@ void testImplHeatEquationFloatRobinBCDeviceCN() {
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
 		float const pipi = PI * PI;
-		float const first = 4.0 / pipi;
+		float const first = 4.0f / pipi;
 		float sum{};
 		float var0{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var0 = (2 * i - 1);
-			var1 = std::exp(-1.0*pipi*var0*var0*t);
+			var0 = (2.0f * i - 1.0f);
+			var1 = std::exp(-1.0f*pipi*var0*var0*t);
 			var2 = std::cos(var0*PI*x) / (var0*var0);
 			sum += (var1*var2);
 		}
-		return (0.5 - first * sum);
+		return (0.5f - first * sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -1032,7 +1034,7 @@ void testImplHeatEquationFloatRobinBCDeviceCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1118,11 +1120,11 @@ void testImplHeatEquationSourceFloatDirichletBCDeviceEuler() {
 		float lam_2{};
 		float var1{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
-			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			q_n = (2.0f / (i*PI))*std::pow(-1.0f, i + 1);
+			f_n = (2.0f / (i*PI))*(1.0f - std::pow(-1.0f, i));
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::sin(i*PI*x);
 			sum += var1;
 		}
 		return sum;
@@ -1281,11 +1283,11 @@ void testImplHeatEquationSourceFloatDirichletBCDeviceCN() {
 		float lam_2{};
 		float var1{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
-			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			q_n = (2.0f / (i*PI))*std::pow(-1.0f, i + 1);
+			f_n = (2.0f / (i*PI))*(1.0f - std::pow(-1.0f, i));
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::sin(i*PI*x);
 			sum += var1;
 		}
 		return sum;
@@ -1443,11 +1445,11 @@ void testImplHeatEquationSourceFloatDirichletBCHostEuler() {
 		float lam_2{};
 		float var1{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
-			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			q_n = (2.0f / (i*PI))*std::pow(-1.0f, i + 1);
+			f_n = (2.0f / (i*PI))*(1.0f - std::pow(-1.0f, i));
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::sin(i*PI*x);
 			sum += var1;
 		}
 		return sum;
@@ -1606,11 +1608,11 @@ void testImplHeatEquationSourceFloatDirichletBCHostCN() {
 		float lam_2{};
 		float var1{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
-			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			q_n = (2.0f / (i*PI))*std::pow(-1.0f, i + 1);
+			f_n = (2.0f / (i*PI))*(1.0f - std::pow(-1.0f, i));
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::sin(i*PI*x);
 			sum += var1;
 		}
 		return sum;
@@ -1621,7 +1623,7 @@ void testImplHeatEquationSourceFloatDirichletBCHostCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1796,13 +1798,13 @@ void testImplHeatEquationSourceFloatRobinBCDeviceEuler() {
 		for (std::size_t i = 1; i <= n; ++i) {
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			q_n = (2.0 / (lam_2))*(std::pow(-1.0, i) - 1.0);
+			q_n = (2.0f / (lam_2))*(std::pow(-1.0f, i) - 1.0f);
 			f_n = q_n;
 
-			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::cos(lam_n*x);
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::cos(lam_n*x);
 			sum += var1;
 		}
-		return ((0.5 + 0.5*t) + sum);
+		return ((0.5f + 0.5f*t) + sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -1810,7 +1812,7 @@ void testImplHeatEquationSourceFloatRobinBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1962,13 +1964,13 @@ void testImplHeatEquationSourceFloatRobinBCHostEuler() {
 		for (std::size_t i = 1; i <= n; ++i) {
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			q_n = (2.0 / (lam_2))*(std::pow(-1.0, i) - 1.0);
+			q_n = (2.0f / (lam_2))*(std::pow(-1.0f, i) - 1.0f);
 			f_n = q_n;
 
-			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::cos(lam_n*x);
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::cos(lam_n*x);
 			sum += var1;
 		}
-		return ((0.5 + 0.5*t) + sum);
+		return ((0.5f + 0.5f*t) + sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -1976,7 +1978,7 @@ void testImplHeatEquationSourceFloatRobinBCHostEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -2131,13 +2133,13 @@ void testImplHeatEquationSourceFloatRobinBCDeviceCN() {
 		for (std::size_t i = 1; i <= n; ++i) {
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			q_n = (2.0 / (lam_2))*(std::pow(-1.0, i) - 1.0);
+			q_n = (2.0f / (lam_2))*(std::pow(-1.0f, i) - 1.0f);
 			f_n = q_n;
 
-			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::cos(lam_n*x);
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::cos(lam_n*x);
 			sum += var1;
 		}
-		return ((0.5 + 0.5*t) + sum);
+		return ((0.5f + 0.5f*t) + sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -2145,7 +2147,7 @@ void testImplHeatEquationSourceFloatRobinBCDeviceCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -2297,13 +2299,13 @@ void testImplHeatEquationSourceFloatRobinBCHostCN() {
 		for (std::size_t i = 1; i <= n; ++i) {
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			q_n = (2.0 / (lam_2))*(std::pow(-1.0, i) - 1.0);
+			q_n = (2.0f / (lam_2))*(std::pow(-1.0f, i) - 1.0f);
 			f_n = q_n;
 
-			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::cos(lam_n*x);
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::cos(lam_n*x);
 			sum += var1;
 		}
-		return ((0.5 + 0.5*t) + sum);
+		return ((0.5f + 0.5f*t) + sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -2311,7 +2313,7 @@ void testImplHeatEquationSourceFloatRobinBCHostCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -2544,7 +2546,7 @@ void testImplNonHomHeatEquationFloatDirichletBCDeviceEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<float> solution(Sd + 1, 0.0);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -2555,16 +2557,16 @@ void testImplNonHomHeatEquationFloatDirichletBCDeviceEuler() {
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 198.0 / PI;
+		float const first = 198.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i ) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i ) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
-		return (100*x + first * sum);
+		return (100.0f*x + first * sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -2572,7 +2574,7 @@ void testImplNonHomHeatEquationFloatDirichletBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -2691,12 +2693,12 @@ void testImplNonHomHeatEquationFloatDirichletBCDeviceCN() {
 	// initial condition:
 	auto initialCondition = [](float x) {return x; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 100.0);
+	auto boundary = std::make_pair(0.0f, 100.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -2707,16 +2709,16 @@ void testImplNonHomHeatEquationFloatDirichletBCDeviceCN() {
 	impl_solver.solve(solution, ImplicitPDESchemes::CrankNicolson);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 198.0 / PI;
+		float const first = 198.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
-		return (100.0*x + first * sum);
+		return (100.0f*x + first * sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -2724,7 +2726,7 @@ void testImplNonHomHeatEquationFloatDirichletBCDeviceCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -2858,12 +2860,12 @@ void testImplNonHomHeatEquationFloatDirichletBCHostEuler() {
 	// initial condition:
 	auto initialCondition = [](float x) {return x; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 100.0);
+	auto boundary = std::make_pair(0.0f, 100.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -2874,16 +2876,16 @@ void testImplNonHomHeatEquationFloatDirichletBCHostEuler() {
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 198.0 / PI;
+		float const first = 198.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i ) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i ) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
-		return (100.0*x + first * sum);
+		return (100.0f*x + first * sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -2891,7 +2893,7 @@ void testImplNonHomHeatEquationFloatDirichletBCHostEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -3010,12 +3012,12 @@ void testImplNonHomHeatEquationFloatDirichletBCHostCN() {
 	// initial condition:
 	auto initialCondition = [](float x) {return x; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 100.0);
+	auto boundary = std::make_pair(0.0f, 100.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -3026,16 +3028,16 @@ void testImplNonHomHeatEquationFloatDirichletBCHostCN() {
 	impl_solver.solve(solution, ImplicitPDESchemes::CrankNicolson);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 198.0 / PI;
+		float const first = 198.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
-		return (100.0*x + first * sum);
+		return (100.0f*x + first * sum);
 	};
 
 	float const h = impl_solver.spaceStep();
@@ -3043,7 +3045,7 @@ void testImplNonHomHeatEquationFloatDirichletBCHostCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -3177,12 +3179,12 @@ void testExplHeatEquationFloatDirichletBCDeviceEuler() {
 	// initial condition:
 	auto initialCondition = [](float x) {return x; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 0.0);
+	auto boundary = std::make_pair(0.0f, 0.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	explicit_solver expl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	explicit_solver expl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -3193,12 +3195,12 @@ void testExplHeatEquationFloatDirichletBCDeviceEuler() {
 	expl_solver.solve(solution);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
+		float const first = 2.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i + 1) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i + 1) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
@@ -3210,7 +3212,7 @@ void testExplHeatEquationFloatDirichletBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -3339,12 +3341,12 @@ void testExplNonHomHeatEquationFloatDirichletBCDeviceEuler() {
 	// initial condition:
 	auto initialCondition = [](float x) {return x; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 100.0);
+	auto boundary = std::make_pair(0.0, 100.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	explicit_solver expl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	explicit_solver expl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -3355,16 +3357,16 @@ void testExplNonHomHeatEquationFloatDirichletBCDeviceEuler() {
 	expl_solver.solve(solution);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 198.0 / PI;
+		float const first = 198.0f / PI;
 		float sum{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var1 = std::pow(-1.0, i) * std::exp(-1.0*(i*PI)*(i*PI)*t);
+			var1 = std::pow(-1.0f, i) * std::exp(-1.0f*(i*PI)*(i*PI)*t);
 			var2 = std::sin(i*PI*x) / i;
 			sum += (var1*var2);
 		}
-		return (100.0*x + first * sum);
+		return (100.0f*x + first * sum);
 	};
 
 	float const h = expl_solver.spaceStep();
@@ -3372,7 +3374,7 @@ void testExplNonHomHeatEquationFloatDirichletBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -3451,11 +3453,11 @@ void testExplHeatEquationSourceFloatDirichletBCEuler() {
 		float lam_2{};
 		float var1{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			q_n = (2.0 / (i*PI))*std::pow(-1.0, i + 1);
-			f_n = (2.0 / (i*PI))*(1.0 - std::pow(-1.0, i));
+			q_n = (2.0f / (i*PI))*std::pow(-1.0f, i + 1);
+			f_n = (2.0f / (i*PI))*(1.0f - std::pow(-1.0f, i));
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::sin(i*PI*x);
+			var1 = (q_n / lam_2 + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::sin(i*PI*x);
 			sum += var1;
 		}
 		return sum;
@@ -3466,7 +3468,7 @@ void testExplHeatEquationSourceFloatDirichletBCEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -3640,12 +3642,12 @@ void testExplHeatEquationDoubleRobinBCDeviceEuler() {
 		double var1{};
 		double var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var0 = (2 * i - 1);
-			var1 = std::exp(-1.0*pipi*var0*var0*t);
+			var0 = (2.0f * i - 1.0f);
+			var1 = std::exp(-1.0f*pipi*var0*var0*t);
 			var2 = std::cos(var0*PI*x) / (var0*var0);
 			sum += (var1*var2);
 		}
-		return (0.5 - first * sum);
+		return (0.5f - first * sum);
 	};
 
 	std::cout << "tp : FDM | Exact | Abs Diff\n";
@@ -3692,9 +3694,9 @@ void testExplHeatEquationFloatRobinBCDeviceEuler() {
 	auto initialCondition = [](float x) {return x; };
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	explicit_solver expl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	explicit_solver expl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -3712,38 +3714,38 @@ void testExplHeatEquationFloatRobinBCDeviceEuler() {
 	//				rightLin = 1.0, rightConst = 0.0
 	//
 	auto const h = expl_solver.spaceStep();
-	auto leftBoundary = std::make_pair(1.0, 0.0);
-	auto rightBoundary = std::make_pair(1.0, 0.0);
+	auto leftBoundary = std::make_pair(1.0f, 0.0f);
+	auto rightBoundary = std::make_pair(1.0f, 0.0f);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.setThermalDiffusivity(1.0f);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
 		float const pipi = PI * PI;
-		float const first = 4.0 / pipi;
+		float const first = 4.0f / pipi;
 		float sum{};
 		float var0{};
 		float var1{};
 		float var2{};
 		for (std::size_t i = 1; i <= n; ++i) {
-			var0 = (2 * i - 1);
-			var1 = std::exp(-1.0*pipi*var0*var0*t);
+			var0 = (2.0f * i - 1.0f);
+			var1 = std::exp(-1.0f*pipi*var0*var0*t);
 			var2 = std::cos(var0*PI*x) / (var0*var0);
 			sum += (var1*var2);
 		}
-		return (0.5 - first * sum);
+		return (0.5f- first * sum);
 	};
 
 	std::cout << "tp : FDM | Exact | Abs Diff\n";
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -3799,9 +3801,9 @@ void testExplHomHeatEquationSourceFloatRobinBCEuler() {
 	auto initialCondition = [](float x) {return x; };
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	explicit_solver expl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	explicit_solver expl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -3819,8 +3821,8 @@ void testExplHomHeatEquationSourceFloatRobinBCEuler() {
 	//				rightLin = 1.0, rightConst = 0.0
 	//
 	auto const h = expl_solver.spaceStep();
-	auto leftBoundary = std::make_pair(1.0, 0.0);
-	auto rightBoundary = std::make_pair(1.0, 0.0);
+	auto leftBoundary = std::make_pair(1.0f, 0.0f);
+	auto rightBoundary = std::make_pair(1.0f, 0.0f);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
 	// set initial condition:
@@ -3842,20 +3844,20 @@ void testExplHomHeatEquationSourceFloatRobinBCEuler() {
 		for (std::size_t i = 1; i <= n; ++i) {
 			lam_n = i * PI;
 			lam_2 = lam_n * lam_n;
-			q_n = (2.0 / (lam_2))*(std::pow(-1.0, i) - 1.0);
+			q_n = (2.0f / (lam_2))*(std::pow(-1.0f, i) - 1.0f);
 			f_n = q_n;
 
-			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0*lam_2*t))*std::cos(lam_n*x);
+			var1 = ((q_n / lam_2) + (f_n - (q_n / lam_2))*std::exp(-1.0f*lam_2*t))*std::cos(lam_n*x);
 			sum += var1;
 		}
-		return ((0.5 + 0.5*t) + sum);
+		return ((0.5f + 0.5f*t) + sum);
 	};
 
 	std::cout << "tp : FDM | Exact | Abs Diff\n";
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}

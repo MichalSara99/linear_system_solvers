@@ -3,11 +3,11 @@
 #define _LSS_ONE_DIM_HEAT_EQUATION_SOLVERS
 
 #include<functional>
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_macros.h"
-#include"lss_one_dim_pde_utility.h"
-#include"lss_one_dim_pde_schemes.h"
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"common/lss_macros.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_schemes.h"
 
 
 namespace lss_one_dim_heat_equation_solvers {

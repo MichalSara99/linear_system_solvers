@@ -9,10 +9,10 @@
 #include<thrust/device_vector.h>
 
 
-#include"lss_macros.h"
-#include"lss_types.h"
-#include"lss_helpers.h"
-#include"lss_utility.h"
+#include"common/lss_macros.h"
+#include"common/lss_types.h"
+#include"common/lss_helpers.h"
+#include"common/lss_utility.h"
 #include"lss_dense_solvers_policy.h"
 
 #include<cusolverDn.h>
@@ -33,8 +33,8 @@ namespace lss_dense_solvers_cuda{
 	template<typename T>
 	class RealDenseSolverCUDA<T> {
 	private:
-		int matrixRows_;
-		int matrixCols_;
+		std::size_t matrixRows_;
+		std::size_t matrixCols_;
 		FlatMatrix<T> matrixElements_;
 
 		thrust::host_vector<T> h_matrixValues_;
@@ -53,7 +53,7 @@ namespace lss_dense_solvers_cuda{
 		RealDenseSolverCUDA(RealDenseSolverCUDA &&) = delete;
 		RealDenseSolverCUDA& operator=(RealDenseSolverCUDA &&) = delete;
 
-		void initialize(int matrixRows,int matrixColumns);
+		void initialize(std::size_t matrixRows, std::size_t matrixColumns);
 
 		template<template<typename T,typename Alloc> typename Container = std::vector,
 			typename Alloc = std::allocator<T>>
@@ -63,9 +63,8 @@ namespace lss_dense_solvers_cuda{
 			thrust::copy(rhs.begin(), rhs.end(), h_rhsValues_.begin());
 		}
 
-		inline void setRhsValue(int idx, T value) {
-			LSS_ASSERT(((idx >= 0) && (idx < matrixRows_)),
-				"idx is outside range");
+		inline void setRhsValue(std::size_t idx, T value) {
+			LSS_ASSERT((idx < matrixRows_),"idx is outside range");
 			h_rhsValues_[idx] = value;
 		}
 
@@ -75,19 +74,15 @@ namespace lss_dense_solvers_cuda{
 			matrixElements_ = std::move(matrix);
 		}
 
-		inline void setFlatDenseMatrixValue(int rowIdx, int colIdx, T value) {
-			LSS_ASSERT((rowIdx < matrixRows_) && (rowIdx >= 0),
-				" row index is out of range");
-			LSS_ASSERT((colIdx < matrixCols_) && (colIdx >= 0),
-				" column index is out of range");
+		inline void setFlatDenseMatrixValue(std::size_t rowIdx, std::size_t colIdx, T value) {
+			LSS_ASSERT((rowIdx < matrixRows_)," row index is out of range");
+			LSS_ASSERT((colIdx < matrixCols_)," column index is out of range");
 			matrixElements_.emplace_back(rowIdx, colIdx, value);
 		}
 
-		inline void setFlatDenseMatrixValue(std::tuple<int, int, T> triplet) {
-			LSS_ASSERT((std::get<0>(triplet) < matrixRows_) && (std::get<0>(triplet) >= 0),
-				" row index is out of range");
-			LSS_ASSERT((std::get<1>(triplet) < matrixCols_) && (std::get<1>(triplet) >= 0),
-				" column index is out of range");
+		inline void setFlatDenseMatrixValue(std::tuple<std::size_t, std::size_t, T> triplet) {
+			LSS_ASSERT((std::get<0>(triplet) < matrixRows_)," row index is out of range");
+			LSS_ASSERT((std::get<1>(triplet) < matrixCols_)," column index is out of range");
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 	
@@ -124,7 +119,7 @@ void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::populate() {
 }
 
 template<typename T>
-void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::initialize(int matrixRows, int matrixColumns) {
+void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::initialize(std::size_t matrixRows, std::size_t matrixColumns) {
 	// set the sizes of the system components:
 	matrixCols_ = matrixColumns;
 	matrixRows_ = matrixRows;
@@ -151,9 +146,9 @@ void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(Container<T, Alloc>& 
 	populate();
 
 	// get the dimensions:
-	int const lda = std::max(matrixElements_.rows(), matrixElements_.columns());
-	int const m  = std::min(matrixElements_.rows(), matrixElements_.columns());
-	int const ldb = h_rhsValues_.size();
+	std::size_t lda = std::max(matrixElements_.rows(), matrixElements_.columns());
+	std::size_t m  = std::min(matrixElements_.rows(), matrixElements_.columns());
+	std::size_t ldb = h_rhsValues_.size();
 
 	// step 1: create device containers:
 	thrust::device_vector<T> d_matrixValues = h_matrixValues_;
@@ -187,9 +182,9 @@ Container<T,Alloc> const lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve()
 	populate();
 
 	// get the dimensions:
-	int const lda = std::max(matrixElements_.rows(), matrixElements_.columns());
-	int const m = std::min(matrixElements_.rows(), matrixElements_.columns());
-	int const ldb = h_rhsValues_.size();
+	std::size_t lda = std::max(matrixElements_.rows(), matrixElements_.columns());
+	std::size_t m = std::min(matrixElements_.rows(), matrixElements_.columns());
+	std::size_t ldb = h_rhsValues_.size();
 
 	// prepare container for solution:
 	thrust::host_vector<T> h_solution(m);

@@ -4,8 +4,8 @@
 
 
 #include<tuple>
-#include"lss_macros.h"
-#include"lss_one_dim_pde_utility.h"
+#include"common/lss_macros.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
 namespace lss_one_dim_pde_schemes_cuda {
 

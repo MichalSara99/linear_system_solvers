@@ -2,12 +2,12 @@
 #if !defined(_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA)
 #define _LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA
 
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_one_dim_pde_utility.h"
-#include"lss_one_dim_pde_schemes.h"
-#include"lss_one_dim_pde_schemes_cuda.h"
-#include"lss_sparse_solvers_cuda.h"
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_schemes.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_schemes_cuda.h"
+#include"sparse_solvers/lss_sparse_solvers_cuda.h"
 
 
 namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
@@ -149,8 +149,8 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 
 				inline void setBoundaryCondition(std::pair<T, T> const &left, std::pair<T, T> const &right) {
 					leftBoundary_ = left;
-					T beta_ = 1.0 / right.first;
-					T psi_ = -1.0*right.second / right.first;
+					T beta_ = static_cast<T>(1.0) / right.first;
+					T psi_ = static_cast<T>(-1.0)*right.second / right.first;
 					rightBoundary_ = std::make_pair(beta_, psi_);
 				}
 
@@ -309,8 +309,8 @@ namespace lss_one_dim_advection_diffusion_equation_solvers_cuda {
 
 				inline void setBoundaryCondition(std::pair<T, T> const &left, std::pair<T, T> const &right) {
 					leftBoundary_ = left;
-					T beta_ = 1.0 / right.first;
-					T psi_ = -1.0*right.second / right.first;
+					T beta_ = static_cast<T>(1.0)/ right.first;
+					T psi_ = static_cast<T>(-1.0)*right.second / right.first;
 					rightBoundary_ = std::make_pair(beta_, psi_);
 				}
 

@@ -42,6 +42,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\my_c_files\linear_system_solvers\linear_system_solvers;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -78,39 +79,39 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="lss_dense_solvers.h" />
-    <ClInclude Include="lss_dense_solvers_cuda.h" />
-    <ClInclude Include="lss_dense_solvers_cuda_t.h" />
-    <ClInclude Include="lss_dense_solvers_policy.h" />
-    <ClInclude Include="lss_fdm_double_sweep_solver.h" />
-    <ClInclude Include="lss_fdm_tridiagonal_solvers.h" />
-    <ClInclude Include="lss_helpers.h" />
-    <ClInclude Include="lss_macros.h" />
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers.h" />
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_cuda.h" />
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h" />
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_t.h" />
-    <ClInclude Include="lss_one_dim_heat_equation_solvers.h" />
-    <ClInclude Include="lss_one_dim_heat_equation_solvers_cuda.h" />
-    <ClInclude Include="lss_one_dim_heat_equation_solvers_cuda_t.h" />
-    <ClInclude Include="lss_one_dim_heat_equation_solvers_t.h" />
-    <ClInclude Include="lss_one_dim_pde_schemes.h" />
-    <ClInclude Include="lss_one_dim_pde_schemes_cuda.h" />
-    <ClInclude Include="lss_one_dim_pde_solvers.h" />
-    <ClInclude Include="lss_one_dim_pde_utility.h" />
-    <ClInclude Include="lss_pde_cuda_kernels.h" />
-    <ClInclude Include="lss_sparse_solvers_cuda.h" />
-    <ClInclude Include="lss_sparse_solvers.h" />
-    <ClInclude Include="lss_sparse_solvers_cuda_t.h" />
-    <ClInclude Include="lss_fdm_thomas_lu_solver.h" />
-    <ClInclude Include="lss_sparse_solvers_policy.h" />
-    <ClInclude Include="lss_fdm_tridiagonal_solvers_t.h" />
-    <ClInclude Include="lss_types.h" />
-    <ClInclude Include="lss_utility.h" />
+    <ClInclude Include="common\lss_helpers.h" />
+    <ClInclude Include="common\lss_macros.h" />
+    <ClInclude Include="common\lss_types.h" />
+    <ClInclude Include="common\lss_utility.h" />
+    <ClInclude Include="dense_solvers\lss_dense_solvers.h" />
+    <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.h" />
+    <ClInclude Include="dense_solvers\lss_dense_solvers_policy.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_advection_diffusion_equation_solvers.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_advection_diffusion_equation_solvers_cuda.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_equation_solvers.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_equation_solvers_cuda.h" />
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes.h" />
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes_cuda.h" />
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_solvers.h" />
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_utility.h" />
+    <ClInclude Include="pde_solvers\one_dim\lss_pde_cuda_kernels.h" />
+    <ClInclude Include="sparse_solvers\lss_fdm_double_sweep_solver.h" />
+    <ClInclude Include="sparse_solvers\lss_fdm_thomas_lu_solver.h" />
+    <ClInclude Include="sparse_solvers\lss_fdm_tridiagonal_solvers.h" />
+    <ClInclude Include="sparse_solvers\lss_sparse_solvers.h" />
+    <ClInclude Include="sparse_solvers\lss_sparse_solvers_cuda.h" />
+    <ClInclude Include="sparse_solvers\lss_sparse_solvers_policy.h" />
+    <ClInclude Include="unit_tests\lss_dense_solvers_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_fdm_tridiagonal_solvers_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_solvers_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_heat_equation_solvers_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_heat_equation_solvers_t.h" />
+    <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="lss_one_dim_pde_schemes_cuda.cu" />
     <CudaCompile Include="main.cu" />
+    <CudaCompile Include="pde_solvers\one_dim\lss_one_dim_pde_schemes_cuda.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

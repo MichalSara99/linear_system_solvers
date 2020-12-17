@@ -3,8 +3,8 @@
 #define _LSS_DENSE_SOLVERS_CUDA_T
 
 
-#include"lss_dense_solvers_cuda.h"
-#include"lss_dense_solvers_policy.h"
+#include"dense_solvers/lss_dense_solvers_cuda.h"
+#include"dense_solvers/lss_dense_solvers_policy.h"
 
 
 void deviceDenseDefaultQRTest() {

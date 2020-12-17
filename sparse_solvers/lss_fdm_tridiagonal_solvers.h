@@ -2,7 +2,7 @@
 #if !defined(_LSS_FDM_TRIDIAGONAL_SOLVERS)
 #define _LSS_FDM_TRIDIAGONAL_SOLVERS
 
-#include"lss_types.h"
+#include"common/lss_types.h"
 #include"lss_fdm_double_sweep_solver.h"
 #include"lss_fdm_thomas_lu_solver.h"
 

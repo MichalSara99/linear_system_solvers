@@ -2,9 +2,11 @@
 #if !defined(_LSS_ONE_DIM_PDE_SCHEMES)
 #define _LSS_ONE_DIM_PDE_SCHEMES
 
+#pragma warning( disable : 4244 )
+
 #include<thread>
-#include"lss_types.h"
-#include"lss_one_dim_pde_utility.h"
+#include"common/lss_types.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
 namespace lss_one_dim_pde_schemes {
 
@@ -1061,7 +1063,7 @@ void lss_one_dim_pde_schemes::ExplicitAdvectionDiffusionEulerScheme<T>::operator
 			solution[0] = left;
 			solution[solution.size() - 1] = right;
 			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-				solution[t] = a * prevSol[t] + b * prevSol[t - 1] + c * prevSol[t + 1];
+				solution[t] = a * prevSol[t] + b * prevSol[t - 1] + c * prevSol[t + 1] + 
 					timeStep_ * sourceCurr[t];
 			}
 			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);

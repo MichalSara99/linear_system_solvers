@@ -4,10 +4,10 @@
 
 #include<vector>
 
-#include"lss_types.h"
-#include"lss_fdm_double_sweep_solver.h"
-#include"lss_fdm_thomas_lu_solver.h"
-#include"lss_fdm_tridiagonal_solvers.h"
+#include"common/lss_types.h"
+#include"sparse_solvers/lss_fdm_double_sweep_solver.h"
+#include"sparse_solvers/lss_fdm_thomas_lu_solver.h"
+#include"sparse_solvers/lss_fdm_tridiagonal_solvers.h"
 
 
 template<typename T>
@@ -117,7 +117,7 @@ void testBVPFDMSolverDirichletBC_0() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	std::vector<T> upperDiag(N + 1, 1.0f);
 	std::vector<T> diagonal(N + 1, -2.0f);
@@ -206,7 +206,7 @@ void testBVPThomasLUSolverDirichletBC() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
 	std::vector<T> upperDiag(N + 1, 1.0);
@@ -277,7 +277,7 @@ void testBVPFDMSolverDirichletBC_1() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
 	std::vector<T> upperDiag(N + 1, 1.0);
@@ -367,7 +367,7 @@ void testBVPDoubleSweepDirichletBC1() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	std::vector<T> upperDiag(N + 1, 1.0);
 	std::vector<T> diagonal(N + 1, -2.0);
@@ -437,7 +437,7 @@ void testBVPFDMSolverDirichletBC_2() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	std::vector<T> upperDiag(N + 1, 1.0);
 	std::vector<T> diagonal(N + 1, -2.0);
@@ -526,7 +526,7 @@ void testBVPThomasLUSolverDirichletBC1() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
 	std::vector<T> upperDiag(N + 1, 1.0);
@@ -596,7 +596,7 @@ void testBVPFDMSolverDirichletBC_3() {
 	// discretization:
 	std::size_t N{ 20 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
 	std::vector<T> upperDiag(N + 1, 1.0);
@@ -688,7 +688,7 @@ void testBVPDoubleSweepRobinBC() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	std::vector<T> upperDiag(N + 1, 1.0);
 	std::vector<T> diagonal(N + 1, -2.0);
@@ -763,7 +763,7 @@ void testBVPFDMSolverRobinBC_0() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	std::vector<T> upperDiag(N + 1, 1.0f);
 	std::vector<T> diagonal(N + 1, -2.0f);
@@ -860,7 +860,7 @@ void testBVPThomasLUSolverRobinBC() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
 	std::vector<T> upperDiag(N + 1, 1.0);
@@ -937,7 +937,7 @@ void testBVPFDMSolverRobinBC_1() {
 	// discretization:
 	std::size_t N{ 100 };
 	// step size:
-	T h = 1.0 / static_cast<T>(N);
+	T h = static_cast<T>(1.0) / static_cast<T>(N);
 	// upper,mid, and lower diagonal:
 	// must be of size N+1 because we need to add the t_0 point:
 	std::vector<T> upperDiag(N + 1, 1.0);

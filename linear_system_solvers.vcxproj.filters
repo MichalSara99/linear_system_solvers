@@ -4,54 +4,121 @@
     <Filter Include="unit_tests">
       <UniqueIdentifier>{f0149da5-4766-43cb-893c-2666ccc65e36}</UniqueIdentifier>
     </Filter>
+    <Filter Include="dense_solvers">
+      <UniqueIdentifier>{9339ca6b-c662-403d-8130-132dcbda304a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers">
+      <UniqueIdentifier>{7cb81dfe-d606-4a85-a4a7-008c347b8f23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers">
+      <UniqueIdentifier>{2cb5eeb4-ef63-4af1-b25e-5d3908091106}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dim">
+      <UniqueIdentifier>{990b2765-3dcd-470c-a222-18afa3cb22d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dim\classic">
+      <UniqueIdentifier>{cfef7131-53b3-48b9-b0b3-935750759480}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dim\variable_coefficients">
+      <UniqueIdentifier>{6ceb39f5-5550-4410-8f7e-fecd38e9fbd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{efd4a1a2-c2ae-487f-9011-6dab976d05ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lss_sparse_solvers_cuda_t.h">
+    <ClInclude Include="dense_solvers\lss_dense_solvers.h">
+      <Filter>dense_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.h">
+      <Filter>dense_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="dense_solvers\lss_dense_solvers_policy.h">
+      <Filter>dense_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_fdm_double_sweep_solver.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_fdm_thomas_lu_solver.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_fdm_tridiagonal_solvers.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_sparse_solvers.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_sparse_solvers_cuda.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_sparse_solvers_policy.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\lss_dense_solvers_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="lss_helpers.h" />
-    <ClInclude Include="lss_macros.h" />
-    <ClInclude Include="lss_sparse_solvers_cuda.h" />
-    <ClInclude Include="lss_sparse_solvers.h" />
-    <ClInclude Include="lss_types.h" />
-    <ClInclude Include="lss_utility.h" />
-    <ClInclude Include="lss_dense_solvers_cuda.h" />
-    <ClInclude Include="lss_dense_solvers_cuda_t.h">
+    <ClInclude Include="unit_tests\lss_fdm_tridiagonal_solvers_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="lss_dense_solvers_policy.h" />
-    <ClInclude Include="lss_sparse_solvers_policy.h" />
-    <ClInclude Include="lss_dense_solvers.h" />
-    <ClInclude Include="lss_fdm_tridiagonal_solvers_t.h">
+    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="lss_fdm_tridiagonal_solvers.h" />
-    <ClInclude Include="lss_fdm_double_sweep_solver.h" />
-    <ClInclude Include="lss_fdm_thomas_lu_solver.h" />
-    <ClInclude Include="lss_one_dim_pde_solvers.h" />
-    <ClInclude Include="lss_one_dim_heat_equation_solvers.h" />
-    <ClInclude Include="lss_one_dim_pde_schemes.h" />
-    <ClInclude Include="lss_one_dim_heat_equation_solvers_t.h">
+    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_solvers_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="lss_one_dim_heat_equation_solvers_cuda.h" />
-    <ClInclude Include="lss_one_dim_heat_equation_solvers_cuda_t.h">
+    <ClInclude Include="unit_tests\lss_one_dim_heat_equation_solvers_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="lss_one_dim_pde_utility.h" />
-    <ClInclude Include="lss_one_dim_pde_schemes_cuda.h" />
-    <ClInclude Include="lss_pde_cuda_kernels.h" />
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers.h" />
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_t.h">
+    <ClInclude Include="unit_tests\lss_one_dim_heat_equation_solvers_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_cuda.h" />
-    <ClInclude Include="lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h">
+    <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h">
       <Filter>unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_advection_diffusion_equation_solvers.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_advection_diffusion_equation_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_equation_solvers.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_equation_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_solvers.h">
+      <Filter>pde_solvers\one_dim</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes.h">
+      <Filter>pde_solvers\one_dim</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes_cuda.h">
+      <Filter>pde_solvers\one_dim</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_utility.h">
+      <Filter>pde_solvers\one_dim</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\lss_pde_cuda_kernels.h">
+      <Filter>pde_solvers\one_dim</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_helpers.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_macros.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_types.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_utility.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
-    <CudaCompile Include="lss_one_dim_pde_schemes_cuda.cu" />
+    <CudaCompile Include="pde_solvers\one_dim\lss_one_dim_pde_schemes_cuda.cu">
+      <Filter>pde_solvers\one_dim</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

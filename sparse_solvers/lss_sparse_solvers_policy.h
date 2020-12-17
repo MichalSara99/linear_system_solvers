@@ -2,7 +2,7 @@
 #if !defined(_LSS_SPARSE_SOLVERS_POLICY)
 #define _LSS_SPARSE_SOLVERS_POLICY
 
-#include"lss_macros.h"
+#include"common/lss_macros.h"
 #include<cusolverSp.h>
 
 #include<type_traits>
@@ -173,7 +173,7 @@ namespace lss_sparse_solvers_policy {
 /* Sparse QR factorization on HOST */
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverHostQR<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverHostQR<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* h_matVals, int const* h_rowCounts,
 	int const* h_colIndices, T const* h_rhs,
@@ -197,7 +197,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverHostQR<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverHostQR<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* h_matVals, int const* h_rowCounts,
 	int const* h_colIndices, T const* h_rhs,
@@ -221,7 +221,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 /* Sparse LU factorization on HOST */
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverHostLU<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverHostLU<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* h_matVals, int const* h_rowCounts,
 	int const* h_colIndices, T const* h_rhs,
@@ -244,7 +244,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverHostLU<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverHostLU<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* h_matVals, int const* h_rowCounts,
 	int const* h_colIndices, T const* h_rhs,
@@ -267,7 +267,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 /* Sparse Cholesky factorization on HOST */
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverHostCholesky<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverHostCholesky<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* h_matVals, int const* h_rowCounts,
 	int const* h_colIndices, T const* h_rhs,
@@ -290,7 +290,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverHostCholesky<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverHostCholesky<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* h_matVals, int const* h_rowCounts,
 	int const* h_colIndices, T const* h_rhs,
@@ -314,7 +314,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 /* Sparse QR factorization on DEVICE */
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverDeviceQR<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverDeviceQR<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize,int const nonZeroSize, T const* d_matVals, int const* d_rowCounts,
 	int const* d_colIndices, T const* d_rhs,
@@ -338,7 +338,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverDeviceQR<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverDeviceQR<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* d_matVals, int const* d_rowCounts,
 	int const* d_colIndices, T const* d_rhs,
@@ -362,7 +362,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 /* Sparse Cholesky factorization on DEVICE */
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverDeviceCholesky<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverDeviceCholesky<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* d_matVals, int const* d_rowCounts,
 	int const* d_colIndices, T const* d_rhs,
@@ -386,7 +386,7 @@ _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 
 
 template<typename T>
-static void lss_sparse_solvers_policy::SparseSolverDeviceCholesky<T>::
+/*static*/ void lss_sparse_solvers_policy::SparseSolverDeviceCholesky<T>::
 _solve_impl(cusolverSpHandle_t handle, cusparseMatDescr_t matDesc,
 	int const systemSize, int const nonZeroSize, T const* d_matVals, int const* d_rowCounts,
 	int const* d_colIndices, T const* d_rhs,

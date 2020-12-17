@@ -1,8 +1,10 @@
 #pragma once
 #if !defined(_LSS_DENSE_SOLVERS_POLICY)
 #define _LSS_DENSE_SOLVERS_POLICY
+#pragma warning(disable: 4267)
 
-#include"lss_macros.h"
+
+#include"common/lss_macros.h"
 
 #include<cuda_runtime.h>
 #include<cusolverDn.h>
@@ -20,13 +22,13 @@ namespace lss_dense_solvers_policy {
 	private:
 		// T = double
 		static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::true_type);
+            std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type);
 		// T = float
 		static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::false_type);
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type);
     public:
 		static void solve(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x) {
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
             _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x, std::is_same<T, double>());
 		}
 
@@ -39,13 +41,13 @@ namespace lss_dense_solvers_policy {
 	private:
 		// T = double
         static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::true_type);
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type);
 		// T = float
         static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::false_type);
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type);
 	public:
 		static void solve(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x) {
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
             _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x, std::is_same<T, double>());
 		}
 
@@ -58,13 +60,13 @@ namespace lss_dense_solvers_policy {
 	private:
 		// T = double
         static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::true_type);
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type);
 		// T = float
         static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::false_type);
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type);
 	public:
 		static void solve(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            int n, const T* d_Acopy, int lda, const T* d_b, T* d_x) {
+			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
             _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x, std::is_same<T, double>());
 		}
 
@@ -81,11 +83,11 @@ namespace lss_dense_solvers_policy {
 
 template<typename T>
 void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(cusolverDnHandle_t cusolverHandle,cublasHandle_t cublasHandle,
-    int n, const T* d_Acopy,int lda, const T* d_b, T* d_x,std::true_type) {
+	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,std::true_type) {
 
-    int bufferSize = 0;
-    int bufferSize_geqrf = 0;
-    int bufferSize_ormqr = 0;
+	int bufferSize = 0;
+	int bufferSize_geqrf = 0;
+	int bufferSize_ormqr = 0;
     int* info = NULL;
     T* buffer = NULL;
     T* A = NULL;
@@ -150,11 +152,11 @@ void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(cusolverDnHandle_t 
 
 template<typename T>
 void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-    int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::false_type) {
+	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type) {
 
-    int bufferSize = 0;
-    int bufferSize_geqrf = 0;
-    int bufferSize_ormqr = 0;
+	int bufferSize = 0;
+	int bufferSize_geqrf = 0;
+	int bufferSize_ormqr = 0;
     int* info = NULL;
     T* buffer = NULL;
     T* A = NULL;
@@ -222,9 +224,9 @@ void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(cusolverDnHandle_t 
 
 template<typename T>
 void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-    int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::true_type) {
+	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type) {
 
-    int bufferSize = 0;
+	int bufferSize = 0;
     int* info = NULL;
     T* buffer = NULL;
     T* A = NULL;
@@ -271,9 +273,9 @@ void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(cusolverDnHan
 
 template<typename T>
 void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-    int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::false_type) {
+	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type) {
 
-    int bufferSize = 0;
+	int bufferSize = 0;
     int* info = NULL;
     T* buffer = NULL;
     T* A = NULL;
@@ -321,9 +323,9 @@ void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(cusolverDnHan
 
 template<typename T>
 void lss_dense_solvers_policy::DenseSolverLU<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-    int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::true_type) {
+	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type) {
 
-    int bufferSize = 0;
+	int bufferSize = 0;
     int* info = NULL;
     T* buffer = NULL;
     T* A = NULL;
@@ -368,9 +370,9 @@ void lss_dense_solvers_policy::DenseSolverLU<T>::_solve_impl(cusolverDnHandle_t 
 
 template<typename T>
 void lss_dense_solvers_policy::DenseSolverLU<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-    int n, const T* d_Acopy, int lda, const T* d_b, T* d_x, std::false_type) {
+	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type) {
 
-    int bufferSize = 0;
+	int bufferSize = 0;
     int* info = NULL;
     T* buffer = NULL;
     T* A = NULL;

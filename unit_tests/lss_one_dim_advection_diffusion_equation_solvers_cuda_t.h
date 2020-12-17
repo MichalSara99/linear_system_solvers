@@ -2,10 +2,11 @@
 #if !defined(_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA_T)
 #define _LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA_T
 
+#pragma warning(disable: 4305)
 
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_one_dim_advection_diffusion_equation_solvers_cuda.h"
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"pde_solvers/one_dim/classic/lss_one_dim_advection_diffusion_equation_solvers_cuda.h"
 
 #define PI 3.14159
 
@@ -139,12 +140,12 @@ void testImplAdvectionDiffusionEquationFloatDirichletBCDeviceEuler() {
 	// initial condition:
 	auto initialCondition = [](float x) {return 1.0; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 0.0);
+	auto boundary = std::make_pair(0.0f, 0.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -157,18 +158,18 @@ void testImplAdvectionDiffusionEquationFloatDirichletBCDeviceEuler() {
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
-		float const exp_0p5x = std::exp(0.5*x);
-		float const exp_m0p5 = std::exp(-0.5);
+		float const first = 2.0f / PI;
+		float const exp_0p5x = std::exp(0.5f*x);
+		float const exp_m0p5 = std::exp(-0.5f);
 		float np_sqr{};
 		float sum{};
 		float num{}, den{}, var{};
 		float lambda{};
 		for (std::size_t i = 1; i <= n; ++i) {
 			np_sqr = (i*i*PI*PI);
-			lambda = 0.25 + np_sqr;
-			num = (1.0 - std::pow(-1.0, i)*exp_m0p5)*exp_0p5x*std::exp(-1.0*lambda*t)*std::sin(i*PI*x);
-			den = i * (1.0 + (0.25 / np_sqr));
+			lambda = 0.25f + np_sqr;
+			num = (1.0f - std::pow(-1.0f, i)*exp_m0p5)*exp_0p5x*std::exp(-1.0f*lambda*t)*std::sin(i*PI*x);
+			den = i * (1.0f + (0.25f / np_sqr));
 			var = num / den;
 			sum += var;
 		}
@@ -180,7 +181,7 @@ void testImplAdvectionDiffusionEquationFloatDirichletBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -303,14 +304,14 @@ void testImplAdvectionDiffusionEquationFloatDirichletBCDeviceCN() {
 	// number of time subdivisions:
 	std::size_t const Td = 1000;
 	// initial condition:
-	auto initialCondition = [](float x) {return 1.0; };
+	auto initialCondition = [](float x) {return 1.0f; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 0.0);
+	auto boundary = std::make_pair(0.0f, 0.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -323,18 +324,18 @@ void testImplAdvectionDiffusionEquationFloatDirichletBCDeviceCN() {
 	impl_solver.solve(solution, ImplicitPDESchemes::CrankNicolson);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
-		float const exp_0p5x = std::exp(0.5*x);
-		float const exp_m0p5 = std::exp(-0.5);
+		float const first = 2.0f / PI;
+		float const exp_0p5x = std::exp(0.5f*x);
+		float const exp_m0p5 = std::exp(-0.5f);
 		float np_sqr{};
 		float sum{};
 		float num{}, den{}, var{};
 		float lambda{};
 		for (std::size_t i = 1; i <= n; ++i) {
 			np_sqr = (i*i*PI*PI);
-			lambda = 0.25 + np_sqr;
-			num = (1.0 - std::pow(-1.0, i)*exp_m0p5)*exp_0p5x*std::exp(-1.0*lambda*t)*std::sin(i*PI*x);
-			den = i * (1.0 + (0.25 / np_sqr));
+			lambda = 0.25f + np_sqr;
+			num = (1.0f - std::pow(-1.0f, i)*exp_m0p5)*exp_0p5x*std::exp(-1.0f*lambda*t)*std::sin(i*PI*x);
+			den = i * (1.0f + (0.25f / np_sqr));
 			var = num / den;
 			sum += var;
 		}
@@ -346,7 +347,7 @@ void testImplAdvectionDiffusionEquationFloatDirichletBCDeviceCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -544,9 +545,9 @@ void testImplAdvectionDiffusionEquationFloatRobinBCDeviceEuler() {
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const zero = 2.0*(1.0 - std::exp(-0.5)) / (1.0 - std::exp(-1.0));
-		float const first = 2.0;
-		float const exp_0p5x = std::exp(0.5*x);
+		float const zero = 2.0f*(1.0f- std::exp(-0.5f)) / (1.0f - std::exp(-1.0f));
+		float const first = 2.0f;
+		float const exp_0p5x = std::exp(0.5f*x);
 		float exp_lamt{};
 		float sum{};
 		float num{}, den{}, var{};
@@ -555,10 +556,10 @@ void testImplAdvectionDiffusionEquationFloatRobinBCDeviceEuler() {
 
 		for (std::size_t i = 1; i <= n; ++i) {
 			delta_n = i * PI;
-			lambda_n = 0.25 + delta_n * delta_n;
-			exp_lamt = std::exp(-1.0*lambda_n*t);
-			num = (1.0 - std::pow(-1.0, i))*exp_0p5x*exp_lamt*(std::sin(delta_n*x) - 2.0*delta_n*std::cos(delta_n*x));
-			den = delta_n * (1.0 + 4.0*delta_n*delta_n);
+			lambda_n = 0.25f + delta_n * delta_n;
+			exp_lamt = std::exp(-1.0f*lambda_n*t);
+			num = (1.0f - std::pow(-1.0f, i))*exp_0p5x*exp_lamt*(std::sin(delta_n*x) - 2.0f*delta_n*std::cos(delta_n*x));
+			den = delta_n * (1.0f + 4.0f*delta_n*delta_n);
 			var = num / den;
 			sum += var;
 		}
@@ -570,7 +571,7 @@ void testImplAdvectionDiffusionEquationFloatRobinBCDeviceEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -751,9 +752,9 @@ void testImplAdvectionDiffusionEquationFloatRobinBCDeviceCN() {
 	impl_solver.solve(solution);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const zero = 2.0*(1.0 - std::exp(-0.5)) / (1.0 - std::exp(-1.0));
-		float const first = 2.0;
-		float const exp_0p5x = std::exp(0.5*x);
+		float const zero = 2.0f*(1.0f - std::exp(-0.5f)) / (1.0f - std::exp(-1.0f));
+		float const first = 2.0f;
+		float const exp_0p5x = std::exp(0.5f*x);
 		float exp_lamt{};
 		float sum{};
 		float num{}, den{}, var{};
@@ -762,10 +763,10 @@ void testImplAdvectionDiffusionEquationFloatRobinBCDeviceCN() {
 
 		for (std::size_t i = 1; i <= n; ++i) {
 			delta_n = i * PI;
-			lambda_n = 0.25 + delta_n * delta_n;
-			exp_lamt = std::exp(-1.0*lambda_n*t);
-			num = (1.0 - std::pow(-1.0, i))*exp_0p5x*exp_lamt*(std::sin(delta_n*x) - 2.0*delta_n*std::cos(delta_n*x));
-			den = delta_n * (1.0 + 4.0*delta_n*delta_n);
+			lambda_n = 0.25f + delta_n * delta_n;
+			exp_lamt = std::exp(-1.0f*lambda_n*t);
+			num = (1.0f - std::pow(-1.0f, i))*exp_0p5x*exp_lamt*(std::sin(delta_n*x) - 2.0f*delta_n*std::cos(delta_n*x));
+			den = delta_n * (1.0f + 4.0f*delta_n*delta_n);
 			var = num / den;
 			sum += var;
 		}
@@ -777,7 +778,7 @@ void testImplAdvectionDiffusionEquationFloatRobinBCDeviceCN() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -916,38 +917,38 @@ void testExplAdvectionDiffusionEquationFloatDirichletBCEuler() {
 	// number of time subdivisions:
 	std::size_t const Td = 10000;
 	// initial condition:
-	auto initialCondition = [](float x) {return 1.0; };
+	auto initialCondition = [](float x) {return 1.0f; };
 	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 0.0);
+	auto boundary = std::make_pair(0.0f, 0.0f);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
-	std::vector<float> solution(Sd + 1, 0.0);
+	std::vector<float> solution(Sd + 1, 0.0f);
 	// initialize solver
-	explicit_solver expl_solver(Range<float>(0.0, 1.0), 0.2, Sd, Td);
+	explicit_solver expl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.setThermalDiffusivity(1.0f);
 	// set convection term:
-	expl_solver.setConvection(1.0);
+	expl_solver.setConvection(1.0f);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const first = 2.0 / PI;
-		float const exp_0p5x = std::exp(0.5*x);
-		float const exp_m0p5 = std::exp(-0.5);
+		float const first = 2.0f / PI;
+		float const exp_0p5x = std::exp(0.5f*x);
+		float const exp_m0p5 = std::exp(-0.5f);
 		float np_sqr{};
 		float sum{};
 		float num{}, den{}, var{};
 		float lambda{};
 		for (std::size_t i = 1; i <= n; ++i) {
 			np_sqr = (i*i*PI*PI);
-			lambda = 0.25 + np_sqr;
-			num = (1.0 - std::pow(-1.0, i)*exp_m0p5)*exp_0p5x*std::exp(-1.0*lambda*t)*std::sin(i*PI*x);
-			den = i * (1.0 + (0.25 / np_sqr));
+			lambda = 0.25f + np_sqr;
+			num = (1.0f - std::pow(-1.0f, i)*exp_m0p5)*exp_0p5x*std::exp(-1.0f*lambda*t)*std::sin(i*PI*x);
+			den = i * (1.0f + (0.25f / np_sqr));
 			var = num / den;
 			sum += var;
 		}
@@ -959,7 +960,7 @@ void testExplAdvectionDiffusionEquationFloatDirichletBCEuler() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.2f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1147,9 +1148,9 @@ void testExplAdvectionDiffusionEquationFloatRobinBC() {
 	expl_solver.solve(solution);
 	// get exact solution:
 	auto exact = [](float x, float t, std::size_t n) {
-		float const zero = 2.0*(1.0 - std::exp(-0.5)) / (1.0 - std::exp(-1.0));
-		float const first = 2.0;
-		float const exp_0p5x = std::exp(0.5*x);
+		float const zero = 2.0f*(1.0f - std::exp(-0.5f)) / (1.0f - std::exp(-1.0f));
+		float const first = 2.0f;
+		float const exp_0p5x = std::exp(0.5f*x);
 		float exp_lamt{};
 		float sum{};
 		float num{}, den{}, var{};
@@ -1158,10 +1159,10 @@ void testExplAdvectionDiffusionEquationFloatRobinBC() {
 
 		for (std::size_t i = 1; i <= n; ++i) {
 			delta_n = i * PI;
-			lambda_n = 0.25 + delta_n * delta_n;
-			exp_lamt = std::exp(-1.0*lambda_n*t);
-			num = (1.0 - std::pow(-1.0, i))*exp_0p5x*exp_lamt*(std::sin(delta_n*x) - 2.0*delta_n*std::cos(delta_n*x));
-			den = delta_n * (1.0 + 4.0*delta_n*delta_n);
+			lambda_n = 0.25f + delta_n * delta_n;
+			exp_lamt = std::exp(-1.0f*lambda_n*t);
+			num = (1.0f - std::pow(-1.0f, i))*exp_0p5x*exp_lamt*(std::sin(delta_n*x) - 2.0f*delta_n*std::cos(delta_n*x));
+			den = delta_n * (1.0f + 4.0f*delta_n*delta_n);
 			var = num / den;
 			sum += var;
 		}
@@ -1173,7 +1174,7 @@ void testExplAdvectionDiffusionEquationFloatRobinBC() {
 	float benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.5f, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}

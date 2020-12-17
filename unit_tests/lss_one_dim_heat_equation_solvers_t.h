@@ -2,11 +2,14 @@
 #if !defined(_LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_T)
 #define _LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_T
 
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_fdm_double_sweep_solver.h"
-#include"lss_fdm_thomas_lu_solver.h"
-#include"lss_one_dim_heat_equation_solvers.h"
+#pragma warning(disable: 4305)
+
+
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"sparse_solvers/lss_fdm_double_sweep_solver.h"
+#include"sparse_solvers/lss_fdm_thomas_lu_solver.h"
+#include"pde_solvers/one_dim/classic/lss_one_dim_heat_equation_solvers.h"
 
 
 #define PI 3.14159
@@ -61,7 +64,7 @@ void testImplHeatEquationDirichletBCDoubleSweepEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0,1.0),0.5,Sd,Td);
+	implicit_solver impl_solver(Range<T>(0.0,1.0), 0.10,Sd,Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -72,7 +75,7 @@ void testImplHeatEquationDirichletBCDoubleSweepEuler() {
 	impl_solver.solve(solution,ImplicitPDESchemes::Euler);
 	// get exact solution:
 	auto exact = [](T x, T t, std::size_t n) {
-		T const first = 2.0 / PI;
+		T const first = static_cast<T>(2.0) / PI;
 		T sum{};
 		T var1{};
 		T var2{};
@@ -89,7 +92,7 @@ void testImplHeatEquationDirichletBCDoubleSweepEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -137,7 +140,7 @@ void testImplHeatEquationDirichletBCDoubleSweepCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.10, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -165,7 +168,7 @@ void testImplHeatEquationDirichletBCDoubleSweepCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -800,7 +803,7 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.10, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -835,7 +838,7 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -881,7 +884,7 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.10, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -916,7 +919,7 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -975,7 +978,7 @@ void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.10, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -1010,7 +1013,7 @@ void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1056,7 +1059,7 @@ void testImplHeatEquationSourceDirichletBCThomasLUCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.10, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -1091,7 +1094,7 @@ void testImplHeatEquationSourceDirichletBCThomasLUCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}

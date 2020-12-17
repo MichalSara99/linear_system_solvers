@@ -3,10 +3,10 @@
 #define _LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS
 
 #include<functional>
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_one_dim_pde_utility.h"
-#include"lss_one_dim_pde_schemes.h"
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include"pde_solvers/one_dim/lss_one_dim_pde_schemes.h"
 
 namespace lss_one_dim_advection_diffusion_equation_solvers {
 

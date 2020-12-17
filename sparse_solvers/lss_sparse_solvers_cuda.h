@@ -2,6 +2,9 @@
 #if !defined(_LSS_SPARSE_SPARSE_CUDA)
 #define _LSS_SPARSE_SPARSE_CUDA
 
+#pragma warning(disable: 4267)
+#pragma warning(disable: 4244)
+
 #include<type_traits>
 
 #include<cuda_runtime.h>
@@ -10,9 +13,9 @@
 #include<thrust/host_vector.h>
 #include<thrust/device_vector.h>
 
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_helpers.h"
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"common/lss_helpers.h"
 #include"lss_sparse_solvers_policy.h"
 
 namespace lss_sparse_solvers_cuda {
@@ -64,9 +67,9 @@ namespace lss_sparse_solvers_cuda {
 		RealSparseSolverCUDA(RealSparseSolverCUDA &&) = delete;
 		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA &&) = delete;
 
-		void initialize(int systemSize);
+		void initialize(std::size_t systemSize);
 
-		inline int const nonZeroElements()const { return matrixElements_.size(); }
+		inline std::size_t nonZeroElements()const { return matrixElements_.size(); }
 
 		template<template<typename T,typename Alloc> typename Container = std::vector,
 			typename Alloc = std::allocator<T>>
@@ -77,8 +80,8 @@ namespace lss_sparse_solvers_cuda {
 		}
 
 
-		inline void setRhsValue(int idx, T value) {
-			LSS_ASSERT(((idx >= 0) && (idx < systemSize_)), "idx is outside range");
+		inline void setRhsValue(std::size_t idx, T value) {
+			LSS_ASSERT((idx < systemSize_), "idx is outside range");
 			h_vectorValues_[idx] = value;
 		}
 
@@ -86,11 +89,11 @@ namespace lss_sparse_solvers_cuda {
 			matrixElements_ = std::move(matrix);
 		}
 
-		inline void setFlatSparseMatrixValue(int rowIdx, int colIdx, T value) {
+		inline void setFlatSparseMatrixValue(std::size_t rowIdx, std::size_t colIdx, T value) {
 			matrixElements_.emplace_back(rowIdx, colIdx, value);
 		}
 
-		inline void setFlatSparseMatrixValue(std::tuple<int, int, T> triplet) {
+		inline void setFlatSparseMatrixValue(std::tuple<std::size_t, std::size_t, T> triplet) {
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 
@@ -137,9 +140,9 @@ namespace lss_sparse_solvers_cuda {
 		RealSparseSolverCUDA(RealSparseSolverCUDA &&) = delete;
 		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA &&) = delete;
 
-		void initialize(int systemSize);
+		void initialize(std::size_t systemSize);
 
-		inline int const nonZeroElements()const { return matrixElements_.size(); }
+		inline std::size_t nonZeroElements()const { return matrixElements_.size(); }
 
 		template<template<typename T, typename Alloc> typename Container = std::vector,
 			typename Alloc = std::allocator<T>>
@@ -149,8 +152,8 @@ namespace lss_sparse_solvers_cuda {
 			thrust::copy(rhs.begin(), rhs.end(), h_vectorValues_.begin());
 		}
 
-		inline void setRhsValue(int idx, T value) {
-			LSS_ASSERT(((idx >= 0) && (idx < systemSize_)), "idx is outside range");
+		inline void setRhsValue(std::size_t idx, T value) {
+			LSS_ASSERT((idx < systemSize_), "idx is outside range");
 			h_vectorValues_[idx] = value;
 		}
 
@@ -158,11 +161,11 @@ namespace lss_sparse_solvers_cuda {
 			matrixElements_ = std::move(matrix);
 		}
 
-		inline void setFlatSparseMatrixValue(int rowIdx, int colIdx, T value) {
+		inline void setFlatSparseMatrixValue(std::size_t rowIdx, std::size_t colIdx, T value) {
 			matrixElements_.emplace_back(rowIdx, colIdx, value);
 		}
 
-		inline void setFlatSparseMatrixValue(std::tuple<int, int, T> triplet) {
+		inline void setFlatSparseMatrixValue(std::tuple<std::size_t, std::size_t, T> triplet) {
 			matrixElements_.emplace_back(std::move(triplet));
 		}
 
@@ -185,7 +188,7 @@ namespace lss_sparse_solvers_cuda {
 
 
 template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,T>::initialize(int systemSize) {
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,T>::initialize(std::size_t systemSize) {
 	// set the size of the linear system:
 	systemSize_ = systemSize;
 
@@ -204,7 +207,7 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,
 }
 
 template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::initialize(int systemSize) {
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::initialize(std::size_t systemSize) {
 	// set the size of the linear system:
 	systemSize_ = systemSize;
 
@@ -269,7 +272,7 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Devic
 	int lastRow{ 0 };
 	h_rowCounts_[nRowElement++] = nElement;
 
-	for (int i = 0; i < nonZeroSize; ++i) {
+	for (std::size_t i = 0; i < nonZeroSize; ++i) {
 
 		if (lastRow < std::get<0>(matrixElements_.at(i))) {
 			h_rowCounts_[nRowElement++] = i;

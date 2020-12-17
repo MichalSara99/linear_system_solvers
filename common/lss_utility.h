@@ -77,10 +77,10 @@ namespace lss_utility {
 	template<typename T>
 	struct FlatMatrix {
 	private:
-		std::vector<std::tuple<int, int, T>> container_;
-		int ncols_, nrows_;
+		std::vector<std::tuple<std::size_t, std::size_t, T>> container_;
+		std::size_t ncols_, nrows_;
 	public:
-		explicit FlatMatrix(int nrows, int ncols)
+		explicit FlatMatrix(std::size_t nrows, std::size_t ncols)
 			:nrows_{ nrows }, ncols_{ ncols }{}
 
 		explicit FlatMatrix()
@@ -117,33 +117,29 @@ namespace lss_utility {
 		}
 
 
-		inline void setRows(int nrows) { nrows_ = nrows; }
-		inline void setColumns(int ncols) { ncols_ = ncols; }
-		inline int const rows()const { return nrows_; }
-		inline int const columns()const { return ncols_; }
-		inline int const size()const { return container_.size(); }
+		inline void setRows(std::size_t nrows) { nrows_ = nrows; }
+		inline void setColumns(std::size_t ncols) { ncols_ = ncols; }
+		inline std::size_t rows()const { return nrows_; }
+		inline std::size_t columns()const { return ncols_; }
+		inline std::size_t size()const { return container_.size(); }
 		inline void clear() { container_.clear(); }
 
-		inline void emplace_back(int rowIdx, int colIdx, T value) {
-			LSS_ASSERT((rowIdx >= 0 && rowIdx < nrows_),
-				" rowIdx is outside <0," << nrows_ << ")");
-			LSS_ASSERT((colIdx >= 0 && colIdx < ncols_),
-				" colIdx is outside <0," << ncols_ << ")");
+		inline void emplace_back(std::size_t rowIdx, std::size_t colIdx, T value) {
+			LSS_ASSERT(rowIdx < nrows_," rowIdx is outside <0," << nrows_ << ")");
+			LSS_ASSERT(colIdx < ncols_," colIdx is outside <0," << ncols_ << ")");
 			container_.emplace_back(std::make_tuple(rowIdx, colIdx, value));
 		}
 
-		inline void emplace_back(std::tuple<int, int, T> tuple) {
-			LSS_ASSERT((std::get<0>(tuple) >= 0 && std::get<0>(tuple) < nrows_),
-				" rowIdx is outside <0," << nrows_ << ")");
-			LSS_ASSERT((std::get<1>(tuple) >= 0 && std::get<1>(tuple) < ncols_),
-				" colIdx is outside <0," << ncols_ << ")");
+		inline void emplace_back(std::tuple<std::size_t, std::size_t, T> tuple) {
+			LSS_ASSERT(std::get<0>(tuple) < nrows_," rowIdx is outside <0," << nrows_ << ")");
+			LSS_ASSERT(std::get<1>(tuple) < ncols_," colIdx is outside <0," << ncols_ << ")");
 			container_.emplace_back(std::move(tuple));
 		}
 
 
 		void sort(FlatMatrixSort sort);
 
-		std::tuple<int, int, T> const& at(int idx)const {
+		std::tuple<std::size_t, std::size_t, T> const& at(std::size_t idx)const {
 			return container_.at(idx);
 		}
 	};
@@ -156,19 +152,19 @@ template<typename T>
 void lss_utility::FlatMatrix<T>::sort(lss_types::FlatMatrixSort sort) {
 	if (sort == lss_types::FlatMatrixSort::RowMajor) {
 		std::sort(container_.begin(), container_.end(), 
-			[this](std::tuple<int,int,T> const &lhs, 
-				std::tuple<int, int, T> const& rhs) {
-					int const flatIdxLhs = std::get<1>(lhs) + nrows_ * std::get<0>(lhs);
-					int const flatIdxRhs = std::get<1>(rhs) + nrows_ * std::get<0>(rhs);
+			[this](std::tuple<std::size_t, std::size_t,T> const &lhs,
+				std::tuple<std::size_t, std::size_t, T> const& rhs) {
+					std::size_t const flatIdxLhs = std::get<1>(lhs) + nrows_ * std::get<0>(lhs);
+					std::size_t const flatIdxRhs = std::get<1>(rhs) + nrows_ * std::get<0>(rhs);
 					return (flatIdxLhs < flatIdxRhs);
 			});
 	}
 	else {
 		std::sort(container_.begin(), container_.end(),
-			[this](std::tuple<int, int, T> const& lhs,
-				std::tuple<int, int, T> const& rhs) {
-					int const flatIdxLhs = std::get<0>(lhs) + ncols_ * std::get<1>(lhs);
-					int const flatIdxRhs = std::get<0>(rhs) + ncols_ * std::get<1>(rhs);
+			[this](std::tuple<std::size_t, std::size_t, T> const& lhs,
+				std::tuple<std::size_t, std::size_t, T> const& rhs) {
+					std::size_t const flatIdxLhs = std::get<0>(lhs) + ncols_ * std::get<1>(lhs);
+					std::size_t const flatIdxRhs = std::get<0>(rhs) + ncols_ * std::get<1>(rhs);
 					return (flatIdxLhs < flatIdxRhs);
 			});
 	}

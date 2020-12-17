@@ -2,11 +2,13 @@
 #if !defined(_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_T)
 #define _LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_T
 
-#include"lss_types.h"
-#include"lss_utility.h"
-#include"lss_fdm_double_sweep_solver.h"
-#include"lss_fdm_thomas_lu_solver.h"
-#include"lss_one_dim_advection_diffusion_equation_solvers.h"
+#pragma warning(disable: 4305)
+
+#include"common/lss_types.h"
+#include"common/lss_utility.h"
+#include"sparse_solvers/lss_fdm_double_sweep_solver.h"
+#include"sparse_solvers/lss_fdm_thomas_lu_solver.h"
+#include"pde_solvers/one_dim/classic/lss_one_dim_advection_diffusion_equation_solvers.h"
 
 
 #define PI 3.14159
@@ -727,8 +729,6 @@ void testImplAdvectionDiffEquationRobinBCThomasLUEuler() {
 	std::size_t const Td = 150;
 	// initial condition:
 	auto initialCondition = [](T x) {return std::exp(0.5*x); };
-	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 0.0);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
@@ -830,8 +830,6 @@ void testImplAdvectionDiffEquationRobinBCThomasLUCN() {
 	std::size_t const Td = 100;
 	// initial condition:
 	auto initialCondition = [](T x) {return std::exp(0.5*x); };
-	// boundary conditions:
-	auto boundary = std::make_pair(0.0, 0.0);
 	// prepare container for solution:
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});

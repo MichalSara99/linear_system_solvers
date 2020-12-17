@@ -2,11 +2,12 @@
 #if !defined(_LSS_FDM_DOUBLE_SWEEP_SOLVER)
 #define _LSS_FDM_DOUBLE_SWEEP_SOLVER
 
+#pragma warning(disable: 4244)
 
 #include<vector>
 #include<type_traits>
-#include"lss_macros.h"
-#include"lss_utility.h"
+#include"common/lss_macros.h"
+#include"common/lss_utility.h"
 
 
 namespace lss_fdm_double_sweep_solver {

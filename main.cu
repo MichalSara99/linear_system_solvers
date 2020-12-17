@@ -1,123 +1,124 @@
 #include<iostream>
 
 
-#include"lss_sparse_solvers_cuda_t.h"
-#include"lss_dense_solvers_cuda_t.h"
-#include"lss_fdm_tridiagonal_solvers_t.h"
-#include"lss_one_dim_heat_equation_solvers_t.h"
-#include"lss_one_dim_heat_equation_solvers_cuda_t.h"
-#include"lss_one_dim_advection_diffusion_equation_solvers_t.h"
-#include"lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h"
+#include"unit_tests/lss_sparse_solvers_cuda_t.h"
+#include"unit_tests/lss_dense_solvers_cuda_t.h"
+#include"unit_tests/lss_fdm_tridiagonal_solvers_t.h"
+#include"unit_tests/lss_one_dim_heat_equation_solvers_t.h"
+#include"unit_tests/lss_one_dim_heat_equation_solvers_cuda_t.h"
+#include"unit_tests/lss_one_dim_advection_diffusion_equation_solvers_t.h"
+#include"unit_tests/lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h"
+
+
 
 int main(int argc, char const* argv[]) {
 
-	// =====================================================
-    // ========= lss_sparse_solvers_tridiagonal_t.h ========
-	// =====================================================
+	// ====================================================================
+    // ================== lss_sparse_solvers_tridiagonal_t.h ==============
+	// ====================================================================
 
-     // testDoubleSweepDirichletBC(); 
-     // testThomasLUSolverDirichletBC();
-	 // testDoubleSweepDirichletBC1();
-	 // testThomasLUSolverDirichletBC1();
+		// testDoubleSweepDirichletBC(); 
+		// testThomasLUSolverDirichletBC();
+		// testDoubleSweepDirichletBC1();
+		// testThomasLUSolverDirichletBC1();
 
-	// testDoubleSweepDirichletBC();
-	// testThomasLUSolverDirichletBC();
-	// testDoubleSweepDirichletBC1();
-	// testThomasLUSolverDirichletBC1();
-	// testDoubleSweepRobinBC();
-	// testThomasLUSolverRobinBC();
+		// testDoubleSweepDirichletBC();
+		// testThomasLUSolverDirichletBC();
+		// testDoubleSweepDirichletBC1();
+		// testThomasLUSolverDirichletBC1();
+		// testDoubleSweepRobinBC();
+		// testThomasLUSolverRobinBC();
 
-	// =====================================================
+	// ====================================================================
 
-	// =====================================================
-    // ============= lss_sparse_solvers_cuda_t.h ===========
-	// =====================================================
+	// ====================================================================
+    // =================== lss_sparse_solvers_cuda_t.h ====================
+	// ====================================================================
 
-    // deviceSparseQRTest();
-    // hostSparseQRTest();
-    // testDirichletBCBVPOnHost();
+		// deviceSparseQRTest();
+		// hostSparseQRTest();
+		// testDirichletBCBVPOnHost();
 	
-    // testDirichletBCBVPOnDevice();
-	// testRobinBCBVPOnHost();
-	// testRobinBCBVPOnDevice();
+		// testDirichletBCBVPOnDevice();
+		// testRobinBCBVPOnHost();
+		// testRobinBCBVPOnDevice();
 
-	// =====================================================
-
-
-	// =====================================================
-    // ============== lss_dense_solvers_cuda_t.h ===========
-	// =====================================================
-
-     // deviceDenseQRTest();
-     // deviceDenseLUTest();
+	// ====================================================================
 
 
-	 // =====================================================
+	// ====================================================================
+    // ==================== lss_dense_solvers_cuda_t.h ====================
+	// ====================================================================
 
-	// =====================================================
-	// ========= lss_one_dim_heat_equation_solvers_t.h =====
-	// =====================================================
+		// deviceDenseQRTest();
+		// deviceDenseLUTest();
 
-	// testImplHeatEquationDirichletBCDoubleSweep();
-	// testImplHeatEquationSourceDirichletBCDoubleSweep();
-	// testImplHeatEquationSourceDirichletBCThomasLU();
-	// testImplHeatEquationRobinBCDoubleSweep();
-	// testImplHeatEquationDirichletBCThomasLU();
-	// testImplHeatEquationRobinBCThomasLU();
-	// testImplHeatEquationSourceRobinBCDoubleSweep();
-	// testImplHeatEquationSourceRobinBCThomasLU();
-	// testExplHeatEquationDirichletBC();
-	// testExplHeatEquationSourceDirichletBC();
-	// testImplNonHomHeatEquationDirichletBCDoubleSweep();
-	// testImplNonHomHeatEquationDirichletBCThomasLU();
-	// testExplNonHomHeatEquationDirichletBC();
-	// testExplHomHeatEquationRobinBC();
-	// testExplHomHeatEquationSourceRobinBC();
+	// ====================================================================
 
-	// =====================================================
+	// ====================================================================
+	// ================ lss_one_dim_heat_equation_solvers_t.h =============
+	// ====================================================================
 
-	// =====================================================
-	// ==== lss_one_dim_heat_equation_solvers_cuda_t.h =====
-	// =====================================================
+		// testImplHeatEquationDirichletBCDoubleSweep();
+		// testImplHeatEquationSourceDirichletBCDoubleSweep();
+		// testImplHeatEquationSourceDirichletBCThomasLU();
+		// testImplHeatEquationRobinBCDoubleSweep();
+		// testImplHeatEquationDirichletBCThomasLU();
+		// testImplHeatEquationRobinBCThomasLU();
+		// testImplHeatEquationSourceRobinBCDoubleSweep();
+		// testImplHeatEquationSourceRobinBCThomasLU();
+		// testExplHeatEquationDirichletBC();
+		// testExplHeatEquationSourceDirichletBC();
+		// testImplNonHomHeatEquationDirichletBCDoubleSweep();
+		// testImplNonHomHeatEquationDirichletBCThomasLU();
+		// testExplNonHomHeatEquationDirichletBC();
+		// testExplHomHeatEquationRobinBC();
+		// testExplHomHeatEquationSourceRobinBC();
 
-	// testImplHeatEquationDirichletBCDeviceCUDA();
-	// testImplHeatEquationDirichletBCHostCUDA();
-	// testImplHeatEquationRobinBCDeviceCUDA();
-	// testImplHeatEquationSourceDirichletBCCUDA();
-	// testImplHeatEquationSourceRobinBCCUDA();
-	// testImplNonHomHeatEquationDirichletBCDeviceCUDA();
-	// testImplNonHomHeatEquationDirichletBCHostCUDA();
-	// testExplHeatEquationDirichletBCDeviceCUDA();
-	// testExplNonHomHeatEquationDirichletBCDeviceCUDA();
-	// testExplHeatEquationSourceDirichletBCEulerCUDA();
-	// testExplHeatEquationRobinBCDeviceCUDA();
-	// testExplHomHeatEquationSourceRobinBCCUDA();
+	// ====================================================================
 
-	// =====================================================
+	// ====================================================================
+	// =========== lss_one_dim_heat_equation_solvers_cuda_t.h =============
+	// ====================================================================
 
-	// ==========================================================
-	// == lss_one_dim_advection_diffusion_equation_solvers_t.h ==
-	// ==========================================================
+		// testImplHeatEquationDirichletBCDeviceCUDA();
+		// testImplHeatEquationDirichletBCHostCUDA();
+		// testImplHeatEquationRobinBCDeviceCUDA();
+		// testImplHeatEquationSourceDirichletBCCUDA();
+		// testImplHeatEquationSourceRobinBCCUDA();
+		// testImplNonHomHeatEquationDirichletBCDeviceCUDA();
+		// testImplNonHomHeatEquationDirichletBCHostCUDA();
+		// testExplHeatEquationDirichletBCDeviceCUDA();
+		// testExplNonHomHeatEquationDirichletBCDeviceCUDA();
+		// testExplHeatEquationSourceDirichletBCEulerCUDA();
+		// testExplHeatEquationRobinBCDeviceCUDA();
+		// testExplHomHeatEquationSourceRobinBCCUDA();
+
+	// ====================================================================
+
+	// ====================================================================
+	// ======== lss_one_dim_advection_diffusion_equation_solvers_t.h ======
+	// ====================================================================
 	
-	// testImplAdvectionDiffEquationDirichletBCDoubleSweep();
-	// testExplAdvectionDiffEquationDirichletBC();
-	// testImplAdvectionDiffEquationRobinBCDoubleSweep();
-	// testImplAdvectionDiffEquationRobinBCThomasLU();
-	// testExplAdvectionDiffEquationRobinBC();
-	// testImplAdvectionDiffEquationSourceDirichletBCDoubleSweep();
-	// testImplAdvectionDiffEquationSourceDirichletBCThomasLU();
-	// testExplAdvectionDiffEquationSourceDirichletBC();
+		// testImplAdvectionDiffEquationDirichletBCDoubleSweep();
+		// testExplAdvectionDiffEquationDirichletBC();
+		// testImplAdvectionDiffEquationRobinBCDoubleSweep();
+		// testImplAdvectionDiffEquationRobinBCThomasLU();
+		// testExplAdvectionDiffEquationRobinBC();
+		// testImplAdvectionDiffEquationSourceDirichletBCDoubleSweep();
+		// testImplAdvectionDiffEquationSourceDirichletBCThomasLU();
+		// testExplAdvectionDiffEquationSourceDirichletBC();
 
-	// ==========================================================
+	// ====================================================================
 
 	// ====================================================================
 	// ==== lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h =====
 	// ====================================================================
 
-	// testImplAdvectionDiffusionEquationDirichletBCDevice();
-	// testImplAdvectionDiffusionEquationRobinBCDevice();
-	// testExplAdvectionDiffusionEquationDirichletBC();
-	// testExplAdvectionDiffusionEquationRobinBC();
+		// testImplAdvectionDiffusionEquationDirichletBCDevice();
+		// testImplAdvectionDiffusionEquationRobinBCDevice();
+		// testExplAdvectionDiffusionEquationDirichletBC();
+		// testExplAdvectionDiffusionEquationRobinBC();
 
 	// ====================================================================
 

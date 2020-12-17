@@ -3,8 +3,8 @@
 #define _LSS_SPARSE_SOLVERS_CUDA_T
 
 
-#include"lss_sparse_solvers_cuda.h"
-#include"lss_sparse_solvers_policy.h"
+#include"sparse_solvers/lss_sparse_solvers_cuda.h"
+#include"sparse_solvers/lss_sparse_solvers_policy.h"
 
 
 void deviceSparseDefaultQRTest() {
@@ -948,7 +948,7 @@ void hostBVPDirichletBCFloatQRTest() {
 	// t_0,t_1,t_2,...,t_20
 	int const N = 20;
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	float h = 1.0f / static_cast<float>(N);
 	// set number of columns and rows:
 	// because we already know the boundary values
 	// at t_0 = 0 and t_20 = 0:
@@ -964,7 +964,7 @@ void hostBVPDirichletBCFloatQRTest() {
 	fsm.emplace_back(m - 1, m - 2, 1.0); fsm.emplace_back(m - 1, m - 1, -2.0);
 
 	// lets use std::vector to populate vector b:
-	std::vector<float> b(m, -2.0 * h * h);
+	std::vector<float> b(m, -2.0f * h * h);
 	// set the Dirichlet boundary conditions:
 	float left = 0.0;
 	float right = 0.0;
@@ -1027,7 +1027,7 @@ void hostBVPDirichletBCFloatLUTest() {
 	// t_0,t_1,t_2,...,t_20
 	int const N = 20;
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	float h = 1.0f / static_cast<float>(N);
 	// set number of columns and rows:
 	// because we already know the boundary values
 	// at t_0 = 0 and t_20 = 0:
@@ -1043,7 +1043,7 @@ void hostBVPDirichletBCFloatLUTest() {
 	fsm.emplace_back(m - 1, m - 2, 1.0); fsm.emplace_back(m - 1, m - 1, -2.0);
 
 	// lets use std::vector to populate vector b:
-	std::vector<float> b(m, -2.0 * h * h);
+	std::vector<float> b(m, -2.0f * h * h);
 	// set the Dirichlet boundary conditions:
 	float left = 0.0;
 	float right = 0.0;
@@ -1106,7 +1106,7 @@ void hostBVPDirichletBCFloatCholeskyTest() {
 	// t_0,t_1,t_2,...,t_20
 	int const N = 20;
 	// step size:
-	float h = 1.0 / static_cast<float>(N);
+	float h = 1.0f / static_cast<float>(N);
 	// set number of columns and rows:
 	// because we already know the boundary values
 	// at t_0 = 0 and t_20 = 0:
@@ -1122,7 +1122,7 @@ void hostBVPDirichletBCFloatCholeskyTest() {
 	fsm.emplace_back(m - 1, m - 2, 1.0); fsm.emplace_back(m - 1, m - 1, -2.0);
 
 	// lets use std::vector to populate vector b:
-	std::vector<float> b(m, -2.0 * h * h);
+	std::vector<float> b(m, -2.0f * h * h);
 	// set the Dirichlet boundary conditions:
 	float left = 0.0;
 	float right = 0.0;
