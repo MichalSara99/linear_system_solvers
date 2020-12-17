@@ -5,6 +5,7 @@
 
 #include<tuple>
 #include"common/lss_macros.h"
+#include"common/lss_utility.h"
 #include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
 namespace lss_one_dim_pde_schemes_cuda {

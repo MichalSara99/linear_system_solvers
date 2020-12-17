@@ -1,6 +1,5 @@
 #include<device_launch_parameters.h>
 #include"lss_pde_cuda_kernels.h"
-#include"common/lss_utility.h"
 #include"pde_solvers/one_dim/lss_one_dim_pde_schemes_cuda.h"
 
 
