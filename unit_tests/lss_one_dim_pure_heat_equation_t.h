@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_T)
-#define _LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_T
+#if !defined(_LSS_ONE_DIM_PURE_HEAT_EQUATION_T)
+#define _LSS_ONE_DIM_PURE_HEAT_EQUATION_T
 
 #pragma warning(disable: 4305)
 
@@ -9,10 +9,14 @@
 #include"common/lss_utility.h"
 #include"sparse_solvers/lss_fdm_double_sweep_solver.h"
 #include"sparse_solvers/lss_fdm_thomas_lu_solver.h"
-#include"pde_solvers/one_dim/classic/lss_one_dim_heat_equation_solvers.h"
+#include"pde_solvers/one_dim/classic/lss_one_dim_general_heat_equation_solvers.h"
 
 
 #define PI 3.14159
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//											  PURE HEAT PROBLEMS
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ================================================================================================================
 // =========================================== IMPLICIT SOLVERS ===================================================
@@ -24,13 +28,13 @@
 // ================================================================================================================
 
 template<typename T>
-void testImplHeatEquationDirichletBCDoubleSweepEuler() {
+void testImplPureHeatEquationDirichletBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -46,7 +50,7 @@ void testImplHeatEquationDirichletBCDoubleSweepEuler() {
 	std::cout << "===============================================================================\n";
 
 	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T, 
+	typedef Implicit1DGeneralHeatEquation<T,
 				BoundaryConditionType::Dirichlet,
 				FDMDoubleSweepSolver, 
 				std::vector,
@@ -70,7 +74,7 @@ void testImplHeatEquationDirichletBCDoubleSweepEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution,ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -100,13 +104,13 @@ void testImplHeatEquationDirichletBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplHeatEquationDirichletBCDoubleSweepCN() {
+void testImplPureHeatEquationDirichletBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -122,7 +126,7 @@ void testImplHeatEquationDirichletBCDoubleSweepCN() {
 	std::cout << "===============================================================================\n";
 
 	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -146,7 +150,7 @@ void testImplHeatEquationDirichletBCDoubleSweepCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -174,28 +178,28 @@ void testImplHeatEquationDirichletBCDoubleSweepCN() {
 	}
 }
 
-void testImplHeatEquationDirichletBCDoubleSweep() {
+void testImplPureHeatEquationDirichletBCDoubleSweep() {
 	std::cout << "================================================================================\n";
-	std::cout << "===================== Implicit Heat Equation (Dirichlet BC) ====================\n";
+	std::cout << "================ Implicit Pure Heat Equation (Dirichlet BC) ====================\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationDirichletBCDoubleSweepEuler<double>();
-	testImplHeatEquationDirichletBCDoubleSweepEuler<float>();
-	testImplHeatEquationDirichletBCDoubleSweepCN<double>();
-	testImplHeatEquationDirichletBCDoubleSweepCN<float>();
+	testImplPureHeatEquationDirichletBCDoubleSweepEuler<double>();
+	testImplPureHeatEquationDirichletBCDoubleSweepEuler<float>();
+	testImplPureHeatEquationDirichletBCDoubleSweepCN<double>();
+	testImplPureHeatEquationDirichletBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 
 template<typename T>
-void testImplHeatEquationDirichletBCThomasLUEuler() {
+void testImplPureHeatEquationDirichletBCThomasLUEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -211,7 +215,7 @@ void testImplHeatEquationDirichletBCThomasLUEuler() {
 	std::cout << "===============================================================================\n";
 
 	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -229,13 +233,13 @@ void testImplHeatEquationDirichletBCThomasLUEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.10, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -257,7 +261,7 @@ void testImplHeatEquationDirichletBCThomasLUEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -265,13 +269,13 @@ void testImplHeatEquationDirichletBCThomasLUEuler() {
 
 
 template<typename T>
-void testImplHeatEquationDirichletBCThomasLUCN() {
+void testImplPureHeatEquationDirichletBCThomasLUCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -287,7 +291,7 @@ void testImplHeatEquationDirichletBCThomasLUCN() {
 	std::cout << "===============================================================================\n";
 
 	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -305,13 +309,13 @@ void testImplHeatEquationDirichletBCThomasLUCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.10, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -333,34 +337,34 @@ void testImplHeatEquationDirichletBCThomasLUCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.10, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplHeatEquationDirichletBCThomasLU() {
+void testImplPureHeatEquationDirichletBCThomasLU() {
 	std::cout << "================================================================================\n";
-	std::cout << "===================== Implicit Heat Equation (Dirichlet BC) ====================\n";
+	std::cout << "================ Implicit Pure Heat Equation (Dirichlet BC) ====================\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationDirichletBCThomasLUEuler<double>();
-	testImplHeatEquationDirichletBCThomasLUEuler<float>();
-	testImplHeatEquationDirichletBCThomasLUCN<double>();
-	testImplHeatEquationDirichletBCThomasLUCN<float>();
+	testImplPureHeatEquationDirichletBCThomasLUEuler<double>();
+	testImplPureHeatEquationDirichletBCThomasLUEuler<float>();
+	testImplPureHeatEquationDirichletBCThomasLUCN<double>();
+	testImplPureHeatEquationDirichletBCThomasLUCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 
 template<typename T>
-void testImplHeatEquationRobinBCDoubleSweepEuler() {
+void testImplPureHeatEquationRobinBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -376,7 +380,7 @@ void testImplHeatEquationRobinBCDoubleSweepEuler() {
 	std::cout << "===============================================================================\n";
 
 	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -392,7 +396,7 @@ void testImplHeatEquationRobinBCDoubleSweepEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -416,7 +420,7 @@ void testImplHeatEquationRobinBCDoubleSweepEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -441,7 +445,7 @@ void testImplHeatEquationRobinBCDoubleSweepEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -449,13 +453,13 @@ void testImplHeatEquationRobinBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplHeatEquationRobinBCDoubleSweepCN() {
+void testImplPureHeatEquationRobinBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -471,7 +475,7 @@ void testImplHeatEquationRobinBCDoubleSweepCN() {
 	std::cout << "===============================================================================\n";
 
 	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -488,7 +492,7 @@ void testImplHeatEquationRobinBCDoubleSweepCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -512,7 +516,7 @@ void testImplHeatEquationRobinBCDoubleSweepCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -537,34 +541,34 @@ void testImplHeatEquationRobinBCDoubleSweepCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplHeatEquationRobinBCDoubleSweep() {
+void testImplPureHeatEquationRobinBCDoubleSweep() {
 	std::cout << "================================================================================\n";
-	std::cout << "===================== Implicit Heat Equation (Robin BC) ====================\n";
+	std::cout << "===================== Implicit Pure Heat Equation (Robin BC) ===================\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationRobinBCDoubleSweepEuler<double>();
-	testImplHeatEquationRobinBCDoubleSweepEuler<float>();
-	testImplHeatEquationRobinBCDoubleSweepCN<double>();
-	testImplHeatEquationRobinBCDoubleSweepCN<float>();
+	testImplPureHeatEquationRobinBCDoubleSweepEuler<double>();
+	testImplPureHeatEquationRobinBCDoubleSweepEuler<float>();
+	testImplPureHeatEquationRobinBCDoubleSweepCN<double>();
+	testImplPureHeatEquationRobinBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 
 template<typename T>
-void testImplHeatEquationRobinBCThomasLUEuler() {
+void testImplPureHeatEquationRobinBCThomasLUEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -580,7 +584,7 @@ void testImplHeatEquationRobinBCThomasLUEuler() {
 	std::cout << "===============================================================================\n";
 
 	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMThomasLUSolver,
 		std::vector,
@@ -596,7 +600,7 @@ void testImplHeatEquationRobinBCThomasLUEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -620,7 +624,7 @@ void testImplHeatEquationRobinBCThomasLUEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -645,7 +649,7 @@ void testImplHeatEquationRobinBCThomasLUEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -653,13 +657,13 @@ void testImplHeatEquationRobinBCThomasLUEuler() {
 
 
 template<typename T>
-void testImplHeatEquationRobinBCThomasLUCN() {
+void testImplPureHeatEquationRobinBCThomasLUCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -674,8 +678,8 @@ void testImplHeatEquationRobinBCThomasLUCN() {
 	std::cout << " U(x,t) = 0.5 - (4/(pi*pi))*sum_1^infty{ exp(-((2n-1)*pi)^2*t) *cos((2n-1)*pi*x)/(2n-1)^2}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMThomasLUSolver,
 		std::vector,
@@ -691,7 +695,7 @@ void testImplHeatEquationRobinBCThomasLUCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// Robin boundaries are assumed to be of following form:
 	//
 	//				U_0 = leftLin * U_1 + leftConst
@@ -714,7 +718,7 @@ void testImplHeatEquationRobinBCThomasLUCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -739,21 +743,21 @@ void testImplHeatEquationRobinBCThomasLUCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplHeatEquationRobinBCThomasLU() {
+void testImplPureHeatEquationRobinBCThomasLU() {
 	std::cout << "================================================================================\n";
-	std::cout << "========================= Implicit Heat Equation (Robin BC) ====================\n";
+	std::cout << "==================== Implicit Pure Heat Equation (Robin BC) ====================\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationRobinBCThomasLUEuler<double>();
-	testImplHeatEquationRobinBCThomasLUEuler<float>();
-	testImplHeatEquationRobinBCThomasLUCN<double>();
-	testImplHeatEquationRobinBCThomasLUCN<float>();
+	testImplPureHeatEquationRobinBCThomasLUEuler<double>();
+	testImplPureHeatEquationRobinBCThomasLUEuler<float>();
+	testImplPureHeatEquationRobinBCThomasLUCN<double>();
+	testImplPureHeatEquationRobinBCThomasLUCN<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -765,13 +769,13 @@ void testImplHeatEquationRobinBCThomasLU() {
 
 
 template<typename T>
-void testImplHeatEquationSourceDirichletBCDoubleSweepEuler() {
+void testImplPureHeatEquationSourceDirichletBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with source: \n\n";
@@ -784,8 +788,8 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepEuler() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -809,7 +813,7 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x,T t) {return x; });
 	// get the solution:
@@ -846,13 +850,13 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplHeatEquationSourceDirichletBCDoubleSweepCN() {
+void testImplPureHeatEquationSourceDirichletBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -865,8 +869,8 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepCN() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -890,7 +894,7 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -925,28 +929,28 @@ void testImplHeatEquationSourceDirichletBCDoubleSweepCN() {
 	}
 }
 
-void testImplHeatEquationSourceDirichletBCDoubleSweep() {
+void testImplPureHeatEquationSourceDirichletBCDoubleSweep() {
 	std::cout << "================================================================================\n";
-	std::cout << "================= Implicit Heat Equation with source (Dirichlet BC) ============\n";
+	std::cout << "================= Implicit Pure Heat Equation with source (Dirichlet BC) =======\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationSourceDirichletBCDoubleSweepEuler<double>();
-	testImplHeatEquationSourceDirichletBCDoubleSweepEuler<float>();
-	testImplHeatEquationSourceDirichletBCDoubleSweepCN<double>();
-	testImplHeatEquationSourceDirichletBCDoubleSweepCN<float>();
+	testImplPureHeatEquationSourceDirichletBCDoubleSweepEuler<double>();
+	testImplPureHeatEquationSourceDirichletBCDoubleSweepEuler<float>();
+	testImplPureHeatEquationSourceDirichletBCDoubleSweepCN<double>();
+	testImplPureHeatEquationSourceDirichletBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 
 template<typename T>
-void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
+void testImplPureHeatEquationSourceDirichletBCThomasLUEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -959,8 +963,8 @@ void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -971,7 +975,7 @@ void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
 	// number of time subdivisions:
 	std::size_t const Td = 100;
 	// initial condition:
-	auto initialCondition = [](T x) {return x; };
+	auto initialCondition = [](T x) {return 1.0; };
 	// boundary conditions:
 	auto boundary = std::make_pair(0.0, 0.0);
 	// prepare container for solution:
@@ -984,7 +988,7 @@ void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1021,13 +1025,13 @@ void testImplHeatEquationSourceDirichletBCThomasLUEuler() {
 
 
 template<typename T>
-void testImplHeatEquationSourceDirichletBCThomasLUCN() {
+void testImplPureHeatEquationSourceDirichletBCThomasLUCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with source: \n\n";
@@ -1040,8 +1044,8 @@ void testImplHeatEquationSourceDirichletBCThomasLUCN() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -1065,7 +1069,7 @@ void testImplHeatEquationSourceDirichletBCThomasLUCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1100,15 +1104,15 @@ void testImplHeatEquationSourceDirichletBCThomasLUCN() {
 	}
 }
 
-void testImplHeatEquationSourceDirichletBCThomasLU() {
+void testImplPureHeatEquationSourceDirichletBCThomasLU() {
 	std::cout << "================================================================================\n";
-	std::cout << "================= Implicit Heat Equation with source (Dirichlet BC) ============\n";
+	std::cout << "============ Implicit Pure Heat Equation with source (Dirichlet BC) ============\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationSourceDirichletBCThomasLUEuler<double>();
-	testImplHeatEquationSourceDirichletBCThomasLUEuler<float>();
-	testImplHeatEquationSourceDirichletBCThomasLUCN<double>();
-	testImplHeatEquationSourceDirichletBCThomasLUCN<float>();
+	testImplPureHeatEquationSourceDirichletBCThomasLUEuler<double>();
+	testImplPureHeatEquationSourceDirichletBCThomasLUEuler<float>();
+	testImplPureHeatEquationSourceDirichletBCThomasLUCN<double>();
+	testImplPureHeatEquationSourceDirichletBCThomasLUCN<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -1119,13 +1123,13 @@ void testImplHeatEquationSourceDirichletBCThomasLU() {
 
 
 template<typename T>
-void testImplHeatEquationSourceRobinBCDoubleSweepEuler() {
+void testImplPureHeatEquationSourceRobinBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with Robin boundaries and source: \n\n";
@@ -1138,8 +1142,8 @@ void testImplHeatEquationSourceRobinBCDoubleSweepEuler() {
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -1155,7 +1159,7 @@ void testImplHeatEquationSourceRobinBCDoubleSweepEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	auto leftBoundary = std::make_pair(1.0, 0.0);
 	auto rightBoundary = std::make_pair(1.0, 0.0);
@@ -1164,7 +1168,7 @@ void testImplHeatEquationSourceRobinBCDoubleSweepEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1194,7 +1198,7 @@ void testImplHeatEquationSourceRobinBCDoubleSweepEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1202,13 +1206,13 @@ void testImplHeatEquationSourceRobinBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplHeatEquationSourceRobinBCDoubleSweepCN() {
+void testImplPureHeatEquationSourceRobinBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with Robin boundaries and source: \n\n";
@@ -1221,8 +1225,8 @@ void testImplHeatEquationSourceRobinBCDoubleSweepCN() {
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -1238,7 +1242,7 @@ void testImplHeatEquationSourceRobinBCDoubleSweepCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	auto leftBoundary = std::make_pair(1.0, 0.0);
 	auto rightBoundary = std::make_pair(1.0, 0.0);
@@ -1247,7 +1251,7 @@ void testImplHeatEquationSourceRobinBCDoubleSweepCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1277,34 +1281,34 @@ void testImplHeatEquationSourceRobinBCDoubleSweepCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplHeatEquationSourceRobinBCDoubleSweep() {
+void testImplPureHeatEquationSourceRobinBCDoubleSweep() {
 	std::cout << "================================================================================\n";
-	std::cout << "================= Implicit Heat Equation with source (Robin BC) ================\n";
+	std::cout << "============ Implicit Pure Heat Equation with source (Robin BC) ================\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationSourceRobinBCDoubleSweepEuler<double>();
-	testImplHeatEquationSourceRobinBCDoubleSweepEuler<float>();
-	testImplHeatEquationSourceRobinBCDoubleSweepCN<double>();
-	testImplHeatEquationSourceRobinBCDoubleSweepCN<float>();
+	testImplPureHeatEquationSourceRobinBCDoubleSweepEuler<double>();
+	testImplPureHeatEquationSourceRobinBCDoubleSweepEuler<float>();
+	testImplPureHeatEquationSourceRobinBCDoubleSweepCN<double>();
+	testImplPureHeatEquationSourceRobinBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 
 template<typename T>
-void testImplHeatEquationSourceRobinBCThomasLUEuler() {
+void testImplPureHeatEquationSourceRobinBCThomasLUEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with Robin boundaries and source: \n\n";
@@ -1317,8 +1321,8 @@ void testImplHeatEquationSourceRobinBCThomasLUEuler() {
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMThomasLUSolver,
 		std::vector,
@@ -1334,7 +1338,7 @@ void testImplHeatEquationSourceRobinBCThomasLUEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	auto leftBoundary = std::make_pair(1.0, 0.0);
 	auto rightBoundary = std::make_pair(1.0, 0.0);
@@ -1343,7 +1347,7 @@ void testImplHeatEquationSourceRobinBCThomasLUEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1373,7 +1377,7 @@ void testImplHeatEquationSourceRobinBCThomasLUEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1381,13 +1385,13 @@ void testImplHeatEquationSourceRobinBCThomasLUEuler() {
 
 
 template<typename T>
-void testImplHeatEquationSourceRobinBCThomasLUCN() {
+void testImplPureHeatEquationSourceRobinBCThomasLUCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with Robin boundaries and source: \n\n";
@@ -1400,8 +1404,8 @@ void testImplHeatEquationSourceRobinBCThomasLUCN() {
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMThomasLUSolver,
 		std::vector,
@@ -1417,7 +1421,7 @@ void testImplHeatEquationSourceRobinBCThomasLUCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	auto leftBoundary = std::make_pair(1.0, 0.0);
 	auto rightBoundary = std::make_pair(1.0, 0.0);
@@ -1426,7 +1430,7 @@ void testImplHeatEquationSourceRobinBCThomasLUCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1456,21 +1460,21 @@ void testImplHeatEquationSourceRobinBCThomasLUCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplHeatEquationSourceRobinBCThomasLU() {
+void testImplPureHeatEquationSourceRobinBCThomasLU() {
 	std::cout << "================================================================================\n";
-	std::cout << "================= Implicit Heat Equation with source (Robin BC) ================\n";
+	std::cout << "============ Implicit Pure Heat Equation with source (Robin BC) ================\n";
 	std::cout << "================================================================================\n";
 
-	testImplHeatEquationSourceRobinBCThomasLUEuler<double>();
-	testImplHeatEquationSourceRobinBCThomasLUEuler<float>();
-	testImplHeatEquationSourceRobinBCThomasLUCN<double>();
-	testImplHeatEquationSourceRobinBCThomasLUCN<float>();
+	testImplPureHeatEquationSourceRobinBCThomasLUEuler<double>();
+	testImplPureHeatEquationSourceRobinBCThomasLUEuler<float>();
+	testImplPureHeatEquationSourceRobinBCThomasLUCN<double>();
+	testImplPureHeatEquationSourceRobinBCThomasLUCN<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -1482,13 +1486,13 @@ void testImplHeatEquationSourceRobinBCThomasLU() {
 // ================================================================================================================
 
 template<typename T>
-void testImplNonHomHeatEquationDirichletBCDoubleSweepEuler() {
+void testImplNonHomPureHeatEquationDirichletBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with Non-hom. BC: \n\n";
@@ -1503,8 +1507,8 @@ void testImplNonHomHeatEquationDirichletBCDoubleSweepEuler() {
 	std::cout << " U(x,t) = 100*x + (198/pi)*sum_0^infty{ (-1)^(n)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -1522,13 +1526,13 @@ void testImplNonHomHeatEquationDirichletBCDoubleSweepEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -1550,7 +1554,7 @@ void testImplNonHomHeatEquationDirichletBCDoubleSweepEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1558,13 +1562,13 @@ void testImplNonHomHeatEquationDirichletBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplNonHomHeatEquationDirichletBCDoubleSweepCN() {
+void testImplNonHomPureHeatEquationDirichletBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with Non-hom. BC:: \n\n";
@@ -1579,8 +1583,8 @@ void testImplNonHomHeatEquationDirichletBCDoubleSweepCN() {
 	std::cout << " U(x,t) = 100*x + (198/pi)*sum_0^infty{ (-1)^(n)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -1598,13 +1602,13 @@ void testImplNonHomHeatEquationDirichletBCDoubleSweepCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -1626,34 +1630,34 @@ void testImplNonHomHeatEquationDirichletBCDoubleSweepCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplNonHomHeatEquationDirichletBCDoubleSweep() {
+void testImplNonHomPureHeatEquationDirichletBCDoubleSweep() {
 	std::cout << "================================================================================\n";
-	std::cout << "=========== Implicit Heat Equation (non-homogenous Dirichlet BC) ===============\n";
+	std::cout << "=========== Implicit Pure Heat Equation (non-homogenous Dirichlet BC) ==========\n";
 	std::cout << "================================================================================\n";
 
-	testImplNonHomHeatEquationDirichletBCDoubleSweepEuler<double>();
-	testImplNonHomHeatEquationDirichletBCDoubleSweepEuler<float>();
-	testImplNonHomHeatEquationDirichletBCDoubleSweepCN<double>();
-	testImplNonHomHeatEquationDirichletBCDoubleSweepCN<float>();
+	testImplNonHomPureHeatEquationDirichletBCDoubleSweepEuler<double>();
+	testImplNonHomPureHeatEquationDirichletBCDoubleSweepEuler<float>();
+	testImplNonHomPureHeatEquationDirichletBCDoubleSweepCN<double>();
+	testImplNonHomPureHeatEquationDirichletBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 
 template<typename T>
-void testImplNonHomHeatEquationDirichletBCThomasLUEuler() {
+void testImplNonHomPureHeatEquationDirichletBCThomasLUEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with non-hom BC: \n\n";
@@ -1668,8 +1672,8 @@ void testImplNonHomHeatEquationDirichletBCThomasLUEuler() {
 	std::cout << " U(x,t) = 100.0*x + (198/pi)*sum_0^infty{ (-1)^(n)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -1687,13 +1691,13 @@ void testImplNonHomHeatEquationDirichletBCThomasLUEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -1715,7 +1719,7 @@ void testImplNonHomHeatEquationDirichletBCThomasLUEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1723,13 +1727,13 @@ void testImplNonHomHeatEquationDirichletBCThomasLUEuler() {
 
 
 template<typename T>
-void testImplNonHomHeatEquationDirichletBCThomasLUCN() {
+void testImplNonHomPureHeatEquationDirichletBCThomasLUCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_heat_equation_solvers::implicit_solvers::Implicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with non-hom BC: \n\n";
@@ -1744,8 +1748,8 @@ void testImplNonHomHeatEquationDirichletBCThomasLUCN() {
 	std::cout << " U(x,t) = 100*x + (198/pi)*sum_0^infty{ (-1)^(n)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Implicit1DHeatEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -1763,13 +1767,13 @@ void testImplNonHomHeatEquationDirichletBCThomasLUCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.20, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	impl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -1791,21 +1795,21 @@ void testImplNonHomHeatEquationDirichletBCThomasLUCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.20, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplNonHomHeatEquationDirichletBCThomasLU() {
+void testImplNonHomPureHeatEquationDirichletBCThomasLU() {
 	std::cout << "================================================================================\n";
-	std::cout << "===== Implicit Heat Equation (with non-homogeneous Dirichlet BC) ===============\n";
+	std::cout << "===== Implicit Pure Heat Equation (with non-homogeneous Dirichlet BC) ==========\n";
 	std::cout << "================================================================================\n";
 
-	testImplNonHomHeatEquationDirichletBCThomasLUEuler<double>();
-	testImplNonHomHeatEquationDirichletBCThomasLUEuler<float>();
-	testImplNonHomHeatEquationDirichletBCThomasLUCN<double>();
-	testImplNonHomHeatEquationDirichletBCThomasLUCN<float>();
+	testImplNonHomPureHeatEquationDirichletBCThomasLUEuler<double>();
+	testImplNonHomPureHeatEquationDirichletBCThomasLUEuler<float>();
+	testImplNonHomPureHeatEquationDirichletBCThomasLUCN<double>();
+	testImplNonHomPureHeatEquationDirichletBCThomasLUCN<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -1820,12 +1824,12 @@ void testImplNonHomHeatEquationDirichletBCThomasLU() {
 // ================================================================================================================
 
 template<typename T>
-void testExplHeatEquationDirichletBCEuler() {
+void testExplPureHeatEquationDirichletBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -1840,8 +1844,8 @@ void testExplHeatEquationDirichletBCEuler() {
 	std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1858,13 +1862,13 @@ void testExplHeatEquationDirichletBCEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution, ExplicitPDESchemes::Euler);
 	// get exact solution:
@@ -1886,7 +1890,7 @@ void testExplHeatEquationDirichletBCEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -1894,12 +1898,12 @@ void testExplHeatEquationDirichletBCEuler() {
 
 
 template<typename T>
-void testExplHeatEquationDirichletBCADEBC() {
+void testExplPureHeatEquationDirichletBCADEBC() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -1914,8 +1918,8 @@ void testExplHeatEquationDirichletBCADEBC() {
 	std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1932,13 +1936,13 @@ void testExplHeatEquationDirichletBCADEBC() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
@@ -1960,19 +1964,19 @@ void testExplHeatEquationDirichletBCADEBC() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
 template<typename T>
-void testExplHeatEquationDirichletBCADES() {
+void testExplPureHeatEquationDirichletBCADES() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -1987,8 +1991,8 @@ void testExplHeatEquationDirichletBCADES() {
 	std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2005,13 +2009,13 @@ void testExplHeatEquationDirichletBCADES() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution,ExplicitPDESchemes::ADESaulyev);
 	// get exact solution:
@@ -2033,23 +2037,23 @@ void testExplHeatEquationDirichletBCADES() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testExplHeatEquationDirichletBC() {
+void testExplPureHeatEquationDirichletBC() {
 	std::cout << "================================================================================\n";
-	std::cout << "===================== Explicit Heat Equation (Dirichlet BC) ====================\n";
+	std::cout << "===================== Explicit Pure Heat Equation (Dirichlet BC) ===============\n";
 	std::cout << "================================================================================\n";
 
-	testExplHeatEquationDirichletBCEuler<double>();
-	testExplHeatEquationDirichletBCEuler<float>();
-	testExplHeatEquationDirichletBCADEBC<double>();
-	testExplHeatEquationDirichletBCADEBC<float>();
-	testExplHeatEquationDirichletBCADES<double>();
-	testExplHeatEquationDirichletBCADES<float>();
+	testExplPureHeatEquationDirichletBCEuler<double>();
+	testExplPureHeatEquationDirichletBCEuler<float>();
+	testExplPureHeatEquationDirichletBCADEBC<double>();
+	testExplPureHeatEquationDirichletBCADEBC<float>();
+	testExplPureHeatEquationDirichletBCADES<double>();
+	testExplPureHeatEquationDirichletBCADES<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -2060,12 +2064,12 @@ void testExplHeatEquationDirichletBC() {
 // ================================================================================================================
 
 template<typename T>
-void testExplHeatEquationSourceDirichletBCEuler() {
+void testExplPureHeatEquationSourceDirichletBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with source: \n\n";
@@ -2078,8 +2082,8 @@ void testExplHeatEquationSourceDirichletBCEuler() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2096,7 +2100,7 @@ void testExplHeatEquationSourceDirichletBCEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -2104,7 +2108,7 @@ void testExplHeatEquationSourceDirichletBCEuler() {
 	// set heat source: 
 	expl_solver.setHeatSource([](T x, T t) {return x; });
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution, ExplicitPDESchemes::Euler);
 	// get exact solution:
@@ -2131,19 +2135,19 @@ void testExplHeatEquationSourceDirichletBCEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
 template<typename T>
-void testExplHeatEquationSourceDirichletBCADEBC() {
+void testExplPureHeatEquationSourceDirichletBCADEBC() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with source: \n\n";
@@ -2156,8 +2160,8 @@ void testExplHeatEquationSourceDirichletBCADEBC() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2174,7 +2178,7 @@ void testExplHeatEquationSourceDirichletBCADEBC() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -2182,7 +2186,7 @@ void testExplHeatEquationSourceDirichletBCADEBC() {
 	// set heat source: 
 	expl_solver.setHeatSource([](T x, T t) {return x; });
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
@@ -2209,7 +2213,7 @@ void testExplHeatEquationSourceDirichletBCADEBC() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -2217,12 +2221,12 @@ void testExplHeatEquationSourceDirichletBCADEBC() {
 
 
 template<typename T>
-void testExplHeatEquationSourceDirichletBCADES() {
+void testExplPureHeatEquationSourceDirichletBCADES() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with source: \n\n";
@@ -2235,8 +2239,8 @@ void testExplHeatEquationSourceDirichletBCADES() {
 	std::cout << " U(x,0) = 1.0, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2253,7 +2257,7 @@ void testExplHeatEquationSourceDirichletBCADES() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
@@ -2261,7 +2265,7 @@ void testExplHeatEquationSourceDirichletBCADES() {
 	// set heat source: 
 	expl_solver.setHeatSource([](T x, T t) {return x; });
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution, ExplicitPDESchemes::ADESaulyev);
 	// get exact solution:
@@ -2288,23 +2292,23 @@ void testExplHeatEquationSourceDirichletBCADES() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testExplHeatEquationSourceDirichletBC() {
+void testExplPureHeatEquationSourceDirichletBC() {
 	std::cout << "================================================================================\n";
-	std::cout << "============== Explicit Heat Equation with source (Dirichlet BC) ===============\n";
+	std::cout << "============== Explicit Pure Heat Equation with source (Dirichlet BC) ==========\n";
 	std::cout << "================================================================================\n";
 
-	testExplHeatEquationSourceDirichletBCEuler<double>();
-	testExplHeatEquationSourceDirichletBCEuler<float>();
-	testExplHeatEquationSourceDirichletBCADEBC<double>();
-	testExplHeatEquationSourceDirichletBCADEBC<float>();
-	testExplHeatEquationSourceDirichletBCADES<double>();
-	testExplHeatEquationSourceDirichletBCADES<float>();
+	testExplPureHeatEquationSourceDirichletBCEuler<double>();
+	testExplPureHeatEquationSourceDirichletBCEuler<float>();
+	testExplPureHeatEquationSourceDirichletBCADEBC<double>();
+	testExplPureHeatEquationSourceDirichletBCADEBC<float>();
+	testExplPureHeatEquationSourceDirichletBCADES<double>();
+	testExplPureHeatEquationSourceDirichletBCADES<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -2316,12 +2320,12 @@ void testExplHeatEquationSourceDirichletBC() {
 // ================================================================================================================
 
 template<typename T>
-void testExplNonHomHeatEquationDirichletBCEuler() {
+void testExplNonHomPureHeatEquationDirichletBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with Non-hom BC: \n\n";
@@ -2336,8 +2340,8 @@ void testExplNonHomHeatEquationDirichletBCEuler() {
 	std::cout << " U(x,t) = 100*x + (198/pi)*sum_0^infty{ (-1)^(n)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2354,13 +2358,13 @@ void testExplNonHomHeatEquationDirichletBCEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.5, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution, ExplicitPDESchemes::Euler);
 	// get exact solution:
@@ -2382,7 +2386,7 @@ void testExplNonHomHeatEquationDirichletBCEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.5, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -2390,12 +2394,12 @@ void testExplNonHomHeatEquationDirichletBCEuler() {
 
 
 template<typename T>
-void testExplNonHomHeatEquationDirichletBCADEBC() {
+void testExplNonHomPureHeatEquationDirichletBCADEBC() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with non-hom BC: \n\n";
@@ -2410,8 +2414,8 @@ void testExplNonHomHeatEquationDirichletBCADEBC() {
 	std::cout << " U(x,t) = 100*x +  (198/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2428,13 +2432,13 @@ void testExplNonHomHeatEquationDirichletBCADEBC() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
@@ -2456,19 +2460,19 @@ void testExplNonHomHeatEquationDirichletBCADEBC() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
 template<typename T>
-void testExplNonHomHeatEquationDirichletBCADES() {
+void testExplNonHomPureHeatEquationDirichletBCADES() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Heat equation with non-hom BC: \n\n";
@@ -2483,8 +2487,8 @@ void testExplNonHomHeatEquationDirichletBCADES() {
 	std::cout << " U(x,t) = 100.0*x + (198/pi)*sum_0^infty{ (-1)^(n)*exp(-(n*pi)^2*t) *sin(n*pi*x)/n}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2501,13 +2505,13 @@ void testExplNonHomHeatEquationDirichletBCADES() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.50, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// set boundary conditions:
 	expl_solver.setBoundaryCondition(boundary);
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution, ExplicitPDESchemes::ADESaulyev);
 	// get exact solution:
@@ -2529,23 +2533,23 @@ void testExplNonHomHeatEquationDirichletBCADES() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.50, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testExplNonHomHeatEquationDirichletBC() {
+void testExplNonHomPureHeatEquationDirichletBC() {
 	std::cout << "================================================================================\n";
-	std::cout << "========= Explicit Heat Equation (with non-homogeneous Dirichlet BC) ===========\n";
+	std::cout << "========= Explicit Pure Heat Equation (with non-homogeneous Dirichlet BC) ======\n";
 	std::cout << "================================================================================\n";
 
-	testExplNonHomHeatEquationDirichletBCEuler<double>();
-	testExplNonHomHeatEquationDirichletBCEuler<float>();
-	testExplNonHomHeatEquationDirichletBCADEBC<double>();
-	testExplNonHomHeatEquationDirichletBCADEBC<float>();
-	testExplNonHomHeatEquationDirichletBCADES<double>();
-	testExplNonHomHeatEquationDirichletBCADES<float>();
+	testExplNonHomPureHeatEquationDirichletBCEuler<double>();
+	testExplNonHomPureHeatEquationDirichletBCEuler<float>();
+	testExplNonHomPureHeatEquationDirichletBCADEBC<double>();
+	testExplNonHomPureHeatEquationDirichletBCADEBC<float>();
+	testExplNonHomPureHeatEquationDirichletBCADES<double>();
+	testExplNonHomPureHeatEquationDirichletBCADES<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -2556,11 +2560,11 @@ void testExplNonHomHeatEquationDirichletBC() {
 // ================================================================================================================
 
 template<typename T>
-void testExplHomHeatEquationRobinBCEuler() {
+void testExplHomPureHeatEquationRobinBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 
 	std::cout << "==============================================================================\n";
@@ -2576,8 +2580,8 @@ void testExplHomHeatEquationRobinBCEuler() {
 	std::cout << " U(x,t) = 0.5 - (4/(pi*pi))*sum_1^infty{ exp(-((2n-1)*pi)^2*t) *cos((2n-1)*pi*x)/(2n-1)^2}\n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2592,7 +2596,7 @@ void testExplHomHeatEquationRobinBCEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, 0.0);
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.2, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -2617,7 +2621,7 @@ void testExplHomHeatEquationRobinBCEuler() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
@@ -2641,20 +2645,20 @@ void testExplHomHeatEquationRobinBCEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
 
-void testExplHomHeatEquationRobinBC() {
+void testExplHomPureHeatEquationRobinBC() {
 	std::cout << "================================================================================\n";
-	std::cout << "========= Explicit Heat Equation (with homogeneous Robin BC) ===================\n";
+	std::cout << "========= Explicit Pure Heat Equation (with homogeneous Robin BC) ==============\n";
 	std::cout << "================================================================================\n";
 
-	testExplHomHeatEquationRobinBCEuler<double>();
-	testExplHomHeatEquationRobinBCEuler<float>();
+	testExplHomPureHeatEquationRobinBCEuler<double>();
+	testExplHomPureHeatEquationRobinBCEuler<float>();
 
 
 	std::cout << "================================================================================\n";
@@ -2665,11 +2669,11 @@ void testExplHomHeatEquationRobinBC() {
 // ================================================================================================================
 
 template<typename T>
-void testExplHomHeatEquationSourceRobinBCEuler() {
+void testExplHomPureHeatEquationSourceRobinBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 
 	std::cout << "==============================================================================\n";
@@ -2683,8 +2687,8 @@ void testExplHomHeatEquationSourceRobinBCEuler() {
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -2699,7 +2703,7 @@ void testExplHomHeatEquationSourceRobinBCEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, 0.0);
 	// initialize solver
-	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.2, Sd, Td);
+	explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -2724,7 +2728,7 @@ void testExplHomHeatEquationSourceRobinBCEuler() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set heat source: 
 	expl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -2753,23 +2757,23 @@ void testExplHomHeatEquationSourceRobinBCEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
 
-void testExplHomHeatEquationSourceRobinBC() {
+void testExplHomPureHeatEquationSourceRobinBC() {
 	std::cout << "================================================================================\n";
-	std::cout << "========= Explicit Heat Equation with Source (with homogeneous Robin BC) =======\n";
+	std::cout << "====== Explicit Pure Heat Equation with Source (with homogeneous Robin BC) =====\n";
 	std::cout << "================================================================================\n";
 
-	testExplHomHeatEquationSourceRobinBCEuler<double>();
-	testExplHomHeatEquationSourceRobinBCEuler<float>();
+	testExplHomPureHeatEquationSourceRobinBCEuler<double>();
+	testExplHomPureHeatEquationSourceRobinBCEuler<float>();
 
 
 	std::cout << "================================================================================\n";
 }
 
-#endif ///_LSS_ONE_DIM_HEAT_EQUATION_SOLVERS_T
+#endif ///_LSS_ONE_DIM_PURE_HEAT_EQUATION_T

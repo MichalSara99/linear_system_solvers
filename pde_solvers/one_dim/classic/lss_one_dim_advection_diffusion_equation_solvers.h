@@ -501,21 +501,21 @@ namespace lss_one_dim_advection_diffusion_equation_solvers {
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
 		if (scheme == ExplicitPDESchemes::Euler) {
-			ExplicitAdvectionDiffusionEulerScheme<T> euler{ initCondition,spacer_.lower(),h,k,
-															terminalT_,diffusivity_,convection_,
-															isSourceSet_,source_ };
+			ExplicitAdvectionDiffusionEulerScheme<T> euler{ spacer_.lower(),terminalT_,
+															std::make_pair(k,h),std::make_tuple(diffusivity_,convection_,0.0),
+															initCondition,source_,isSourceSet_};
 			euler(boundary_, solution);
 		}
 		else if (scheme == ExplicitPDESchemes::ADEBarakatClark) {
-			ADEAdvectionDiffusionBakaratClarkScheme<T> adebc{ initCondition,spacer_.lower(),h,k,
-																terminalT_,diffusivity_,convection_,
-																isSourceSet_,source_ };
+			ADEAdvectionDiffusionBakaratClarkScheme<T> adebc{ spacer_.lower(),terminalT_,
+															std::make_pair(k,h),std::make_tuple(diffusivity_,convection_,0.0),
+															initCondition,source_,isSourceSet_ };
 			adebc(boundary_, solution);
 		}
 		else {
-			ADEAdvectionDiffusionSaulyevScheme<T> ades{ initCondition,spacer_.lower(),h,k,
-														terminalT_,diffusivity_,convection_,
-														isSourceSet_,source_ };
+			ADEAdvectionDiffusionSaulyevScheme<T> ades{ spacer_.lower(),terminalT_,
+														std::make_pair(k,h),std::make_tuple(diffusivity_,convection_,0.0),
+														initCondition,source_,isSourceSet_ };
 			ades(boundary_, solution);
 		}
 
@@ -544,9 +544,9 @@ namespace lss_one_dim_advection_diffusion_equation_solvers {
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, initCondition);
 		// get the correct scheme:
-		ExplicitAdvectionDiffusionEulerScheme<T> euler{ initCondition,spacer_.lower(),h,k,
-														terminalT_,diffusivity_,convection_,
-														isSourceSet_,source_ };
+		ExplicitAdvectionDiffusionEulerScheme<T> euler{ spacer_.lower(),terminalT_,
+														std::make_pair(k,h),std::make_tuple(diffusivity_,convection_,0.0),
+														initCondition,source_,isSourceSet_ };
 		euler(left_,right_, solution);
 
 

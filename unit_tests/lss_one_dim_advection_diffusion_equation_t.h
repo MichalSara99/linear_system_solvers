@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_T)
-#define _LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_T
+#if !defined(_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_T)
+#define _LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_T
 
 #pragma warning(disable: 4305)
 
@@ -8,10 +8,14 @@
 #include"common/lss_utility.h"
 #include"sparse_solvers/lss_fdm_double_sweep_solver.h"
 #include"sparse_solvers/lss_fdm_thomas_lu_solver.h"
-#include"pde_solvers/one_dim/classic/lss_one_dim_advection_diffusion_equation_solvers.h"
+#include"pde_solvers/one_dim/classic/lss_one_dim_general_heat_equation_solvers.h"
 
 
 #define PI 3.14159
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//											  ADVECTION-DIFFUSION PROBLEMS
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ================================================================================================================
 // =========================================== IMPLICIT SOLVERS ===================================================
@@ -23,13 +27,13 @@
 // ================================================================================================================
 
 template<typename T>
-void testImplAdvectionDiffEquationDirichletBCDoubleSweepEuler() {
+void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -42,8 +46,8 @@ void testImplAdvectionDiffEquationDirichletBCDoubleSweepEuler() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -67,9 +71,9 @@ void testImplAdvectionDiffEquationDirichletBCDoubleSweepEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -105,13 +109,13 @@ void testImplAdvectionDiffEquationDirichletBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplAdvectionDiffEquationDirichletBCDoubleSweepCN() {
+void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -124,8 +128,8 @@ void testImplAdvectionDiffEquationDirichletBCDoubleSweepCN() {
 	std::cout << " U(x,0) = -sin(pi*x), x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -149,9 +153,9 @@ void testImplAdvectionDiffEquationDirichletBCDoubleSweepCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -185,15 +189,15 @@ void testImplAdvectionDiffEquationDirichletBCDoubleSweepCN() {
 	}
 }
 
-void testImplAdvectionDiffEquationDirichletBCDoubleSweep() {
+void testImplAdvDiffEquationDirichletBCDoubleSweep() {
 	std::cout << "================================================================================\n";
 	std::cout << "=============== Implicit Advection Diffusion Equation (Dirichlet BC) ===========\n";
 	std::cout << "================================================================================\n";
 
-	testImplAdvectionDiffEquationDirichletBCDoubleSweepEuler<double>();
-	testImplAdvectionDiffEquationDirichletBCDoubleSweepEuler<float>();
-	testImplAdvectionDiffEquationDirichletBCDoubleSweepCN<double>();
-	testImplAdvectionDiffEquationDirichletBCDoubleSweepCN<float>();
+	testImplAdvDiffEquationDirichletBCDoubleSweepEuler<double>();
+	testImplAdvDiffEquationDirichletBCDoubleSweepEuler<float>();
+	testImplAdvDiffEquationDirichletBCDoubleSweepCN<double>();
+	testImplAdvDiffEquationDirichletBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -204,13 +208,13 @@ void testImplAdvectionDiffEquationDirichletBCDoubleSweep() {
 
 
 template<typename T>
-void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepEuler() {
+void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation with source: \n\n";
@@ -223,8 +227,8 @@ void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepEuler() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -248,9 +252,9 @@ void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// set source function:
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -266,13 +270,13 @@ void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepCN() {
+void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation with source: \n\n";
@@ -285,8 +289,8 @@ void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepCN() {
 	std::cout << " U(x,0) = 1.0, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -310,9 +314,9 @@ void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// set source function:
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -326,27 +330,27 @@ void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepCN() {
 	}
 }
 
-void testImplAdvectionDiffEquationSourceDirichletBCDoubleSweep() {
+void testImplAdvDiffEquationSourceDirichletBCDoubleSweep() {
 	std::cout << "================================================================================\n";
 	std::cout << "======= Implicit Advection Diffusion Equation with source (Dirichlet BC) =======\n";
 	std::cout << "================================================================================\n";
 
-	testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepEuler<double>();
-	testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepEuler<float>();
-	testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepCN<double>();
-	testImplAdvectionDiffEquationSourceDirichletBCDoubleSweepCN<float>();
+	testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler<double>();
+	testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler<float>();
+	testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN<double>();
+	testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 template<typename T>
-void testImplAdvectionDiffEquationSourceDirichletBCThomasLUEuler() {
+void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation with source: \n\n";
@@ -359,8 +363,8 @@ void testImplAdvectionDiffEquationSourceDirichletBCThomasLUEuler() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -384,9 +388,9 @@ void testImplAdvectionDiffEquationSourceDirichletBCThomasLUEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// set source function:
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -402,13 +406,13 @@ void testImplAdvectionDiffEquationSourceDirichletBCThomasLUEuler() {
 
 
 template<typename T>
-void testImplAdvectionDiffEquationSourceDirichletBCThomasLUCN() {
+void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation with source: \n\n";
@@ -421,8 +425,8 @@ void testImplAdvectionDiffEquationSourceDirichletBCThomasLUCN() {
 	std::cout << " U(x,0) = 1.0, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		FDMThomasLUSolver,
 		std::vector,
@@ -446,9 +450,9 @@ void testImplAdvectionDiffEquationSourceDirichletBCThomasLUCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// set source function:
 	impl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -462,15 +466,15 @@ void testImplAdvectionDiffEquationSourceDirichletBCThomasLUCN() {
 	}
 }
 
-void testImplAdvectionDiffEquationSourceDirichletBCThomasLU() {
+void testImplAdvDiffEquationSourceDirichletBCThomasLU() {
 	std::cout << "================================================================================\n";
 	std::cout << "======= Implicit Advection Diffusion Equation with source (Dirichlet BC) =======\n";
 	std::cout << "================================================================================\n";
 
-	testImplAdvectionDiffEquationSourceDirichletBCThomasLUEuler<double>();
-	testImplAdvectionDiffEquationSourceDirichletBCThomasLUEuler<float>();
-	testImplAdvectionDiffEquationSourceDirichletBCThomasLUCN<double>();
-	testImplAdvectionDiffEquationSourceDirichletBCThomasLUCN<float>();
+	testImplAdvDiffEquationSourceDirichletBCThomasLUEuler<double>();
+	testImplAdvDiffEquationSourceDirichletBCThomasLUEuler<float>();
+	testImplAdvDiffEquationSourceDirichletBCThomasLUCN<double>();
+	testImplAdvDiffEquationSourceDirichletBCThomasLUCN<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -482,13 +486,13 @@ void testImplAdvectionDiffEquationSourceDirichletBCThomasLU() {
 // ================================================================================================================
 
 template<typename T>
-void testImplAdvectionDiffEquationRobinBCDoubleSweepEuler() {
+void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -501,8 +505,8 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepEuler() {
 	std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -518,7 +522,7 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -542,9 +546,9 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -575,7 +579,7 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -583,13 +587,13 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepEuler() {
 
 
 template<typename T>
-void testImplAdvectionDiffEquationRobinBCDoubleSweepCN() {
+void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -602,8 +606,8 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepCN() {
 	std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMDoubleSweepSolver,
 		std::vector,
@@ -619,7 +623,7 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -643,9 +647,9 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -677,33 +681,33 @@ void testImplAdvectionDiffEquationRobinBCDoubleSweepCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 20);
+		benchmark = exact(j * h, 0.1, 20);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplAdvectionDiffEquationRobinBCDoubleSweep() {
+void testImplAdvDiffEquationRobinBCDoubleSweep() {
 	std::cout << "================================================================================\n";
 	std::cout << "=============== Implicit Advection Diffusion Equation (Robin BC) ===============\n";
 	std::cout << "================================================================================\n";
 
-	testImplAdvectionDiffEquationRobinBCDoubleSweepEuler<double>();
-	testImplAdvectionDiffEquationRobinBCDoubleSweepEuler<float>();
-	testImplAdvectionDiffEquationRobinBCDoubleSweepCN<double>();
-	testImplAdvectionDiffEquationRobinBCDoubleSweepCN<float>();
+	testImplAdvDiffEquationRobinBCDoubleSweepEuler<double>();
+	testImplAdvDiffEquationRobinBCDoubleSweepEuler<float>();
+	testImplAdvDiffEquationRobinBCDoubleSweepCN<double>();
+	testImplAdvDiffEquationRobinBCDoubleSweepCN<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 template<typename T>
-void testImplAdvectionDiffEquationRobinBCThomasLUEuler() {
+void testImplAdvDiffEquationRobinBCThomasLUEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -716,8 +720,8 @@ void testImplAdvectionDiffEquationRobinBCThomasLUEuler() {
 	std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMThomasLUSolver,
 		std::vector,
@@ -733,7 +737,7 @@ void testImplAdvectionDiffEquationRobinBCThomasLUEuler() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -757,9 +761,9 @@ void testImplAdvectionDiffEquationRobinBCThomasLUEuler() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	impl_solver.solve(solution, ImplicitPDESchemes::Euler);
 	// get exact solution:
@@ -790,7 +794,7 @@ void testImplAdvectionDiffEquationRobinBCThomasLUEuler() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 30);
+		benchmark = exact(j * h, 0.1, 30);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
@@ -798,13 +802,13 @@ void testImplAdvectionDiffEquationRobinBCThomasLUEuler() {
 
 
 template<typename T>
-void testImplAdvectionDiffEquationRobinBCThomasLUCN() {
+void testImplAdvDiffEquationRobinBCThomasLUCN() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-	using lss_one_dim_advection_diffusion_equation_solvers::implicit_solvers::Implicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::implicit_solvers::Implicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -817,8 +821,8 @@ void testImplAdvectionDiffEquationRobinBCThomasLUCN() {
 	std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DAdvectionDiffusionEquation
-	typedef Implicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Implicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		FDMThomasLUSolver,
 		std::vector,
@@ -834,7 +838,7 @@ void testImplAdvectionDiffEquationRobinBCThomasLUCN() {
 	// note: size is Sd+1 since we must include space point at x = 0
 	std::vector<T> solution(Sd + 1, T{});
 	// initialize solver
-	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.2, Sd, Td);
+	implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
 	// boundary conditions:
 	// Robin boundaries are assumed to be of following form:
 	//
@@ -858,9 +862,9 @@ void testImplAdvectionDiffEquationRobinBCThomasLUCN() {
 	// set initial condition:
 	impl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	impl_solver.setThermalDiffusivity(1.0);
+	impl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	impl_solver.setConvection(1.0);
+	impl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	impl_solver.solve(solution);
 	// get exact solution:
@@ -891,21 +895,21 @@ void testImplAdvectionDiffEquationRobinBCThomasLUCN() {
 	T benchmark{};
 	for (std::size_t j = 0; j < solution.size(); ++j)
 	{
-		benchmark = exact(j * h, 0.2, 30);
+		benchmark = exact(j * h, 0.1, 30);
 		std::cout << "t_" << j << ": " << solution[j] << " |  "
 			<< benchmark << " | " << (solution[j] - benchmark) << '\n';
 	}
 }
 
-void testImplAdvectionDiffEquationRobinBCThomasLU() {
+void testImplAdvDiffEquationRobinBCThomasLU() {
 	std::cout << "================================================================================\n";
 	std::cout << "======== Implicit Advection Diffusion Equation (ThomasLU,Robin BC) =============\n";
 	std::cout << "================================================================================\n";
 
-	testImplAdvectionDiffEquationRobinBCThomasLUEuler<double>();
-	testImplAdvectionDiffEquationRobinBCThomasLUEuler<float>();
-	testImplAdvectionDiffEquationRobinBCThomasLUCN<double>();
-	testImplAdvectionDiffEquationRobinBCThomasLUCN<float>();
+	testImplAdvDiffEquationRobinBCThomasLUEuler<double>();
+	testImplAdvDiffEquationRobinBCThomasLUEuler<float>();
+	testImplAdvDiffEquationRobinBCThomasLUCN<double>();
+	testImplAdvDiffEquationRobinBCThomasLUCN<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -921,12 +925,12 @@ void testImplAdvectionDiffEquationRobinBCThomasLU() {
 // ================================================================================================================
 
 template<typename T>
-void testExplAdvectionDiffEquationDirichletBCEuler() {
+void testExplAdvDiffEquationDirichletBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_advection_diffusion_equation_solvers::explicit_solvers::Explicit1DAdvectionDiffusionEquation;;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -939,8 +943,8 @@ void testExplAdvectionDiffEquationDirichletBCEuler() {
 	std::cout << " U(x,0) = 1, x in <-1,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Explicit1DAdvectionDiffusionEquation
-	typedef Explicit1DAdvectionDiffusionEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -963,9 +967,9 @@ void testExplAdvectionDiffEquationDirichletBCEuler() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	expl_solver.setConvection(1.0);
+	expl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	expl_solver.solve(solution, ExplicitPDESchemes::Euler);
 	// get exact solution:
@@ -1000,12 +1004,12 @@ void testExplAdvectionDiffEquationDirichletBCEuler() {
 }
 
 template<typename T>
-void testExplAdvectionDiffEquationDirichletBCADEBC() {
+void testExplAdvDiffEquationDirichletBCADEBC() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_advection_diffusion_equation_solvers::explicit_solvers::Explicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -1018,8 +1022,8 @@ void testExplAdvectionDiffEquationDirichletBCADEBC() {
 	std::cout << " U(x,0) = 1, x in <-1,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Explicit1DAdvectionDiffusionEquation
-	typedef Explicit1DAdvectionDiffusionEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1042,9 +1046,9 @@ void testExplAdvectionDiffEquationDirichletBCADEBC() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	expl_solver.setConvection(1.0);
+	expl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
@@ -1079,12 +1083,12 @@ void testExplAdvectionDiffEquationDirichletBCADEBC() {
 }
 
 template<typename T>
-void testExplAdvectionDiffEquationDirichletBCADES() {
+void testExplAdvDiffEquationDirichletBCADES() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_advection_diffusion_equation_solvers::explicit_solvers::Explicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -1097,8 +1101,8 @@ void testExplAdvectionDiffEquationDirichletBCADES() {
 	std::cout << " U(x,0) = 1, x in <-1,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Explicit1DAdvectionDiffusionEquation
-	typedef Explicit1DAdvectionDiffusionEquation<T,
+	// typedef the Implicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1121,9 +1125,9 @@ void testExplAdvectionDiffEquationDirichletBCADES() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	expl_solver.setConvection(1.0);
+	expl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	expl_solver.solve(solution, ExplicitPDESchemes::ADESaulyev);
 	// get exact solution:
@@ -1158,17 +1162,17 @@ void testExplAdvectionDiffEquationDirichletBCADES() {
 }
 
 
-void testExplAdvectionDiffEquationDirichletBC() {
+void testExplAdvDiffEquationDirichletBC() {
 	std::cout << "================================================================================\n";
 	std::cout << "=============== Explicit Advection Diffusion Equation (Dirichlet BC) ===========\n";
 	std::cout << "================================================================================\n";
 
-	testExplAdvectionDiffEquationDirichletBCEuler<double>();
-	testExplAdvectionDiffEquationDirichletBCEuler<float>();
-	testExplAdvectionDiffEquationDirichletBCADEBC<double>();
-	testExplAdvectionDiffEquationDirichletBCADEBC<float>();
-	testExplAdvectionDiffEquationDirichletBCADES<double>();
-	testExplAdvectionDiffEquationDirichletBCADES<float>();
+	testExplAdvDiffEquationDirichletBCEuler<double>();
+	testExplAdvDiffEquationDirichletBCEuler<float>();
+	testExplAdvDiffEquationDirichletBCADEBC<double>();
+	testExplAdvDiffEquationDirichletBCADEBC<float>();
+	testExplAdvDiffEquationDirichletBCADES<double>();
+	testExplAdvDiffEquationDirichletBCADES<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -1179,12 +1183,12 @@ void testExplAdvectionDiffEquationDirichletBC() {
 
 
 template<typename T>
-void testExplAdvectionDiffEquationSourceDirichletBCEuler() {
+void testExplAdvDiffEquationSourceDirichletBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_advection_diffusion_equation_solvers::explicit_solvers::Explicit1DAdvectionDiffusionEquation;;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation with source: \n\n";
@@ -1197,8 +1201,8 @@ void testExplAdvectionDiffEquationSourceDirichletBCEuler() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Explicit1DAdvectionDiffusionEquation
-	typedef Explicit1DAdvectionDiffusionEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1221,9 +1225,9 @@ void testExplAdvectionDiffEquationSourceDirichletBCEuler() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	expl_solver.setConvection(1.0);
+	expl_solver.set1OrderCoefficient(-1.0);
 	// set heat source:
 	expl_solver.setHeatSource([](T x,T t) {return x; });
 	// get the solution:
@@ -1238,12 +1242,12 @@ void testExplAdvectionDiffEquationSourceDirichletBCEuler() {
 }
 
 template<typename T>
-void testExplAdvectionDiffEquationSourceDirichletBCADEBC() {
+void testExplAdvDiffEquationSourceDirichletBCADEBC() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_advection_diffusion_equation_solvers::explicit_solvers::Explicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation with source: \n\n";
@@ -1256,8 +1260,8 @@ void testExplAdvectionDiffEquationSourceDirichletBCADEBC() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Explicit1DAdvectionDiffusionEquation
-	typedef Explicit1DAdvectionDiffusionEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1280,9 +1284,9 @@ void testExplAdvectionDiffEquationSourceDirichletBCADEBC() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	expl_solver.setConvection(1.0);
+	expl_solver.set1OrderCoefficient(-1.0);
 	// set heat source:
 	expl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1297,12 +1301,12 @@ void testExplAdvectionDiffEquationSourceDirichletBCADEBC() {
 }
 
 template<typename T>
-void testExplAdvectionDiffEquationSourceDirichletBCADES() {
+void testExplAdvDiffEquationSourceDirichletBCADES() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_advection_diffusion_equation_solvers::explicit_solvers::Explicit1DAdvectionDiffusionEquation;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation with source: \n\n";
@@ -1315,8 +1319,8 @@ void testExplAdvectionDiffEquationSourceDirichletBCADES() {
 	std::cout << " U(x,0) = 1, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Explicit1DAdvectionDiffusionEquation
-	typedef Explicit1DAdvectionDiffusionEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Dirichlet,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1339,9 +1343,9 @@ void testExplAdvectionDiffEquationSourceDirichletBCADES() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	expl_solver.setConvection(1.0);
+	expl_solver.set1OrderCoefficient(-1.0);
 	// set heat source:
 	expl_solver.setHeatSource([](T x, T t) {return x; });
 	// get the solution:
@@ -1355,17 +1359,17 @@ void testExplAdvectionDiffEquationSourceDirichletBCADES() {
 }
 
 
-void testExplAdvectionDiffEquationSourceDirichletBC() {
+void testExplAdvDiffEquationSourceDirichletBC() {
 	std::cout << "================================================================================\n";
 	std::cout << "======= Explicit Advection Diffusion Equation with source (Dirichlet BC) =======\n";
 	std::cout << "================================================================================\n";
 
-	testExplAdvectionDiffEquationSourceDirichletBCEuler<double>();
-	testExplAdvectionDiffEquationSourceDirichletBCEuler<float>();
-	testExplAdvectionDiffEquationSourceDirichletBCADEBC<double>();
-	testExplAdvectionDiffEquationSourceDirichletBCADEBC<float>();
-	testExplAdvectionDiffEquationSourceDirichletBCADES<double>();
-	testExplAdvectionDiffEquationSourceDirichletBCADES<float>();
+	testExplAdvDiffEquationSourceDirichletBCEuler<double>();
+	testExplAdvDiffEquationSourceDirichletBCEuler<float>();
+	testExplAdvDiffEquationSourceDirichletBCADEBC<double>();
+	testExplAdvDiffEquationSourceDirichletBCADEBC<float>();
+	testExplAdvDiffEquationSourceDirichletBCADES<double>();
+	testExplAdvDiffEquationSourceDirichletBCADES<float>();
 
 	std::cout << "================================================================================\n";
 }
@@ -1378,12 +1382,12 @@ void testExplAdvectionDiffEquationSourceDirichletBC() {
 // ================================================================================================================
 
 template<typename T>
-void testExplAdvectionDiffEquationRobinBCEuler() {
+void testExplAdvDiffEquationRobinBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_advection_diffusion_equation_solvers::explicit_solvers::Explicit1DAdvectionDiffusionEquation;;
+	using lss_one_dim_general_heat_equation_solvers::explicit_solvers::Explicit1DGeneralHeatEquation;
 
 	std::cout << "==============================================================================\n";
 	std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -1396,8 +1400,8 @@ void testExplAdvectionDiffEquationRobinBCEuler() {
 	std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Explicit1DAdvectionDiffusionEquation
-	typedef Explicit1DAdvectionDiffusionEquation<T,
+	// typedef the Explicit1DGeneralHeatEquation
+	typedef Explicit1DGeneralHeatEquation<T,
 		BoundaryConditionType::Robin,
 		std::vector,
 		std::allocator<T>> explicit_solver;
@@ -1436,9 +1440,9 @@ void testExplAdvectionDiffEquationRobinBCEuler() {
 	// set initial condition:
 	expl_solver.setInitialCondition(initialCondition);
 	// set thermal diffusivity (C^2 in PDE)
-	expl_solver.setThermalDiffusivity(1.0);
+	expl_solver.set2OrderCoefficient(1.0);
 	// set convection term 
-	expl_solver.setConvection(1.0);
+	expl_solver.set1OrderCoefficient(-1.0);
 	// get the solution:
 	expl_solver.solve(solution);
 	// get exact solution:
@@ -1477,24 +1481,17 @@ void testExplAdvectionDiffEquationRobinBCEuler() {
 
 
 
-void testExplAdvectionDiffEquationRobinBC() {
+void testExplAdvDiffEquationRobinBC() {
 	std::cout << "================================================================================\n";
 	std::cout << "=============== Explicit Advection Diffusion Equation (Robin BC) ===============\n";
 	std::cout << "================================================================================\n";
 
-	testExplAdvectionDiffEquationRobinBCEuler<double>();
-	testExplAdvectionDiffEquationRobinBCEuler<float>();
+	testExplAdvDiffEquationRobinBCEuler<double>();
+	testExplAdvDiffEquationRobinBCEuler<float>();
 
 	std::cout << "================================================================================\n";
 }
 
 
 
-
-
-
-
-
-
-
-#endif ///_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_T
+#endif ///_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_T

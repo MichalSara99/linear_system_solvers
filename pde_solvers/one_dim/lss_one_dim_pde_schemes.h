@@ -27,6 +27,9 @@ namespace lss_one_dim_pde_schemes {
 	using InhomSchemeFunctionCUDA = std::function<void(T, T, T, std::vector<T> const&, std::vector<T> const&,
 														std::vector<T> const&, std::vector<T>&,
 														std::pair<T, T> const&, std::pair<T, T> const&)>;
+	template<typename T>
+	using SchemeFunctionMod = std::function<void(std::tuple<T, T, T, T> const&, std::vector<T> const &, std::vector<T> const &,
+																				std::vector<T> const &, std::vector<T>&)>;
 
 	// ==============================================================================================================
 	// ========================================= ImplicitHeatEquationSchemes  =======================================
@@ -44,6 +47,65 @@ namespace lss_one_dim_pde_schemes {
 					theta = 0.5;
 				return theta;
 			}
+
+			// =================== 
+			static SchemeFunctionMod<T> const getSchemeMod(ImplicitPDESchemes scheme) {
+				double theta{};
+				if (scheme == ImplicitPDESchemes::Euler)
+					theta = 1.0;
+				else
+					theta = 0.5;
+				auto schemeFun = [=](std::tuple<T,T,T,T> const& coeffs,
+					std::vector<T> const& input,
+					std::vector<T> const& inhomInput,
+					std::vector<T> const& inhomInputNext,
+					std::vector<T> &solution) {
+
+					// inhomInput not used
+					// inhomInputNext not used
+
+					T const lambda = std::get<0>(coeffs);
+					T const gamma = std::get<1>(coeffs);
+					T const delta = std::get<2>(coeffs);
+
+					for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+						solution[t] = ((lambda + gamma)*(1.0 - theta)*input[t + 1])
+							+ ((1.0 - (2.0*lambda - delta)*(1.0 - theta))*input[t])
+							+ ((lambda - gamma)*(1.0 - theta)*input[t - 1]);
+					}
+				};
+				return schemeFun;
+			}
+
+
+			static SchemeFunctionMod<T> const getInhomSchemeMod(ImplicitPDESchemes scheme) {
+				double theta{};
+				if (scheme == ImplicitPDESchemes::Euler)
+					theta = 1.0;
+				else
+					theta = 0.5;
+				auto schemeFun = [=](std::tuple<T,T,T,T> const &coeffs,
+					std::vector<T> const& input,
+					std::vector<T> const& inhomInput,
+					std::vector<T> const& inhomInputNext,
+					std::vector<T> &solution) {
+
+					T const lambda = std::get<0>(coeffs);
+					T const gamma = std::get<1>(coeffs);
+					T const delta = std::get<2>(coeffs);
+					T const k = std::get<3>(coeffs);
+
+					for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+						solution[t] = ((lambda + gamma)*(1.0 - theta)*input[t + 1])
+							+ (1.0 - ((2.0*lambda - delta)*(1.0 - theta)))*input[t]
+							+ ((lambda - gamma)*(1.0 - theta)*input[t - 1])
+							+ k * (theta*inhomInputNext[t] +
+							(1.0 - theta)*inhomInput[t]);
+					}
+				};
+				return schemeFun;
+			}
+			// ========================
 
 			static SchemeFunction<T> const getScheme(ImplicitPDESchemes scheme) {
 				double theta{};
@@ -378,25 +440,46 @@ namespace lss_one_dim_pde_schemes {
 	protected:
 		std::vector<T> initialCondition_;
 		T spaceStart_;
-		T spaceStep_;
-		T timeStep_;
+		//T spaceStep_;
+		//T timeStep_;
 		T terminalTime_;
-		T thermalDiffusivity_;
+		//T thermalDiffusivity_;
+
+		std::pair<T, T> deltas_;				// first = delta time, second = delta space
+		std::tuple<T, T, T> coeffs_;			// coefficients of PDE 
+		std::function<T(T, T)> source_;
+		bool isSourceSet_;
 
 	public:
 		explicit ExplicitSchemeBase() = delete;
-		explicit ExplicitSchemeBase(std::vector<T> const& initialCondition,
-									T spaceStart,
-									T spaceStep,
-									T timeStep,
+		//explicit ExplicitSchemeBase(std::vector<T> const& initialCondition,
+		//							T spaceStart,
+		//							T spaceStep,
+		//							T timeStep,
+		//							T terminalTime,
+		//							T thermalDiffusivity)
+		//	:initialCondition_{ initialCondition },
+		//	spaceStart_{ spaceStart },
+		//	spaceStep_{ spaceStep },
+		//	timeStep_{ timeStep },
+		//	terminalTime_{ terminalTime },
+		//	thermalDiffusivity_{ thermalDiffusivity } {}
+
+		explicit ExplicitSchemeBase(T spaceStart,
 									T terminalTime,
-									T thermalDiffusivity)
-			:initialCondition_{ initialCondition },
-			spaceStart_{ spaceStart },
-			spaceStep_{ spaceStep },
-			timeStep_{ timeStep },
+									std::pair<T, T> const& deltas,
+									std::tuple<T, T, T> const& coeffs,
+									std::vector<T> const& initialCondition,
+									std::function<T(T, T)> const &source = nullptr,
+									bool isSourceSet = false)
+			:spaceStart_{ spaceStart },
 			terminalTime_{ terminalTime },
-			thermalDiffusivity_{ thermalDiffusivity } {}
+			deltas_{ deltas },
+			coeffs_{ coeffs },
+			initialCondition_{ initialCondition },
+			source_{ source },
+			isSourceSet_{ isSourceSet } {}
+
 
 		virtual ~ExplicitSchemeBase() {}
 
@@ -419,27 +502,22 @@ namespace lss_one_dim_pde_schemes {
 
 	template<typename T>
 	class ExplicitHeatEulerScheme :public ExplicitSchemeBase<T> {
-	private:
-		std::function<T(T, T)> source_;
-		bool isSourceSet_;
 	public:
 		explicit ExplicitHeatEulerScheme() = delete;
-		explicit ExplicitHeatEulerScheme(std::vector<T> const& initialCondition,
-									T spaceStart,
-									T spaceStep,
-									T timeStep,
-									T terminalTime,
-									T thermalDiffusivity,
-									bool isSourceSet = false,
-									std::function<T(T, T)> const &source = nullptr)
-			:ExplicitSchemeBase<T>(initialCondition,
-									spaceStart,
-									spaceStep,
-									timeStep,
+		explicit ExplicitHeatEulerScheme(T spaceStart,
+										T terminalTime,
+										std::pair<T, T> const& deltas,
+										std::tuple<T, T, T> const& coeffs,
+										std::vector<T> const& initialCondition,
+										std::function<T(T, T)> const &source = nullptr,
+										bool isSourceSet = false)
+			:ExplicitSchemeBase<T>(spaceStart,
 									terminalTime,
-									thermalDiffusivity),
-			isSourceSet_{ isSourceSet },
-			source_{ source }{}
+									deltas,
+									coeffs,
+									initialCondition,
+									source,
+									isSourceSet) {}
 
 		~ExplicitHeatEulerScheme(){}
 
@@ -449,7 +527,8 @@ namespace lss_one_dim_pde_schemes {
 		ExplicitHeatEulerScheme& operator=(ExplicitHeatEulerScheme &&) = delete;
 
 		// stability check:
-		bool inline isStable()const override{ return ((2.0*thermalDiffusivity_*timeStep_ / (spaceStep_*spaceStep_)) <= 1.0); }
+		bool inline isStable()const override{
+			return ((2.0*std::get<0>(coeffs_)*std::get<0>(deltas_) / (std::get<1>(deltas_)*std::get<1>(deltas_))) <= 1.0); }
 
 		// for Dirichlet BC
 		void operator()(std::pair<T,T> const &dirichletBCPair, 
@@ -469,27 +548,22 @@ namespace lss_one_dim_pde_schemes {
 
 	template<typename T>
 	class ADEHeatBakaratClarkScheme:public ExplicitSchemeBase<T> {	
-	private:
-		std::function<T(T, T)> source_;
-		bool isSourceSet_;
 	public:
 		explicit ADEHeatBakaratClarkScheme() = delete;
-		explicit ADEHeatBakaratClarkScheme(std::vector<T> const& initialCondition,
-										T spaceStart,
-										T spaceStep,
-										T timeStep,
-										T terminalTime,
-										T thermalDiffusivity,
-										bool isSourceSet = false,
-										std::function<T(T, T)> const &source = nullptr)
-			:ExplicitSchemeBase<T>(initialCondition,
-									spaceStart,
-									spaceStep,
-									timeStep,
+		explicit ADEHeatBakaratClarkScheme(T spaceStart,
+											T terminalTime,
+											std::pair<T, T> const& deltas,
+											std::tuple<T, T, T> const& coeffs,
+											std::vector<T> const& initialCondition,
+											std::function<T(T, T)> const &source = nullptr,
+											bool isSourceSet = false)
+			:ExplicitSchemeBase<T>(spaceStart,
 									terminalTime,
-									thermalDiffusivity),
-			isSourceSet_{ isSourceSet },
-			source_{ source }{}
+									deltas,
+									coeffs,
+									initialCondition,
+									source,
+									isSourceSet) {}
 
 		~ADEHeatBakaratClarkScheme() {}
 
@@ -517,27 +591,22 @@ namespace lss_one_dim_pde_schemes {
 
 	template<typename T>
 	class ADEHeatSaulyevScheme:public ExplicitSchemeBase<T> {
-	private:
-		std::function<T(T, T)> source_;
-		bool isSourceSet_;
 	public:
 		explicit ADEHeatSaulyevScheme() = delete;
-		explicit ADEHeatSaulyevScheme(std::vector<T> const &initialCondition,
-									T spaceStart,
-									T spaceStep,
-									T timeStep,
-									T terminalTime,
-									T thermalDiffusivity,
-									bool isSourceSet = false,
-									std::function<T(T, T)> const &source = nullptr)
-			:ExplicitSchemeBase<T>(initialCondition, 
-									spaceStart,
-									spaceStep,
-									timeStep,
+		explicit ADEHeatSaulyevScheme(T spaceStart,
+										T terminalTime,
+										std::pair<T, T> const& deltas,
+										std::tuple<T, T, T> const& coeffs,
+										std::vector<T> const& initialCondition,
+										std::function<T(T, T)> const &source = nullptr,
+										bool isSourceSet = false)
+			:ExplicitSchemeBase<T>(spaceStart,
 									terminalTime,
-									thermalDiffusivity),
-			isSourceSet_{ isSourceSet },
-			source_{ source }{}
+									deltas,
+									coeffs,
+									initialCondition,
+									source,
+									isSourceSet){}
 
 		~ADEHeatSaulyevScheme(){}
 
@@ -565,30 +634,23 @@ namespace lss_one_dim_pde_schemes {
 
 	template<typename T>
 	class ExplicitAdvectionDiffusionEulerScheme :public ExplicitSchemeBase<T> {
-	private:
-		std::function<T(T, T)> source_;
-		bool isSourceSet_;
-		T convection_;
 	public:
 		explicit ExplicitAdvectionDiffusionEulerScheme() = delete;
-		explicit ExplicitAdvectionDiffusionEulerScheme(std::vector<T> const& initialCondition,
-														T spaceStart,
-														T spaceStep,
-														T timeStep,
+		explicit ExplicitAdvectionDiffusionEulerScheme(T spaceStart,
 														T terminalTime,
-														T thermalDiffusivity,
-														T convection,
-														bool isSourceSet = false,
-														std::function<T(T, T)> const &source = nullptr)
-			:ExplicitSchemeBase<T>(initialCondition,
-									spaceStart,
-									spaceStep,
-									timeStep,
+														std::pair<T, T> const& deltas,
+														std::tuple<T, T, T> const& coeffs,
+														std::vector<T> const& initialCondition,
+														std::function<T(T, T)> const &source = nullptr,
+														bool isSourceSet = false)
+			:ExplicitSchemeBase<T>(spaceStart,
 									terminalTime,
-									thermalDiffusivity),
-			convection_{convection},
-			isSourceSet_{ isSourceSet },
-			source_{source}{}
+									deltas,
+									coeffs,
+									initialCondition,
+									source,
+									isSourceSet) {}
+
 
 		~ExplicitAdvectionDiffusionEulerScheme() {}
 
@@ -600,8 +662,8 @@ namespace lss_one_dim_pde_schemes {
 		// stability check:
 		bool inline isStable()const override
 		{
-			return ((2.0*thermalDiffusivity_*timeStep_ / (spaceStep_*spaceStep_)) <= 1.0)
-				&& (convection_*(timeStep_ / spaceStep_) <= 1.0);
+			return ((2.0*std::get<0>(coeffs_)*std::get<0>(deltas_) / (std::get<1>(deltas_)*std::get<1>(deltas_))) <= 1.0)
+				&& (std::get<1>(coeffs_)*(std::get<0>(deltas_) / std::get<1>(deltas_)) <= 1.0);
 		}
 
 		// for Dirichlet BC
@@ -621,30 +683,23 @@ namespace lss_one_dim_pde_schemes {
 
 	template<typename T>
 	class ADEAdvectionDiffusionBakaratClarkScheme :public ExplicitSchemeBase<T> {
-	private:
-		std::function<T(T, T)> source_;
-		bool isSourceSet_;
-		T convection_;
 	public:
 		explicit ADEAdvectionDiffusionBakaratClarkScheme() = delete;
-		explicit ADEAdvectionDiffusionBakaratClarkScheme(std::vector<T> const& initialCondition,
-														T spaceStart,
-														T spaceStep,
-														T timeStep,
-														T terminalTime,
-														T thermalDiffusivity,
-														T convection,
-														bool isSourceSet = false,
-														std::function<T(T, T)> const &source = nullptr)
-			:ExplicitSchemeBase<T>(initialCondition,
-				spaceStart,
-				spaceStep,
-				timeStep,
-				terminalTime,
-				thermalDiffusivity),
-			convection_{ convection },
-			isSourceSet_{ isSourceSet},
-			source_{source}{}
+
+		explicit ADEAdvectionDiffusionBakaratClarkScheme(T spaceStart,
+															T terminalTime,
+															std::pair<T, T> const& deltas,
+															std::tuple<T, T, T> const& coeffs,
+															std::vector<T> const& initialCondition,
+															std::function<T(T, T)> const &source = nullptr,
+															bool isSourceSet = false)
+			:ExplicitSchemeBase<T>(spaceStart,
+									terminalTime,
+									deltas,
+									coeffs,
+									initialCondition,
+									source,
+									isSourceSet) {}
 
 		~ADEAdvectionDiffusionBakaratClarkScheme() {}
 
@@ -672,30 +727,22 @@ namespace lss_one_dim_pde_schemes {
 
 	template<typename T>
 	class ADEAdvectionDiffusionSaulyevScheme :public ExplicitSchemeBase<T> {
-	private:
-		std::function<T(T, T)> source_;
-		bool isSourceSet_;
-		T convection_;
 	public:
 		explicit ADEAdvectionDiffusionSaulyevScheme() = delete;
-		explicit ADEAdvectionDiffusionSaulyevScheme(std::vector<T> const &initialCondition,
-													T spaceStart,
-													T spaceStep,
-													T timeStep,
+		explicit ADEAdvectionDiffusionSaulyevScheme(T spaceStart,
 													T terminalTime,
-													T thermalDiffusivity,
-													T convection,
-													bool isSourceSet = false,
-													std::function<T(T, T)> const &source = nullptr)
-			:ExplicitSchemeBase<T>(initialCondition,
-									spaceStart,
-									spaceStep,
-									timeStep,
+													std::pair<T, T> const& deltas,
+													std::tuple<T, T, T> const& coeffs,
+													std::vector<T> const& initialCondition,
+													std::function<T(T, T)> const &source = nullptr,
+													bool isSourceSet = false)
+			:ExplicitSchemeBase<T>(spaceStart,
 									terminalTime,
-									thermalDiffusivity),
-			convection_{ convection },
-			isSourceSet_{ isSourceSet },
-			source_{ source }{}
+									deltas,
+									coeffs,
+									initialCondition,
+									source,
+									isSourceSet) {}
 
 		~ADEAdvectionDiffusionSaulyevScheme() {}
 
@@ -730,13 +777,24 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 		"Entered solution vector size differs from initialCondition vector.");
 	LSS_ASSERT(isStable() == true, 
 		"This discretization is not stable.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k;
 	// set up coefficients:
-	T const a = 1.0 - 2.0*lambda;
-	T const b = lambda;
+	T const a = 1.0 - (2.0*lambda - delta);
+	T const b = lambda + gamma;
+	T const c = lambda - gamma;
 	// previous solution:
 	std::vector<T> prevSol = initialCondition_;
 	// left space boundary:
@@ -751,27 +809,27 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 			solution[0] = left;
 			solution[solution.size() - 1] = right;
 			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-				solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]);
+				solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
 			}
 			prevSol = solution;
-			time += timeStep_;
+			time += k;
 		}
 	}
 	else {
 		// create a container to carry discretized source heat
 		std::vector<T> sourceCurr(solution.size(), T{});
-		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
 			solution[0] = left;
 			solution[solution.size() - 1] = right;
 			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-				solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]) +
-					timeStep_ * sourceCurr[t];
+				solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1] +
+					k * sourceCurr[t];
 			}
-			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
 			prevSol = solution;
-			time += timeStep_;
+			time += k;
 		}
 	}
 
@@ -787,10 +845,20 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 		"Entered solution vector size differs from initialCondition vector.");
 	LSS_ASSERT(isStable() == true,
 		"This discretization is not stable.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k;
 	// left space boundary:
 	T const leftLin = leftRobinBCPair.first;
 	T const leftConst = leftRobinBCPair.second;
@@ -801,10 +869,9 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 	T const rightLin = 1.0 / rightLin_;
 	T const rightConst = -1.0*(rightConst_ / rightLin_);
 	// set up coefficients:
-	T const a = 1.0 - 2.0*lambda;
-	T const b = lambda;
-	T const c = 1.0 + leftLin;
-	T const d = 1.0 + rightLin;
+	T const a = 1.0 - (2.0*lambda - delta);
+	T const b = lambda + gamma;
+	T const c = lambda - gamma;
 	// previous solution:
 	std::vector<T> prevSol = initialCondition_;
 	// size of the space vector:
@@ -812,31 +879,31 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 	if (!isSourceSet_) {
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
-			solution[0] = b * c*prevSol[1] + a * prevSol[0] + b * leftConst;
-			solution[solution.size() - 1] = b * d*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
+			solution[0] = (b + (c * leftLin))*prevSol[1] + a * prevSol[0] + c * leftConst;
+			solution[solution.size() - 1] = (c + (b * rightLin))*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
 			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-				solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]);
+				solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
 			}
 			prevSol = solution;
-			time += timeStep_;
+			time += k;
 		}
 	}
 	else {
 		// create a container to carry discretized source heat
 		std::vector<T> sourceCurr(solution.size(), T{});
-		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
 		// loop for stepping in time:
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
-			solution[0] = b * c*prevSol[1] + a * prevSol[0] + b * leftConst;
-			solution[solution.size() - 1] = b * d*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
+			solution[0] = (b + (c * leftLin))*prevSol[1] + a * prevSol[0] + c * leftConst;
+			solution[solution.size() - 1] = (c + (b * rightLin))*prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
 			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-				solution[t] = a * prevSol[t] + b * (prevSol[t + 1] + prevSol[t - 1]) +
-					timeStep_ * sourceCurr[t];
+				solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1] +
+					k * sourceCurr[t];
 			}
-			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
 			prevSol = solution;
-			time += timeStep_;
+			time += k;
 		}
 
 
@@ -853,15 +920,26 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
 		"Entered solution vector size differs from initialCondition vector.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k / 2.0;
 	// set up coefficients:
-	T const divisor = 1.0 + lambda;
-	T const a = (1.0 - lambda) / divisor;
-	T const b = lambda / divisor;
-	T const c = timeStep_ / divisor;
+	T const divisor = 1.0 + lambda - delta;
+	T const a = (1.0 - lambda + delta) / divisor;
+	T const b = (lambda + gamma) / divisor;
+	T const c = (lambda - gamma) / divisor;
+	T const d = k / divisor;
 	// left space boundary:
 	T const left = dirichletBCPair.first;
 	// right space boundary:
@@ -877,13 +955,13 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 	// create upsweep anonymous function:
 	auto upSweep = [=](std::vector<T>& upComponent,std::vector<T> const &rhs,T rhsCoeff) {
 		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-			upComponent[t] = a * upComponent[t] + b * (upComponent[t + 1] + upComponent[t - 1]) + c * rhsCoeff *rhs[t];
+			upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] + c * upComponent[t - 1] + d * rhsCoeff *rhs[t];
 		}
 	};
 	// create downsweep anonymous function:
 	auto downSweep = [=](std::vector<T>& downComponent, std::vector<T> const &rhs, T rhsCoeff) {
 		for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-			downComponent[t] = a * downComponent[t] + b * (downComponent[t + 1] + downComponent[t - 1]) + c * rhsCoeff *rhs[t];
+			downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] + c * downComponent[t - 1] + d * rhsCoeff *rhs[t];
 		}
 	};
 
@@ -899,12 +977,12 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 			for (std::size_t t = 0; t < spaceSize; ++t) {
 				solution[t] = 0.5*(com1[t] + com2[t]);
 			}
-			time += timeStep_;
+			time += k;
 		}
 	}
 	else {
-		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
-		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
+		discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(h, spaceStart_, time, source_, sourceNext);
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
 			com1[0] = com2[0] = left;
@@ -916,9 +994,9 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 			for (std::size_t t = 0; t < spaceSize; ++t) {
 				solution[t] = 0.5*(com1[t] + com2[t]);
 			}
-			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
-			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
-			time += timeStep_;
+			discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(h, spaceStart_, 2.0*time, source_, sourceNext);
+			time += k;
 		}
 	}
 
@@ -939,15 +1017,26 @@ void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
 		"Entered solution vector size differs from initialCondition vector.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k / 2.0;
 	// set up coefficients:
-	T const divisor = 1.0 + lambda;
-	T const a = (1.0 - lambda) / divisor;
-	T const b = lambda / divisor;
-	T const c = timeStep_ / divisor;
+	T const divisor = 1.0 + lambda - delta;
+	T const a = (1.0 - lambda + delta) / divisor;
+	T const b = (lambda + gamma) / divisor;
+	T const c = (lambda - gamma) / divisor;
+	T const d = k / divisor;
 	// left space boundary:
 	T const left = dirichletBCPair.first;
 	// right space boundary:
@@ -962,13 +1051,13 @@ void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T
 	// create upsweep anonymous function:
 	auto upSweep = [=](std::vector<T>& upComponent, std::vector<T> const &rhs, T rhsCoeff) {
 		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-			upComponent[t] = a * upComponent[t] + b * (upComponent[t + 1] + upComponent[t - 1]) + c * rhsCoeff *rhs[t];
+			upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] + c * upComponent[t - 1] + d * rhsCoeff *rhs[t];
 		}
 	};
 	// create downsweep anonymous function:
 	auto downSweep = [=](std::vector<T>& downComponent, std::vector<T> const &rhs, T rhsCoeff) {
 		for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-			downComponent[t] = a * downComponent[t] + b * (downComponent[t + 1] + downComponent[t - 1]) + c * rhsCoeff *rhs[t];
+			downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] + c*downComponent[t - 1] + d * rhsCoeff *rhs[t];
 		}
 	};
 
@@ -983,12 +1072,12 @@ void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T
 			else
 				upSweep(solution, sourceCurr, 0.0);
 			++t;
-			time += timeStep_;
+			time += k;
 		}
 	}
 	else {
-		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
-		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
+		discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(h, spaceStart_, time, source_, sourceNext);
 		// loop for stepping in time:
 		std::size_t t = 1;
 		while (time <= terminalTime_) {
@@ -999,9 +1088,9 @@ void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T
 			else
 				upSweep(solution, sourceNext, 1.0);
 			++t;
-			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
-			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
-			time += timeStep_;
+			discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(h, spaceStart_, 2.0*time, source_, sourceNext);
+			time += k;
 		}
 	}
 
@@ -1024,14 +1113,22 @@ void lss_one_dim_pde_schemes::ExplicitAdvectionDiffusionEulerScheme<T>::operator
 		"Entered solution vector size differs from initialCondition vector.");
 	LSS_ASSERT(isStable() == true,
 		"This discretization is not stable.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
-	// calculate gamma:
-	T const gamma = (convection_ *  timeStep_) / (2.0*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k;
 	// set up coefficients:
-	T const a = 1.0 - 2.0*lambda;
+	T const a = 1.0 - (2.0*lambda - delta);
 	T const b = lambda + gamma;
 	T const c = lambda - gamma;
 	// previous solution:
@@ -1048,27 +1145,27 @@ void lss_one_dim_pde_schemes::ExplicitAdvectionDiffusionEulerScheme<T>::operator
 			solution[0] = left;
 			solution[solution.size() - 1] = right;
 			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-				solution[t] = a * prevSol[t] + b * prevSol[t - 1] + c * prevSol[t + 1];
+				solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
 			}
 			prevSol = solution;
-			time += timeStep_;
+			time += k;
 		}
 	}
 	else {
 		// create a container to carry discretized source heat
 		std::vector<T> sourceCurr(solution.size(), T{});
-		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
 			solution[0] = left;
 			solution[solution.size() - 1] = right;
 			for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-				solution[t] = a * prevSol[t] + b * prevSol[t - 1] + c * prevSol[t + 1] + 
-					timeStep_ * sourceCurr[t];
+				solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1] +
+					k * sourceCurr[t];
 			}
-			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
 			prevSol = solution;
-			time += timeStep_;
+			time += k;
 		}
 	}
 }
@@ -1083,12 +1180,20 @@ void lss_one_dim_pde_schemes::ExplicitAdvectionDiffusionEulerScheme<T>::operator
 		"Entered solution vector size differs from initialCondition vector.");
 	LSS_ASSERT(isStable() == true,
 		"This discretization is not stable.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
-	// calculate gamma:
-	T const gamma = (convection_ *  timeStep_) / (2.0*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k;
 	// left space boundary:
 	T const leftLin = leftRobinBCPair.first;
 	T const leftConst = leftRobinBCPair.second;
@@ -1099,24 +1204,22 @@ void lss_one_dim_pde_schemes::ExplicitAdvectionDiffusionEulerScheme<T>::operator
 	T const rightLin = 1.0 / rightLin_;
 	T const rightConst = -1.0*(rightConst_ / rightLin_);
 	// set up coefficients:
-	T const a = 1.0 - 2.0*lambda;
+	T const a = 1.0 - (2.0*lambda - delta);
 	T const b = lambda + gamma;
 	T const c = lambda - gamma;
-	T const alpha = (c + leftLin * b);
-	T const beta = (b + rightLin * c);
 	// previous solution:
 	std::vector<T> prevSol = initialCondition_;
 	// size of the space vector:
 	std::size_t const spaceSize = solution.size();
 	// loop for stepping in time:
 	while (time <= terminalTime_) {
-		solution[0] = alpha * prevSol[1] + a * prevSol[0] + b * leftConst;
-		solution[solution.size() - 1] = beta * prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + c * rightConst;
+		solution[0] = (b + (c*leftLin)) * prevSol[1] + a * prevSol[0] + c * leftConst;
+		solution[solution.size() - 1] = (c + (b*rightLin)) * prevSol[solution.size() - 2] + a * prevSol[solution.size() - 1] + b * rightConst;
 		for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-			solution[t] = a * prevSol[t] + c * prevSol[t + 1] + b * prevSol[t - 1];
+			solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
 		}
 		prevSol = solution;
-		time += timeStep_;
+		time += k;
 	}
 }
 
@@ -1129,18 +1232,26 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionBakaratClarkScheme<T>::operat
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
 		"Entered solution vector size differs from initialCondition vector.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
-	// calculate gamma:
-	T const gamma = (convection_ *  timeStep_) / (2.0*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k / 2.0;
 	// set up coefficients:
-	T const divisor = 1.0 + lambda;
-	T const a = (1.0 - lambda) / divisor;
-	T const b = (lambda - gamma) / divisor;
-	T const c = (lambda + gamma) / divisor;
-	T const d = timeStep_ / divisor;
+	T const divisor = 1.0 + lambda - delta;
+	T const a = (1.0 - lambda + delta) / divisor;
+	T const b = (lambda + gamma) / divisor;
+	T const c = (lambda - gamma) / divisor;
+	T const d = k / divisor;
 	// left space boundary:
 	T const left = dirichletBCPair.first;
 	// right space boundary:
@@ -1180,12 +1291,12 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionBakaratClarkScheme<T>::operat
 			for (std::size_t t = 0; t < spaceSize; ++t) {
 				solution[t] = 0.5*(com1[t] + com2[t]);
 			}
-			time += timeStep_;
+			time += k;
 		}
 	}
 	else {
-		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
-		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
+		discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(h, spaceStart_, time, source_, sourceNext);
 		// loop for stepping in time:
 		while (time <= terminalTime_) {
 			com1[0] = com2[0] = left;
@@ -1197,9 +1308,9 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionBakaratClarkScheme<T>::operat
 			for (std::size_t t = 0; t < spaceSize; ++t) {
 				solution[t] = 0.5*(com1[t] + com2[t]);
 			}
-			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
-			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
-			time += timeStep_;
+			discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(h, spaceStart_, 2.0*time, source_, sourceNext);
+			time += k;
 		}
 	}
 }
@@ -1219,18 +1330,26 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionSaulyevScheme<T>::operator()(
 		"The input solution container must be initialized.");
 	LSS_ASSERT(solution.size() == initialCondition_.size(),
 		"Entered solution vector size differs from initialCondition vector.");
+	// get delta time:
+	T const k = std::get<0>(deltas_);
+	// get delta space:
+	T const h = std::get<1>(deltas_);
 	// create first time point:
-	T time = timeStep_;
-	// calculate lambda:
-	T const lambda = (thermalDiffusivity_ *  timeStep_) / (spaceStep_*spaceStep_);
-	// calculate gamma:
-	T const gamma = (convection_ *  timeStep_) / (2.0*spaceStep_);
+	T time = k;
+	// get coefficients:
+	T const A = std::get<0>(coeffs_);
+	T const B = std::get<1>(coeffs_);
+	T const C = std::get<2>(coeffs_);
+	// calculate scheme coefficients:
+	T const lambda = (A *  k) / (h*h);
+	T const gamma = (B *  k) / (2.0 * h);
+	T const delta = C * k / 2.0;
 	// set up coefficients:
-	T const divisor = 1.0 + lambda;
-	T const a = (1.0 - lambda) / divisor;
-	T const b = (lambda - gamma) / divisor;
-	T const c = (lambda + gamma) / divisor;
-	T const d = timeStep_ / divisor;
+	T const divisor = 1.0 + lambda - delta;
+	T const a = (1.0 - lambda + delta) / divisor;
+	T const b = (lambda + gamma) / divisor;
+	T const c = (lambda - gamma) / divisor;
+	T const d = k / divisor;
 	// left space boundary:
 	T const left = dirichletBCPair.first;
 	// right space boundary:
@@ -1266,12 +1385,12 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionSaulyevScheme<T>::operator()(
 			else
 				upSweep(solution, sourceCurr,0.0);
 			++t;
-			time += timeStep_;
+			time += k;
 		}
 	}
 	else {
-		discretizeInSpace(spaceStep_, spaceStart_, 0.0, source_, sourceCurr);
-		discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceNext);
+		discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
+		discretizeInSpace(h, spaceStart_, time, source_, sourceNext);
 		// loop for stepping in time:
 		std::size_t t = 1;
 		while (time <= terminalTime_) {
@@ -1282,9 +1401,9 @@ void lss_one_dim_pde_schemes::ADEAdvectionDiffusionSaulyevScheme<T>::operator()(
 			else
 				upSweep(solution, sourceNext, 1.0);
 			++t;
-			discretizeInSpace(spaceStep_, spaceStart_, time, source_, sourceCurr);
-			discretizeInSpace(spaceStep_, spaceStart_, 2.0*time, source_, sourceNext);
-			time += timeStep_;
+			discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
+			discretizeInSpace(h, spaceStart_, 2.0*time, source_, sourceNext);
+			time += k;
 		}
 	}
 }

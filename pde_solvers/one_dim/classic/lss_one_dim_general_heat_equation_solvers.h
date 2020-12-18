@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_HEAT_EQUATION_SOLVERS)
-#define _LSS_ONE_DIM_HEAT_EQUATION_SOLVERS
+#if !defined(_LSS_ONE_DIM_GENERAL_HEAT_EQUATION_SOLVERS)
+#define _LSS_ONE_DIM_GENERAL_HEAT_EQUATION_SOLVERS
 
 #include<functional>
 #include"common/lss_types.h"
@@ -10,7 +10,7 @@
 #include"pde_solvers/one_dim/lss_one_dim_pde_schemes.h"
 
 
-namespace lss_one_dim_heat_equation_solvers {
+namespace lss_one_dim_general_heat_equation_solvers {
 
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
@@ -25,7 +25,7 @@ namespace lss_one_dim_heat_equation_solvers {
 	namespace implicit_solvers {
 
 		// ==============================================================================================================
-		// ===================================== Implicit1DHeatEquation General Template ================================
+		// ============================== Implicit1DGeneralHeatEquation General Template ================================
 		// ==============================================================================================================
 
 
@@ -37,12 +37,23 @@ namespace lss_one_dim_heat_equation_solvers {
 					typename> typename FDMSolver,
 			template<typename, typename> typename Container,
 			typename Alloc>
-		class Implicit1DHeatEquation{};
+		class Implicit1DGeneralHeatEquation {};
 
 
 		// ==============================================================================================================
-		// ======================= Implicit1DHeatEquation Dirichlet Specialisation Template =============================
+		// ================== Implicit1DGeneralHeatEquation Dirichlet Specialisation Template ===========================
 		// ==============================================================================================================
+		// 	
+		//	u_t = a*u_xx + b*u_x + c*u + F(x,t), t > 0, x_1 < x < x_2
+		// 
+		//	with initial condition
+		//  u(x,0) = f(x)
+		//
+		//	and Dirichlet boundaries:
+		//  u(x_1,t) = A
+		//	u(x_2,t) = B
+		//	
+		//===============================================================================================================
 
 		template<typename T,
 				template<typename,
@@ -51,7 +62,7 @@ namespace lss_one_dim_heat_equation_solvers {
 						typename> typename FDMSolver,
 				template<typename, typename> typename Container,
 				typename Alloc>
-		class Implicit1DHeatEquation<T,BoundaryConditionType::Dirichlet, FDMSolver,Container,Alloc>
+		class Implicit1DGeneralHeatEquation<T,BoundaryConditionType::Dirichlet, FDMSolver,Container,Alloc>
 		:public Discretization<T,Container,Alloc>{
 		private:
 			FDMSolver<T, BoundaryConditionType::Dirichlet, Container, Alloc> fdmSolver_;// finite-difference solver
@@ -59,16 +70,16 @@ namespace lss_one_dim_heat_equation_solvers {
 			T terminalT_;																// terminal time
 			std::size_t timeN_;															// number of time subdivisions
 			std::size_t spaceN_;														// number of space subdivisions
-			std::function<T(T)> init_;													// initi condition
-			std::function<T(T, T)> source_;												// heat source
+			std::function<T(T)> init_;													// init condition
+			std::function<T(T, T)> source_;												// heat source F(x,t)
 			std::pair<T, T> boundary_;													// boundaries
-			T diffusivity_;																// diffusivity = c^2 in PDE
+			std::tuple<T,T,T> coeffs_;													// coefficients a, b, c in PDE
 			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
-			explicit Implicit1DHeatEquation() = delete;
-			explicit Implicit1DHeatEquation(Range<T> const &spaceRange,
+			explicit Implicit1DGeneralHeatEquation() = delete;
+			explicit Implicit1DGeneralHeatEquation(Range<T> const &spaceRange,
 											T terminalTime,
 											std::size_t const &spaceDiscretization,
 											std::size_t const &timeDiscretization)
@@ -80,12 +91,12 @@ namespace lss_one_dim_heat_equation_solvers {
 				source_{ nullptr },
 				isSourceSet_{false} {}
 
-			~Implicit1DHeatEquation(){}
+			~Implicit1DGeneralHeatEquation(){}
 
-			Implicit1DHeatEquation(Implicit1DHeatEquation const &) = delete;
-			Implicit1DHeatEquation(Implicit1DHeatEquation &&) = delete;
-			Implicit1DHeatEquation& operator=(Implicit1DHeatEquation const &) = delete;
-			Implicit1DHeatEquation& operator=(Implicit1DHeatEquation &&) = delete;
+			Implicit1DGeneralHeatEquation(Implicit1DGeneralHeatEquation const &) = delete;
+			Implicit1DGeneralHeatEquation(Implicit1DGeneralHeatEquation &&) = delete;
+			Implicit1DGeneralHeatEquation& operator=(Implicit1DGeneralHeatEquation const &) = delete;
+			Implicit1DGeneralHeatEquation& operator=(Implicit1DGeneralHeatEquation &&) = delete;
 
 			inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
 			inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
@@ -101,8 +112,14 @@ namespace lss_one_dim_heat_equation_solvers {
 				isSourceSet_ = true;
 				source_ = heatSource;
 			}
-			inline void setThermalDiffusivity(T value) {
-				diffusivity_ = value;
+			inline void set2OrderCoefficient(T value) {
+				std::get<0>(coeffs_) = value;
+			}
+			inline void set1OrderCoefficient(T value) {
+				std::get<1>(coeffs_) = value;
+			}
+			inline void set0OrderCoefficient(T value) {
+				std::get<2>(coeffs_) = value;
 			}
 
 			void solve(Container<T,Alloc> &solution,
@@ -110,8 +127,33 @@ namespace lss_one_dim_heat_equation_solvers {
 		};
 
 		// ==============================================================================================================
-		// =========================== Implicit1DHeatEquation Robin Specialisation Template =============================
+		// ====================== Implicit1DGeneralHeatEquation Robin Specialisation Template ===========================
 		// ==============================================================================================================
+		// 	
+		//	u_t = a*u_xx + b*u_x + c*u + F(x,t), t > 0, x_1 < x < x_2
+		// 
+		//	with initial condition
+		//  u(x,0) = f(x)
+		//
+		//	and Robin boundaries:
+		//  d_1*u_x(x_1,t) + f_1*u(x_1,t) = A
+		//	d_2*u_x(x_2,t) + f_2*u(x_2,t) = B
+		//
+		//	It is assumed the Robin boundaries are discretised in following way:
+		//	d_1*(U_1 - U_0)/h + f_1*(U_0 + U_1)/2 = A
+		//	d_2*(U_N - U_N-1)/h + f_2*(U_N-1 + U_N)/2 = B
+		//
+		//	And therefore can be rewritten in form:
+		//
+		//	U_0 = ((2*d_1 + f_1*h)/(2*d_1 - f_1*h)) * U_1 + (2*h/(f_1*h - 2*d_1))*A	
+		//	U_N-1 = ((2*d_2 + f_2*h)/(2*d_2 - f_2*h)) * U_N + (2*h/(f_2*h - 2*d_2))*B
+		//
+		//	or
+		//
+		//	U_0 = alpha * U_1 + phi,	
+		//	U_N-1 = beta * U_N + psi,	
+		//
+		//===============================================================================================================
 
 		template<typename T,
 				template<typename,
@@ -120,7 +162,7 @@ namespace lss_one_dim_heat_equation_solvers {
 						typename> typename FDMSolver,
 				template<typename, typename> typename Container,
 				typename Alloc>
-		class Implicit1DHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>:
+		class Implicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>:
 			public Discretization<T, Container, Alloc> {
 		private:
 			FDMSolver<T, BoundaryConditionType::Robin, Container, Alloc> fdmSolver_;	// finite-difference solver
@@ -128,17 +170,17 @@ namespace lss_one_dim_heat_equation_solvers {
 			T terminalT_;																// terminal time
 			std::size_t timeN_;															// number of time subdivisions
 			std::size_t spaceN_;														// number of space subdivisions
-			std::function<T(T, T)> source_;												// heat source
+			std::function<T(T, T)> source_;												// heat source F(x,t)
 			std::function<T(T)> init_;													// initi condition
 			std::pair<T, T> left_;														// left boundary pair
 			std::pair<T, T> right_;														// right boundary pair
-			T diffusivity_;																// diffusivity = c^2 in PDE
+			std::tuple<T,T,T> coeffs_;													// coefficients a, b, c in PDE
 			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
-			explicit Implicit1DHeatEquation() = delete;
-			explicit Implicit1DHeatEquation(Range<T> const &spaceRange,
+			explicit Implicit1DGeneralHeatEquation() = delete;
+			explicit Implicit1DGeneralHeatEquation(Range<T> const &spaceRange,
 											T terminalTime,
 											std::size_t const &spaceDiscretization,
 											std::size_t const &timeDiscretization)
@@ -150,12 +192,12 @@ namespace lss_one_dim_heat_equation_solvers {
 				source_{ nullptr },
 				isSourceSet_{ false } {}
 
-			~Implicit1DHeatEquation() {}
+			~Implicit1DGeneralHeatEquation() {}
 
-			Implicit1DHeatEquation(Implicit1DHeatEquation const &) = delete;
-			Implicit1DHeatEquation(Implicit1DHeatEquation &&) = delete;
-			Implicit1DHeatEquation& operator=(Implicit1DHeatEquation const &) = delete;
-			Implicit1DHeatEquation& operator=(Implicit1DHeatEquation &&) = delete;
+			Implicit1DGeneralHeatEquation(Implicit1DGeneralHeatEquation const &) = delete;
+			Implicit1DGeneralHeatEquation(Implicit1DGeneralHeatEquation &&) = delete;
+			Implicit1DGeneralHeatEquation& operator=(Implicit1DGeneralHeatEquation const &) = delete;
+			Implicit1DGeneralHeatEquation& operator=(Implicit1DGeneralHeatEquation &&) = delete;
 
 			inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
 			inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
@@ -173,8 +215,14 @@ namespace lss_one_dim_heat_equation_solvers {
 				isSourceSet_ = true;
 				source_ = heatSource;
 			}
-			inline void setThermalDiffusivity(T value) {
-				diffusivity_ = value;
+			inline void set2OrderCoefficient(T value) {
+				std::get<0>(coeffs_) = value;
+			}
+			inline void set1OrderCoefficient(T value) {
+				std::get<1>(coeffs_) = value;
+			}
+			inline void set0OrderCoefficient(T value) {
+				std::get<2>(coeffs_) = value;
 			}
 
 			void solve(Container<T, Alloc> &solution,
@@ -192,24 +240,35 @@ namespace lss_one_dim_heat_equation_solvers {
 	namespace explicit_solvers {
 
 		// ==============================================================================================================
-		// ===================================== Explicit1DHeatEquation General Template ================================
+		// ================================ Explicit1DGeneralHeatEquation General Template ==============================
 		// ==============================================================================================================
 
 		template<typename T,
 				BoundaryConditionType BType,
 				template<typename, typename> typename Container,
 				typename Alloc>
-		class Explicit1DHeatEquation{};
+		class Explicit1DGeneralHeatEquation {};
 
 
 		// ==============================================================================================================
-		// ======================= Explicit1DHeatEquation Dirichlet Specialisation Template =============================
+		// ======================= Explicit1DGeneralHeatEquation Dirichlet Specialisation Template ======================
 		// ==============================================================================================================
+		// 	
+		//	u_t = a*u_xx + b*u_x + c*u + F(x,t), t > 0, x_1 < x < x_2
+		// 
+		//	with initial condition
+		//  u(x,0) = f(x)
+		//
+		//	and Dirichlet boundaries:
+		//  u(x_1,t) = A
+		//	u(x_2,t) = B
+		//	
+		//===============================================================================================================
 
 		template<typename T,
 			template<typename, typename> typename Container,
 			typename Alloc>
-		class Explicit1DHeatEquation<T,BoundaryConditionType::Dirichlet,Container,Alloc>:
+		class Explicit1DGeneralHeatEquation<T,BoundaryConditionType::Dirichlet,Container,Alloc>:
 		public Discretization<T,Container,Alloc>{
 		private:
 			Range<T> spacer_;											// space range
@@ -217,15 +276,15 @@ namespace lss_one_dim_heat_equation_solvers {
 			std::size_t timeN_;											// number of time subdivisions
 			std::size_t spaceN_;										// number of space subdivisions
 			std::function<T(T)> init_;									// initi condition
-			std::function<T(T, T)> source_;								// heat source
+			std::function<T(T, T)> source_;								// heat source	F(x,t)
 			std::pair<T, T> boundary_;									// boundaries
-			T diffusivity_;												// diffusivity = c^2 in PDE
+			std::tuple<T,T,T> coeffs_;									// coefficients a, b, c in PDE
 			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
-			explicit Explicit1DHeatEquation() = delete;
-			explicit Explicit1DHeatEquation(Range<T> const &spaceRange,
+			explicit Explicit1DGeneralHeatEquation() = delete;
+			explicit Explicit1DGeneralHeatEquation(Range<T> const &spaceRange,
 											T terminalTime,
 											std::size_t const &spaceDiscretization,
 											std::size_t const &timeDiscretization)
@@ -236,12 +295,12 @@ namespace lss_one_dim_heat_equation_solvers {
 				source_{nullptr },
 				isSourceSet_{ false } {}
 
-			~Explicit1DHeatEquation(){}
+			~Explicit1DGeneralHeatEquation(){}
 
-			Explicit1DHeatEquation(Explicit1DHeatEquation const &) = delete;
-			Explicit1DHeatEquation(Explicit1DHeatEquation &&) = delete;
-			Explicit1DHeatEquation& operator=(Explicit1DHeatEquation const &) = delete;
-			Explicit1DHeatEquation& operator=(Explicit1DHeatEquation &&) = delete;
+			Explicit1DGeneralHeatEquation(Explicit1DGeneralHeatEquation const &) = delete;
+			Explicit1DGeneralHeatEquation(Explicit1DGeneralHeatEquation &&) = delete;
+			Explicit1DGeneralHeatEquation& operator=(Explicit1DGeneralHeatEquation const &) = delete;
+			Explicit1DGeneralHeatEquation& operator=(Explicit1DGeneralHeatEquation &&) = delete;
 
 			inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
 			inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
@@ -256,8 +315,14 @@ namespace lss_one_dim_heat_equation_solvers {
 				isSourceSet_ = true;
 				source_ = heatSource;
 			}
-			inline void setThermalDiffusivity(T value) {
-				diffusivity_ = value;
+			inline void set2OrderCoefficient(T value) {
+				std::get<0>(coeffs_) = value;
+			}
+			inline void set1OrderCoefficient(T value) {
+				std::get<1>(coeffs_) = value;
+			}
+			inline void set0OrderCoefficient(T value) {
+				std::get<2>(coeffs_) = value;
 			}
 
 			void solve(Container<T, Alloc> &solution,
@@ -266,30 +331,55 @@ namespace lss_one_dim_heat_equation_solvers {
 
 
 		// ==============================================================================================================
-		// =========================== Explicit1DHeatEquation Robin Specialisation Template =============================
+		// =========================== Explicit1DGeneralHeatEquation Robin Specialisation Template ======================
 		// ==============================================================================================================
+		// 	
+		//	u_t = a*u_xx + b*u_x + c*u + F(x,t), t > 0, x_1 < x < x_2
+		// 
+		//	with initial condition
+		//  u(x,0) = f(x)
+		//
+		//	and Robin boundaries:
+		//  d_1*u_x(x_1,t) + f_1*u(x_1,t) = A
+		//	d_2*u_x(x_2,t) + f_2*u(x_2,t) = B
+		//
+		//	It is assumed the Robin boundaries are discretised in following way:
+		//	d_1*(U_1 - U_0)/h + f_1*(U_0 + U_1)/2 = A
+		//	d_2*(U_N - U_N-1)/h + f_2*(U_N-1 + U_N)/2 = B
+		//
+		//	And therefore can be rewritten in form:
+		//
+		//	U_0 = ((2*d_1 + f_1*h)/(2*d_1 - f_1*h)) * U_1 + (2*h/(f_1*h - 2*d_1))*A	
+		//	U_N-1 = ((2*d_2 + f_2*h)/(2*d_2 - f_2*h)) * U_N + (2*h/(f_2*h - 2*d_2))*B
+		//
+		//	or
+		//
+		//	U_0 = alpha * U_1 + phi,	
+		//	U_N-1 = beta * U_N + psi,	
+		//
+		//===============================================================================================================
 
 		template<typename T,
 			template<typename, typename> typename Container,
 			typename Alloc>
-		class Explicit1DHeatEquation<T, BoundaryConditionType::Robin, Container, Alloc>:
+		class Explicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, Container, Alloc>:
 			public Discretization<T,Container,Alloc>{
 		private:
 			Range<T> spacer_;											// space range
 			T terminalT_;												// terminal time
 			std::size_t timeN_;											// number of time subdivisions
 			std::size_t spaceN_;										// number of space subdivisions
-			std::function<T(T, T)> source_;								// heat source
+			std::function<T(T, T)> source_;								// heat source F(x,t)
 			std::function<T(T)> init_;									// initi condition
 			std::pair<T, T> left_;										// left boundary pair
 			std::pair<T, T> right_;										// right boundary pair
-			T diffusivity_;												// diffusivity = c^2 in PDE
+			std::tuple<T,T,T> coeffs_;									// coefficients a, b, c in PDE
 			bool isSourceSet_;
 
 		public:
 			typedef T value_type;
-			explicit Explicit1DHeatEquation() = delete;
-			explicit Explicit1DHeatEquation(Range<T> const &spaceRange,
+			explicit Explicit1DGeneralHeatEquation() = delete;
+			explicit Explicit1DGeneralHeatEquation(Range<T> const &spaceRange,
 											T terminalTime,
 											std::size_t const &spaceDiscretization,
 											std::size_t const &timeDiscretization)
@@ -300,12 +390,12 @@ namespace lss_one_dim_heat_equation_solvers {
 				source_{ nullptr },
 				isSourceSet_{ false } {}
 
-			~Explicit1DHeatEquation() {}
+			~Explicit1DGeneralHeatEquation() {}
 
-			Explicit1DHeatEquation(Explicit1DHeatEquation const &) = delete;
-			Explicit1DHeatEquation(Explicit1DHeatEquation &&) = delete;
-			Explicit1DHeatEquation& operator=(Explicit1DHeatEquation const &) = delete;
-			Explicit1DHeatEquation& operator=(Explicit1DHeatEquation &&) = delete;
+			Explicit1DGeneralHeatEquation(Explicit1DGeneralHeatEquation const &) = delete;
+			Explicit1DGeneralHeatEquation(Explicit1DGeneralHeatEquation &&) = delete;
+			Explicit1DGeneralHeatEquation& operator=(Explicit1DGeneralHeatEquation const &) = delete;
+			Explicit1DGeneralHeatEquation& operator=(Explicit1DGeneralHeatEquation &&) = delete;
 
 			inline T spaceStep()const { return (spacer_.spread() / static_cast<T>(spaceN_)); }
 			inline T timeStep()const { return (terminalT_ / static_cast<T>(timeN_)); }
@@ -321,8 +411,14 @@ namespace lss_one_dim_heat_equation_solvers {
 				isSourceSet_ = true;
 				source_ = heatSource;
 			}
-			inline void setThermalDiffusivity(T value) {
-				diffusivity_ = value;
+			inline void set2OrderCoefficient(T value) {
+				std::get<0>(coeffs_) = value;
+			}
+			inline void set1OrderCoefficient(T value) {
+				std::get<1>(coeffs_) = value;
+			}
+			inline void set0OrderCoefficient(T value) {
+				std::get<2>(coeffs_) = value;
 			}
 
 			void solve(Container<T, Alloc> &solution);
@@ -336,7 +432,7 @@ namespace lss_one_dim_heat_equation_solvers {
 	// ====================================== IMPLEMENTATIONS =======================================================
 
 	// ==============================================================================================================
-	// ========================== Implicit1DHeatEquation (Dirichlet) implementation =================================
+	// ========================== Implicit1DGeneralHeatEquation (Dirichlet) implementation ==========================
 	// ==============================================================================================================
 
 	template<typename T,
@@ -346,7 +442,7 @@ namespace lss_one_dim_heat_equation_solvers {
 					typename> typename FDMSolver,
 			template<typename, typename> typename Container,
 			typename Alloc>
-	void implicit_solvers::Implicit1DHeatEquation<T, BoundaryConditionType::Dirichlet, FDMSolver, Container, Alloc>::
+	void implicit_solvers::Implicit1DGeneralHeatEquation<T, BoundaryConditionType::Dirichlet, FDMSolver, Container, Alloc>::
 		solve(Container<T,Alloc> &solution, ImplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
@@ -356,8 +452,10 @@ namespace lss_one_dim_heat_equation_solvers {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
-		// calculate lambda:
-		T const lambda = (diffusivity_ *  k) / (h*h);
+		// calculate scheme const coefficients:
+		T const lambda = (std::get<0>(coeffs_) *  k) / (h*h);
+		T const gamma = (std::get<1>(coeffs_) * k) / (2.0*h);
+		T const delta = (std::get<2>(coeffs_) * k);
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
@@ -365,9 +463,9 @@ namespace lss_one_dim_heat_equation_solvers {
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 		// prepare containers for diagonal vectors for FDMSolver:
-		Container<T, Alloc> low(spaceN_ + 1, -1.0*lambda*theta);
-		Container<T, Alloc> diag(spaceN_ + 1, (1.0 + 2.0*lambda*theta));
-		Container<T, Alloc> up(spaceN_ + 1, -1.0*lambda*theta);
+		Container<T, Alloc> low(spaceN_ + 1, -1.0*(lambda - gamma)*theta);
+		Container<T, Alloc> diag(spaceN_ + 1, (1.0 + (2.0*lambda - delta)*theta));
+		Container<T, Alloc> up(spaceN_ + 1, -1.0*(lambda + gamma)*theta);
 		Container<T, Alloc> rhs(spaceN_ + 1, T{});
 		// create container to carry new solution:
 		Container<T, Alloc> nextSol(spaceN_ + 1, T{});
@@ -379,8 +477,10 @@ namespace lss_one_dim_heat_equation_solvers {
 		fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
 		// differentiate between inhomogeneous and homogeneous PDE:
 		if (isSourceSet_) {
+			// wrap the scheme coefficients:
+			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, k);
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomScheme(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomSchemeMod(scheme);
 			// create a container to carry discretized source heat
 			Container<T, Alloc> sourceCurr(spaceN_ + 1, T{});
 			Container<T, Alloc> sourceNext(spaceN_ + 1, T{});
@@ -388,7 +488,7 @@ namespace lss_one_dim_heat_equation_solvers {
 			discretizeInSpace(h, spacer_.lower(), time, source_, sourceNext);
 			// loop for stepping in time:
 			while (time <= lastTime) {
-				schemeFun(lambda, T{}, k, prevSol, sourceCurr, sourceNext, rhs);
+				schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs);
 				fdmSolver_.setRhs(rhs);
 				fdmSolver_.solve(nextSol);
 				prevSol = nextSol;
@@ -398,11 +498,13 @@ namespace lss_one_dim_heat_equation_solvers {
 			}
 		}
 		else {
+			// wrap the scheme coefficients:
+			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, T{});
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeMod(scheme);
 			// loop for stepping in time:
 			while (time <= lastTime) {
-				schemeFun(lambda, T{}, prevSol, rhs);
+				schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(), Container<T, Alloc>(), rhs);
 				fdmSolver_.setRhs(rhs);
 				fdmSolver_.solve(nextSol);
 				prevSol = nextSol;
@@ -415,7 +517,7 @@ namespace lss_one_dim_heat_equation_solvers {
 
 
 	// ==============================================================================================================
-	// ============================== Implicit1DHeatEquation (Robin) implementation =================================
+	// ============================== Implicit1DGeneralHeatEquation (Robin) implementation ==========================
 	// ==============================================================================================================
 
 
@@ -426,7 +528,7 @@ namespace lss_one_dim_heat_equation_solvers {
 					typename> typename FDMSolver,
 			template<typename, typename> typename Container,
 			typename Alloc>
-	void implicit_solvers::Implicit1DHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>::
+	void implicit_solvers::Implicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>::
 		solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
@@ -436,8 +538,10 @@ namespace lss_one_dim_heat_equation_solvers {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
-		// calculate lambda:
-		T const lambda = (diffusivity_ *  k) / (h*h);
+		// calculate scheme const coefficients:
+		T const lambda = (std::get<0>(coeffs_) *  k) / (h*h);
+		T const gamma = (std::get<1>(coeffs_) * k) / (2.0*h);
+		T const delta = (std::get<2>(coeffs_) * k);
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
@@ -445,9 +549,9 @@ namespace lss_one_dim_heat_equation_solvers {
 		// use the mesh in space to get values of initial condition
 		discretizeInitialCondition(init_, prevSol);
 		// prepare containers for diagonal vectors for FDMSolver:
-		Container<T, Alloc> low(spaceN_ + 1, -1.0*lambda*theta);
-		Container<T, Alloc> diag(spaceN_ + 1, (1.0 + 2.0*lambda*theta));
-		Container<T, Alloc> up(spaceN_ + 1, -1.0*lambda*theta);
+		Container<T, Alloc> low(spaceN_ + 1, -1.0*(lambda - gamma)*theta);
+		Container<T, Alloc> diag(spaceN_ + 1, (1.0 + (2.0*lambda - delta)*theta));
+		Container<T, Alloc> up(spaceN_ + 1, -1.0*(lambda + gamma)*theta);
 		Container<T, Alloc> rhs(spaceN_ + 1, T{});
 		// create container to carry new solution:
 		Container<T, Alloc> nextSol(spaceN_ + 1, T{});
@@ -459,8 +563,10 @@ namespace lss_one_dim_heat_equation_solvers {
 		fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
 		// differentiate between inhomogeneous and homogeneous PDE:
 		if (isSourceSet_) {
+			// wrap the scheme coefficients:
+			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, k);
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomScheme(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomSchemeMod(scheme);
 			// create a container to carry discretized source heat
 			Container<T, Alloc> sourceCurr(spaceN_ + 1, T{});
 			Container<T, Alloc> sourceNext(spaceN_ + 1, T{});
@@ -468,7 +574,7 @@ namespace lss_one_dim_heat_equation_solvers {
 			discretizeInSpace(h, spacer_.lower(), time, source_, sourceNext);
 			// loop for stepping in time:
 			while (time <= lastTime) {
-				schemeFun(lambda, T{}, k, prevSol, sourceCurr, sourceNext, rhs);
+				schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs);
 				fdmSolver_.setRhs(rhs);
 				fdmSolver_.solve(nextSol);
 				prevSol = nextSol;
@@ -478,11 +584,13 @@ namespace lss_one_dim_heat_equation_solvers {
 			}
 		}
 		else {
+			// wrap the scheme coefficients:
+			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, T{});
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeMod(scheme);
 			// loop for stepping in time:
 			while (time <= lastTime) {
-				schemeFun(lambda, T{}, prevSol, rhs);
+				schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(), Container<T, Alloc>(), rhs);
 				fdmSolver_.setRhs(rhs);
 				fdmSolver_.solve(nextSol);
 				prevSol = nextSol;
@@ -495,14 +603,14 @@ namespace lss_one_dim_heat_equation_solvers {
 
 
 	// ==============================================================================================================
-	// ========================== Explicit1DHeatEquation (Dirichlet) implementation =================================
+	// ========================== Explicit1DGeneralHeatEquation (Dirichlet) implementation ==========================
 	// ==============================================================================================================
 
 	
 	template<typename T,
 			template<typename, typename> typename Container,
 			typename Alloc>
-		void explicit_solvers::Explicit1DHeatEquation<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
+		void explicit_solvers::Explicit1DGeneralHeatEquation<T, BoundaryConditionType::Dirichlet, Container, Alloc>::
 		solve(Container<T, Alloc> &solution, ExplicitPDESchemes scheme) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
@@ -519,34 +627,36 @@ namespace lss_one_dim_heat_equation_solvers {
 		// get the correct scheme:
 		if (scheme == ExplicitPDESchemes::Euler) {
 			ExplicitHeatEulerScheme<T> euler{ spacer_.lower(),terminalT_,
-											std::make_pair(k,h),std::make_tuple(diffusivity_,0.0,0.0),
-											initCondition,source_,isSourceSet_ };
+											std::make_pair(k,h),
+											coeffs_,initCondition,
+											source_,isSourceSet_ };
 			euler(boundary_, solution);
 		}
 		else if(scheme == ExplicitPDESchemes::ADEBarakatClark) {
-
 			ADEHeatBakaratClarkScheme<T> adebc{ spacer_.lower(),terminalT_,
-												std::make_pair(k,h),std::make_tuple(diffusivity_,0.0,0.0),
-												initCondition,source_,isSourceSet_ };
+												std::make_pair(k,h),
+												coeffs_,initCondition,
+												source_,isSourceSet_ };
 			adebc(boundary_, solution);
 		}
 		else {
-			ADEHeatBakaratClarkScheme<T> ades{ spacer_.lower(),terminalT_,
-												std::make_pair(k,h),std::make_tuple(diffusivity_,0.0,0.0),
-												initCondition,source_,isSourceSet_ };
+			ADEHeatSaulyevScheme<T> ades{ spacer_.lower(),terminalT_,
+											std::make_pair(k,h),
+											coeffs_,initCondition,
+											source_,isSourceSet_ };
 			ades(boundary_, solution);
 		}
 	}
 
 
 	// ==============================================================================================================
-	// ========================== Explicit1DHeatEquation (Robin) implementation =================================
+	// ========================== Explicit1DGeneralHeatEquation (Robin) implementation ==============================
 	// ==============================================================================================================
 
 	template<typename T,
 			template<typename, typename> typename Container,
 			typename Alloc>
-		void explicit_solvers::Explicit1DHeatEquation<T, BoundaryConditionType::Robin, Container, Alloc>::
+		void explicit_solvers::Explicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, Container, Alloc>::
 		solve(Container<T, Alloc> &solution) {
 
 		LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized.");
@@ -563,8 +673,9 @@ namespace lss_one_dim_heat_equation_solvers {
 		// get the correct scheme:
 		// Here we have only ExplicitEulerScheme available
 		ExplicitHeatEulerScheme<T> euler{ spacer_.lower(),terminalT_,
-										std::make_pair(k,h),std::make_tuple(diffusivity_,0.0,0.0),
-										initCondition,source_,isSourceSet_ };
+										std::make_pair(k,h),
+										coeffs_,initCondition,
+										source_,isSourceSet_ };
 		euler(left_, right_, solution);
 		
 	}
@@ -576,4 +687,4 @@ namespace lss_one_dim_heat_equation_solvers {
 
 
 
-#endif //_LSS_ONE_DIM_HEAT_EQUATION_SOLVERS
+#endif //_LSS_ONE_DIM_GENERAL_HEAT_EQUATION_SOLVERS

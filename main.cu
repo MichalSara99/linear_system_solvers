@@ -4,9 +4,11 @@
 #include"unit_tests/lss_sparse_solvers_cuda_t.h"
 #include"unit_tests/lss_dense_solvers_cuda_t.h"
 #include"unit_tests/lss_fdm_tridiagonal_solvers_t.h"
-#include"unit_tests/lss_one_dim_heat_equation_solvers_t.h"
+#include"unit_tests/lss_one_dim_pure_heat_equation_t.h"
+#include"unit_tests/lss_one_dim_advection_diffusion_equation_t.h"
+
+
 #include"unit_tests/lss_one_dim_heat_equation_solvers_cuda_t.h"
-#include"unit_tests/lss_one_dim_advection_diffusion_equation_solvers_t.h"
 #include"unit_tests/lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h"
 
 
@@ -55,27 +57,6 @@ int main(int argc, char const* argv[]) {
 
 	// ====================================================================
 
-	// ====================================================================
-	// ================ lss_one_dim_heat_equation_solvers_t.h =============
-	// ====================================================================
-
-		 testImplHeatEquationDirichletBCDoubleSweep();
-		// testImplHeatEquationSourceDirichletBCDoubleSweep();
-		// testImplHeatEquationSourceDirichletBCThomasLU();
-		// testImplHeatEquationRobinBCDoubleSweep();
-		// testImplHeatEquationDirichletBCThomasLU();
-		// testImplHeatEquationRobinBCThomasLU();
-		// testImplHeatEquationSourceRobinBCDoubleSweep();
-		// testImplHeatEquationSourceRobinBCThomasLU();
-		// testExplHeatEquationDirichletBC();
-		// testExplHeatEquationSourceDirichletBC();
-		// testImplNonHomHeatEquationDirichletBCDoubleSweep();
-		// testImplNonHomHeatEquationDirichletBCThomasLU();
-		// testExplNonHomHeatEquationDirichletBC();
-		// testExplHomHeatEquationRobinBC();
-		// testExplHomHeatEquationSourceRobinBC();
-
-	// ====================================================================
 
 	// ====================================================================
 	// =========== lss_one_dim_heat_equation_solvers_cuda_t.h =============
@@ -96,20 +77,6 @@ int main(int argc, char const* argv[]) {
 
 	// ====================================================================
 
-	// ====================================================================
-	// ======== lss_one_dim_advection_diffusion_equation_solvers_t.h ======
-	// ====================================================================
-	
-		// testImplAdvectionDiffEquationDirichletBCDoubleSweep();
-		// testExplAdvectionDiffEquationDirichletBC();
-		// testImplAdvectionDiffEquationRobinBCDoubleSweep();
-		// testImplAdvectionDiffEquationRobinBCThomasLU();
-		// testExplAdvectionDiffEquationRobinBC();
-		// testImplAdvectionDiffEquationSourceDirichletBCDoubleSweep();
-		// testImplAdvectionDiffEquationSourceDirichletBCThomasLU();
-		// testExplAdvectionDiffEquationSourceDirichletBC();
-
-	// ====================================================================
 
 	// ====================================================================
 	// ==== lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h =====
@@ -122,6 +89,44 @@ int main(int argc, char const* argv[]) {
 
 	// ====================================================================
 
+	// ====================================================================
+	// ================ lss_one_dim_pure_heat_equation_t.h ================
+	// ====================================================================
+
+		// testImplPureHeatEquationDirichletBCDoubleSweep();
+		// testImplPureHeatEquationDirichletBCThomasLU();
+		// testImplPureHeatEquationRobinBCDoubleSweep();
+		// testImplPureHeatEquationRobinBCThomasLU();
+		// testImplPureHeatEquationSourceDirichletBCDoubleSweep();
+		// testImplPureHeatEquationSourceDirichletBCThomasLU();
+		// testImplPureHeatEquationSourceRobinBCDoubleSweep();
+		// testImplPureHeatEquationSourceRobinBCThomasLU();
+		// testImplNonHomPureHeatEquationDirichletBCDoubleSweep();
+		// testImplNonHomPureHeatEquationDirichletBCThomasLU();
+
+		// testExplPureHeatEquationDirichletBC();
+		// testExplPureHeatEquationSourceDirichletBC();
+		// testExplNonHomPureHeatEquationDirichletBC();
+		// testExplHomPureHeatEquationRobinBC();
+		// testExplHomPureHeatEquationSourceRobinBC();
+
+	// ====================================================================
+
+	// ====================================================================
+	// ========== lss_one_dim_advection_diffusion_equation_t.h ============
+	// ====================================================================
+
+		// testImplAdvDiffEquationDirichletBCDoubleSweep();
+		// testImplAdvDiffEquationSourceDirichletBCDoubleSweep();
+		// testImplAdvDiffEquationSourceDirichletBCThomasLU();
+		// testImplAdvDiffEquationRobinBCDoubleSweep();
+		// testImplAdvDiffEquationRobinBCThomasLU();
+
+		// testExplAdvDiffEquationDirichletBC();
+		// testExplAdvDiffEquationSourceDirichletBC();
+		// testExplAdvDiffEquationRobinBC();
+
+	// ====================================================================
 
 
     std::cout << "\n\n";

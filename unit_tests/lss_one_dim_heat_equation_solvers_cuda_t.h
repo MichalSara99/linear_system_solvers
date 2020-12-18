@@ -3773,7 +3773,7 @@ void testExplHomHeatEquationSourceFloatRobinBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_heat_equation_solvers_cuda::explicit_solvers::Explicit1DHeatEquationCUDA;
 
 
 	std::cout << "==============================================================================\n";
@@ -3787,8 +3787,8 @@ void testExplHomHeatEquationSourceFloatRobinBCEuler() {
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<float,
+	// typedef the Explicit1DHeatEquationCUDA
+	typedef Explicit1DHeatEquationCUDA<float,
 		BoundaryConditionType::Robin,
 		std::vector,
 		std::allocator<float>> explicit_solver;
@@ -3867,7 +3867,7 @@ void testExplHomHeatEquationSourceDoubleRobinBCEuler() {
 
 	using lss_utility::Range;
 	using lss_types::BoundaryConditionType;
-	using lss_one_dim_heat_equation_solvers::explicit_solvers::Explicit1DHeatEquation;
+	using lss_one_dim_heat_equation_solvers_cuda::explicit_solvers::Explicit1DHeatEquationCUDA;
 
 
 	std::cout << "==============================================================================\n";
@@ -3881,8 +3881,8 @@ void testExplHomHeatEquationSourceDoubleRobinBCEuler() {
 	std::cout << " U(x,0) = x, x in <0,1> \n\n";
 	std::cout << "===============================================================================\n";
 
-	// typedef the Implicit1DHeatEquation
-	typedef Explicit1DHeatEquation<double,
+	// typedef the Explicit1DHeatEquationCUDA
+	typedef Explicit1DHeatEquationCUDA<double,
 		BoundaryConditionType::Robin,
 		std::vector,
 		std::allocator<double>> explicit_solver;

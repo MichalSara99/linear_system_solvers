@@ -63,13 +63,7 @@
     <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_solvers_t.h">
-      <Filter>unit_tests</Filter>
-    </ClInclude>
     <ClInclude Include="unit_tests\lss_one_dim_heat_equation_solvers_cuda_t.h">
-      <Filter>unit_tests</Filter>
-    </ClInclude>
-    <ClInclude Include="unit_tests\lss_one_dim_heat_equation_solvers_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
     <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h">
@@ -113,6 +107,15 @@
     </ClInclude>
     <ClInclude Include="common\lss_utility.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_general_heat_equation_solvers.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\lss_one_dim_pure_heat_equation_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_t.h">
+      <Filter>unit_tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
