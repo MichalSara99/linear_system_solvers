@@ -480,7 +480,7 @@ namespace lss_one_dim_general_heat_equation_solvers {
 			// wrap the scheme coefficients:
 			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, k);
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomSchemeMod(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomScheme(scheme);
 			// create a container to carry discretized source heat
 			Container<T, Alloc> sourceCurr(spaceN_ + 1, T{});
 			Container<T, Alloc> sourceNext(spaceN_ + 1, T{});
@@ -501,7 +501,7 @@ namespace lss_one_dim_general_heat_equation_solvers {
 			// wrap the scheme coefficients:
 			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, T{});
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeMod(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
 			// loop for stepping in time:
 			while (time <= lastTime) {
 				schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(), Container<T, Alloc>(), rhs);
@@ -566,7 +566,7 @@ namespace lss_one_dim_general_heat_equation_solvers {
 			// wrap the scheme coefficients:
 			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, k);
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomSchemeMod(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getInhomScheme(scheme);
 			// create a container to carry discretized source heat
 			Container<T, Alloc> sourceCurr(spaceN_ + 1, T{});
 			Container<T, Alloc> sourceNext(spaceN_ + 1, T{});
@@ -587,7 +587,7 @@ namespace lss_one_dim_general_heat_equation_solvers {
 			// wrap the scheme coefficients:
 			const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, T{});
 			// get the correct scheme:
-			auto schemeFun = ImplicitHeatEquationSchemes<T>::getSchemeMod(scheme);
+			auto schemeFun = ImplicitHeatEquationSchemes<T>::getScheme(scheme);
 			// loop for stepping in time:
 			while (time <= lastTime) {
 				schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(), Container<T, Alloc>(), rhs);

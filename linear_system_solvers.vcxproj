@@ -89,11 +89,8 @@
     <ClInclude Include="dense_solvers\lss_dense_solvers.h" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.h" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_policy.h" />
-    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_advection_diffusion_equation_solvers.h" />
-    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_advection_diffusion_equation_solvers_cuda.h" />
     <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_general_heat_equation_solvers.h" />
-    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_equation_solvers.h" />
-    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_equation_solvers_cuda.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_general_heat_equation_solvers_cuda.h" />
     <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes.h" />
     <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes_cuda.h" />
     <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_solvers.h" />
@@ -107,10 +104,10 @@
     <ClInclude Include="sparse_solvers\lss_sparse_solvers_policy.h" />
     <ClInclude Include="unit_tests\lss_dense_solvers_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_fdm_tridiagonal_solvers_t.h" />
-    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_solvers_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_pure_heat_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_pure_heat_equation_t.h" />
-    <ClInclude Include="unit_tests\lss_one_dim_heat_equation_solvers_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h" />
   </ItemGroup>
   <ItemGroup>

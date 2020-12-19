@@ -26,12 +26,21 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 		unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
 		unsigned int const blocksPerGrid = (size + threadsPerBlock - 1) / threadsPerBlock;
+		// unpack the deltas and PDE coefficients:
+		float const k = std::get<0>(deltas_);
+		float const h = std::get<1>(deltas_);
+		float const A = std::get<0>(coeffs_);
+		float const B = std::get<1>(coeffs_);
+		float const C = std::get<2>(coeffs_);
+		// calculate scheme coefficients:
+		float const lambda = (A*k) / (h*h);
+		float const gamma = (B*k)/(2.0f*h);
+		float const delta = (C*k);
+		// store bc:
+		float const left = boundaryPair.first;
+		float const right = boundaryPair.second;
 
-		float time = timeStep_;
-		float k = timeStep_;
-		float h = spaceStep_;
-		float left = boundaryPair.first;
-		float right = boundaryPair.second;
+		float time = k;
 
 		if (isSourceSet_) {
 			// prepare a pointer for source on device:
@@ -48,7 +57,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 				cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
 					cudaMemcpyKind::cudaMemcpyHostToDevice);
 				// populate new solution in d_next:
-				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> > (d_prev, d_next, d_source, lambda_, gamma_, k, size);
+				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> > (d_prev, d_next, d_source, lambda, gamma, delta, k, size);
 				// fill in the dirichlet boundaries in d_next:
 				fillDirichletBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
 				// swap the two pointers:
@@ -62,7 +71,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 			// source is zero:
 			while (time <= terminalT_) {
 				// populate new solution in d_next:
-				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_, gamma_, size);
+				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda, gamma, delta, size);
 				// fill in the dirichlet boundaries in d_next:
 				fillDirichletBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
 				// swap the two pointers:
@@ -92,12 +101,21 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 		unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
 		unsigned int const blocksPerGrid = (size + threadsPerBlock - 1) / threadsPerBlock;
+		// unpack the deltas and PDE coefficients:
+		double const k = std::get<0>(deltas_);
+		double const h = std::get<1>(deltas_);
+		double const A = std::get<0>(coeffs_);
+		double const B = std::get<1>(coeffs_);
+		double const C = std::get<2>(coeffs_);
+		// calculate scheme coefficients:
+		double const lambda = (A*k) / (h*h);
+		double const gamma = (B*k) / (2.0f*h);
+		double const delta = (C*k);
+		// store bc:
+		double const left = boundaryPair.first;
+		double const right = boundaryPair.second;
 
-		double time = timeStep_;
-		double k = timeStep_;
-		double h = spaceStep_;
-		double left = boundaryPair.first;
-		double right = boundaryPair.second;
+		double time = k;
 
 		if (isSourceSet_) {
 			// prepare a pointer for source on device:
@@ -114,7 +132,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 				cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
 					cudaMemcpyKind::cudaMemcpyHostToDevice);
 				// populate new solution in d_next:
-				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, d_source, lambda_, gamma_, k, size);
+				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, d_source, lambda, gamma, delta, k, size);
 				// fill in the dirichlet boundaries in d_next:
 				fillDirichletBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
 				// swap the two pointers:
@@ -127,7 +145,7 @@ namespace lss_one_dim_pde_schemes_cuda {
 		else {
 			while (time <= terminalT_) {
 				// populate new solution in d_next:
-				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_, gamma_, size);
+				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda, gamma, delta, size);
 				// fill in the dirichlet boundaries in d_next:
 				fillDirichletBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, left, right, size);
 				// swap the two pointers:
@@ -160,14 +178,23 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 		unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
 		unsigned int const blocksPerGrid = (size + threadsPerBlock - 1) / threadsPerBlock;
+		// unpack the deltas and PDE coefficients:
+		float const k = std::get<0>(deltas_);
+		float const h = std::get<1>(deltas_);
+		float const A = std::get<0>(coeffs_);
+		float const B = std::get<1>(coeffs_);
+		float const C = std::get<2>(coeffs_);
+		// calculate scheme coefficients:
+		float const lambda = (A*k) / (h*h);
+		float const gamma = (B*k) / (2.0f*h);
+		float const delta = (C*k);
+		// store bc:
+		float const leftLinear = leftPair.first;
+		float const leftConst = leftPair.second;
+		float const rightLinear = rightPair.first;
+		float const rightConst = rightPair.second;
 
-		float time = timeStep_;
-		float k = timeStep_;
-		float h = spaceStep_;
-		float leftLinear = leftPair.first;
-		float leftConst = leftPair.second;
-		float rightLinear = rightPair.first;
-		float rightConst = rightPair.second;
+		float time = k;
 
 		if (isSourceSet_) {
 			// prepare a pointer for source on device:
@@ -184,9 +211,13 @@ namespace lss_one_dim_pde_schemes_cuda {
 				cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
 					cudaMemcpyKind::cudaMemcpyHostToDevice);
 				// populate new solution in d_next:
-				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, d_source, lambda_, gamma_, k, size);
+				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, d_source,
+																						lambda, gamma, delta, k, size);
 				// fill in the dirichlet boundaries in d_next:
-				fillRobinBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, lambda_, gamma_, leftLinear, leftConst, rightLinear, rightConst, size);
+				fillRobinBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, h_source.front(), h_source.back(),
+																				lambda, gamma, delta,k,
+																				leftLinear, leftConst,
+																				rightLinear,rightConst, size);
 				// swap the two pointers:
 				swap(d_prev, d_next);
 				time += k;
@@ -197,9 +228,12 @@ namespace lss_one_dim_pde_schemes_cuda {
 		else {
 			while (time <= terminalT_) {
 				// populate new solution in d_next:
-				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_, gamma_, size);
+				explicitEulerIterate1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next,
+																						lambda, gamma, delta, size);
 				// fill in the dirichlet boundaries in d_next:
-				fillRobinBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, lambda_, gamma_, leftLinear, leftConst, rightLinear, rightConst, size);
+				fillRobinBC1D<float> << <threadsPerBlock, blocksPerGrid >> >(d_next, lambda, gamma, delta,
+																			leftLinear, leftConst,
+																			rightLinear, rightConst, size);
 				// swap the two pointers:
 				swap(d_prev, d_next);
 				time += k;
@@ -228,14 +262,23 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 		unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
 		unsigned int const blocksPerGrid = (size + threadsPerBlock - 1) / threadsPerBlock;
+		// unpack the deltas and PDE coefficients:
+		double const k = std::get<0>(deltas_);
+		double const h = std::get<1>(deltas_);
+		double const A = std::get<0>(coeffs_);
+		double const B = std::get<1>(coeffs_);
+		double const C = std::get<2>(coeffs_);
+		// calculate scheme coefficients:
+		double const lambda = (A*k) / (h*h);
+		double const gamma = (B*k) / (2.0f*h);
+		double const delta = (C*k);
+		// store bc:
+		double const leftLinear = leftPair.first;
+		double const leftConst = leftPair.second;
+		double const rightLinear = rightPair.first;
+		double const rightConst = rightPair.second;
 
-		double time = timeStep_;
-		double k = timeStep_;
-		double h = spaceStep_;
-		double leftLinear = leftPair.first;
-		double leftConst = leftPair.second;
-		double rightLinear = rightPair.first;
-		double rightConst = rightPair.second;
+		double time = k;
 
 		if (isSourceSet_) {
 			// prepare a pointer for source on device:
@@ -252,9 +295,13 @@ namespace lss_one_dim_pde_schemes_cuda {
 				cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
 					cudaMemcpyKind::cudaMemcpyHostToDevice);
 				// populate new solution in d_next:
-				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, d_source, lambda_, gamma_, k, size);
+				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, d_source,
+																						lambda, gamma, delta, k, size);
 				// fill in the dirichlet boundaries in d_next:
-				fillRobinBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, lambda_, gamma_, leftLinear, leftConst, rightLinear, rightConst, size);
+				fillRobinBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, h_source.front(), h_source.back(),
+																			lambda, gamma, delta,k,
+																			leftLinear, leftConst,
+																			rightLinear, rightConst, size);
 				// swap the two pointers:
 				swap(d_prev, d_next);
 				time += k;
@@ -265,9 +312,12 @@ namespace lss_one_dim_pde_schemes_cuda {
 		else {
 			while (time <= terminalT_) {
 				// populate new solution in d_next:
-				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, lambda_, gamma_, size);
+				explicitEulerIterate1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_prev, d_next, 
+																						lambda, gamma, delta, size);
 				// fill in the dirichlet boundaries in d_next:
-				fillRobinBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, lambda_, gamma_, leftLinear, leftConst, rightLinear, rightConst, size);
+				fillRobinBC1D<double> << <threadsPerBlock, blocksPerGrid >> >(d_next, lambda, gamma, delta, 
+																				leftLinear, leftConst,
+																				rightLinear, rightConst, size);
 				// swap the two pointers:
 				swap(d_prev, d_next);
 				time += k;
