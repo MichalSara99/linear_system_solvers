@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_PDE_SCHEMES)
-#define _LSS_ONE_DIM_PDE_SCHEMES
+#if !defined(_LSS_ONE_DIM_HEAT_SCHEMES)
+#define _LSS_ONE_DIM_HEAT_SCHEMES
 
 #pragma warning( disable : 4244 )
 
@@ -8,7 +8,7 @@
 #include"common/lss_types.h"
 #include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
-namespace lss_one_dim_pde_schemes {
+namespace lss_one_dim_heat_schemes {
 
 	using lss_types::ImplicitPDESchemes;
 	using lss_types::ExplicitPDESchemes;
@@ -469,7 +469,7 @@ namespace lss_one_dim_pde_schemes {
 // ====================================== IMPLEMENTATIONS =======================================================
 
 template<typename T>
-bool lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::isStable()const {
+bool lss_one_dim_heat_schemes::ExplicitHeatEulerScheme<T>::isStable()const {
 	T const A = std::get<0>(coeffs_);
 	T const B = std::get<1>(coeffs_);
 	T const k = std::get<0>(deltas_);
@@ -479,7 +479,7 @@ bool lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::isStable()const {
 }
 
 template<typename T>
-void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair, 
+void lss_one_dim_heat_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
 																	std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
 		"The input solution container must be initialized.");
@@ -546,7 +546,7 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 }
 
 template<typename T>
-void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
+void lss_one_dim_heat_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
 																	std::pair<T, T> const &rightRobinBCPair,
 																	std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
@@ -624,7 +624,7 @@ void lss_one_dim_pde_schemes::ExplicitHeatEulerScheme<T>::operator()(std::pair<T
 
 
 template<typename T>
-void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
+void lss_one_dim_heat_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
 																		std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
 		"The input solution container must be initialized.");
@@ -713,7 +713,7 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 }
 
 template<typename T>
-void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
+void lss_one_dim_heat_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
 																		std::pair<T,T> const &rightRobinBCPair,
 																		std::vector<T> &solution)const {
 	throw new std::exception("Not available.");
@@ -721,7 +721,7 @@ void lss_one_dim_pde_schemes::ADEHeatBakaratClarkScheme<T>::operator()(std::pair
 
 
 template<typename T>
-void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
+void lss_one_dim_heat_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T> const &dirichletBCPair,
 																std::vector<T> &solution)const {
 	LSS_ASSERT(solution.size() > 0,
 		"The input solution container must be initialized.");
@@ -807,11 +807,11 @@ void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T
 }
 
 template<typename T>
-void lss_one_dim_pde_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
+void lss_one_dim_heat_schemes::ADEHeatSaulyevScheme<T>::operator()(std::pair<T, T> const &leftRobinBCPair,
 																std::pair<T,T> const &rightRobinBCPair,	
 																std::vector<T> &solution)const {
 	throw new std::exception("Not available.");
 }
 
 
-#endif //_LSS_ONE_DIM_PDE_SCHEMES
+#endif //_LSS_ONE_DIM_HEAT_SCHEMES

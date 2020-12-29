@@ -6,22 +6,22 @@
 #include"common/lss_types.h"
 #include"common/lss_utility.h"
 #include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
-#include"pde_solvers/one_dim/lss_one_dim_pde_schemes.h"
-#include"pde_solvers/one_dim/lss_one_dim_pde_schemes_cuda.h"
+#include"lss_one_dim_heat_schemes.h"
+#include"lss_one_dim_heat_schemes_cuda.h"
 #include"sparse_solvers/lss_sparse_solvers_cuda.h"
 
 
 namespace lss_one_dim_general_heat_equation_solvers_cuda {
 
 	using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-	using lss_one_dim_pde_schemes::ImplicitHeatEquationSchemes;
+	using lss_one_dim_heat_schemes::ImplicitHeatEquationSchemes;
 	using lss_types::BoundaryConditionType;
 	using lss_types::MemorySpace;
 	using lss_types::ImplicitPDESchemes;
 	using lss_utility::Range;
 	using lss_utility::FlatMatrix;
 	using lss_one_dim_pde_utility::Discretization;
-	using lss_one_dim_pde_schemes_cuda::ExplicitEulerHeatEquationScheme;
+	using lss_one_dim_heat_schemes_cuda::ExplicitEulerHeatEquationScheme;
 
 	namespace implicit_solvers {
 

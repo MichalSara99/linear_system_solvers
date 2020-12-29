@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_PDE_CUDA_KERNELS)
-#define _LSS_PDE_CUDA_KERNELS
+#if !defined(_LSS_ONE_DIM_HEAT_CUDA_KERNELS)
+#define _LSS_ONE_DIM_HEAT_CUDA_KERNELS
 
 #include<device_launch_parameters.h>
 
@@ -8,7 +8,7 @@
 
 
 
-namespace lss_pde_cuda_kernels {
+namespace lss_one_dim_heat_cuda_kernels {
 
 
 	template<typename T>
@@ -93,4 +93,4 @@ namespace lss_pde_cuda_kernels {
 }
 
 
-#endif ///_LSS_PDE_CUDA_KERNELS
+#endif ///_LSS_ONE_DIM_HEAT_CUDA_KERNELS

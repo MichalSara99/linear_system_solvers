@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_PDE_SCHEMES_CUDA)
-#define _LSS_ONE_DIM_PDE_SCHEMES_CUDA
+#if !defined(_LSS_ONE_DIM_HEAT_SCHEMES_CUDA)
+#define _LSS_ONE_DIM_HEAT_SCHEMES_CUDA
 
 
 #include<tuple>
@@ -8,7 +8,7 @@
 #include"common/lss_utility.h"
 #include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
-namespace lss_one_dim_pde_schemes_cuda {
+namespace lss_one_dim_heat_schemes_cuda {
 
 	using lss_one_dim_pde_utility::Discretization;
 
@@ -285,4 +285,4 @@ namespace lss_one_dim_pde_schemes_cuda {
 
 }
 
-#endif ///_LSS_ONE_DIM_PDE_SCHEMES_CUDA
+#endif ///_LSS_ONE_DIM_HEAT_SCHEMES_CUDA

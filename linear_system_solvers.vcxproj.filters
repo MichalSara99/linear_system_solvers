@@ -66,16 +66,7 @@
     <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_solvers.h">
       <Filter>pde_solvers\one_dim</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes.h">
-      <Filter>pde_solvers\one_dim</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_schemes_cuda.h">
-      <Filter>pde_solvers\one_dim</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_utility.h">
-      <Filter>pde_solvers\one_dim</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dim\lss_pde_cuda_kernels.h">
       <Filter>pde_solvers\one_dim</Filter>
     </ClInclude>
     <ClInclude Include="common\lss_helpers.h">
@@ -108,11 +99,26 @@
     <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_general_heat_equation_solvers.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_schemes.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_schemes_cuda.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_cuda_kernels.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_schemes.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
-    <CudaCompile Include="pde_solvers\one_dim\lss_one_dim_pde_schemes_cuda.cu">
-      <Filter>pde_solvers\one_dim</Filter>
+    <CudaCompile Include="pde_solvers\one_dim\classic\lss_one_dim_heat_schemes_cuda.cu">
+      <Filter>pde_solvers\one_dim\classic</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

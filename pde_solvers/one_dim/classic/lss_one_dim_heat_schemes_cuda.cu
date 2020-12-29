@@ -1,15 +1,15 @@
 #include<device_launch_parameters.h>
-#include"lss_pde_cuda_kernels.h"
-#include<pde_solvers/one_dim/lss_one_dim_pde_schemes_cuda.h>
+#include"lss_one_dim_heat_cuda_kernels.h"
+#include"lss_one_dim_heat_schemes_cuda.h"
 
 
 
 
-namespace lss_one_dim_pde_schemes_cuda {
+namespace lss_one_dim_heat_schemes_cuda {
 
-	using lss_pde_cuda_kernels::explicitEulerIterate1D;
-	using lss_pde_cuda_kernels::fillDirichletBC1D;
-	using lss_pde_cuda_kernels::fillRobinBC1D;
+	using lss_one_dim_heat_cuda_kernels::explicitEulerIterate1D;
+	using lss_one_dim_heat_cuda_kernels::fillDirichletBC1D;
+	using lss_one_dim_heat_cuda_kernels::fillRobinBC1D;
 	using lss_utility::swap;
 
 	void ExplicitEulerLoopSP::operator()(float const *input, std::pair<float, float> const &boundaryPair,
