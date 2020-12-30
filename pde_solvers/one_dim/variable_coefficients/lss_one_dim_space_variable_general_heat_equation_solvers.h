@@ -7,7 +7,8 @@
 #include"common/lss_utility.h"
 #include"common/lss_macros.h"
 #include"pde_solvers/one_dim/lss_one_dim_pde_utility.h"
-#include"lss_one_dim_space_variable_heat_schemes.h"
+#include"lss_one_dim_space_variable_heat_implicit_schemes.h"
+#include"lss_one_dim_space_variable_heat_explicit_schemes.h"
 
 
 namespace lss_one_dim_space_variable_general_heat_equation_solvers {
@@ -15,10 +16,10 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 	using lss_types::BoundaryConditionType;
 	using lss_types::ImplicitPDESchemes;
 	using lss_types::ExplicitPDESchemes;
-	using lss_one_dim_space_variable_heat_schemes::ImplicitSpaceVariableHeatEquationSchemes;
-	using lss_one_dim_space_variable_heat_schemes::ExplicitHeatEulerScheme;
-	using lss_one_dim_space_variable_heat_schemes::ADEHeatBakaratClarkScheme;
-	using lss_one_dim_space_variable_heat_schemes::ADEHeatSaulyevScheme;
+	using lss_one_dim_space_variable_heat_implicit_schemes::ImplicitSpaceVariableHeatEquationSchemes;
+	using lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme;
+	using lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatBakaratClarkScheme;
+	using lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme;
 	using lss_utility::Range;
 	using lss_one_dim_pde_utility::Discretization;
 
@@ -460,10 +461,11 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		// calculate scheme const coefficients:
 		T const lambda = k / (h*h);
 		T const gamma = k / (2.0*h);
+		T const delta = 0.5*k;
 		// save scheme variable coefficients:
-		auto const a& = std::get<0>(coeffs_);
-		auto const b& = std::get<1>(coeffs_);
-		auto const c& = std::get<2>(coeffs_);
+		auto const &a = std::get<0>(coeffs_);
+		auto const &b = std::get<1>(coeffs_);
+		auto const &c = std::get<2>(coeffs_);
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
@@ -476,11 +478,11 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		Container<T, Alloc> up(spaceN_ + 1, T{});
 		// prepare space variable coefficients:
 		auto const &A = [&](T x) {return (lambda*a(x) - gamma * b(x)); };
-		auto const &B = [&](T x) {return (2.0*lambda*a(x) - k * c(x)); };
+		auto const &B = [&](T x) {return (lambda*a(x) - delta * c(x)); };
 		auto const &D = [&](T x) {return (lambda*a(x) + gamma * b(x)); };
 		for (std::size_t t = 0; t < low.size(); ++t) {
 			low[t] = -1.0*A(t*h)*theta;
-			diag[t] = (1.0 + B(t*h) *theta);
+			diag[t] = (1.0 + 2.0*B(t*h) *theta);
 			up[t] = -1.0*D(t*h)*theta;
 		}
 		Container<T, Alloc> rhs(spaceN_ + 1, T{});
@@ -558,10 +560,11 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		// calculate scheme const coefficients:
 		T const lambda = k / (h*h);
 		T const gamma = k / (2.0*h);
+		T const delta = 0.5*k;
 		// save scheme variable coefficients:
-		auto const a& = std::get<0>(coeffs_);
-		auto const b& = std::get<1>(coeffs_);
-		auto const c& = std::get<2>(coeffs_);
+		auto const &a = std::get<0>(coeffs_);
+		auto const &b = std::get<1>(coeffs_);
+		auto const &c = std::get<2>(coeffs_);
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> prevSol(spaceN_ + 1, T{});
 		// populate the container with mesh in space
@@ -574,11 +577,11 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		Container<T, Alloc> up(spaceN_ + 1, T{});
 		// prepare space variable coefficients:
 		auto const &A = [&](T x) {return (lambda*a(x) - gamma * b(x)); };
-		auto const &B = [&](T x) {return (2.0*lambda*a(x) - k * c(x)); };
+		auto const &B = [&](T x) {return (lambda*a(x) - delta * c(x)); };
 		auto const &D = [&](T x) {return (lambda*a(x) + gamma * b(x)); };
 		for (std::size_t t = 0; t < low.size(); ++t) {
 			low[t] = -1.0*A(t*h)*theta;
-			diag[t] = (1.0 + B(t*h) *theta);
+			diag[t] = (1.0 + 2.0*B(t*h) *theta);
 			up[t] = -1.0*D(t*h)*theta;
 		}
 		Container<T, Alloc> rhs(spaceN_ + 1, T{});
@@ -647,6 +650,20 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
+		// calculate scheme const coefficients:
+		T const lambda = k / (h*h);
+		T const gamma = k / (2.0*h);
+		T const delta = 0.5*k;
+		// save scheme variable coefficients:
+		auto const &a = std::get<0>(coeffs_);
+		auto const &b = std::get<1>(coeffs_);
+		auto const &c = std::get<2>(coeffs_);
+		// prepare space variable coefficients:
+		auto const &A = [&](T x) {return (lambda*a(x) - gamma * b(x)); };
+		auto const &B = [&](T x) {return (lambda*a(x) - delta * c(x)); };
+		auto const &D = [&](T x) {return (lambda*a(x) + gamma * b(x)); };
+		// wrap up the scheme coefficients:
+		auto schemeCoeffs = std::make_tuple(A, B, D);
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> initCondition(spaceN_ + 1, T{});
 		// populate the container with mesh in space
@@ -657,21 +674,21 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		if (scheme == ExplicitPDESchemes::Euler) {
 			ExplicitHeatEulerScheme<T> euler{ spacer_.lower(),terminalT_,
 											std::make_pair(k,h),
-											coeffs_,initCondition,
-											source_,isSourceSet_ };
+											coeffs_,schemeCoeffs,
+											initCondition,source_,isSourceSet_ };
 			euler(boundary_, solution);
 		}
 		else if(scheme == ExplicitPDESchemes::ADEBarakatClark) {
 			ADEHeatBakaratClarkScheme<T> adebc{ spacer_.lower(),terminalT_,
 												std::make_pair(k,h),
-												coeffs_,initCondition,
+												schemeCoeffs,initCondition,
 												source_,isSourceSet_ };
 			adebc(boundary_, solution);
 		}
 		else {
 			ADEHeatSaulyevScheme<T> ades{ spacer_.lower(),terminalT_,
 											std::make_pair(k,h),
-											coeffs_,initCondition,
+											schemeCoeffs,initCondition,
 											source_,isSourceSet_ };
 			ades(boundary_, solution);
 		}
@@ -693,6 +710,20 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		T const h = spaceStep();
 		// get time step:
 		T const k = timeStep();
+		// calculate scheme const coefficients:
+		T const lambda = k / (h*h);
+		T const gamma = k / (2.0*h);
+		T const delta = 0.5*k;
+		// save scheme variable coefficients:
+		auto const &a = std::get<0>(coeffs_);
+		auto const &b = std::get<1>(coeffs_);
+		auto const &c = std::get<2>(coeffs_);
+		// prepare space variable coefficients:
+		auto const &A = [&](T x) {return (lambda*a(x) - gamma * b(x)); };
+		auto const &B = [&](T x) {return (lambda*a(x) - delta * c(x)); };
+		auto const &D = [&](T x) {return (lambda*a(x) + gamma * b(x)); };
+		// wrap up the scheme coefficients:
+		auto schemeCoeffs = std::make_tuple(A, B, D);
 		// create container to carry mesh in space and then previous solution:
 		Container<T, Alloc> initCondition(spaceN_ + 1, T{});
 		// populate the container with mesh in space
@@ -703,8 +734,8 @@ namespace lss_one_dim_space_variable_general_heat_equation_solvers {
 		// Here we have only ExplicitEulerScheme available
 		ExplicitHeatEulerScheme<T> euler{ spacer_.lower(),terminalT_,
 										std::make_pair(k,h),
-										coeffs_,initCondition,
-										source_,isSourceSet_ };
+										coeffs_,schemeCoeffs,
+										initCondition,source_,isSourceSet_ };
 		euler(left_, right_, solution);
 		
 	}

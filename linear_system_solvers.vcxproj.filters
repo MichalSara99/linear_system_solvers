@@ -111,8 +111,14 @@
     <ClInclude Include="pde_solvers\one_dim\classic\lss_one_dim_heat_cuda_kernels.h">
       <Filter>pde_solvers\one_dim\classic</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_schemes.h">
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_explicit_schemes.h">
       <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_implicit_schemes.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\lss_one_dim_base_explicit_schemes.h">
+      <Filter>pde_solvers\one_dim</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
