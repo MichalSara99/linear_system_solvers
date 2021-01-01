@@ -2,473 +2,462 @@
 #if !defined(_LSS_SPARSE_SPARSE_CUDA)
 #define _LSS_SPARSE_SPARSE_CUDA
 
-#pragma warning(disable: 4267)
-#pragma warning(disable: 4244)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4244)
 
-#include<type_traits>
+#include <cuda_runtime.h>
+#include <cusolverSp.h>
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
 
-#include<cuda_runtime.h>
-#include<cusolverSp.h>
+#include <type_traits>
 
-#include<thrust/host_vector.h>
-#include<thrust/device_vector.h>
-
-#include"common/lss_types.h"
-#include"common/lss_utility.h"
-#include"common/lss_helpers.h"
-#include"lss_sparse_solvers_policy.h"
+#include "common/lss_helpers.h"
+#include "common/lss_types.h"
+#include "common/lss_utility.h"
+#include "lss_sparse_solvers_policy.h"
 
 namespace lss_sparse_solvers_cuda {
 
-	using lss_types::MemorySpace;
-	using lss_types::FlatMatrixSort;
-	using lss_utility::FlatMatrix;
-	using lss_helpers::RealSparseSolverCUDAHelpers;
-	using lss_sparse_solvers_policy::SparseSolverDevice;
-	using lss_sparse_solvers_policy::SparseSolverDeviceCholesky;
-	using lss_sparse_solvers_policy::SparseSolverDeviceQR;
-	using lss_sparse_solvers_policy::SparseSolverHost;
-	using lss_sparse_solvers_policy::SparseSolverHostQR;
-	using lss_sparse_solvers_policy::SparseSolverHostLU;
-	using lss_sparse_solvers_policy::SparseSolverHostCholesky;
+using lss_helpers::RealSparseSolverCUDAHelpers;
+using lss_sparse_solvers_policy::SparseSolverDevice;
+using lss_sparse_solvers_policy::SparseSolverDeviceCholesky;
+using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+using lss_sparse_solvers_policy::SparseSolverHost;
+using lss_sparse_solvers_policy::SparseSolverHostCholesky;
+using lss_sparse_solvers_policy::SparseSolverHostLU;
+using lss_sparse_solvers_policy::SparseSolverHostQR;
+using lss_types::FlatMatrixSort;
+using lss_types::MemorySpace;
+using lss_utility::FlatMatrix;
 
+template <MemorySpace MemSpace, typename T>
+class RealSparseSolverCUDA {};
 
+// =============================================================================
+// ========== RealSparseSolverCUDA partial specialization for HOST =============
+// =============================================================================
 
-	template<MemorySpace MemSpace,
-			typename T>
-	class RealSparseSolverCUDA{};
+template <typename T>
+class RealSparseSolverCUDA<MemorySpace::Host, T> {
+ protected:
+  int systemSize_;
+  FlatMatrix<T> matrixElements_;
 
+  thrust::host_vector<T> h_matrixValues_;
+  thrust::host_vector<T> h_vectorValues_;  // of systemSize length
+  thrust::host_vector<int> h_columnIndices_;
+  thrust::host_vector<int> h_rowCounts_;  // of systemSize + 1 length
 
-	// ===============================================================================
-	// ========= RealSparseSolverCUDA partial specialization for HOST ================
-	// ===============================================================================
+  void buildCSR();
 
-	template<typename T>
-	class RealSparseSolverCUDA<MemorySpace::Host, T> {
-	protected:
-		int systemSize_;
-		FlatMatrix<T> matrixElements_;
+ public:
+  typedef T value_type;
+  explicit RealSparseSolverCUDA() : systemSize_{0} {}
+  virtual ~RealSparseSolverCUDA() {}
 
-		thrust::host_vector<T> h_matrixValues_;
-		thrust::host_vector<T> h_vectorValues_; // of systemSize length
-		thrust::host_vector<int> h_columnIndices_; 
-		thrust::host_vector<int> h_rowCounts_; // of systemSize + 1 length
+  RealSparseSolverCUDA(RealSparseSolverCUDA const&) = delete;
+  RealSparseSolverCUDA& operator=(RealSparseSolverCUDA const&) = delete;
+  RealSparseSolverCUDA(RealSparseSolverCUDA&&) = delete;
+  RealSparseSolverCUDA& operator=(RealSparseSolverCUDA&&) = delete;
 
-		void buildCSR();
+  void initialize(std::size_t systemSize);
 
-	public:
-		typedef T value_type;
-		explicit RealSparseSolverCUDA()
-			:systemSize_{ 0 } {}
-		virtual ~RealSparseSolverCUDA(){}
+  inline std::size_t nonZeroElements() const { return matrixElements_.size(); }
 
-		RealSparseSolverCUDA(RealSparseSolverCUDA const&) = delete;
-		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA const&) = delete;
-		RealSparseSolverCUDA(RealSparseSolverCUDA &&) = delete;
-		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA &&) = delete;
+  template <template <typename T, typename Alloc>
+            typename Container = std::vector,
+            typename Alloc = std::allocator<T>>
+  inline void setRhs(Container<T, Alloc> const& rhs) {
+    LSS_ASSERT(rhs.size() == systemSize_, " rhs has incorrect size");
+    thrust::copy(rhs.begin(), rhs.end(), h_vectorValues_.begin());
+  }
 
-		void initialize(std::size_t systemSize);
+  inline void setRhsValue(std::size_t idx, T value) {
+    LSS_ASSERT((idx < systemSize_), "idx is outside range");
+    h_vectorValues_[idx] = value;
+  }
 
-		inline std::size_t nonZeroElements()const { return matrixElements_.size(); }
+  inline void setFlatSparseMatrix(FlatMatrix<T> matrix) {
+    matrixElements_ = std::move(matrix);
+  }
 
-		template<template<typename T,typename Alloc> typename Container = std::vector,
-			typename Alloc = std::allocator<T>>
-		inline void setRhs(Container<T,Alloc> const &rhs) {
-			LSS_ASSERT(rhs.size() == systemSize_,
-				" rhs has incorrect size");
-			thrust::copy(rhs.begin(), rhs.end(), h_vectorValues_.begin());
-		}
+  inline void setFlatSparseMatrixValue(std::size_t rowIdx, std::size_t colIdx,
+                                       T value) {
+    matrixElements_.emplace_back(rowIdx, colIdx, value);
+  }
 
+  inline void setFlatSparseMatrixValue(
+      std::tuple<std::size_t, std::size_t, T> triplet) {
+    matrixElements_.emplace_back(std::move(triplet));
+  }
 
-		inline void setRhsValue(std::size_t idx, T value) {
-			LSS_ASSERT((idx < systemSize_), "idx is outside range");
-			h_vectorValues_[idx] = value;
-		}
+  template <
+      template <typename> typename SparseSolverHostPolicy = SparseSolverHostQR,
+      template <typename T, typename Alloc> typename Container = std::vector,
+      typename Alloc = std::allocator<T>,
+      typename = typename std::enable_if<std::is_base_of<
+          SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
+  void solve(Container<T, Alloc>& solution);
 
-		inline void setFlatSparseMatrix(FlatMatrix<T> matrix) {
-			matrixElements_ = std::move(matrix);
-		}
+  template <template <typename T>
+            typename SparseSolverHostPolicy = SparseSolverHostQR,
+            template <typename T, typename Alloc>
+            typename Container = std::vector,
+            typename Alloc = std::allocator<T>,
+            typename = typename std::enable_if<std::is_base_of<
+                SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
+  Container<T, Alloc> const solve();
+};
 
-		inline void setFlatSparseMatrixValue(std::size_t rowIdx, std::size_t colIdx, T value) {
-			matrixElements_.emplace_back(rowIdx, colIdx, value);
-		}
+// =============================================================================
+// ========== RealSparseSolverCUDA partial specialization for DEVICE ===========
+// =============================================================================
 
-		inline void setFlatSparseMatrixValue(std::tuple<std::size_t, std::size_t, T> triplet) {
-			matrixElements_.emplace_back(std::move(triplet));
-		}
+template <typename T>
+class RealSparseSolverCUDA<MemorySpace::Device, T> {
+ protected:
+  int systemSize_;
+  FlatMatrix<T> matrixElements_;
 
-		template<template<typename> typename SparseSolverHostPolicy = SparseSolverHostQR,
-			template<typename T,typename Alloc> typename Container = std::vector,
-			typename Alloc = std::allocator<T>,
-				typename  = typename std::enable_if<std::is_base_of<SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
-		void solve(Container<T,Alloc> &solution);
+  thrust::host_vector<T> h_matrixValues_;
+  thrust::host_vector<T> h_vectorValues_;  // of systemSize length
+  thrust::host_vector<int> h_columnIndices_;
+  thrust::host_vector<int> h_rowCounts_;  // of systemSize + 1 length
 
-		template<template<typename T> typename  SparseSolverHostPolicy = SparseSolverHostQR,
-			template<typename T,typename Alloc> typename Container = std::vector,
-			typename Alloc = std::allocator<T>,
-			typename = typename std::enable_if<std::is_base_of<SparseSolverHost<T>, SparseSolverHostPolicy<T>>::value>::type>
-		Container<T,Alloc> const solve();
+  void buildCSR();
 
-	};
+ public:
+  typedef T value_type;
+  explicit RealSparseSolverCUDA() : systemSize_{0} {}
+  virtual ~RealSparseSolverCUDA() {}
 
+  RealSparseSolverCUDA(RealSparseSolverCUDA const&) = delete;
+  RealSparseSolverCUDA& operator=(RealSparseSolverCUDA const&) = delete;
+  RealSparseSolverCUDA(RealSparseSolverCUDA&&) = delete;
+  RealSparseSolverCUDA& operator=(RealSparseSolverCUDA&&) = delete;
 
-	// ===============================================================================
-	// ========= RealSparseSolverCUDA partial specialization for DEVICE ==============
-	// ===============================================================================
+  void initialize(std::size_t systemSize);
 
-	template<typename T>
-	class RealSparseSolverCUDA<MemorySpace::Device, T> {
-	protected:
-		int systemSize_;
-		FlatMatrix<T> matrixElements_;
+  inline std::size_t nonZeroElements() const { return matrixElements_.size(); }
 
-		thrust::host_vector<T> h_matrixValues_;
-		thrust::host_vector<T> h_vectorValues_; // of systemSize length
-		thrust::host_vector<int> h_columnIndices_;
-		thrust::host_vector<int> h_rowCounts_; // of systemSize + 1 length
+  template <template <typename T, typename Alloc>
+            typename Container = std::vector,
+            typename Alloc = std::allocator<T>>
+  inline void setRhs(Container<T, Alloc> const& rhs) {
+    LSS_ASSERT(rhs.size() == systemSize_, " rhs has incorrect size");
+    thrust::copy(rhs.begin(), rhs.end(), h_vectorValues_.begin());
+  }
 
-		void buildCSR();
+  inline void setRhsValue(std::size_t idx, T value) {
+    LSS_ASSERT((idx < systemSize_), "idx is outside range");
+    h_vectorValues_[idx] = value;
+  }
 
-	public:
-		typedef T value_type;
-		explicit RealSparseSolverCUDA()
-			:systemSize_{0} {}
-		virtual ~RealSparseSolverCUDA() {}
+  inline void setFlatSparseMatrix(FlatMatrix<T> matrix) {
+    matrixElements_ = std::move(matrix);
+  }
 
-		RealSparseSolverCUDA(RealSparseSolverCUDA const&) = delete;
-		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA const&) = delete;
-		RealSparseSolverCUDA(RealSparseSolverCUDA &&) = delete;
-		RealSparseSolverCUDA& operator=(RealSparseSolverCUDA &&) = delete;
+  inline void setFlatSparseMatrixValue(std::size_t rowIdx, std::size_t colIdx,
+                                       T value) {
+    matrixElements_.emplace_back(rowIdx, colIdx, value);
+  }
 
-		void initialize(std::size_t systemSize);
+  inline void setFlatSparseMatrixValue(
+      std::tuple<std::size_t, std::size_t, T> triplet) {
+    matrixElements_.emplace_back(std::move(triplet));
+  }
 
-		inline std::size_t nonZeroElements()const { return matrixElements_.size(); }
+  template <
+      template <typename T>
+      typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
+      template <typename T, typename Alloc> typename Container = std::vector,
+      typename Alloc = std::allocator<T>,
+      typename = typename std::enable_if<std::is_base_of<
+          SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
+  void solve(Container<T, Alloc>& solution);
 
-		template<template<typename T, typename Alloc> typename Container = std::vector,
-			typename Alloc = std::allocator<T>>
-		inline void setRhs(Container<T,Alloc> const& rhs) {
-			LSS_ASSERT(rhs.size() == systemSize_,
-				" rhs has incorrect size");
-			thrust::copy(rhs.begin(), rhs.end(), h_vectorValues_.begin());
-		}
+  template <
+      template <typename T>
+      typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
+      template <typename T, typename Alloc> typename Container = std::vector,
+      typename Alloc = std::allocator<T>,
+      typename = typename std::enable_if<std::is_base_of<
+          SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
+  Container<T, Alloc> const solve();
+};
 
-		inline void setRhsValue(std::size_t idx, T value) {
-			LSS_ASSERT((idx < systemSize_), "idx is outside range");
-			h_vectorValues_[idx] = value;
-		}
+}  // namespace lss_sparse_solvers_cuda
 
-		inline void setFlatSparseMatrix(FlatMatrix<T> matrix) {
-			matrixElements_ = std::move(matrix);
-		}
+template <typename T>
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_types::MemorySpace::Host, T>::initialize(std::size_t systemSize) {
+  // set the size of the linear system:
+  systemSize_ = systemSize;
 
-		inline void setFlatSparseMatrixValue(std::size_t rowIdx, std::size_t colIdx, T value) {
-			matrixElements_.emplace_back(rowIdx, colIdx, value);
-		}
+  // clear the containers:
+  matrixElements_.clear();
+  h_matrixValues_.clear();
+  h_vectorValues_.clear();
+  h_columnIndices_.clear();
+  h_rowCounts_.clear();
 
-		inline void setFlatSparseMatrixValue(std::tuple<std::size_t, std::size_t, T> triplet) {
-			matrixElements_.emplace_back(std::move(triplet));
-		}
-
-		template<template<typename T> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
-			template<typename T,typename Alloc> typename Container = std::vector,
-			typename Alloc = std::allocator<T>,
-			typename =typename std::enable_if<std::is_base_of<SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
-		void solve(Container<T,Alloc> &solution);
-
-		template<
-			template<typename T> typename SparseSolverDevicePolicy = SparseSolverDeviceQR,
-			template<typename T,typename Alloc> typename Container = std::vector,
-			typename Alloc = std::allocator<T>,
-			typename = typename std::enable_if<std::is_base_of<SparseSolverDevice<T>, SparseSolverDevicePolicy<T>>::value>::type>
-		Container<T,Alloc> const solve();
-
-	};
-
+  // resize the containers to the correct size:
+  h_vectorValues_.resize(systemSize_);
+  h_rowCounts_.resize((systemSize_ + 1));
+  matrixElements_.setColumns(systemSize_);
+  matrixElements_.setRows(systemSize_);
 }
 
+template <typename T>
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_types::MemorySpace::Device, T>::initialize(std::size_t systemSize) {
+  // set the size of the linear system:
+  systemSize_ = systemSize;
 
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,T>::initialize(std::size_t systemSize) {
-	// set the size of the linear system:
-	systemSize_ = systemSize;
+  // clear the containers:
+  matrixElements_.clear();
+  h_matrixValues_.clear();
+  h_vectorValues_.clear();
+  h_columnIndices_.clear();
+  h_rowCounts_.clear();
 
-	// clear the containers:
-	matrixElements_.clear();
-	h_matrixValues_.clear();
-	h_vectorValues_.clear();
-	h_columnIndices_.clear();
-	h_rowCounts_.clear();
-
-	// resize the containers to the correct size:
-	h_vectorValues_.resize(systemSize_);
-	h_rowCounts_.resize((systemSize_ + 1));
-	matrixElements_.setColumns(systemSize_);
-	matrixElements_.setRows(systemSize_);
+  // resize the containers to the correct size:
+  h_vectorValues_.resize(systemSize_);
+  h_rowCounts_.resize((systemSize_ + 1));
+  matrixElements_.setColumns(systemSize_);
+  matrixElements_.setRows(systemSize_);
 }
 
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::initialize(std::size_t systemSize) {
-	// set the size of the linear system:
-	systemSize_ = systemSize;
+template <typename T>
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,
+                                                   T>::buildCSR() {
+  int const nonZeroSize = nonZeroElements();
 
-	// clear the containers:
-	matrixElements_.clear();
-	h_matrixValues_.clear();
-	h_vectorValues_.clear();
-	h_columnIndices_.clear();
-	h_rowCounts_.clear();
+  // CUDA sparse solver is row-major:
+  matrixElements_.sort(FlatMatrixSort::RowMajor);
 
-	// resize the containers to the correct size:
-	h_vectorValues_.resize(systemSize_);
-	h_rowCounts_.resize((systemSize_ + 1));
-	matrixElements_.setColumns(systemSize_);
-	matrixElements_.setRows(systemSize_);
+  h_columnIndices_.resize(nonZeroSize);
+  h_matrixValues_.resize(nonZeroSize);
+
+  int nElement{0};
+  int nRowElement{0};
+  int lastRow{0};
+  h_rowCounts_[nRowElement++] = nElement;
+
+  for (int i = 0; i < nonZeroSize; ++i) {
+    if (lastRow < std::get<0>(matrixElements_.at(i))) {
+      h_rowCounts_[nRowElement++] = i;
+      lastRow++;
+    }
+
+    h_columnIndices_[i] = std::get<1>(matrixElements_.at(i));
+    h_matrixValues_[i] = std::get<2>(matrixElements_.at(i));
+  }
+  h_rowCounts_[nRowElement] = nonZeroSize;
 }
 
+template <typename T>
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_types::MemorySpace::Device, T>::buildCSR() {
+  int const nonZeroSize = nonZeroElements();
 
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::buildCSR() {
+  // CUDA sparse solver is row-major:
+  matrixElements_.sort(FlatMatrixSort::RowMajor);
 
-	int const nonZeroSize = nonZeroElements();
+  h_columnIndices_.resize(nonZeroSize);
+  h_matrixValues_.resize(nonZeroSize);
 
-	// CUDA sparse solver is row-major:
-	matrixElements_.sort(FlatMatrixSort::RowMajor);
+  int nElement{0};
+  int nRowElement{0};
+  int lastRow{0};
+  h_rowCounts_[nRowElement++] = nElement;
 
-	h_columnIndices_.resize(nonZeroSize);
-	h_matrixValues_.resize(nonZeroSize);
+  for (std::size_t i = 0; i < nonZeroSize; ++i) {
+    if (lastRow < std::get<0>(matrixElements_.at(i))) {
+      h_rowCounts_[nRowElement++] = i;
+      lastRow++;
+    }
 
-	int nElement{ 0 };
-	int nRowElement{ 0 };
-	int lastRow{ 0 };
-	h_rowCounts_[nRowElement++] = nElement;
-
-	for (int i = 0; i < nonZeroSize; ++i) {
-
-		if (lastRow < std::get<0>(matrixElements_.at(i))) {
-			h_rowCounts_[nRowElement++] = i;
-			lastRow++;
-		}
-
-		h_columnIndices_[i] = std::get<1>(matrixElements_.at(i));
-		h_matrixValues_[i] = std::get<2>(matrixElements_.at(i));
-	}
-	h_rowCounts_[nRowElement] = nonZeroSize;
-
+    h_columnIndices_[i] = std::get<1>(matrixElements_.at(i));
+    h_matrixValues_[i] = std::get<2>(matrixElements_.at(i));
+  }
+  h_rowCounts_[nRowElement] = nonZeroSize;
 }
 
-template<typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::buildCSR() {
+template <typename T>
+template <template <typename T> typename SparseSolverHostPolicy,
+          template <typename T, typename Alloc> typename Container,
+          typename Alloc, typename>
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_types::MemorySpace::Host, T>::solve(Container<T, Alloc>& solution) {
+  buildCSR();
 
-	int const nonZeroSize = nonZeroElements();
+  // get the non-zero size:
+  int const nonZeroSize = nonZeroElements();
 
-	// CUDA sparse solver is row-major:
-	matrixElements_.sort(FlatMatrixSort::RowMajor);
+  // integer for holding index of row where singularity occurs:
+  int singularIdx{0};
 
-	h_columnIndices_.resize(nonZeroSize);
-	h_matrixValues_.resize(nonZeroSize);
+  // prepare container for solution:
+  thrust::host_vector<T> h_solution(systemSize_);
 
-	int nElement{ 0 };
-	int nRowElement{ 0 };
-	int lastRow{ 0 };
-	h_rowCounts_[nRowElement++] = nElement;
+  // get the raw host pointers
+  T* h_matVals = thrust::raw_pointer_cast(h_matrixValues_.data());
+  T* h_rhsVals = thrust::raw_pointer_cast(h_vectorValues_.data());
+  T* h_sol = thrust::raw_pointer_cast(h_solution.data());
+  int* h_col = thrust::raw_pointer_cast(h_columnIndices_.data());
+  int* h_row = thrust::raw_pointer_cast(h_rowCounts_.data());
 
-	for (std::size_t i = 0; i < nonZeroSize; ++i) {
+  // create the helpers:
+  RealSparseSolverCUDAHelpers helpers;
+  helpers.initialize();
+  // call the SparseSolverHostPolicy:
+  SparseSolverHostPolicy<T>::solve(helpers.getSolverHandle(),
+                                   helpers.getMatrixDescriptor(), systemSize_,
+                                   nonZeroSize, h_matVals, h_row, h_col,
+                                   h_rhsVals, 0.0, 0, h_sol, &singularIdx);
 
-		if (lastRow < std::get<0>(matrixElements_.at(i))) {
-			h_rowCounts_[nRowElement++] = i;
-			lastRow++;
-		}
-
-		h_columnIndices_[i] = std::get<1>(matrixElements_.at(i));
-		h_matrixValues_[i] = std::get<2>(matrixElements_.at(i));
-	}
-	h_rowCounts_[nRowElement] = nonZeroSize;
-
+  if (singularIdx >= 0) {
+    std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
+  }
+  thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
 }
 
-template<typename T>
-template<template<typename T> typename SparseSolverHostPolicy,
-	template<typename T,typename Alloc> typename Container,
-	typename Alloc,
-	typename>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,T>::
-solve(Container<T,Alloc> &solution) {
+template <typename T>
+template <template <typename T> typename SparseSolverDevicePolicy,
+          template <typename T, typename Alloc> typename Container,
+          typename Alloc, typename>
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_types::MemorySpace::Device, T>::solve(Container<T, Alloc>& solution) {
+  buildCSR();
 
-	buildCSR();
+  // get the non-zero size:
+  int const nonZeroSize = nonZeroElements();
 
-	// get the non-zero size:
-	int const nonZeroSize = nonZeroElements();
+  // integer for holding index of row where singularity occurs:
+  int singularIdx{0};
 
-	// integer for holding index of row where singularity occurs:
-	int singularIdx{ 0 };
+  // prepare container for solution:
+  thrust::device_vector<T> d_solution(systemSize_);
 
-	// prepare container for solution:
-	thrust::host_vector<T> h_solution(systemSize_);
+  // copy to the device constainers:
+  thrust::device_vector<T> d_matrixValues = h_matrixValues_;
+  thrust::device_vector<T> d_vectorValues = h_vectorValues_;
+  thrust::device_vector<int> d_columnIndices = h_columnIndices_;
+  thrust::device_vector<int> d_rowCounts = h_rowCounts_;
 
-	// get the raw host pointers 
-	T* h_matVals = thrust::raw_pointer_cast(h_matrixValues_.data());
-	T* h_rhsVals = thrust::raw_pointer_cast(h_vectorValues_.data());
-	T* h_sol = thrust::raw_pointer_cast(h_solution.data());
-	int* h_col = thrust::raw_pointer_cast(h_columnIndices_.data());
-	int* h_row = thrust::raw_pointer_cast(h_rowCounts_.data());
+  // get the raw host pointers
+  T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
+  T* d_rhsVals = thrust::raw_pointer_cast(d_vectorValues.data());
+  T* d_sol = thrust::raw_pointer_cast(d_solution.data());
+  int* d_col = thrust::raw_pointer_cast(d_columnIndices.data());
+  int* d_row = thrust::raw_pointer_cast(d_rowCounts.data());
 
-	// create the helpers:
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-	// call the SparseSolverHostPolicy:
-	SparseSolverHostPolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
-		systemSize_, nonZeroSize, h_matVals, h_row, h_col, h_rhsVals, 0.0, 0, h_sol, &singularIdx);
+  // create the helpers:
+  RealSparseSolverCUDAHelpers helpers;
+  helpers.initialize();
+  // call the SparseSolverDevicePolicy:
+  SparseSolverDevicePolicy<T>::solve(helpers.getSolverHandle(),
+                                     helpers.getMatrixDescriptor(), systemSize_,
+                                     nonZeroSize, d_matVals, d_row, d_col,
+                                     d_rhsVals, 0.0, 0, d_sol, &singularIdx);
 
-	if (singularIdx >= 0) {
-		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
-	}
-	thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
+  if (singularIdx >= 0) {
+    std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
+  }
+  thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
 }
 
-template<typename T>
-template<
-	template<typename T> typename SparseSolverDevicePolicy,
-	template<typename T,typename Alloc> typename Container,
-	typename Alloc,
-	typename>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
-solve(Container<T,Alloc> &solution) {
+template <typename T>
+template <template <typename T> typename SparseSolverHostPolicy,
+          template <typename T, typename Alloc> typename Container,
+          typename Alloc, typename>
+Container<T, Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_types::MemorySpace::Host, T>::solve() {
+  buildCSR();
 
-	buildCSR();
+  // get the non-zero size:
+  int const nonZeroSize = nonZeroElements();
 
-	// get the non-zero size:
-	int const nonZeroSize = nonZeroElements();
+  // integer for holding index of row where singularity occurs:
+  int singularIdx{0};
 
-	// integer for holding index of row where singularity occurs:
-	int singularIdx{ 0 };
+  // prepare container for solution:
+  thrust::host_vector<T> h_solution(systemSize_);
 
-	// prepare container for solution:
-	thrust::device_vector<T> d_solution(systemSize_);
-	
-	// copy to the device constainers:
-	thrust::device_vector<T> d_matrixValues = h_matrixValues_;
-	thrust::device_vector<T> d_vectorValues = h_vectorValues_;
-	thrust::device_vector<int> d_columnIndices = h_columnIndices_;
-	thrust::device_vector<int> d_rowCounts = h_rowCounts_;
+  // get the raw host pointers
+  T* h_matVals = thrust::raw_pointer_cast(h_matrixValues_.data());
+  T* h_rhsVals = thrust::raw_pointer_cast(h_vectorValues_.data());
+  T* h_sol = thrust::raw_pointer_cast(h_solution.data());
+  int* h_col = thrust::raw_pointer_cast(h_columnIndices_.data());
+  int* h_row = thrust::raw_pointer_cast(h_rowCounts_.data());
 
+  // create the helpers:
+  RealSparseSolverCUDAHelpers helpers;
+  helpers.initialize();
+  // call the SparseSolverHostPolicy:
+  SparseSolverHostPolicy<T>::solve(helpers.getSolverHandle(),
+                                   helpers.getMatrixDescriptor(), systemSize_,
+                                   nonZeroSize, h_matVals, h_row, h_col,
+                                   h_rhsVals, 0.0, 0, h_sol, &singularIdx);
 
-	// get the raw host pointers 
-	T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
-	T* d_rhsVals = thrust::raw_pointer_cast(d_vectorValues.data());
-	T* d_sol = thrust::raw_pointer_cast(d_solution.data());
-	int* d_col = thrust::raw_pointer_cast(d_columnIndices.data());
-	int* d_row = thrust::raw_pointer_cast(d_rowCounts.data());
+  if (singularIdx >= 0) {
+    std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
+  }
 
-	// create the helpers:
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-	// call the SparseSolverDevicePolicy:
-	SparseSolverDevicePolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
-		systemSize_, nonZeroSize, d_matVals, d_row, d_col, d_rhsVals, 0.0, 0, d_sol, &singularIdx);
-
-	if (singularIdx >= 0) {
-		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
-	}
-	thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
-
+  Container<T, Alloc> solution(h_solution.size());
+  thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
+  return solution;
 }
 
-template<typename T>
-template<
-		template<typename T> typename SparseSolverHostPolicy,
-		template<typename T,typename Alloc> typename Container,
-		typename Alloc,
-		typename>
-Container<T,Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host, T>::
-solve() {
+template <typename T>
+template <template <typename T> typename SparseSolverDevicePolicy,
+          template <typename T, typename Alloc> typename Container,
+          typename Alloc, typename>
+Container<T, Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_types::MemorySpace::Device, T>::solve() {
+  buildCSR();
 
-	buildCSR();
+  // get the non-zero size:
+  int const nonZeroSize = nonZeroElements();
 
-	// get the non-zero size:
-	int const nonZeroSize = nonZeroElements();
+  // integer for holding index of row where singularity occurs:
+  int singularIdx{0};
 
-	// integer for holding index of row where singularity occurs:
-	int singularIdx{ 0 };
+  // prepare container for solution:
+  thrust::device_vector<T> d_solution(systemSize_);
 
-	// prepare container for solution:
-	thrust::host_vector<T> h_solution(systemSize_);
+  // copy to the device constainers:
+  thrust::device_vector<T> d_matrixValues = h_matrixValues_;
+  thrust::device_vector<T> d_vectorValues = h_vectorValues_;
+  thrust::device_vector<int> d_columnIndices = h_columnIndices_;
+  thrust::device_vector<int> d_rowCounts = h_rowCounts_;
 
-	// get the raw host pointers 
-	T* h_matVals = thrust::raw_pointer_cast(h_matrixValues_.data());
-	T* h_rhsVals = thrust::raw_pointer_cast(h_vectorValues_.data());
-	T* h_sol = thrust::raw_pointer_cast(h_solution.data());
-	int* h_col = thrust::raw_pointer_cast(h_columnIndices_.data());
-	int* h_row = thrust::raw_pointer_cast(h_rowCounts_.data());
+  // get the raw host pointers
+  T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
+  T* d_rhsVals = thrust::raw_pointer_cast(d_vectorValues.data());
+  T* d_sol = thrust::raw_pointer_cast(d_solution.data());
+  int* d_col = thrust::raw_pointer_cast(d_columnIndices.data());
+  int* d_row = thrust::raw_pointer_cast(d_rowCounts.data());
 
-	// create the helpers:
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-	// call the SparseSolverHostPolicy:
-	SparseSolverHostPolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
-		systemSize_, nonZeroSize, h_matVals, h_row, h_col, h_rhsVals, 0.0, 0, h_sol, &singularIdx);
+  // create the helpers:
+  RealSparseSolverCUDAHelpers helpers;
+  helpers.initialize();
+  // call the SparseSolverDevicePolicy:
+  SparseSolverDevicePolicy<T>::solve(helpers.getSolverHandle(),
+                                     helpers.getMatrixDescriptor(), systemSize_,
+                                     nonZeroSize, d_matVals, d_row, d_col,
+                                     d_rhsVals, 0.0, 0, d_sol, &singularIdx);
 
-	if (singularIdx >= 0) {
-		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
-	}
+  if (singularIdx >= 0) {
+    std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
+  }
 
-	Container<T,Alloc> solution(h_solution.size());
-	thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
-	return solution;
+  Container<T, Alloc> solution(systemSize_);
+  thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
+
+  return solution;
 }
 
-template<typename T>
-template<
-	template<typename T> typename SparseSolverDevicePolicy,
-	template<typename T, typename Alloc> typename Container,
-	typename Alloc,
-	typename>
-Container<T,Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Device, T>::
-solve() {
-
-	buildCSR();
-
-	// get the non-zero size:
-	int const nonZeroSize = nonZeroElements();
-
-	// integer for holding index of row where singularity occurs:
-	int singularIdx{ 0 };
-
-	// prepare container for solution:
-	thrust::device_vector<T> d_solution(systemSize_);
-
-	// copy to the device constainers:
-	thrust::device_vector<T> d_matrixValues = h_matrixValues_;
-	thrust::device_vector<T> d_vectorValues = h_vectorValues_;
-	thrust::device_vector<int> d_columnIndices = h_columnIndices_;
-	thrust::device_vector<int> d_rowCounts = h_rowCounts_;
-
-
-	// get the raw host pointers 
-	T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
-	T* d_rhsVals = thrust::raw_pointer_cast(d_vectorValues.data());
-	T* d_sol = thrust::raw_pointer_cast(d_solution.data());
-	int* d_col = thrust::raw_pointer_cast(d_columnIndices.data());
-	int* d_row = thrust::raw_pointer_cast(d_rowCounts.data());
-
-	// create the helpers:
-	RealSparseSolverCUDAHelpers helpers;
-	helpers.initialize();
-	// call the SparseSolverDevicePolicy:
-	SparseSolverDevicePolicy<T>::solve(helpers.getSolverHandle(), helpers.getMatrixDescriptor(),
-		systemSize_, nonZeroSize, d_matVals, d_row, d_col, d_rhsVals, 0.0, 0, d_sol, &singularIdx);
-
-	if (singularIdx >= 0) {
-		std::cerr << "Sparse matrix is singular at row: " << singularIdx << "\n";
-	}
-
-	Container<T,Alloc> solution(systemSize_);
-	thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
-
-	return solution;
-}
-
-
-
-
-
-#endif ///_LSS_SPARSE_SPARSE_CUDA
+#endif  ///_LSS_SPARSE_SPARSE_CUDA

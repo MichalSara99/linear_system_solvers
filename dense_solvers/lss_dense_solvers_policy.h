@@ -1,417 +1,433 @@
 #pragma once
 #if !defined(_LSS_DENSE_SOLVERS_POLICY)
 #define _LSS_DENSE_SOLVERS_POLICY
-#pragma warning(disable: 4267)
+#pragma warning(disable : 4267)
 
+#include <cuda_runtime.h>
+#include <cusolverDn.h>
 
-#include"common/lss_macros.h"
+#include <type_traits>
 
-#include<cuda_runtime.h>
-#include<cusolverDn.h>
-#include<type_traits>
+#include "common/lss_macros.h"
 
 namespace lss_dense_solvers_policy {
 
-    template<typename T>
-    struct DenseSolverDevice{};
+template <typename T>
+struct DenseSolverDevice {};
 
-	/* Dense QR factorization */
+/* Dense QR factorization */
 
-	template<typename T>
-	struct DenseSolverQR:public DenseSolverDevice<T> {
-	private:
-		// T = double
-		static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-            std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type);
-		// T = float
-		static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type);
-    public:
-		static void solve(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
-            _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x, std::is_same<T, double>());
-		}
+template <typename T>
+struct DenseSolverQR : public DenseSolverDevice<T> {
+ private:
+  // T = double
+  static void _solve_impl(cusolverDnHandle_t cusolverHandle,
+                          cublasHandle_t cublasHandle, std::size_t n,
+                          const T* d_Acopy, std::size_t lda, const T* d_b,
+                          T* d_x, std::true_type);
+  // T = float
+  static void _solve_impl(cusolverDnHandle_t cusolverHandle,
+                          cublasHandle_t cublasHandle, std::size_t n,
+                          const T* d_Acopy, std::size_t lda, const T* d_b,
+                          T* d_x, std::false_type);
 
-	};
+ public:
+  static void solve(cusolverDnHandle_t cusolverHandle,
+                    cublasHandle_t cublasHandle, std::size_t n,
+                    const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
+    _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x,
+                std::is_same<T, double>());
+  }
+};
 
-	/* Dense LU factorization */
+/* Dense LU factorization */
 
-	template<typename T>
-	struct DenseSolverLU:public DenseSolverDevice<T> {
-	private:
-		// T = double
-        static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type);
-		// T = float
-        static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type);
-	public:
-		static void solve(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
-            _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x, std::is_same<T, double>());
-		}
+template <typename T>
+struct DenseSolverLU : public DenseSolverDevice<T> {
+ private:
+  // T = double
+  static void _solve_impl(cusolverDnHandle_t cusolverHandle,
+                          cublasHandle_t cublasHandle, std::size_t n,
+                          const T* d_Acopy, std::size_t lda, const T* d_b,
+                          T* d_x, std::true_type);
+  // T = float
+  static void _solve_impl(cusolverDnHandle_t cusolverHandle,
+                          cublasHandle_t cublasHandle, std::size_t n,
+                          const T* d_Acopy, std::size_t lda, const T* d_b,
+                          T* d_x, std::false_type);
 
-	};
+ public:
+  static void solve(cusolverDnHandle_t cusolverHandle,
+                    cublasHandle_t cublasHandle, std::size_t n,
+                    const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
+    _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x,
+                std::is_same<T, double>());
+  }
+};
 
-	/* Dense Cholesky factorization */
+/* Dense Cholesky factorization */
 
-	template<typename T>
-	struct DenseSolverCholesky:public DenseSolverDevice<T> {
-	private:
-		// T = double
-        static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type);
-		// T = float
-        static void _solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type);
-	public:
-		static void solve(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-			std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
-            _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x, std::is_same<T, double>());
-		}
+template <typename T>
+struct DenseSolverCholesky : public DenseSolverDevice<T> {
+ private:
+  // T = double
+  static void _solve_impl(cusolverDnHandle_t cusolverHandle,
+                          cublasHandle_t cublasHandle, std::size_t n,
+                          const T* d_Acopy, std::size_t lda, const T* d_b,
+                          T* d_x, std::true_type);
+  // T = float
+  static void _solve_impl(cusolverDnHandle_t cusolverHandle,
+                          cublasHandle_t cublasHandle, std::size_t n,
+                          const T* d_Acopy, std::size_t lda, const T* d_b,
+                          T* d_x, std::false_type);
 
-	};
+ public:
+  static void solve(cusolverDnHandle_t cusolverHandle,
+                    cublasHandle_t cublasHandle, std::size_t n,
+                    const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x) {
+    _solve_impl(cusolverHandle, cublasHandle, n, d_Acopy, lda, d_b, d_x,
+                std::is_same<T, double>());
+  }
+};
 
+}  // namespace lss_dense_solvers_policy
 
+template <typename T>
+void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(
+    cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
+    std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,
+    std::true_type) {
+  int bufferSize = 0;
+  int bufferSize_geqrf = 0;
+  int bufferSize_ormqr = 0;
+  int* info = NULL;
+  T* buffer = NULL;
+  T* A = NULL;
+  T* tau = NULL;
+  int h_info = 0;
+  const T one = 1.0;
 
+  CUSOLVER_STATUS(cusolverDnDgeqrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
+                                              lda, &bufferSize_geqrf));
+  CUSOLVER_STATUS(cusolverDnDormqr_bufferSize(cusolverHandle, CUBLAS_SIDE_LEFT,
+                                              CUBLAS_OP_T, n, 1, n, A, lda,
+                                              NULL, d_x, n, &bufferSize_ormqr));
 
+  bufferSize = (bufferSize_geqrf > bufferSize_ormqr) ? bufferSize_geqrf
+                                                     : bufferSize_ormqr;
 
+  CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
+  CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
+  CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
+  CUDA_ERROR(cudaMalloc((void**)&tau, sizeof(T) * n));
+
+  // prepare a copy of A because getrf will overwrite A with L
+  CUDA_ERROR(
+      cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
+
+  CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
+
+  // compute QR factorization
+  CUSOLVER_STATUS(cusolverDnDgeqrf(cusolverHandle, n, n, A, lda, tau, buffer,
+                                   bufferSize, info));
+
+  CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
+
+  LSS_ASSERT(h_info == 0, "LU factorization failed\n");
+
+  CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
+
+  // compute Q^T*b
+  CUSOLVER_STATUS(cusolverDnDormqr(cusolverHandle, CUBLAS_SIDE_LEFT,
+                                   CUBLAS_OP_T, n, 1, n, A, lda, tau, d_x, n,
+                                   buffer, bufferSize, info));
+
+  // x = R \ Q^T*b
+  CUBLAS_STATUS(cublasDtrsm_v2(
+      cublasHandle, CUBLAS_SIDE_LEFT, CUBLAS_FILL_MODE_UPPER, CUBLAS_OP_N,
+      CUBLAS_DIAG_NON_UNIT, n, 1, &one, A, lda, d_x, n));
+  CUDA_ERROR(cudaDeviceSynchronize());
+
+  if (info) {
+    CUDA_ERROR(cudaFree(info));
+  }
+  if (buffer) {
+    CUDA_ERROR(cudaFree(buffer));
+  }
+  if (A) {
+    CUDA_ERROR(cudaFree(A));
+  }
+  if (tau) {
+    CUDA_ERROR(cudaFree(tau));
+  }
 }
 
+template <typename T>
+void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(
+    cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
+    std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,
+    std::false_type) {
+  int bufferSize = 0;
+  int bufferSize_geqrf = 0;
+  int bufferSize_ormqr = 0;
+  int* info = NULL;
+  T* buffer = NULL;
+  T* A = NULL;
+  T* tau = NULL;
+  int h_info = 0;
+  const T one = 1.0;
 
+  CUSOLVER_STATUS(cusolverDnSgeqrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
+                                              lda, &bufferSize_geqrf));
+  CUSOLVER_STATUS(cusolverDnSormqr_bufferSize(cusolverHandle, CUBLAS_SIDE_LEFT,
+                                              CUBLAS_OP_T, n, 1, n, A, lda,
+                                              NULL, d_x, n, &bufferSize_ormqr));
 
+  bufferSize = (bufferSize_geqrf > bufferSize_ormqr) ? bufferSize_geqrf
+                                                     : bufferSize_ormqr;
 
-template<typename T>
-void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(cusolverDnHandle_t cusolverHandle,cublasHandle_t cublasHandle,
-	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,std::true_type) {
+  CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
+  CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
+  CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
+  CUDA_ERROR(cudaMalloc((void**)&tau, sizeof(T) * n));
 
-	int bufferSize = 0;
-	int bufferSize_geqrf = 0;
-	int bufferSize_ormqr = 0;
-    int* info = NULL;
-    T* buffer = NULL;
-    T* A = NULL;
-    T* tau = NULL;
-    int h_info = 0;
-    const T one = 1.0;
+  // prepare a copy of A because getrf will overwrite A with L
+  CUDA_ERROR(
+      cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
 
-    CUSOLVER_STATUS(cusolverDnDgeqrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
-        lda, &bufferSize_geqrf));
-    CUSOLVER_STATUS(cusolverDnDormqr_bufferSize(cusolverHandle, CUBLAS_SIDE_LEFT,
-        CUBLAS_OP_T, n, 1, n, A, lda,
-        NULL, d_x, n, &bufferSize_ormqr));
+  CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
 
-    bufferSize = (bufferSize_geqrf > bufferSize_ormqr) ? bufferSize_geqrf
-        : bufferSize_ormqr;
+  // compute QR factorization
+  CUSOLVER_STATUS(cusolverDnSgeqrf(cusolverHandle, n, n, A, lda, tau, buffer,
+                                   bufferSize, info));
 
-    CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
-    CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
-    CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
-    CUDA_ERROR(cudaMalloc((void**)&tau, sizeof(T) * n));
+  CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
 
-    // prepare a copy of A because getrf will overwrite A with L
-    CUDA_ERROR(cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
+  LSS_ASSERT(h_info == 0, "LU factorization failed\n");
 
-    CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
+  CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
 
-    // compute QR factorization
-    CUSOLVER_STATUS(cusolverDnDgeqrf(cusolverHandle, n, n, A, lda, tau, buffer, bufferSize, info));
+  // compute Q^T*b
+  CUSOLVER_STATUS(cusolverDnSormqr(cusolverHandle, CUBLAS_SIDE_LEFT,
+                                   CUBLAS_OP_T, n, 1, n, A, lda, tau, d_x, n,
+                                   buffer, bufferSize, info));
 
-    CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
+  // x = R \ Q^T*b
+  CUBLAS_STATUS(cublasStrsm_v2(
+      cublasHandle, CUBLAS_SIDE_LEFT, CUBLAS_FILL_MODE_UPPER, CUBLAS_OP_N,
+      CUBLAS_DIAG_NON_UNIT, n, 1, &one, A, lda, d_x, n));
+  CUDA_ERROR(cudaDeviceSynchronize());
 
-    LSS_ASSERT(h_info == 0, "LU factorization failed\n");
-
-    CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
-
-    // compute Q^T*b
-    CUSOLVER_STATUS(cusolverDnDormqr(cusolverHandle, CUBLAS_SIDE_LEFT, CUBLAS_OP_T, n, 1,
-        n, A, lda, tau, d_x, n, buffer, bufferSize,
-        info));
-
-    // x = R \ Q^T*b
-    CUBLAS_STATUS(cublasDtrsm_v2(cublasHandle, CUBLAS_SIDE_LEFT,
-        CUBLAS_FILL_MODE_UPPER, CUBLAS_OP_N,
-        CUBLAS_DIAG_NON_UNIT, n, 1, &one, A, lda, d_x, n));
-    CUDA_ERROR(cudaDeviceSynchronize());
-
-
-    if (info) {
-        CUDA_ERROR(cudaFree(info));
-    }
-    if (buffer) {
-        CUDA_ERROR(cudaFree(buffer));
-    }
-    if (A) {
-        CUDA_ERROR(cudaFree(A));
-    }
-    if (tau) {
-        CUDA_ERROR(cudaFree(tau));
-    }
+  if (info) {
+    CUDA_ERROR(cudaFree(info));
+  }
+  if (buffer) {
+    CUDA_ERROR(cudaFree(buffer));
+  }
+  if (A) {
+    CUDA_ERROR(cudaFree(A));
+  }
+  if (tau) {
+    CUDA_ERROR(cudaFree(tau));
+  }
 }
 
+template <typename T>
+void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(
+    cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
+    std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,
+    std::true_type) {
+  int bufferSize = 0;
+  int* info = NULL;
+  T* buffer = NULL;
+  T* A = NULL;
+  int h_info = 0;
 
-template<typename T>
-void lss_dense_solvers_policy::DenseSolverQR<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type) {
+  CUSOLVER_STATUS(cusolverDnDpotrf_bufferSize(cusolverHandle,
+                                              CUBLAS_FILL_MODE_LOWER, n,
+                                              (T*)d_Acopy, lda, &bufferSize));
 
-	int bufferSize = 0;
-	int bufferSize_geqrf = 0;
-	int bufferSize_ormqr = 0;
-    int* info = NULL;
-    T* buffer = NULL;
-    T* A = NULL;
-    T* tau = NULL;
-    int h_info = 0;
-    const T one = 1.0;
+  CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
+  CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
+  CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
 
-    CUSOLVER_STATUS(cusolverDnSgeqrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
-        lda, &bufferSize_geqrf));
-    CUSOLVER_STATUS(cusolverDnSormqr_bufferSize(cusolverHandle, CUBLAS_SIDE_LEFT,
-        CUBLAS_OP_T, n, 1, n, A, lda,
-        NULL, d_x, n, &bufferSize_ormqr));
+  // prepare a copy of A because potrf will overwrite A with L
+  CUDA_ERROR(
+      cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
+  CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
 
-    bufferSize = (bufferSize_geqrf > bufferSize_ormqr) ? bufferSize_geqrf
-        : bufferSize_ormqr;
+  CUSOLVER_STATUS(cusolverDnDpotrf(cusolverHandle, CUBLAS_FILL_MODE_LOWER, n, A,
+                                   lda, buffer, bufferSize, info));
 
-    CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
-    CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
-    CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
-    CUDA_ERROR(cudaMalloc((void**)&tau, sizeof(T) * n));
+  CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
 
-    // prepare a copy of A because getrf will overwrite A with L
-    CUDA_ERROR(cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
+  LSS_ASSERT(h_info == 0, "Cholesky factorization failed\n");
 
-    CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
+  CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
 
-    // compute QR factorization
-    CUSOLVER_STATUS(cusolverDnSgeqrf(cusolverHandle, n, n, A, lda, tau, buffer, bufferSize, info));
+  CUSOLVER_STATUS(cusolverDnDpotrs(cusolverHandle, CUBLAS_FILL_MODE_LOWER, n, 1,
+                                   A, lda, d_x, n, info));
 
-    CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
+  CUDA_ERROR(cudaDeviceSynchronize());
 
-    LSS_ASSERT(h_info == 0, "LU factorization failed\n");
-
-    CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
-
-    // compute Q^T*b
-    CUSOLVER_STATUS(cusolverDnSormqr(cusolverHandle, CUBLAS_SIDE_LEFT, CUBLAS_OP_T, n, 1,
-        n, A, lda, tau, d_x, n, buffer, bufferSize,
-        info));
-
-    // x = R \ Q^T*b
-    CUBLAS_STATUS(cublasStrsm_v2(cublasHandle, CUBLAS_SIDE_LEFT,
-        CUBLAS_FILL_MODE_UPPER, CUBLAS_OP_N,
-        CUBLAS_DIAG_NON_UNIT, n, 1, &one, A, lda, d_x, n));
-    CUDA_ERROR(cudaDeviceSynchronize());
-
-
-    if (info) {
-        CUDA_ERROR(cudaFree(info));
-    }
-    if (buffer) {
-        CUDA_ERROR(cudaFree(buffer));
-    }
-    if (A) {
-        CUDA_ERROR(cudaFree(A));
-    }
-    if (tau) {
-        CUDA_ERROR(cudaFree(tau));
-    }
+  if (info) {
+    CUDA_ERROR(cudaFree(info));
+  }
+  if (buffer) {
+    CUDA_ERROR(cudaFree(buffer));
+  }
+  if (A) {
+    CUDA_ERROR(cudaFree(A));
+  }
 }
 
+template <typename T>
+void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(
+    cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
+    std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,
+    std::false_type) {
+  int bufferSize = 0;
+  int* info = NULL;
+  T* buffer = NULL;
+  T* A = NULL;
+  int h_info = 0;
 
+  CUSOLVER_STATUS(cusolverDnSpotrf_bufferSize(cusolverHandle,
+                                              CUBLAS_FILL_MODE_LOWER, n,
+                                              (T*)d_Acopy, lda, &bufferSize));
 
+  CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
+  CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
+  CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
 
+  // prepare a copy of A because potrf will overwrite A with L
+  CUDA_ERROR(
+      cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
+  CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
 
-template<typename T>
-void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type) {
+  CUSOLVER_STATUS(cusolverDnSpotrf(cusolverHandle, CUBLAS_FILL_MODE_LOWER, n, A,
+                                   lda, buffer, bufferSize, info));
 
-	int bufferSize = 0;
-    int* info = NULL;
-    T* buffer = NULL;
-    T* A = NULL;
-    int h_info = 0;
+  CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
 
+  LSS_ASSERT(h_info == 0, "Cholesky factorization failed\n");
 
-    CUSOLVER_STATUS(cusolverDnDpotrf_bufferSize(cusolverHandle, CUBLAS_FILL_MODE_LOWER, n, (T*)d_Acopy,
-        lda, &bufferSize));
+  CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
 
-    CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
-    CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
-    CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
+  CUSOLVER_STATUS(cusolverDnSpotrs(cusolverHandle, CUBLAS_FILL_MODE_LOWER, n, 1,
+                                   A, lda, d_x, n, info));
 
-    // prepare a copy of A because potrf will overwrite A with L
-    CUDA_ERROR(cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
-    CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
+  CUDA_ERROR(cudaDeviceSynchronize());
 
-    CUSOLVER_STATUS(cusolverDnDpotrf(cusolverHandle, CUBLAS_FILL_MODE_LOWER,
-        n, A, lda, buffer, bufferSize, info));
-
-    CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
-
-    LSS_ASSERT(h_info == 0, "Cholesky factorization failed\n");
-
-    CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
-
-    CUSOLVER_STATUS(cusolverDnDpotrs(cusolverHandle, CUBLAS_FILL_MODE_LOWER,
-        n, 1, A, lda, d_x, n, info));
-
-    CUDA_ERROR(cudaDeviceSynchronize());
-
-    if (info) {
-        CUDA_ERROR(cudaFree(info));
-    }
-    if (buffer) {
-        CUDA_ERROR(cudaFree(buffer));
-    }
-    if (A) {
-        CUDA_ERROR(cudaFree(A));
-    }
-
+  if (info) {
+    CUDA_ERROR(cudaFree(info));
+  }
+  if (buffer) {
+    CUDA_ERROR(cudaFree(buffer));
+  }
+  if (A) {
+    CUDA_ERROR(cudaFree(A));
+  }
 }
 
+template <typename T>
+void lss_dense_solvers_policy::DenseSolverLU<T>::_solve_impl(
+    cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
+    std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,
+    std::true_type) {
+  int bufferSize = 0;
+  int* info = NULL;
+  T* buffer = NULL;
+  T* A = NULL;
+  int* ipiv = NULL;  // pivoting sequence
+  int h_info = 0;
 
-template<typename T>
-void lss_dense_solvers_policy::DenseSolverCholesky<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type) {
+  CUSOLVER_STATUS(cusolverDnDgetrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
+                                              lda, &bufferSize));
 
-	int bufferSize = 0;
-    int* info = NULL;
-    T* buffer = NULL;
-    T* A = NULL;
-    int h_info = 0;
+  CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
+  CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
+  CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
+  CUDA_ERROR(cudaMalloc(&ipiv, sizeof(int) * n));
 
-    CUSOLVER_STATUS(cusolverDnSpotrf_bufferSize(cusolverHandle, CUBLAS_FILL_MODE_LOWER, n, (T*)d_Acopy,
-        lda, &bufferSize));
+  // prepare a copy of A because getrf will overwrite A with L
+  CUDA_ERROR(
+      cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
+  CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
 
-    CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
-    CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
-    CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
+  CUSOLVER_STATUS(
+      cusolverDnDgetrf(cusolverHandle, n, n, A, lda, buffer, ipiv, info));
+  CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
 
-    // prepare a copy of A because potrf will overwrite A with L
-    CUDA_ERROR(cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
-    CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
+  LSS_ASSERT(h_info == 0, " LU factorizartion failed\n");
 
-    CUSOLVER_STATUS(cusolverDnSpotrf(cusolverHandle, CUBLAS_FILL_MODE_LOWER,
-        n, A, lda, buffer, bufferSize, info));
+  CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
+  CUSOLVER_STATUS(cusolverDnDgetrs(cusolverHandle, CUBLAS_OP_N, n, 1, A, lda,
+                                   ipiv, d_x, n, info));
+  CUDA_ERROR(cudaDeviceSynchronize());
 
-    CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
-
-    LSS_ASSERT(h_info == 0, "Cholesky factorization failed\n");
-
-    CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
-
-    CUSOLVER_STATUS(cusolverDnSpotrs(cusolverHandle, CUBLAS_FILL_MODE_LOWER,
-        n, 1, A, lda, d_x, n, info));
-
-    CUDA_ERROR(cudaDeviceSynchronize());
-
-    if (info) {
-        CUDA_ERROR(cudaFree(info));
-    }
-    if (buffer) {
-        CUDA_ERROR(cudaFree(buffer));
-    }
-    if (A) {
-        CUDA_ERROR(cudaFree(A));
-    }
-
+  if (info) {
+    CUDA_ERROR(cudaFree(info));
+  }
+  if (buffer) {
+    CUDA_ERROR(cudaFree(buffer));
+  }
+  if (A) {
+    CUDA_ERROR(cudaFree(A));
+  }
+  if (ipiv) {
+    CUDA_ERROR(cudaFree(ipiv));
+  }
 }
 
+template <typename T>
+void lss_dense_solvers_policy::DenseSolverLU<T>::_solve_impl(
+    cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
+    std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x,
+    std::false_type) {
+  int bufferSize = 0;
+  int* info = NULL;
+  T* buffer = NULL;
+  T* A = NULL;
+  int* ipiv = NULL;  // pivoting sequence
+  int h_info = 0;
 
+  CUSOLVER_STATUS(cusolverDnSgetrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
+                                              lda, &bufferSize));
 
+  CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
+  CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
+  CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
+  CUDA_ERROR(cudaMalloc(&ipiv, sizeof(int) * n));
 
-template<typename T>
-void lss_dense_solvers_policy::DenseSolverLU<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::true_type) {
+  // prepare a copy of A because getrf will overwrite A with L
+  CUDA_ERROR(
+      cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
+  CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
 
-	int bufferSize = 0;
-    int* info = NULL;
-    T* buffer = NULL;
-    T* A = NULL;
-    int* ipiv = NULL;  // pivoting sequence
-    int h_info = 0;
+  CUSOLVER_STATUS(
+      cusolverDnSgetrf(cusolverHandle, n, n, A, lda, buffer, ipiv, info));
+  CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
 
-    CUSOLVER_STATUS(cusolverDnDgetrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
-        lda, &bufferSize));
+  LSS_ASSERT(h_info == 0, " LU factorizartion failed\n");
 
-    CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
-    CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
-    CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
-    CUDA_ERROR(cudaMalloc(&ipiv, sizeof(int) * n));
+  CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
+  CUSOLVER_STATUS(cusolverDnSgetrs(cusolverHandle, CUBLAS_OP_N, n, 1, A, lda,
+                                   ipiv, d_x, n, info));
+  CUDA_ERROR(cudaDeviceSynchronize());
 
-    // prepare a copy of A because getrf will overwrite A with L
-    CUDA_ERROR(cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
-    CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
-
-    CUSOLVER_STATUS(cusolverDnDgetrf(cusolverHandle, n, n, A, lda, buffer, ipiv, info));
-    CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
-
-    LSS_ASSERT(h_info == 0, " LU factorizartion failed\n");
-
-    CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
-    CUSOLVER_STATUS(cusolverDnDgetrs(cusolverHandle, CUBLAS_OP_N, n, 1, A, lda, ipiv, d_x, n, info));
-    CUDA_ERROR(cudaDeviceSynchronize());
-
-    if (info) {
-        CUDA_ERROR(cudaFree(info));
-    }
-    if (buffer) {
-        CUDA_ERROR(cudaFree(buffer));
-    }
-    if (A) {
-        CUDA_ERROR(cudaFree(A));
-    }
-    if (ipiv) {
-        CUDA_ERROR(cudaFree(ipiv));
-    }
+  if (info) {
+    CUDA_ERROR(cudaFree(info));
+  }
+  if (buffer) {
+    CUDA_ERROR(cudaFree(buffer));
+  }
+  if (A) {
+    CUDA_ERROR(cudaFree(A));
+  }
+  if (ipiv) {
+    CUDA_ERROR(cudaFree(ipiv));
+  }
 }
 
-
-template<typename T>
-void lss_dense_solvers_policy::DenseSolverLU<T>::_solve_impl(cusolverDnHandle_t cusolverHandle, cublasHandle_t cublasHandle,
-	std::size_t n, const T* d_Acopy, std::size_t lda, const T* d_b, T* d_x, std::false_type) {
-
-	int bufferSize = 0;
-    int* info = NULL;
-    T* buffer = NULL;
-    T* A = NULL;
-    int* ipiv = NULL;  // pivoting sequence
-    int h_info = 0;
-
-    CUSOLVER_STATUS(cusolverDnSgetrf_bufferSize(cusolverHandle, n, n, (T*)d_Acopy,
-        lda, &bufferSize));
-
-    CUDA_ERROR(cudaMalloc(&info, sizeof(int)));
-    CUDA_ERROR(cudaMalloc(&buffer, sizeof(T) * bufferSize));
-    CUDA_ERROR(cudaMalloc(&A, sizeof(T) * lda * n));
-    CUDA_ERROR(cudaMalloc(&ipiv, sizeof(int) * n));
-
-    // prepare a copy of A because getrf will overwrite A with L
-    CUDA_ERROR(cudaMemcpy(A, d_Acopy, sizeof(T) * lda * n, cudaMemcpyDeviceToDevice));
-    CUDA_ERROR(cudaMemset(info, 0, sizeof(int)));
-
-    CUSOLVER_STATUS(cusolverDnSgetrf(cusolverHandle, n, n, A, lda, buffer, ipiv, info));
-    CUDA_ERROR(cudaMemcpy(&h_info, info, sizeof(int), cudaMemcpyDeviceToHost));
-
-    LSS_ASSERT(h_info == 0, " LU factorizartion failed\n");
-
-    CUDA_ERROR(cudaMemcpy(d_x, d_b, sizeof(T) * n, cudaMemcpyDeviceToDevice));
-    CUSOLVER_STATUS(cusolverDnSgetrs(cusolverHandle, CUBLAS_OP_N, n, 1, A, lda, ipiv, d_x, n, info));
-    CUDA_ERROR(cudaDeviceSynchronize());
-
-    if (info) {
-        CUDA_ERROR(cudaFree(info));
-    }
-    if (buffer) {
-        CUDA_ERROR(cudaFree(buffer));
-    }
-    if (A) {
-        CUDA_ERROR(cudaFree(A));
-    }
-    if (ipiv) {
-        CUDA_ERROR(cudaFree(ipiv));
-    }
-}
-
-#endif ///_LSS_DENSE_SOLVERS_POLICY
+#endif  ///_LSS_DENSE_SOLVERS_POLICY

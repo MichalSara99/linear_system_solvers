@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES)
-#define _LSS_ONE_DIM_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES
+#if !defined(_LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES_CUDA)
+#define _LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES_CUDA
 
 #pragma warning(disable : 4244)
 
@@ -9,7 +9,7 @@
 #include "common/lss_types.h"
 #include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
-namespace lss_one_dim_space_variable_heat_implicit_schemes {
+namespace lss_one_dim_heat_implicit_schemes_cuda {
 
 using lss_one_dim_pde_utility::Discretization;
 using lss_types::BoundaryConditionType;
@@ -18,27 +18,20 @@ using lss_types::ImplicitPDESchemes;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x),h,k)
 template <typename T>
-using SchemeCoefficientHolder =
-    std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>, T,
-               T>;
+using SchemeCoefficientHolder = std::tuple<T, T, T, T>;
 
 template <typename T>
 using SchemeFunction = std::function<void(
-    SchemeCoefficientHolder<T> const &, std::vector<T> const &,
-    std::vector<T> const &, std::vector<T> const &, std::vector<T> &)>;
-
-template <typename T>
-using SchemeFunctionCUDA = std::function<void(
     SchemeCoefficientHolder<T> const &, std::vector<T> const &,
     std::vector<T> const &, std::vector<T> const &, std::vector<T> &,
     std::pair<T, T> const &, std::pair<T, T> const &)>;
 
 // ============================================================================
-// ================ ImplicitSpaceVariableHeatEquationSchemes ==================
+// ============================ ImplicitHeatEquationSchemes  ==================
 // ============================================================================
 
 template <typename T>
-class ImplicitSpaceVariableHeatEquationSchemes {
+class ImplicitHeatEquationSchemes {
  public:
   static T const getTheta(ImplicitPDESchemes scheme) {
     double theta{};
@@ -49,62 +42,8 @@ class ImplicitSpaceVariableHeatEquationSchemes {
     return theta;
   }
 
-  static SchemeFunction<T> const getScheme(ImplicitPDESchemes scheme) {
-    double theta{};
-    if (scheme == ImplicitPDESchemes::Euler)
-      theta = 1.0;
-    else
-      theta = 0.5;
-    auto schemeFun =
-        [=](SchemeCoefficientHolder<T> const &coeffs,
-            std::vector<T> const &input, std::vector<T> const &inhomInput,
-            std::vector<T> const &inhomInputNext, std::vector<T> &solution) {
-          // inhomInput not used
-          // inhomInputNext not used
-
-          auto const &A = std::get<0>(coeffs);
-          auto const &B = std::get<1>(coeffs);
-          auto const &D = std::get<2>(coeffs);
-          auto const h = std::get<3>(coeffs);
-
-          for (std::size_t t = 1; t < solution.size() - 1; ++t) {
-            solution[t] = (D(t * h) * (1.0 - theta) * input[t + 1]) +
-                          ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
-                          (A(t * h) * (1.0 - theta) * input[t - 1]);
-          }
-        };
-    return schemeFun;
-  }
-
-  static SchemeFunction<T> const getInhomScheme(ImplicitPDESchemes scheme) {
-    double theta{};
-    if (scheme == ImplicitPDESchemes::Euler)
-      theta = 1.0;
-    else
-      theta = 0.5;
-    auto schemeFun =
-        [=](SchemeCoefficientHolder<T> const &coeffs,
-            std::vector<T> const &input, std::vector<T> const &inhomInput,
-            std::vector<T> const &inhomInputNext, std::vector<T> &solution) {
-          auto const &A = std::get<0>(coeffs);
-          auto const &B = std::get<1>(coeffs);
-          auto const &D = std::get<2>(coeffs);
-          auto const h = std::get<3>(coeffs);
-          auto const k = std::get<4>(coeffs);
-
-          for (std::size_t t = 1; t < solution.size() - 1; ++t) {
-            solution[t] =
-                (D(t * h) * (1.0 - theta) * input[t + 1]) +
-                ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
-                (A(t * h) * (1.0 - theta) * input[t - 1]) +
-                k * (theta * inhomInputNext[t] + (1.0 - theta) * inhomInput[t]);
-          }
-        };
-    return schemeFun;
-  }
-
-  static SchemeFunctionCUDA<T> const getSchemeCUDA(BoundaryConditionType bcType,
-                                                   ImplicitPDESchemes scheme) {
+  static SchemeFunction<T> const getScheme(BoundaryConditionType bcType,
+                                           ImplicitPDESchemes scheme) {
     double theta{};
     if (scheme == ImplicitPDESchemes::Euler)
       theta = 1.0;
@@ -192,8 +131,8 @@ class ImplicitSpaceVariableHeatEquationSchemes {
       return schemeFunRobin;
   }
 
-  static SchemeFunctionCUDA<T> const getInhomSchemeCUDA(
-      BoundaryConditionType bcType, ImplicitPDESchemes scheme) {
+  static SchemeFunction<T> const getInhomScheme(BoundaryConditionType bcType,
+                                                ImplicitPDESchemes scheme) {
     double theta{};
     if (scheme == ImplicitPDESchemes::Euler)
       theta = 1.0;
@@ -287,6 +226,6 @@ class ImplicitSpaceVariableHeatEquationSchemes {
   }
 };
 
-}  // namespace lss_one_dim_space_variable_heat_implicit_schemes
+}  // namespace lss_one_dim_heat_implicit_schemes_cuda
 
-#endif  //_LSS_ONE_DIM_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES
+#endif  //_LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES_CUDA

@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES)
-#define _LSS_ONE_DIM_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES
+#if !defined(_LSS_ONE_DIM_HEAT_EXPLICIT_SCHEMES)
+#define _LSS_ONE_DIM_HEAT_EXPLICIT_SCHEMES
 
 #pragma warning(disable : 4244)
 
@@ -10,7 +10,7 @@
 #include "pde_solvers/one_dim/lss_one_dim_base_explicit_schemes.h"
 #include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
-namespace lss_one_dim_space_variable_heat_explicit_schemes {
+namespace lss_one_dim_heat_explicit_schemes {
 
 using lss_one_dim_base_explicit_schemes::Explicit1DHeatSchemeBase;
 using lss_one_dim_pde_utility::Discretization;
@@ -20,35 +20,25 @@ using lss_types::ImplicitPDESchemes;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x))
 template <typename T>
-using SchemeCoefficientHolder =
-    std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
-// Alias for PDE coefficients (a(x),b(x),c(x))
-template <typename T>
-using PDECoefficientHolder =
-    std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
+using SchemeCoefficientHolder = std::tuple<T, T, T>;
 
 // ============================================================================
-// ======================= ExplicitHeatEulerScheme ============================
+// ================= ExplicitHeatEulerScheme ==================================
 // ============================================================================
 
 template <typename T>
 class ExplicitHeatEulerScheme
     : public Explicit1DHeatSchemeBase<T, SchemeCoefficientHolder<T>> {
- private:
-  PDECoefficientHolder<T> pdeCoeffs_;
-
  public:
   explicit ExplicitHeatEulerScheme() = delete;
   explicit ExplicitHeatEulerScheme(
       T spaceStart, T terminalTime, std::pair<T, T> const &deltas,
-      PDECoefficientHolder<T> const &pdeCoeffs,
       SchemeCoefficientHolder<T> const &coeffs,
       std::vector<T> const &initialCondition,
       std::function<T(T, T)> const &source = nullptr, bool isSourceSet = false)
       : Explicit1DHeatSchemeBase<T, SchemeCoefficientHolder<T>>(
             spaceStart, terminalTime, deltas, coeffs, initialCondition, source,
-            isSourceSet),
-        pdeCoeffs_{pdeCoeffs} {}
+            isSourceSet) {}
 
   ~ExplicitHeatEulerScheme() {}
 
@@ -70,7 +60,7 @@ class ExplicitHeatEulerScheme
 };
 
 // ============================================================================
-// ====================== ADEHeatBakaratClarkScheme ===========================
+// ====================== ADEHeatBakaratClarkScheme  ==========================
 // ============================================================================
 
 template <typename T>
@@ -145,37 +135,25 @@ class ADEHeatSaulyevScheme
                   std::vector<T> &solution) const override;
 };
 
-}  // namespace lss_one_dim_space_variable_heat_explicit_schemes
+}  // namespace lss_one_dim_heat_explicit_schemes
 
 // ============================================================================
-// ======================== IMPLEMENTATIONS ===================================
+// =========================== IMPLEMENTATIONS ================================
 
 template <typename T>
-bool lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
-    T>::isStable() const {
-  auto const &a = std::get<0>(pdeCoeffs_);
-  auto const &b = std::get<1>(pdeCoeffs_);
-  auto const &c = std::get<2>(pdeCoeffs_);
+bool lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme<T>::isStable()
+    const {
+  T const A = std::get<0>(coeffs_);
+  T const B = std::get<1>(coeffs_);
   T const k = std::get<0>(deltas_);
   T const h = std::get<1>(deltas_);
-  T const lambda = k / (h * h);
-  T const gamma = h / k;
 
-  const std::size_t spaceSize = initialCondition_.size();
-  for (std::size_t i = 0; i < spaceSize; ++i) {
-    if (c(i * h) > 0.0) return false;
-    if ((2.0 * lambda * a(i * h) - k * c(i * h)) > 1.0) return false;
-    if (((gamma * std::abs(b(i * h))) * (gamma * std::abs(b(i * h)))) >
-        (2.0 * lambda * a(i * h)))
-      return false;
-  }
-  return true;
+  return (((2.0 * A * k / (h * h)) <= 1.0) && (B * (k / h) <= 1.0));
 }
 
 template <typename T>
-void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
-    T>::operator()(std::pair<T, T> const &dirichletBCPair,
-                   std::vector<T> &solution) const {
+void lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme<T>::operator()(
+    std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -189,9 +167,17 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
   // create first time point:
   T time = k;
   // get coefficients:
-  auto const &A = std::get<0>(coeffs_);
-  auto const &B = std::get<1>(coeffs_);
-  auto const &D = std::get<2>(coeffs_);
+  T const A = std::get<0>(coeffs_);
+  T const B = std::get<1>(coeffs_);
+  T const C = std::get<2>(coeffs_);
+  // calculate scheme coefficients:
+  T const lambda = (A * k) / (h * h);
+  T const gamma = (B * k) / (2.0 * h);
+  T const delta = C * k;
+  // set up coefficients:
+  T const a = 1.0 - (2.0 * lambda - delta);
+  T const b = lambda + gamma;
+  T const c = lambda - gamma;
   // previous solution:
   std::vector<T> prevSol = initialCondition_;
   // left space boundary:
@@ -206,8 +192,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
       solution[0] = left;
       solution[solution.size() - 1] = right;
       for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = (1.0 - 2.0 * B(t * h)) * prevSol[t] +
-                      D(t * h) * prevSol[t + 1] + A(t * h) * prevSol[t - 1];
+        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
       }
       prevSol = solution;
       time += k;
@@ -221,9 +206,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
       solution[0] = left;
       solution[solution.size() - 1] = right;
       for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = solution[t] =
-            (1.0 - 2.0 * B(t * h)) * prevSol[t] + D(t * h) * prevSol[t + 1] +
-            A(t * h) * prevSol[t - 1] + k * sourceCurr[t];
+        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1] +
+                      k * sourceCurr[t];
       }
       discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
       prevSol = solution;
@@ -233,10 +217,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
 }
 
 template <typename T>
-void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
-    T>::operator()(std::pair<T, T> const &leftRobinBCPair,
-                   std::pair<T, T> const &rightRobinBCPair,
-                   std::vector<T> &solution) const {
+void lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme<T>::operator()(
+    std::pair<T, T> const &leftRobinBCPair,
+    std::pair<T, T> const &rightRobinBCPair, std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -250,9 +233,13 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
   // create first time point:
   T time = k;
   // get coefficients:
-  auto const &A = std::get<0>(coeffs_);
-  auto const &B = std::get<1>(coeffs_);
-  auto const &D = std::get<2>(coeffs_);
+  T const A = std::get<0>(coeffs_);
+  T const B = std::get<1>(coeffs_);
+  T const C = std::get<2>(coeffs_);
+  // calculate scheme coefficients:
+  T const lambda = (A * k) / (h * h);
+  T const gamma = (B * k) / (2.0 * h);
+  T const delta = C * k;
   // left space boundary:
   T const leftLin = leftRobinBCPair.first;
   T const leftConst = leftRobinBCPair.second;
@@ -262,6 +249,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
   // conversion of right hand boundaries:
   T const rightLin = 1.0 / rightLin_;
   T const rightConst = -1.0 * (rightConst_ / rightLin_);
+  // set up coefficients:
+  T const a = 1.0 - (2.0 * lambda - delta);
+  T const b = lambda + gamma;
+  T const c = lambda - gamma;
   // previous solution:
   std::vector<T> prevSol = initialCondition_;
   // size of the space vector:
@@ -269,16 +260,13 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
   if (!isSourceSet_) {
     // loop for stepping in time:
     while (time <= terminalTime_) {
-      solution[0] = (D(0) + (A(0) * leftLin)) * prevSol[1] +
-                    (1.0 - 2.0 * B(0)) * prevSol[0] + A(0) * leftConst;
-      solution[spaceSize - 1] =
-          (A((spaceSize - 1) * h) + (D((spaceSize - 1) * h) * rightLin)) *
-              prevSol[spaceSize - 2] +
-          (1.0 - 2.0 * B((spaceSize - 1) * h)) * prevSol[spaceSize - 1] +
-          D((spaceSize - 1) * h) * rightConst;
+      solution[0] =
+          (b + (c * leftLin)) * prevSol[1] + a * prevSol[0] + c * leftConst;
+      solution[solution.size() - 1] =
+          (c + (b * rightLin)) * prevSol[solution.size() - 2] +
+          a * prevSol[solution.size() - 1] + b * rightConst;
       for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = (1.0 - 2.0 * B(t * h)) * prevSol[t] +
-                      D(t * h) * prevSol[t + 1] + A(t * h) * prevSol[t - 1];
+        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
       }
       prevSol = solution;
       time += k;
@@ -288,18 +276,15 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
     std::vector<T> sourceCurr(solution.size(), T{});
     discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
     // loop for stepping in time:
+    // loop for stepping in time:
     while (time <= terminalTime_) {
-      solution[0] = (D(0) + (A(0) * leftLin)) * prevSol[1] +
-                    (1.0 - 2.0 * B(0)) * prevSol[0] + A(0) * leftConst +
-                    k * sourceCurr[0];
-      solution[spaceSize - 1] =
-          (A((spaceSize - 1) * h) + (D((spaceSize - 1) * h) * rightLin)) *
-              prevSol[spaceSize - 2] +
-          (1.0 - 2.0 * B((spaceSize - 1) * h)) * prevSol[spaceSize - 1] +
-          D((spaceSize - 1) * h) * rightConst + k * sourceCurr[spaceSize - 1];
+      solution[0] =
+          (b + (c * leftLin)) * prevSol[1] + a * prevSol[0] + c * leftConst;
+      solution[solution.size() - 1] =
+          (c + (b * rightLin)) * prevSol[solution.size() - 2] +
+          a * prevSol[solution.size() - 1] + b * rightConst;
       for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = (1.0 - 2.0 * B(t * h)) * prevSol[t] +
-                      D(t * h) * prevSol[t + 1] + A(t * h) * prevSol[t - 1] +
+        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1] +
                       k * sourceCurr[t];
       }
       discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
@@ -310,10 +295,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
 }
 
 template <typename T>
-void lss_one_dim_space_variable_heat_explicit_schemes::
-    ADEHeatBakaratClarkScheme<T>::operator()(
-        std::pair<T, T> const &dirichletBCPair,
-        std::vector<T> &solution) const {
+void lss_one_dim_heat_explicit_schemes::ADEHeatBakaratClarkScheme<
+    T>::operator()(std::pair<T, T> const &dirichletBCPair,
+                   std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -326,14 +310,19 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
   // create first time point:
   T time = k;
   // get coefficients:
-  auto const &A = std::get<0>(coeffs_);
-  auto const &B = std::get<1>(coeffs_);
-  auto const &D = std::get<2>(coeffs_);
+  T const A = std::get<0>(coeffs_);
+  T const B = std::get<1>(coeffs_);
+  T const C = std::get<2>(coeffs_);
   // calculate scheme coefficients:
-  auto const &a = [&](T x) { return (A(x) / (1.0 + B(x))); };
-  auto const &b = [&](T x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
-  auto const &d = [&](T x) { return (D(x) / (1.0 + B(x))); };
-  auto const &f = [&](T x) { return (k / (1.0 + B(x))); };
+  T const lambda = (A * k) / (h * h);
+  T const gamma = (B * k) / (2.0 * h);
+  T const delta = C * k / 2.0;
+  // set up coefficients:
+  T const divisor = 1.0 + lambda - delta;
+  T const a = (1.0 - lambda + delta) / divisor;
+  T const b = (lambda + gamma) / divisor;
+  T const c = (lambda - gamma) / divisor;
+  T const d = k / divisor;
   // left space boundary:
   T const left = dirichletBCPair.first;
   // right space boundary:
@@ -350,18 +339,16 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
   auto upSweep = [=](std::vector<T> &upComponent, std::vector<T> const &rhs,
                      T rhsCoeff) {
     for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-      upComponent[t] =
-          b(t * h) * upComponent[t] + d(t * h) * upComponent[t + 1] +
-          a(t * h) * upComponent[t - 1] + f(t * h) * rhsCoeff * rhs[t];
+      upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] +
+                       c * upComponent[t - 1] + d * rhsCoeff * rhs[t];
     }
   };
   // create downsweep anonymous function:
   auto downSweep = [=](std::vector<T> &downComponent, std::vector<T> const &rhs,
                        T rhsCoeff) {
     for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-      downComponent[t] =
-          b(t * h) * downComponent[t] + d(t * h) * downComponent[t + 1] +
-          a(t * h) * downComponent[t - 1] + f(t * h) * rhsCoeff * rhs[t];
+      downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] +
+                         c * downComponent[t - 1] + d * rhsCoeff * rhs[t];
     }
   };
 
@@ -405,18 +392,16 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
 }
 
 template <typename T>
-void lss_one_dim_space_variable_heat_explicit_schemes::
-    ADEHeatBakaratClarkScheme<T>::operator()(
-        std::pair<T, T> const &leftRobinBCPair,
-        std::pair<T, T> const &rightRobinBCPair,
-        std::vector<T> &solution) const {
+void lss_one_dim_heat_explicit_schemes::ADEHeatBakaratClarkScheme<
+    T>::operator()(std::pair<T, T> const &leftRobinBCPair,
+                   std::pair<T, T> const &rightRobinBCPair,
+                   std::vector<T> &solution) const {
   throw new std::exception("Not available.");
 }
 
 template <typename T>
-void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
-    T>::operator()(std::pair<T, T> const &dirichletBCPair,
-                   std::vector<T> &solution) const {
+void lss_one_dim_heat_explicit_schemes::ADEHeatSaulyevScheme<T>::operator()(
+    std::pair<T, T> const &dirichletBCPair, std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -429,14 +414,19 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
   // create first time point:
   T time = k;
   // get coefficients:
-  auto const &A = std::get<0>(coeffs_);
-  auto const &B = std::get<1>(coeffs_);
-  auto const &D = std::get<2>(coeffs_);
+  T const A = std::get<0>(coeffs_);
+  T const B = std::get<1>(coeffs_);
+  T const C = std::get<2>(coeffs_);
   // calculate scheme coefficients:
-  auto const &a = [&](T x) { return (A(x) / (1.0 + B(x))); };
-  auto const &b = [&](T x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
-  auto const &d = [&](T x) { return (D(x) / (1.0 + B(x))); };
-  auto const &f = [&](T x) { return (k / (1.0 + B(x))); };
+  T const lambda = (A * k) / (h * h);
+  T const gamma = (B * k) / (2.0 * h);
+  T const delta = C * k / 2.0;
+  // set up coefficients:
+  T const divisor = 1.0 + lambda - delta;
+  T const a = (1.0 - lambda + delta) / divisor;
+  T const b = (lambda + gamma) / divisor;
+  T const c = (lambda - gamma) / divisor;
+  T const d = k / divisor;
   // left space boundary:
   T const left = dirichletBCPair.first;
   // right space boundary:
@@ -452,18 +442,16 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
   auto upSweep = [=](std::vector<T> &upComponent, std::vector<T> const &rhs,
                      T rhsCoeff) {
     for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-      upComponent[t] =
-          b(t * h) * upComponent[t] + d(t * h) * upComponent[t + 1] +
-          a(t * h) * upComponent[t - 1] + f(t * h) * rhsCoeff * rhs[t];
+      upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] +
+                       c * upComponent[t - 1] + d * rhsCoeff * rhs[t];
     }
   };
   // create downsweep anonymous function:
   auto downSweep = [=](std::vector<T> &downComponent, std::vector<T> const &rhs,
                        T rhsCoeff) {
     for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-      downComponent[t] =
-          b(t * h) * downComponent[t] + d(t * h) * downComponent[t + 1] +
-          a(t * h) * downComponent[t - 1] + f(t * h) * rhsCoeff * rhs[t];
+      downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] +
+                         c * downComponent[t - 1] + d * rhsCoeff * rhs[t];
     }
   };
 
@@ -501,11 +489,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
 }
 
 template <typename T>
-void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
-    T>::operator()(std::pair<T, T> const &leftRobinBCPair,
-                   std::pair<T, T> const &rightRobinBCPair,
-                   std::vector<T> &solution) const {
+void lss_one_dim_heat_explicit_schemes::ADEHeatSaulyevScheme<T>::operator()(
+    std::pair<T, T> const &leftRobinBCPair,
+    std::pair<T, T> const &rightRobinBCPair, std::vector<T> &solution) const {
   throw new std::exception("Not available.");
 }
 
-#endif  //_LSS_ONE_DIM_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES
+#endif  ///_LSS_ONE_DIM_HEAT_EXPLICIT_SCHEMES
