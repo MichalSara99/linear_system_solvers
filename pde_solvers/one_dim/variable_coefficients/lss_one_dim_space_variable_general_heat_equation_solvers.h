@@ -68,15 +68,15 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
     : public Discretization<T, Container, Alloc> {
  private:
   FDMSolver<T, BoundaryConditionType::Dirichlet, Container, Alloc>
-      fdmSolver_;                  // finite-difference solver
-  Range<T> spacer_;                // space range
-  T terminalT_;                    // terminal time
-  std::size_t timeN_;              // number of time subdivisions
-  std::size_t spaceN_;             // number of space subdivisions
-  std::function<T(T)> init_;       // init condition
-  std::function<T(T, T)> source_;  // heat source F(x,t)
-  std::pair<T, T> boundary_;       // boundaries
-  PDECoefficientHolder coeffs_;    // coefficients a(x), b(x), c(x) in PDE
+      fdmSolver_;                   // finite-difference solver
+  Range<T> spacer_;                 // space range
+  T terminalT_;                     // terminal time
+  std::size_t timeN_;               // number of time subdivisions
+  std::size_t spaceN_;              // number of space subdivisions
+  std::function<T(T)> init_;        // init condition
+  std::function<T(T, T)> source_;   // heat source F(x,t)
+  std::pair<T, T> boundary_;        // boundaries
+  PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
  public:
@@ -176,16 +176,16 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
     : public Discretization<T, Container, Alloc> {
  private:
   FDMSolver<T, BoundaryConditionType::Robin, Container, Alloc>
-      fdmSolver_;                  // finite-difference solver
-  Range<T> spacer_;                // space range
-  T terminalT_;                    // terminal time
-  std::size_t timeN_;              // number of time subdivisions
-  std::size_t spaceN_;             // number of space subdivisions
-  std::function<T(T, T)> source_;  // heat source F(x,t)
-  std::function<T(T)> init_;       // initi condition
-  std::pair<T, T> left_;           // left boundary pair
-  std::pair<T, T> right_;          // right boundary pair
-  PDECoefficientHolder coeffs_;    // coefficients a(x), b(x), c(x) in PDE
+      fdmSolver_;                   // finite-difference solver
+  Range<T> spacer_;                 // space range
+  T terminalT_;                     // terminal time
+  std::size_t timeN_;               // number of time subdivisions
+  std::size_t spaceN_;              // number of space subdivisions
+  std::function<T(T, T)> source_;   // heat source F(x,t)
+  std::function<T(T)> init_;        // initi condition
+  std::pair<T, T> left_;            // left boundary pair
+  std::pair<T, T> right_;           // right boundary pair
+  PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
  public:
@@ -280,14 +280,14 @@ class Explicit1DSpaceVariableGeneralHeatEquation<
     T, BoundaryConditionType::Dirichlet, Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  Range<T> spacer_;                // space range
-  T terminalT_;                    // terminal time
-  std::size_t timeN_;              // number of time subdivisions
-  std::size_t spaceN_;             // number of space subdivisions
-  std::function<T(T)> init_;       // initi condition
-  std::function<T(T, T)> source_;  // heat source	F(x,t)
-  std::pair<T, T> boundary_;       // boundaries
-  PDECoefficientHolder coeffs_;    // coefficients a(x), b(x), c(x) in PDE
+  Range<T> spacer_;                 // space range
+  T terminalT_;                     // terminal time
+  std::size_t timeN_;               // number of time subdivisions
+  std::size_t spaceN_;              // number of space subdivisions
+  std::function<T(T)> init_;        // initi condition
+  std::function<T(T, T)> source_;   // heat source	F(x,t)
+  std::pair<T, T> boundary_;        // boundaries
+  PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
  public:
@@ -381,15 +381,15 @@ class Explicit1DSpaceVariableGeneralHeatEquation<
     T, BoundaryConditionType::Robin, Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  Range<T> spacer_;                // space range
-  T terminalT_;                    // terminal time
-  std::size_t timeN_;              // number of time subdivisions
-  std::size_t spaceN_;             // number of space subdivisions
-  std::function<T(T, T)> source_;  // heat source F(x,t)
-  std::function<T(T)> init_;       // initi condition
-  std::pair<T, T> left_;           // left boundary pair
-  std::pair<T, T> right_;          // right boundary pair
-  PDECoefficientHolder coeffs_;    // coefficients a(x,t), b(x,t), c(x,t) in PDE
+  Range<T> spacer_;                 // space range
+  T terminalT_;                     // terminal time
+  std::size_t timeN_;               // number of time subdivisions
+  std::size_t spaceN_;              // number of space subdivisions
+  std::function<T(T, T)> source_;   // heat source F(x,t)
+  std::function<T(T)> init_;        // initi condition
+  std::pair<T, T> left_;            // left boundary pair
+  std::pair<T, T> right_;           // right boundary pair
+  PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
  public:

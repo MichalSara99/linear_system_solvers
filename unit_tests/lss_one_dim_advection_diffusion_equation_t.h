@@ -800,8 +800,8 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
-  std::cout << " Using Thomas LU algorithm with \n
-               " implicit Crank-Nicolson method\n\n";
+  std::cout << " Using Thomas LU algorithm with \n";
+  std::cout << " implicit Crank-Nicolson method\n\n";
   std::cout << " Value type: " << typeid(T).name() << "\n\n";
   std::cout << " U_t(x,t)  +  U_x(x,t) = U_xx(x,t), \n\n";
   std::cout << " where\n\n";

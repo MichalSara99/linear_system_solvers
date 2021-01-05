@@ -6,10 +6,10 @@
 #include "unit_tests/lss_one_dim_advection_diffusion_equation_t.h"
 #include "unit_tests/lss_one_dim_pure_heat_equation_cuda_t.h"
 #include "unit_tests/lss_one_dim_pure_heat_equation_t.h"
+#include "unit_tests/lss_one_dim_space_variable_pure_heat_equation_t.h"
 #include "unit_tests/lss_sparse_solvers_cuda_t.h"
 
 int main(int argc, char const *argv[]) {
-
   // ====================================================================
   // ================== lss_sparse_solvers_tridiagonal_t.h ==============
   // ====================================================================
@@ -77,9 +77,9 @@ int main(int argc, char const *argv[]) {
   // ============ lss_one_dim_pure_heat_equation_cuda_t.h ===============
   // ====================================================================
 
-  //	testImplPureHeatEquationDirichletBCDeviceCUDA();
-  //	testImplPureHeatEquationDirichletBCHostCUDA();
-  //	testImplPureHeatEquationRobinBCDeviceCUDA();
+  // testImplPureHeatEquationDirichletBCDeviceCUDA();
+  // testImplPureHeatEquationDirichletBCHostCUDA();
+  // testImplPureHeatEquationRobinBCDeviceCUDA();
   // testImplPureHeatEquationSourceDirichletBCCUDA();
   // testImplPureHeatEquationSourceRobinBCCUDA();
   // testImplNonHomPureHeatEquationDirichletBCDeviceCUDA();
@@ -88,7 +88,7 @@ int main(int argc, char const *argv[]) {
   // testExplNonHomPureHeatEquationDirichletBCDeviceCUDA();
   // testExplPureHeatEquationSourceDirichletBCEulerCUDA();
   // testExplPureHeatEquationRobinBCDeviceCUDA();
-  //	testExplHomPureHeatEquationSourceRobinBCCUDA();
+  // testExplHomPureHeatEquationSourceRobinBCCUDA();
 
   // ====================================================================
 
@@ -111,10 +111,28 @@ int main(int argc, char const *argv[]) {
   // ====== lss_one_dim_advection_diffusion_equation_cuda_t.h ===========
   // ====================================================================
 
-  //	testImplAdvDiffEquationDirichletBCDeviceCUDA();
-  //	testImplAdvDiffEquationRobinBCDeviceCUDA();
-  //	testExplAdvDiffEquationDirichletBCCUDA();
-  //	testExplAdvDiffEquationRobinBCCUDA();
+  // testImplAdvDiffEquationDirichletBCDeviceCUDA();
+  // testImplAdvDiffEquationRobinBCDeviceCUDA();
+  // testExplAdvDiffEquationDirichletBCCUDA();
+  // testExplAdvDiffEquationRobinBCCUDA();
+
+  // ====================================================================
+
+  // ====================================================================
+  // ====== lss_one_dim_space_variable_pure_heat_equation_t.h ===========
+  // ====================================================================
+
+  // testImplSpaceVarPureHeatEquationDirichletBCDoubleSweep();
+  // testImplSpaceVarPureHeatEquationDirichletBCThomasLU();
+  // testImplSpaceVarPureHeatEquationRobinBCDoubleSweep();
+  // testImplSpaceVarPureHeatEquationRobinBCThomasLU();
+  // testImplSpaceVarPureHeatEquationSourceDirichletBCDoubleSweep();
+  // testImplSpaceVarPureHeatEquationSourceDirichletBCThomasLU();
+  // testImplSpaceVarPureHeatEquationSourceRobinBCDoubleSweep();
+  // testImplSpaceVarPureHeatEquationSourceRobinBCThomasLU();
+  // testImplSpaceVarNonHomPureHeatEquationDirichletBCDoubleSweep();
+  // testImplSpaceVarNonHomPureHeatEquationDirichletBCThomasLU();
+  // testExplSpaceVarPureHeatEquationDirichletBC();
 
   // ====================================================================
 

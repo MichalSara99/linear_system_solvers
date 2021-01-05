@@ -61,6 +61,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>D:\my_c_files\linear_system_solvers\linear_system_solvers\pde_solvers\one_dim\classic;%(Include)</Include>
+      <AdditionalCompilerOptions>/bigobj</AdditionalCompilerOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -81,6 +82,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>D:\my_c_files\linear_system_solvers\linear_system_solvers\pde_solvers\one_dim\classic;%(Include)</Include>
+      <AdditionalCompilerOptions>/bigobj</AdditionalCompilerOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -116,6 +118,7 @@
     <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_pure_heat_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_pure_heat_equation_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_space_variable_pure_heat_equation_t.h" />
     <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h" />
   </ItemGroup>
   <ItemGroup>
