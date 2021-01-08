@@ -159,7 +159,7 @@ bool lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
   T const k = std::get<0>(deltas_);
   T const h = std::get<1>(deltas_);
   T const lambda = k / (h * h);
-  T const gamma = h / k;
+  T const gamma = k / h;
 
   const std::size_t spaceSize = initialCondition_.size();
   for (std::size_t i = 0; i < spaceSize; ++i) {

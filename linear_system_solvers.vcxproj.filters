@@ -129,6 +129,9 @@
     <ClInclude Include="unit_tests\lss_one_dim_space_variable_pure_heat_equation_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="unit_tests\lss_one_dim_space_variable_advection_diffusion_equation_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
