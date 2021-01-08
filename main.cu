@@ -7,6 +7,7 @@
 #include "unit_tests/lss_one_dim_pure_heat_equation_cuda_t.h"
 #include "unit_tests/lss_one_dim_pure_heat_equation_t.h"
 #include "unit_tests/lss_one_dim_space_variable_advection_diffusion_equation_t.h"
+#include "unit_tests/lss_one_dim_space_variable_pure_heat_equation_cuda_t.h"
 #include "unit_tests/lss_one_dim_space_variable_pure_heat_equation_t.h"
 #include "unit_tests/lss_sparse_solvers_cuda_t.h"
 
@@ -153,6 +154,20 @@ int main(int argc, char const *argv[]) {
   // testExplSpaceVarAdvDiffEquationDirichletBC();
   // testExplSpaceVarAdvDiffEquationSourceDirichletBC();
   // testExplSpaceVarAdvDiffEquationRobinBC();
+
+  // ====================================================================
+
+  // ====================================================================
+  // ==== lss_one_dim_space_variable_pure_heat_equation_cuda_t.h ========
+  // ====================================================================
+
+  // testImplSpaceVarPureHeatEquationDirichletBCDeviceCUDA();
+  // testImplSpaceVarPureHeatEquationDirichletBCHostCUDA();
+  // testImplSpaceVarPureHeatEquationRobinBCDeviceCUDA();
+  // testImplSpaceVarPureHeatEquationSourceDirichletBCCUDA();
+  // testImplSpaceVarPureHeatEquationSourceRobinBCCUDA();
+  // testImplSpaceVarNonHomPureHeatEquationDirichletBCDeviceCUDA();
+  // testImplSpaceVarNonHomPureHeatEquationDirichletBCHostCUDA();
 
   // ====================================================================
 

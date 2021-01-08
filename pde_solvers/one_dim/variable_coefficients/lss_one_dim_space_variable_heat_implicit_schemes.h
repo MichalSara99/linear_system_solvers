@@ -59,8 +59,8 @@ class ImplicitSpaceVariableHeatEquationSchemes {
         [=](SchemeCoefficientHolder<T> const &coeffs,
             std::vector<T> const &input, std::vector<T> const &inhomInput,
             std::vector<T> const &inhomInputNext, std::vector<T> &solution) {
-          // inhomInput not used
-          // inhomInputNext not used
+          // inhomInput  = not used
+          // inhomInputNext  = not used
 
           auto const &A = std::get<0>(coeffs);
           auto const &B = std::get<1>(coeffs);
