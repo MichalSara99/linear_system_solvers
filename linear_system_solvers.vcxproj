@@ -105,7 +105,9 @@
     <ClInclude Include="pde_solvers\one_dim\lss_one_dim_pde_utility.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_general_heat_equation_solvers.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_general_heat_equation_solvers_cuda.h" />
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_cuda_kernels.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_explicit_schemes.h" />
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_explicit_schemes_cuda.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_implicit_schemes.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_implicit_schemes_cuda.h" />
     <ClInclude Include="sparse_solvers\lss_fdm_double_sweep_solver.h" />
@@ -128,6 +130,7 @@
   <ItemGroup>
     <CudaCompile Include="main.cu" />
     <CudaCompile Include="pde_solvers\one_dim\classic\lss_one_dim_heat_explicit_schemes_cuda.cu" />
+    <CudaCompile Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_heat_explicit_schemes_cuda.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

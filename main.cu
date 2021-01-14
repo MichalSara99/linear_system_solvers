@@ -168,6 +168,11 @@ int main(int argc, char const *argv[]) {
   // testImplSpaceVarPureHeatEquationSourceRobinBCCUDA();
   // testImplSpaceVarNonHomPureHeatEquationDirichletBCDeviceCUDA();
   // testImplSpaceVarNonHomPureHeatEquationDirichletBCHostCUDA();
+  // testExplSpaceVarPureHeatEquationDirichletBCDeviceCUDA();
+  // testExplSpaceVarNonHomPureHeatEquationDirichletBCDeviceCUDA();
+  // testExplSpaceVarPureHeatEquationSourceDirichletBCEulerCUDA();
+  // testExplSpaceVarPureHeatEquationRobinBCDeviceCUDA();
+  // testExplSpaceVarHomPureHeatEquationSourceRobinBCCUDA();
 
   // ====================================================================
 
