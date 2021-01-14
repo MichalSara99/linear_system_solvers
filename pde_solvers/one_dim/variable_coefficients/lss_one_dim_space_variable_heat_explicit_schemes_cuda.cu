@@ -7,7 +7,7 @@
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
-// Move this somewhere else:
+// Move this somewhere else seperate:
 template <typename T>
 static constexpr T NaN() {
   return std::numeric_limits<T>::quiet_NaN();
@@ -74,7 +74,6 @@ void ExplicitEulerLoopSP::operator()(
   std::vector<float> h_B(size, NaN<float>());
   std::vector<float> h_D(size, NaN<float>());
 
-  std::numeric_limits<double>::quiet_NaN();
   if (isSourceSet_) {
     // prepare a pointer for source on device:
     float *d_source = NULL;
