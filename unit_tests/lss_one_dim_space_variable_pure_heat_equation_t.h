@@ -2673,6 +2673,128 @@ void testExplHomPureHeatEquationSourceRobinBCEuler() {
 
 }  // namespace pure_heat_equation
 
+namespace reaction_diffusion_equation {
+
+template <typename T>
+void testImplHeatEquationDirichletBCDoubleSweepEuler() {
+  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_one_dim_space_variable_general_heat_equation_solvers::
+      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_types::BoundaryConditionType;
+  using lss_types::ImplicitPDESchemes;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+  std::cout << " Value type: " << typeid(T).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <0,1> \n\n";
+  std::cout << "============================================================\n";
+
+  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
+  typedef Implicit1DSpaceVariableGeneralHeatEquation<
+      T, BoundaryConditionType::Dirichlet, FDMDoubleSweepSolver, std::vector,
+      std::allocator<T>>
+      implicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 100;
+  // number of time subdivisions:
+  std::size_t const Td = 100;
+  // initial condition:
+  auto initialCondition = [](T x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto boundary = std::make_pair(exp(-0.5), exp(-0.5));
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<T> solution(Sd + 1, T{});
+  // initialize solver
+  implicit_solver impl_solver(Range<T>(-1.0, 1.0), 0.10, Sd, Td);
+  // set boundary conditions:
+  impl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  impl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  // set convection term in PDE
+  impl_solver.set1OrderCoefficient([](T x) { return 0.0; });
+  // set zero-order term in PDE
+  impl_solver.set0OrderCoefficient([](T x) { return -1.0 * x * x; });
+  // get the solution:
+  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+
+  T const h = impl_solver.spaceStep();
+  std::cout << "tp : FDM | \n";
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    std::cout << "t_" << j << ": " << solution[j] << '\n';
+  }
+}
+
+template <typename T>
+void testImplHeatEquationDirichletBCDoubleSweepCN() {
+  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_one_dim_space_variable_general_heat_equation_solvers::
+      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_types::BoundaryConditionType;
+  using lss_types::ImplicitPDESchemes;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using Double Sweep algorithm with implicit Crank-Nicolson\n"
+               "method\n\n";
+  std::cout << " Value type: " << typeid(T).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <0,1> \n\n";
+  std::cout << "============================================================\n";
+  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
+  typedef Implicit1DSpaceVariableGeneralHeatEquation<
+      T, BoundaryConditionType::Dirichlet, FDMDoubleSweepSolver, std::vector,
+      std::allocator<T>>
+      implicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 100;
+  // number of time subdivisions:
+  std::size_t const Td = 100;
+  // initial condition:
+  auto initialCondition = [](T x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto boundary = std::make_pair(exp(-0.5), exp(-0.5));
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<T> solution(Sd + 1, T{});
+  // initialize solver
+  implicit_solver impl_solver(Range<T>(-1.0, 1.0), 0.10, Sd, Td);
+  // set boundary conditions:
+  impl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  impl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  // set convection term in PDE
+  impl_solver.set1OrderCoefficient([](T x) { return 0.0; });
+  // set zero-order term in PDE
+  impl_solver.set0OrderCoefficient([](T x) { return -1.0 * x * x; });
+  // get the solution:
+  impl_solver.solve(solution);
+
+  T const h = impl_solver.spaceStep();
+  std::cout << "tp : FDM |\n";
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    std::cout << "t_" << j << ": " << solution[j] << '\n';
+  }
+}
+
+}  // namespace reaction_diffusion_equation
+
 void testImplSpaceVarPureHeatEquationDirichletBCDoubleSweep() {
   std::cout << "============================================================\n";
   std::cout << "========= Implicit Pure Heat Equation (Dirichlet BC) =======\n";
@@ -2903,6 +3025,23 @@ void testExplSpaceVarHomPureHeatEquationSourceRobinBC() {
 
   testExplHomPureHeatEquationSourceRobinBCEuler<double>();
   testExplHomPureHeatEquationSourceRobinBCEuler<float>();
+
+  std::cout << "============================================================\n";
+}
+
+void testImplSpaceVarHeatEquationDirichletBCDoubleSweep() {
+  std::cout << "============================================================\n";
+  std::cout << "============ Implicit Heat Equation (Dirichlet BC) =========\n";
+  std::cout << "============================================================\n";
+  reaction_diffusion_equation::testImplHeatEquationDirichletBCDoubleSweepEuler<
+      float>();
+  reaction_diffusion_equation::testImplHeatEquationDirichletBCDoubleSweepCN<
+      float>();
+
+  reaction_diffusion_equation::testImplHeatEquationDirichletBCDoubleSweepEuler<
+      double>();
+  reaction_diffusion_equation::testImplHeatEquationDirichletBCDoubleSweepCN<
+      double>();
 
   std::cout << "============================================================\n";
 }

@@ -140,6 +140,8 @@ int main(int argc, char const *argv[]) {
   // testExplSpaceVarHomPureHeatEquationRobinBC();
   // testExplSpaceVarHomPureHeatEquationSourceRobinBC();
 
+  // testImplSpaceVarHeatEquationDirichletBCDoubleSweep();
+
   // ====================================================================
 
   // ====================================================================
@@ -173,6 +175,17 @@ int main(int argc, char const *argv[]) {
   // testExplSpaceVarPureHeatEquationSourceDirichletBCEulerCUDA();
   // testExplSpaceVarPureHeatEquationRobinBCDeviceCUDA();
   // testExplSpaceVarHomPureHeatEquationSourceRobinBCCUDA();
+
+  // ====================================================================
+
+  // ====================================================================
+  // = lss_one_dim_space_variable_advection_diffusion_equation_cuda_t.h =
+  // ====================================================================
+
+  // testImplSpaceVarAdvDiffEquationDirichletBCDeviceCUDA();
+  // testImplSpaceVarAdvDiffEquationRobinBCDeviceCUDA();
+  // testExplSpaceVarAdvDiffEquationDirichletBCCUDA();
+  // testExplSpaceVarAdvDiffEquationRobinBCCUDA();
 
   // ====================================================================
 

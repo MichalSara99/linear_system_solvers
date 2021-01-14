@@ -1,17 +1,15 @@
 #pragma once
-#if !defined( \
-    _LSS_ONE_DIM_SPACE_VARIABNLE_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA_T)
-#define _LSS_ONE_DIM_SPACE_VARIABNLE_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA_T
+#if !defined(_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA_T)
+#define _LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA_T
 
 #pragma warning(disable : 4305)
 
 #include "common/lss_types.h"
 #include "common/lss_utility.h"
-#include "pde_solvers/one_dim/variable_coefficients/lss_one_dim_space_variable_general_heat_equation_solvers_cuda.h"
+#include "pde_solvers/one_dim/classic/lss_one_dim_general_heat_equation_solvers_cuda.h"
 
 #define PI 3.14159
 
-namespace advection_equation {
 // //////////////////////////////////////////////////////////////////////////////
 //					 ADVECTION-DIFFUSION PROBLEMS ON CUDA
 // //////////////////////////////////////////////////////////////////////////////
@@ -25,8 +23,8 @@ namespace advection_equation {
 // =============================================================================
 
 void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -45,8 +43,8 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "===========================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       double, BoundaryConditionType::Dirichlet, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<double>>
       implicit_solver;
@@ -69,11 +67,9 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](double x) { return 1.0; });
+  impl_solver.set2OrderCoefficient(1.0);
   // set convection term:
-  impl_solver.set1OrderCoefficient([](double x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](double x) { return 0.0; });
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution, ImplicitPDESchemes::Euler);
   // get exact solution:
@@ -108,8 +104,8 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -128,8 +124,8 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       float, BoundaryConditionType::Dirichlet, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<float>>
       implicit_solver;
@@ -152,11 +148,9 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](double x) { return 1.0; });
+  impl_solver.set2OrderCoefficient(1.0);
   // set convection term:
-  impl_solver.set1OrderCoefficient([](double x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](double x) { return 0.0; });
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution, ImplicitPDESchemes::Euler);
   // get exact solution:
@@ -191,8 +185,8 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -211,8 +205,8 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       double, BoundaryConditionType::Dirichlet, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<double>>
       implicit_solver;
@@ -235,11 +229,9 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](double x) { return 1.0; });
+  impl_solver.set2OrderCoefficient(1.0);
   // set convection term:
-  impl_solver.set1OrderCoefficient([](double x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](double x) { return 0.0; });
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution, ImplicitPDESchemes::CrankNicolson);
   // get exact solution:
@@ -274,8 +266,8 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
 }
 
 void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -294,8 +286,8 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       float, BoundaryConditionType::Dirichlet, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<float>>
       implicit_solver;
@@ -318,11 +310,9 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](float x) { return 1.0; });
+  impl_solver.set2OrderCoefficient(1.0);
   // set convection term:
-  impl_solver.set1OrderCoefficient([](float x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](float x) { return 0.0; });
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution, ImplicitPDESchemes::CrankNicolson);
   // get exact solution:
@@ -356,13 +346,26 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
   }
 }
 
+void testImplAdvDiffEquationDirichletBCDeviceCUDA() {
+  std::cout << "============================================================\n";
+  std::cout << "==== Implicit Advection-Diffusion Equation (Dirichlet BC) ==\n";
+  std::cout << "============================================================\n";
+
+  testImplAdvDiffEquationDoubleDirichletBCDeviceEuler();
+  testImplAdvDiffEquationFloatDirichletBCDeviceEuler();
+  testImplAdvDiffEquationDoubleDirichletBCDeviceCN();
+  testImplAdvDiffEquationFloatDirichletBCDeviceCN();
+
+  std::cout << "============================================================\n";
+}
+
 // ===========================================================================
 // == Advection Diffusion problem with homogeneous Robin boundary conditions =
 // ===========================================================================
 
 void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -380,8 +383,8 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       double, BoundaryConditionType::Robin, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<double>>
       implicit_solver;
@@ -420,11 +423,9 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](double x) { return 1.0; });
-  // set convection term:
-  impl_solver.set1OrderCoefficient([](double x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](double x) { return 0.0; });
+  impl_solver.set2OrderCoefficient(1.0);
+  // set convection term
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution, ImplicitPDESchemes::Euler);
   // get exact solution:
@@ -462,8 +463,8 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -481,8 +482,8 @@ void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       float, BoundaryConditionType::Robin, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<float>>
       implicit_solver;
@@ -521,11 +522,9 @@ void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](float x) { return 1.0; });
-  // set convection term:
-  impl_solver.set1OrderCoefficient([](float x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](float x) { return 0.0; });
+  impl_solver.set2OrderCoefficient(1.0);
+  // set convection term
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution, ImplicitPDESchemes::Euler);
   // get exact solution:
@@ -564,8 +563,8 @@ void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -584,8 +583,8 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       double, BoundaryConditionType::Robin, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<double>>
       implicit_solver;
@@ -624,11 +623,9 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](double x) { return 1.0; });
-  // set convection term:
-  impl_solver.set1OrderCoefficient([](double x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](double x) { return 0.0; });
+  impl_solver.set2OrderCoefficient(1.0);
+  // set convection term
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution);
   // get exact solution:
@@ -667,8 +664,8 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
 }
 
 void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::implicit_solvers::
+      Implicit1DGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
   using lss_types::BoundaryConditionType;
   using lss_types::ImplicitPDESchemes;
@@ -687,8 +684,8 @@ void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Implicit1DGeneralHeatEquationCUDA
+  typedef Implicit1DGeneralHeatEquationCUDA<
       float, BoundaryConditionType::Robin, MemorySpace::Device,
       RealSparseSolverCUDA, std::vector, std::allocator<float>>
       implicit_solver;
@@ -727,11 +724,9 @@ void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](float x) { return 1.0; });
-  // set convection term:
-  impl_solver.set1OrderCoefficient([](float x) { return -1.0; });
-  // se zero-order term:
-  impl_solver.set0OrderCoefficient([](float x) { return 0.0; });
+  impl_solver.set2OrderCoefficient(1.0);
+  // set convection term
+  impl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   impl_solver.solve(solution);
   // get exact solution:
@@ -769,6 +764,19 @@ void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
   }
 }
 
+void testImplAdvDiffEquationRobinBCDeviceCUDA() {
+  std::cout << "============================================================\n";
+  std::cout << "======= Implicit Advection Diffusion Equation (Robin BC) ===\n";
+  std::cout << "============================================================\n";
+
+  testImplAdvDiffEquationDoubleRobinBCDeviceEuler();
+  testImplAdvDiffEquationFloatRobinBCDeviceEuler();
+  testImplAdvDiffEquationDoubleRobinBCDeviceCN();
+  testImplAdvDiffEquationFloatRobinBCDeviceCN();
+
+  std::cout << "============================================================\n";
+}
+
 // ===========================================================================
 // ======================= EXPLICIT SOLVERS ==================================
 // ===========================================================================
@@ -778,8 +786,8 @@ void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
 // ===========================================================================
 
 void testExplAdvDiffEquationDoubleDirichletBCEuler() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::explicit_solvers::
+      Explicit1DGeneralHeatEquationCUDA;
   using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
@@ -794,10 +802,10 @@ void testExplAdvDiffEquationDoubleDirichletBCEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Explicit1DSpaceVariableGeneralHeatEquationCUDA<
-      double, BoundaryConditionType::Dirichlet, std::vector,
-      std::allocator<double>>
+  // typedef the Explicit1DGeneralHeatEquationCUDA
+  typedef Explicit1DGeneralHeatEquationCUDA<double,
+                                            BoundaryConditionType::Dirichlet,
+                                            std::vector, std::allocator<double>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -818,11 +826,9 @@ void testExplAdvDiffEquationDoubleDirichletBCEuler() {
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](double x) { return 1.0; });
+  expl_solver.set2OrderCoefficient(1.0);
   // set convection term:
-  expl_solver.set1OrderCoefficient([](double x) { return -1.0; });
-  // set zero-order term:
-  expl_solver.set0OrderCoefficient([](double x) { return 0.0; });
+  expl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
@@ -857,8 +863,8 @@ void testExplAdvDiffEquationDoubleDirichletBCEuler() {
 }
 
 void testExplAdvDiffEquationFloatDirichletBCEuler() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::explicit_solvers::
+      Explicit1DGeneralHeatEquationCUDA;
   using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
@@ -873,10 +879,10 @@ void testExplAdvDiffEquationFloatDirichletBCEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Explicit1DSpaceVariableGeneralHeatEquationCUDA<
-      float, BoundaryConditionType::Dirichlet, std::vector,
-      std::allocator<float>>
+  // typedef the Explicit1DGeneralHeatEquationCUDA
+  typedef Explicit1DGeneralHeatEquationCUDA<float,
+                                            BoundaryConditionType::Dirichlet,
+                                            std::vector, std::allocator<float>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -897,11 +903,9 @@ void testExplAdvDiffEquationFloatDirichletBCEuler() {
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](float x) { return 1.0; });
+  expl_solver.set2OrderCoefficient(1.0f);
   // set convection term:
-  expl_solver.set1OrderCoefficient([](float x) { return -1.0; });
-  // set zero-order term:
-  expl_solver.set0OrderCoefficient([](float x) { return 0.0; });
+  expl_solver.set1OrderCoefficient(-1.0f);
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
@@ -935,13 +939,24 @@ void testExplAdvDiffEquationFloatDirichletBCEuler() {
   }
 }
 
+void testExplAdvDiffEquationDirichletBCCUDA() {
+  std::cout << "============================================================\n";
+  std::cout << "=== Explicit Advection Diffusion Equation (Dirichlet BC) ===\n";
+  std::cout << "============================================================\n";
+
+  testExplAdvDiffEquationDoubleDirichletBCEuler();
+  testExplAdvDiffEquationFloatDirichletBCEuler();
+
+  std::cout << "============================================================\n";
+}
+
 // ===========================================================================
 // == Advection Diffusion problem with homogeneous Robin boundary conditions =
 // ===========================================================================
 
 void testExplAdvDiffEquationDoubleRobinBC() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::explicit_solvers::
+      Explicit1DGeneralHeatEquationCUDA;
   using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
@@ -957,8 +972,8 @@ void testExplAdvDiffEquationDoubleRobinBC() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Explicit1DSpaceVariableGeneralHeatEquationCUDA<
+  // typedef the Explicit1DGeneralHeatEquationCUDA
+  typedef Explicit1DGeneralHeatEquationCUDA<
       double, BoundaryConditionType::Robin, std::vector, std::allocator<double>>
       explicit_solver;
 
@@ -996,11 +1011,9 @@ void testExplAdvDiffEquationDoubleRobinBC() {
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](double x) { return 1.0; });
-  // set convection term:
-  expl_solver.set1OrderCoefficient([](double x) { return -1.0; });
-  // set zero-order term:
-  expl_solver.set0OrderCoefficient([](double x) { return 0.0; });
+  expl_solver.set2OrderCoefficient(1.0);
+  // set convection term
+  expl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
@@ -1039,8 +1052,8 @@ void testExplAdvDiffEquationDoubleRobinBC() {
 }
 
 void testExplAdvDiffEquationFloatRobinBC() {
-  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_one_dim_general_heat_equation_solvers_cuda::explicit_solvers::
+      Explicit1DGeneralHeatEquationCUDA;
   using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
@@ -1056,9 +1069,9 @@ void testExplAdvDiffEquationFloatRobinBC() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquationCUDA
-  typedef Explicit1DSpaceVariableGeneralHeatEquationCUDA<
-      float, BoundaryConditionType::Robin, std::vector, std::allocator<float>>
+  // typedef the Explicit1DGeneralHeatEquationCUDA
+  typedef Explicit1DGeneralHeatEquationCUDA<float, BoundaryConditionType::Robin,
+                                            std::vector, std::allocator<float>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -1095,11 +1108,9 @@ void testExplAdvDiffEquationFloatRobinBC() {
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](float x) { return 1.0; });
-  // set convection term:
-  expl_solver.set1OrderCoefficient([](float x) { return -1.0; });
-  // set zero-order term:
-  expl_solver.set0OrderCoefficient([](float x) { return 0.0; });
+  expl_solver.set2OrderCoefficient(1.0);
+  // set convection term
+  expl_solver.set1OrderCoefficient(-1.0);
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
@@ -1137,54 +1148,15 @@ void testExplAdvDiffEquationFloatRobinBC() {
   }
 }
 
-}  // namespace advection_equation
-
-void testImplSpaceVarAdvDiffEquationDirichletBCDeviceCUDA() {
-  std::cout << "============================================================\n";
-  std::cout << "==== Implicit Advection-Diffusion Equation (Dirichlet BC) ==\n";
-  std::cout << "============================================================\n";
-
-  advection_equation::testImplAdvDiffEquationDoubleDirichletBCDeviceEuler();
-  advection_equation::testImplAdvDiffEquationFloatDirichletBCDeviceEuler();
-  advection_equation::testImplAdvDiffEquationDoubleDirichletBCDeviceCN();
-  advection_equation::testImplAdvDiffEquationFloatDirichletBCDeviceCN();
-
-  std::cout << "============================================================\n";
-}
-
-void testImplSpaceVarAdvDiffEquationRobinBCDeviceCUDA() {
-  std::cout << "============================================================\n";
-  std::cout << "======= Implicit Advection Diffusion Equation (Robin BC) ===\n";
-  std::cout << "============================================================\n";
-
-  advection_equation::testImplAdvDiffEquationDoubleRobinBCDeviceEuler();
-  advection_equation::testImplAdvDiffEquationFloatRobinBCDeviceEuler();
-  advection_equation::testImplAdvDiffEquationDoubleRobinBCDeviceCN();
-  advection_equation::testImplAdvDiffEquationFloatRobinBCDeviceCN();
-
-  std::cout << "============================================================\n";
-}
-
-void testExplSpaceVarAdvDiffEquationDirichletBCCUDA() {
-  std::cout << "============================================================\n";
-  std::cout << "=== Explicit Advection Diffusion Equation (Dirichlet BC) ===\n";
-  std::cout << "============================================================\n";
-
-  advection_equation::testExplAdvDiffEquationDoubleDirichletBCEuler();
-  advection_equation::testExplAdvDiffEquationFloatDirichletBCEuler();
-
-  std::cout << "============================================================\n";
-}
-
-void testExplSpaceVarAdvDiffEquationRobinBCCUDA() {
+void testExplAdvDiffEquationRobinBCCUDA() {
   std::cout << "============================================================\n";
   std::cout << "===== Explicit Advection Diffusion Equation (Robin BC) =====\n";
   std::cout << "============================================================\n";
 
-  advection_equation::testExplAdvDiffEquationDoubleRobinBC();
-  advection_equation::testExplAdvDiffEquationFloatRobinBC();
+  testExplAdvDiffEquationDoubleRobinBC();
+  testExplAdvDiffEquationFloatRobinBC();
 
   std::cout << "============================================================\n";
 }
 
-#endif  ///_LSS_ONE_DIM_SPACE_VARIABNLE_ADVECTION_DIFFUSION_EQUATION_SOLVERS_CUDA_T
+#endif  ///_LSS_ONE_DIM_ADVECTION_DIFFUSION_EQUATION_CUDA_T
