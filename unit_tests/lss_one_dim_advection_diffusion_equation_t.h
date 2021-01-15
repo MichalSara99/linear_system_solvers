@@ -57,7 +57,8 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -138,7 +139,8 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -237,7 +239,8 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -298,7 +301,8 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -372,7 +376,8 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -433,7 +438,8 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -941,7 +947,8 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1019,7 +1026,8 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1097,7 +1105,8 @@ void testExplAdvDiffEquationDirichletBCADES() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1196,7 +1205,8 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1254,7 +1264,8 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1311,7 +1322,8 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});

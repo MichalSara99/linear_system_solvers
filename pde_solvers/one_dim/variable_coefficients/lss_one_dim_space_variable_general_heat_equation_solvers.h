@@ -30,6 +30,10 @@ template <typename T>
 using PDECoefficientHolder =
     std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
 
+// move this somewhere else:
+template <typename T>
+using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
+
 namespace implicit_solvers {
 
 // ============================================================================
@@ -75,7 +79,7 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
   std::size_t spaceN_;              // number of space subdivisions
   std::function<T(T)> init_;        // init condition
   std::function<T(T, T)> source_;   // heat source F(x,t)
-  std::pair<T, T> boundary_;        // boundaries
+  DirichletPair<T> boundary_;       // boundaries
   PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
@@ -110,9 +114,8 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &boundaryPair) {
+  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
     boundary_ = boundaryPair;
-    fdmSolver_.setBoundaryCondition(boundaryPair);
   }
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
     init_ = initialCondition;
@@ -269,8 +272,8 @@ class Explicit1DSpaceVariableGeneralHeatEquation {};
 //  u(x,0) = f(x)
 //
 //	and Dirichlet boundaries:
-//  u(x_1,t) = A
-//	u(x_2,t) = B
+//  u(x_1,t) = A(t)
+//	u(x_2,t) = B(t)
 //
 // ============================================================================
 
@@ -286,7 +289,7 @@ class Explicit1DSpaceVariableGeneralHeatEquation<
   std::size_t spaceN_;              // number of space subdivisions
   std::function<T(T)> init_;        // initi condition
   std::function<T(T, T)> source_;   // heat source	F(x,t)
-  std::pair<T, T> boundary_;        // boundaries
+  DirichletPair<T> boundary_;       // boundaries
   PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
@@ -320,7 +323,7 @@ class Explicit1DSpaceVariableGeneralHeatEquation<
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &boundaryPair) {
+  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
     boundary_ = boundaryPair;
   }
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -523,6 +526,8 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs);
+      fdmSolver_.setBoundaryCondition(
+          std::make_pair(boundary_.first(time), boundary_.second(time)));
       fdmSolver_.setRhs(rhs);
       fdmSolver_.solve(nextSol);
       prevSol = nextSol;
@@ -540,6 +545,8 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(),
                 Container<T, Alloc>(), rhs);
+      fdmSolver_.setBoundaryCondition(
+          std::make_pair(boundary_.first(time), boundary_.second(time)));
       fdmSolver_.setRhs(rhs);
       fdmSolver_.solve(nextSol);
       prevSol = nextSol;
@@ -680,7 +687,7 @@ void explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation<
   // create container to carry mesh in space and then previous solution:
   Container<T, Alloc> initCondition(spaceN_ + 1, T{});
   // populate the container with mesh in space
-  discretizeSpace(h, boundary_.first, initCondition);
+  discretizeSpace(h, spacer_.lower(), initCondition);
   // use the mesh in space to get values of initial condition
   discretizeInitialCondition(init_, initCondition);
   // get the correct scheme:

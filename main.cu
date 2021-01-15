@@ -141,6 +141,8 @@ int main(int argc, char const *argv[]) {
   // testExplSpaceVarHomPureHeatEquationSourceRobinBC();
 
   // testImplSpaceVarHeatEquationDirichletBCDoubleSweep();
+  // testImplSpaceVarHeatEquationDirichletBCThomasLU();
+  // testExplSpaceVarHeatEquationDirichletBCADE();
 
   // ====================================================================
 

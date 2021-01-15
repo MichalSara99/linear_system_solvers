@@ -27,6 +27,10 @@ template <typename T>
 using PDECoefficientHolder =
     std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
 
+// move this somewhere else:
+template <typename T>
+using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
+
 // ============================================================================
 // ======================= ExplicitHeatEulerScheme ============================
 // ============================================================================
@@ -61,7 +65,7 @@ class ExplicitHeatEulerScheme
   bool isStable() const override;
 
   // for Dirichlet BC
-  void operator()(std::pair<T, T> const &dirichletBCPair,
+  void operator()(DirichletPair<T> const &dirichletBCPair,
                   std::vector<T> &solution) const override;
   // for Robin BC
   void operator()(std::pair<T, T> const &leftRobinBCPair,
@@ -99,7 +103,7 @@ class ADEHeatBakaratClarkScheme
   bool isStable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(std::pair<T, T> const &dirichletBCPair,
+  void operator()(DirichletPair<T> const &dirichletBCPair,
                   std::vector<T> &solution) const override;
   // for Robin BC
   void operator()(std::pair<T, T> const &leftRobinBCPair,
@@ -137,7 +141,7 @@ class ADEHeatSaulyevScheme
   bool isStable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(std::pair<T, T> const &dirichletBCPair,
+  void operator()(DirichletPair<T> const &dirichletBCPair,
                   std::vector<T> &solution) const override;
   // for Robin BC
   void operator()(std::pair<T, T> const &leftRobinBCPair,
@@ -174,7 +178,7 @@ bool lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
 
 template <typename T>
 void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
-    T>::operator()(std::pair<T, T> const &dirichletBCPair,
+    T>::operator()(DirichletPair<T> const &dirichletBCPair,
                    std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
@@ -195,16 +199,16 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
   // previous solution:
   std::vector<T> prevSol = initialCondition_;
   // left space boundary:
-  T const left = dirichletBCPair.first;
+  auto const &left = dirichletBCPair.first;
   // right space boundary:
-  T const right = dirichletBCPair.second;
+  auto const &right = dirichletBCPair.second;
   // size of the space vector:
   std::size_t const spaceSize = solution.size();
   if (!isSourceSet_) {
     // loop for stepping in time:
     while (time <= terminalTime_) {
-      solution[0] = left;
-      solution[solution.size() - 1] = right;
+      solution[0] = left(time);
+      solution[solution.size() - 1] = right(time);
       for (std::size_t t = 1; t < spaceSize - 1; ++t) {
         solution[t] = (1.0 - 2.0 * B(t * h)) * prevSol[t] +
                       D(t * h) * prevSol[t + 1] + A(t * h) * prevSol[t - 1];
@@ -218,8 +222,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
     discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
     // loop for stepping in time:
     while (time <= terminalTime_) {
-      solution[0] = left;
-      solution[solution.size() - 1] = right;
+      solution[0] = left(time);
+      solution[solution.size() - 1] = right(time);
       for (std::size_t t = 1; t < spaceSize - 1; ++t) {
         solution[t] = solution[t] =
             (1.0 - 2.0 * B(t * h)) * prevSol[t] + D(t * h) * prevSol[t + 1] +
@@ -312,7 +316,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
 template <typename T>
 void lss_one_dim_space_variable_heat_explicit_schemes::
     ADEHeatBakaratClarkScheme<T>::operator()(
-        std::pair<T, T> const &dirichletBCPair,
+        DirichletPair<T> const &dirichletBCPair,
         std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
@@ -335,9 +339,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
   auto const &d = [&](T x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](T x) { return (k / (1.0 + B(x))); };
   // left space boundary:
-  T const left = dirichletBCPair.first;
+  auto const &left = dirichletBCPair.first;
   // right space boundary:
-  T const right = dirichletBCPair.second;
+  auto const &right = dirichletBCPair.second;
   // conmponents of the solution:
   std::vector<T> com1(initialCondition_);
   std::vector<T> com2(initialCondition_);
@@ -368,8 +372,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
   if (!isSourceSet_) {
     // loop for stepping in time:
     while (time <= terminalTime_) {
-      com1[0] = com2[0] = left;
-      com1[solution.size() - 1] = com2[solution.size() - 1] = right;
+      com1[0] = com2[0] = left(time);
+      com1[solution.size() - 1] = com2[solution.size() - 1] = right(time);
       std::thread upSweepTr(std::move(upSweep), std::ref(com1), sourceCurr,
                             0.0);
       std::thread downSweepTr(std::move(downSweep), std::ref(com2), sourceCurr,
@@ -386,8 +390,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
     discretizeInSpace(h, spaceStart_, time, source_, sourceNext);
     // loop for stepping in time:
     while (time <= terminalTime_) {
-      com1[0] = com2[0] = left;
-      com1[solution.size() - 1] = com2[solution.size() - 1] = right;
+      com1[0] = com2[0] = left(time);
+      com1[solution.size() - 1] = com2[solution.size() - 1] = right(time);
       std::thread upSweepTr(std::move(upSweep), std::ref(com1), sourceNext,
                             1.0);
       std::thread downSweepTr(std::move(downSweep), std::ref(com2), sourceCurr,
@@ -415,7 +419,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
 
 template <typename T>
 void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
-    T>::operator()(std::pair<T, T> const &dirichletBCPair,
+    T>::operator()(DirichletPair<T> const &dirichletBCPair,
                    std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
@@ -438,9 +442,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
   auto const &d = [&](T x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](T x) { return (k / (1.0 + B(x))); };
   // left space boundary:
-  T const left = dirichletBCPair.first;
+  auto const &left = dirichletBCPair.first;
   // right space boundary:
-  T const right = dirichletBCPair.second;
+  auto const &right = dirichletBCPair.second;
   // get the initial condition :
   solution = initialCondition_;
   // size of the space vector:
@@ -471,8 +475,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
     // loop for stepping in time:
     std::size_t t = 1;
     while (time <= terminalTime_) {
-      solution[0] = left;
-      solution[solution.size() - 1] = right;
+      solution[0] = left(time);
+      solution[solution.size() - 1] = right(time);
       if (t % 2 == 0)
         downSweep(solution, sourceCurr, 0.0);
       else
@@ -486,8 +490,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ADEHeatSaulyevScheme<
     // loop for stepping in time:
     std::size_t t = 1;
     while (time <= terminalTime_) {
-      solution[0] = left;
-      solution[solution.size() - 1] = right;
+      solution[0] = left(time);
+      solution[solution.size() - 1] = right(time);
       if (t % 2 == 0)
         downSweep(solution, sourceCurr, 1.0);
       else

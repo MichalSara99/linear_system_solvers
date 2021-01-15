@@ -11,6 +11,10 @@
 
 namespace lss_one_dim_base_explicit_schemes {
 
+// move this somewhere else:
+template <typename T>
+using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
+
 using lss_one_dim_pde_utility::Discretization;
 
 // ============================================================================
@@ -52,7 +56,7 @@ class Explicit1DHeatSchemeBase
   virtual bool isStable() const = 0;
 
   // for Dirichlet BC
-  virtual void operator()(std::pair<T, T> const &dirichletBCPair,
+  virtual void operator()(DirichletPair<T> const &dirichletBCPair,
                           std::vector<T> &solution) const = 0;
   // for Robin BC
   virtual void operator()(std::pair<T, T> const &leftRobinBCPair,

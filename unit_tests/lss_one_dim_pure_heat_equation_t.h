@@ -60,7 +60,8 @@ void testImplPureHeatEquationDirichletBCDoubleSweepEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -135,7 +136,8 @@ void testImplPureHeatEquationDirichletBCDoubleSweepCN() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -222,7 +224,8 @@ void testImplPureHeatEquationDirichletBCThomasLUEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -297,7 +300,8 @@ void testImplPureHeatEquationDirichletBCThomasLUCN() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -789,7 +793,8 @@ void testImplPureHeatEquationSourceDirichletBCDoubleSweepEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -870,7 +875,8 @@ void testImplPureHeatEquationSourceDirichletBCDoubleSweepCN() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -963,7 +969,8 @@ void testImplPureHeatEquationSourceDirichletBCThomasLUEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1044,7 +1051,8 @@ void testImplPureHeatEquationSourceDirichletBCThomasLUCN() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T t) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1508,7 +1516,9 @@ void testImplNonHomPureHeatEquationDirichletBCDoubleSweepEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](T t) { return 0.0; };
+  auto const &dirichletRight = [](T t) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1583,7 +1593,9 @@ void testImplNonHomPureHeatEquationDirichletBCDoubleSweepCN() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](T t) { return 0.0; };
+  auto const &dirichletRight = [](T t) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1670,7 +1682,9 @@ void testImplNonHomPureHeatEquationDirichletBCThomasLUEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](T t) { return 0.0; };
+  auto const &dirichletRight = [](T t) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1745,7 +1759,9 @@ void testImplNonHomPureHeatEquationDirichletBCThomasLUCN() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](T t) { return 0.0; };
+  auto const &dirichletRight = [](T t) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1839,7 +1855,8 @@ void testExplPureHeatEquationDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1911,7 +1928,8 @@ void testExplPureHeatEquationDirichletBCADEBC() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1983,7 +2001,8 @@ void testExplPureHeatEquationDirichletBCADES() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -2071,7 +2090,8 @@ void testExplPureHeatEquationSourceDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -2149,7 +2169,8 @@ void testExplPureHeatEquationSourceDirichletBCADEBC() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -2227,7 +2248,8 @@ void testExplPureHeatEquationSourceDirichletBCADES() {
   // initial condition:
   auto initialCondition = [](T x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](T x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -2327,7 +2349,9 @@ void testExplNonHomPureHeatEquationDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](T x) { return 0.0; };
+  auto const &dirichletRight = [](T x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -2399,7 +2423,9 @@ void testExplNonHomPureHeatEquationDirichletBCADEBC() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](T x) { return 0.0; };
+  auto const &dirichletRight = [](T x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -2471,7 +2497,9 @@ void testExplNonHomPureHeatEquationDirichletBCADES() {
   // initial condition:
   auto initialCondition = [](T x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](T x) { return 0.0; };
+  auto const &dirichletRight = [](T x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
