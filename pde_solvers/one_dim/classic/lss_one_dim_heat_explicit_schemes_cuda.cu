@@ -11,14 +11,19 @@ static constexpr T NaN() {
   return std::numeric_limits<T>::quiet_NaN();
 }
 
+// move this somewhere else:
+template <typename T>
+using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
+
 using lss_one_dim_heat_cuda_kernels::explicitEulerIterate1D;
 using lss_one_dim_heat_cuda_kernels::fillDirichletBC1D;
 using lss_one_dim_heat_cuda_kernels::fillRobinBC1D;
 using lss_utility::swap;
 
-void ExplicitEulerLoopSP::operator()(
-    float const *input, std::pair<float, float> const &boundaryPair,
-    unsigned long long const size, float *solution) const {
+void ExplicitEulerLoopSP::operator()(float const *input,
+                                     DirichletPair<float> const &boundaryPair,
+                                     unsigned long long const size,
+                                     float *solution) const {
   // prepare pointers on device:
   float *d_prev = NULL;
   float *d_next = NULL;
@@ -43,8 +48,8 @@ void ExplicitEulerLoopSP::operator()(
   float const gamma = (B * k) / (2.0f * h);
   float const delta = (C * k);
   // store bc:
-  float const left = boundaryPair.first;
-  float const right = boundaryPair.second;
+  auto const &left = boundaryPair.first;
+  auto const &right = boundaryPair.second;
 
   float time = k;
 
@@ -66,8 +71,8 @@ void ExplicitEulerLoopSP::operator()(
       explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(
           d_prev, d_next, d_source, lambda, gamma, delta, k, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<float>
-          <<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
+      fillDirichletBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+          d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;
@@ -81,8 +86,8 @@ void ExplicitEulerLoopSP::operator()(
       explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(
           d_prev, d_next, lambda, gamma, delta, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<float>
-          <<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
+      fillDirichletBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+          d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;
@@ -96,9 +101,10 @@ void ExplicitEulerLoopSP::operator()(
   cudaFree(d_next);
 }
 
-void ExplicitEulerLoopDP::operator()(
-    double const *input, std::pair<double, double> const &boundaryPair,
-    unsigned long long const size, double *solution) const {
+void ExplicitEulerLoopDP::operator()(double const *input,
+                                     DirichletPair<double> const &boundaryPair,
+                                     unsigned long long const size,
+                                     double *solution) const {
   // prepare pointers on device:
   double *d_prev = NULL;
   double *d_next = NULL;
@@ -123,8 +129,8 @@ void ExplicitEulerLoopDP::operator()(
   double const gamma = (B * k) / (2.0f * h);
   double const delta = (C * k);
   // store bc:
-  double const left = boundaryPair.first;
-  double const right = boundaryPair.second;
+  auto const &left = boundaryPair.first;
+  auto const &right = boundaryPair.second;
 
   double time = k;
 
@@ -146,8 +152,8 @@ void ExplicitEulerLoopDP::operator()(
       explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(
           d_prev, d_next, d_source, lambda, gamma, delta, k, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<double>
-          <<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
+      fillDirichletBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+          d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;
@@ -160,8 +166,8 @@ void ExplicitEulerLoopDP::operator()(
       explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(
           d_prev, d_next, lambda, gamma, delta, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<double>
-          <<<threadsPerBlock, blocksPerGrid>>>(d_next, left, right, size);
+      fillDirichletBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+          d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;

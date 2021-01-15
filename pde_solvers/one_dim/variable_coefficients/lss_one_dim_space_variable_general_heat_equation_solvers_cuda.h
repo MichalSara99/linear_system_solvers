@@ -28,6 +28,10 @@ template <typename T>
 using PDECoefficientHolder =
     std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
 
+// move this somewhere else:
+template <typename T>
+using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
+
 namespace implicit_solvers {
 
 // ============================================================================
@@ -50,8 +54,8 @@ class Implicit1DSpaceVariableGeneralHeatEquationCUDA {};
 //  u(x,0) = f(x)
 //
 //	and Dirichlet boundaries:
-//  u(x_1,t) = A
-//	u(x_2,t) = B
+//  u(x_1,t) = A(t)
+//	u(x_2,t) = B(t)
 //
 // ============================================================================
 
@@ -69,7 +73,7 @@ class Implicit1DSpaceVariableGeneralHeatEquationCUDA<
   std::size_t spaceN_;                        // number of space subdivisions
   std::function<T(T)> init_;                  // init condition
   std::function<T(T, T)> source_;             // heat source
-  std::pair<T, T> boundary_;                  // boundaries
+  DirichletPair<T> boundary_;                 // boundaries
   PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
@@ -103,7 +107,7 @@ class Implicit1DSpaceVariableGeneralHeatEquationCUDA<
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &boundaryPair) {
+  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
     boundary_ = boundaryPair;
   }
 
@@ -259,8 +263,8 @@ class Explicit1DSpaceVariableGeneralHeatEquationCUDA {};
 //  u(x,0) = f(x)
 //
 //	and Dirichlet boundaries:
-//  u(x_1,t) = A
-//	u(x_2,t) = B
+//  u(x_1,t) = A(t)
+//	u(x_2,t) = B(t)
 //
 // ============================================================================
 
@@ -276,7 +280,7 @@ class Explicit1DSpaceVariableGeneralHeatEquationCUDA<
   std::size_t spaceN_;              // number of space subdivisions
   std::function<T(T)> init_;        // initi condition
   std::function<T(T, T)> source_;   // heat source	F(x,t)
-  std::pair<T, T> boundary_;        // boundaries
+  DirichletPair<T> boundary_;       // boundaries
   PDECoefficientHolder<T> coeffs_;  // coefficients a(x), b(x), c(x) in PDE
   bool isSourceSet_;
 
@@ -310,7 +314,7 @@ class Explicit1DSpaceVariableGeneralHeatEquationCUDA<
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &boundaryPair) {
+  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
     boundary_ = boundaryPair;
   }
 
@@ -529,7 +533,8 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA<
     discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceNext);
     // loop for stepping in time:
     while (time <= lastTime) {
-      schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs, boundary_,
+      schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs,
+                std::make_pair(boundary_.first(time), boundary_.second(time)),
                 std::pair<T, T>());
       solver_.setRhs(rhs);
       solver_.solve(nextSol);
@@ -548,7 +553,9 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA<
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(),
-                Container<T, Alloc>(), rhs, boundary_, std::pair<T, T>());
+                Container<T, Alloc>(), rhs,
+                std::make_pair(boundary_.first(time), boundary_.second(time)),
+                std::pair<T, T>());
       solver_.setRhs(rhs);
       solver_.solve(nextSol);
       prevSol = nextSol;
@@ -557,9 +564,9 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA<
   }
 
   // copy into solution vector
-  solution[0] = boundary_.first;
+  solution[0] = boundary_.first(lastTime);
   std::copy(prevSol.begin(), prevSol.end(), std::next(solution.begin()));
-  solution[solution.size() - 1] = boundary_.second;
+  solution[solution.size() - 1] = boundary_.second(lastTime);
 }
 
 // ============================================================================

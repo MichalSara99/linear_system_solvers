@@ -96,9 +96,6 @@
     <ClInclude Include="unit_tests\lss_one_dim_pure_heat_equation_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
-    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_cuda_t.h">
-      <Filter>unit_tests</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_one_dim_space_variable_general_heat_equation_solvers.h">
       <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
     </ClInclude>
@@ -148,6 +145,9 @@
       <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
     </ClInclude>
     <ClInclude Include="unit_tests\lss_one_dim_space_variable_advection_diffusion_equation_cuda_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
   </ItemGroup>

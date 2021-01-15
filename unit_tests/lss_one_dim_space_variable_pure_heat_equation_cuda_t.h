@@ -60,7 +60,8 @@ void testImplPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -138,7 +139,8 @@ void testImplPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -217,7 +219,8 @@ void testImplPureHeatEquationDoubleDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -296,7 +299,8 @@ void testImplPureHeatEquationFloatDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -374,7 +378,8 @@ void testImplPureHeatEquationDoubleDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -452,7 +457,8 @@ void testImplPureHeatEquationFloatDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -531,7 +537,8 @@ void testImplPureHeatEquationDoubleDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -610,7 +617,8 @@ void testImplPureHeatEquationFloatDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -1083,7 +1091,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1168,7 +1177,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -1253,7 +1263,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1338,7 +1349,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -1423,7 +1435,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1508,7 +1521,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -1593,7 +1607,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1678,7 +1693,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2469,7 +2485,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2547,7 +2565,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -2626,7 +2646,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2705,7 +2727,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -2783,7 +2807,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2861,7 +2887,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -2940,7 +2968,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -3019,7 +3049,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3102,7 +3134,8 @@ void testExplPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -3177,7 +3210,8 @@ void testExplPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3257,7 +3291,9 @@ void testExplNonHomPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -3332,7 +3368,9 @@ void testExplNonHomPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3409,7 +3447,8 @@ void testExplPureHeatEquationSourceFloatDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3491,7 +3530,8 @@ void testExplPureHeatEquationSourceDoubleDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0f);
@@ -3935,6 +3975,419 @@ void testExplHomPureHeatEquationSourceDoubleRobinBCEuler() {
 
 }  // namespace pure_heat_equation_cuda
 
+namespace reaction_diffusion_equation {
+
+void testImplSpaceVarHeatEquationDoubleDirichletBCDeviceEuler() {
+  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
+      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+  using lss_types::BoundaryConditionType;
+  using lss_types::ImplicitPDESchemes;
+  using lss_types::MemorySpace;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+  std::cout << " Value type: " << typeid(double).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5 - t), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <-1,1> \n\n";
+  std::cout << " U(x,t) = exp(-0.5*x*x - t), x in <-1,1> \n\n";
+  std::cout << "============================================================\n";
+
+  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
+  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+      double, BoundaryConditionType::Dirichlet, MemorySpace::Device,
+      RealSparseSolverCUDA, std::vector, std::allocator<double>>
+      implicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 200;
+  // number of time subdivisions:
+  std::size_t const Td = 200;
+  // initial condition:
+  auto initialCondition = [](double x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto const &dirichet = [](double t) { return exp(-0.5 - t); };
+  auto boundary = std::make_pair(dirichet, dirichet);
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<double> solution(Sd + 1, double{});
+  // initialize solver
+  implicit_solver impl_solver(Range<double>(-1.0, 1.0), 0.20, Sd, Td);
+  // set boundary conditions:
+  impl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  impl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  impl_solver.set2OrderCoefficient([](double x) { return 1.0; });
+  // set convection term in PDE
+  impl_solver.set1OrderCoefficient([](double x) { return 0.0; });
+  // set zero-order term in PDE
+  impl_solver.set0OrderCoefficient([](double x) { return -1.0 * x * x; });
+  // get the solution:
+  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+  // get exact solution:
+  auto exact = [](double x, double t) { return (exp(-0.5 * x * x - t)); };
+
+  double const h = impl_solver.spaceStep();
+  double const start = -1.0;
+  std::cout << "tp : FDM | Exact | Abs Diff\n";
+  double benchmark{};
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    benchmark = exact(start + j * h, 0.2);
+    std::cout << "t_" << j << "(" << (start + j * h) << ") : " << solution[j]
+              << " |  " << benchmark << " | " << (solution[j] - benchmark)
+              << '\n';
+  }
+}
+
+void testImplSpaceVarHeatEquationFloatDirichletBCDeviceEuler() {
+  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
+      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+  using lss_types::BoundaryConditionType;
+  using lss_types::ImplicitPDESchemes;
+  using lss_types::MemorySpace;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+  std::cout << " Value type: " << typeid(float).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5 - t), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <-1,1> \n\n";
+  std::cout << " U(x,t) = exp(-0.5*x*x - t), x in <-1,1> \n\n";
+  std::cout << "============================================================\n";
+
+  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
+  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+      float, BoundaryConditionType::Dirichlet, MemorySpace::Device,
+      RealSparseSolverCUDA, std::vector, std::allocator<float>>
+      implicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 200;
+  // number of time subdivisions:
+  std::size_t const Td = 200;
+  // initial condition:
+  auto initialCondition = [](float x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto const &dirichet = [](float t) { return exp(-0.5 - t); };
+  auto boundary = std::make_pair(dirichet, dirichet);
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<float> solution(Sd + 1, float{});
+  // initialize solver
+  implicit_solver impl_solver(Range<float>(-1.0, 1.0), 0.20, Sd, Td);
+  // set boundary conditions:
+  impl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  impl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  impl_solver.set2OrderCoefficient([](float x) { return 1.0; });
+  // set convection term in PDE
+  impl_solver.set1OrderCoefficient([](float x) { return 0.0; });
+  // set zero-order term in PDE
+  impl_solver.set0OrderCoefficient([](float x) { return -1.0 * x * x; });
+  // get the solution:
+  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+  // get exact solution:
+  auto exact = [](float x, float t) { return (exp(-0.5 * x * x - t)); };
+
+  float const h = impl_solver.spaceStep();
+  float const start = -1.0;
+  std::cout << "tp : FDM | Exact | Abs Diff\n";
+  float benchmark{};
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    benchmark = exact(start + j * h, 0.2);
+    std::cout << "t_" << j << "(" << (start + j * h) << ") : " << solution[j]
+              << " |  " << benchmark << " | " << (solution[j] - benchmark)
+              << '\n';
+  }
+}
+
+void testImplSpaceVarHeatEquationDoubleDirichletBCDeviceCN() {
+  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
+      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+  using lss_types::BoundaryConditionType;
+  using lss_types::ImplicitPDESchemes;
+  using lss_types::MemorySpace;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using Double Sweep algorithm with implicit Crank-Nicolson\n"
+               "method\n\n";
+  std::cout << " Value type: " << typeid(double).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5 - t), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <-1,1> \n\n";
+  std::cout << " U(x,t) = exp(-0.5*x*x - t), x in <-1,1> \n\n";
+  std::cout << "============================================================\n";
+  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
+  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+      double, BoundaryConditionType::Dirichlet, MemorySpace::Device,
+      RealSparseSolverCUDA, std::vector, std::allocator<double>>
+      implicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 200;
+  // number of time subdivisions:
+  std::size_t const Td = 200;
+  // initial condition:
+  auto initialCondition = [](double x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto const &dirichet = [](double t) { return exp(-0.5 - t); };
+  auto boundary = std::make_pair(dirichet, dirichet);
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<double> solution(Sd + 1, double{});
+  // initialize solver
+  implicit_solver impl_solver(Range<double>(-1.0, 1.0), 0.20, Sd, Td);
+  // set boundary conditions:
+  impl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  impl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  impl_solver.set2OrderCoefficient([](double x) { return 1.0; });
+  // set convection term in PDE
+  impl_solver.set1OrderCoefficient([](double x) { return 0.0; });
+  // set zero-order term in PDE
+  impl_solver.set0OrderCoefficient([](double x) { return -1.0 * x * x; });
+  // get the solution:
+  impl_solver.solve(solution);
+  // get exact solution:
+  auto exact = [](double x, double t) { return (exp(-0.5 * x * x - t)); };
+
+  double const h = impl_solver.spaceStep();
+  double const start = -1.0;
+  std::cout << "tp : FDM | Exact | Abs Diff\n";
+  double benchmark{};
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    benchmark = exact(start + j * h, 0.2);
+    std::cout << "t_" << j << "(" << (start + j * h) << ") : " << solution[j]
+              << " |  " << benchmark << " | " << (solution[j] - benchmark)
+              << '\n';
+  }
+}
+
+void testImplSpaceVarHeatEquationFloatDirichletBCDeviceCN() {
+  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
+      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+  using lss_types::BoundaryConditionType;
+  using lss_types::ImplicitPDESchemes;
+  using lss_types::MemorySpace;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using Double Sweep algorithm with implicit Crank-Nicolson\n"
+               "method\n\n";
+  std::cout << " Value type: " << typeid(float).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5 - t), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <-1,1> \n\n";
+  std::cout << " U(x,t) = exp(-0.5*x*x - t), x in <-1,1> \n\n";
+  std::cout << "============================================================\n";
+  // typedef the Implicit1DSpaceVariableGeneralHeatEquationCUDA
+  typedef Implicit1DSpaceVariableGeneralHeatEquationCUDA<
+      float, BoundaryConditionType::Dirichlet, MemorySpace::Device,
+      RealSparseSolverCUDA, std::vector, std::allocator<float>>
+      implicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 200;
+  // number of time subdivisions:
+  std::size_t const Td = 200;
+  // initial condition:
+  auto initialCondition = [](float x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto const &dirichet = [](float t) { return exp(-0.5 - t); };
+  auto boundary = std::make_pair(dirichet, dirichet);
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<float> solution(Sd + 1, float{});
+  // initialize solver
+  implicit_solver impl_solver(Range<float>(-1.0, 1.0), 0.20, Sd, Td);
+  // set boundary conditions:
+  impl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  impl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  impl_solver.set2OrderCoefficient([](float x) { return 1.0; });
+  // set convection term in PDE
+  impl_solver.set1OrderCoefficient([](float x) { return 0.0; });
+  // set zero-order term in PDE
+  impl_solver.set0OrderCoefficient([](float x) { return -1.0 * x * x; });
+  // get the solution:
+  impl_solver.solve(solution);
+  // get exact solution:
+  auto exact = [](float x, float t) { return (exp(-0.5 * x * x - t)); };
+
+  float const h = impl_solver.spaceStep();
+  float const start = -1.0;
+  std::cout << "tp : FDM | Exact | Abs Diff\n";
+  double benchmark{};
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    benchmark = exact(start + j * h, 0.2);
+    std::cout << "t_" << j << "(" << (start + j * h) << ") : " << solution[j]
+              << " |  " << benchmark << " | " << (solution[j] - benchmark)
+              << '\n';
+  }
+}
+
+void testExplHeatEquationDoubleDirichletBCDeviceEuler() {
+  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
+      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+  using lss_types::BoundaryConditionType;
+  using lss_types::MemorySpace;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using ADE Barakat-Clark  method\n\n";
+  std::cout << " Value type:" << typeid(double).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5 - t), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <-1,1> \n\n";
+  std::cout << " U(x,t) = exp(-0.5*x*x - t), x in <-1,1> \n\n";
+  std::cout << "============================================================\n";
+
+  // typedef the Explicit1DSpaceVariableGeneralHeatEquationCUDA
+  typedef Explicit1DSpaceVariableGeneralHeatEquationCUDA<
+      double, BoundaryConditionType::Dirichlet, std::vector,
+      std::allocator<double>>
+      explicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 100;
+  // number of time subdivisions:
+  std::size_t const Td = 10000;
+  // initial condition:
+  auto initialCondition = [](double x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto const &dirichet = [](double t) { return exp(-0.5 - t); };
+  auto boundary = std::make_pair(dirichet, dirichet);
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<double> solution(Sd + 1, double{});
+  // initialize solver
+  explicit_solver expl_solver(Range<double>(-1.0, 1.0), 0.20, Sd, Td);
+  // set boundary conditions:
+  expl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  expl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  expl_solver.set2OrderCoefficient([](double x) { return 1.0; });
+  // set convection term in PDE
+  expl_solver.set1OrderCoefficient([](double x) { return 0.0; });
+  // set zero-order term in PDE
+  expl_solver.set0OrderCoefficient([](double x) { return -1.0 * x * x; });
+  // get the solution:
+  expl_solver.solve(solution);
+  // get exact solution:
+  auto exact = [](double x, double t) { return (exp(-0.5 * x * x - t)); };
+
+  double const h = expl_solver.spaceStep();
+  double const start = -1.0;
+  std::cout << "tp : FDM | Exact | Abs Diff\n";
+  double benchmark{};
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    benchmark = exact(start + j * h, 0.2);
+    std::cout << "t_" << j << "(" << (start + j * h) << ") : " << solution[j]
+              << " |  " << benchmark << " | " << (solution[j] - benchmark)
+              << '\n';
+  }
+}
+
+void testExplHeatEquationFloatDirichletBCDeviceEuler() {
+  using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
+      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
+  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
+  using lss_types::BoundaryConditionType;
+  using lss_types::MemorySpace;
+  using lss_utility::Range;
+
+  std::cout << "============================================================\n";
+  std::cout << "Solving Boundary-value Heat equation: \n\n";
+  std::cout << " Using ADE Barakat-Clark  method\n\n";
+  std::cout << " Value type:" << typeid(float).name() << "\n\n";
+  std::cout << " U_t(x,t) = U_xx(x,t) - x*x*U(x,t), \n\n";
+  std::cout << " where\n\n";
+  std::cout << " x in <-1,1> and t > 0,\n";
+  std::cout << " U(-1,t) = U(1,t) = exp(-0.5 - t), t > 0 \n\n";
+  std::cout << " U(x,0) = exp(-0.5*x*x), x in <-1,1> \n\n";
+  std::cout << " U(x,t) = exp(-0.5*x*x - t), x in <-1,1> \n\n";
+  std::cout << "============================================================\n";
+
+  // typedef the Explicit1DSpaceVariableGeneralHeatEquationCUDA
+  typedef Explicit1DSpaceVariableGeneralHeatEquationCUDA<
+      float, BoundaryConditionType::Dirichlet, std::vector,
+      std::allocator<float>>
+      explicit_solver;
+
+  // number of space subdivisions:
+  std::size_t const Sd = 100;
+  // number of time subdivisions:
+  std::size_t const Td = 10000;
+  // initial condition:
+  auto initialCondition = [](float x) { return exp(-0.5 * x * x); };
+  // boundary conditions:
+  auto const &dirichet = [](float t) { return exp(-0.5 - t); };
+  auto boundary = std::make_pair(dirichet, dirichet);
+  // prepare container for solution:
+  // note: size is Sd+1 since we must include space point at x = 0
+  std::vector<float> solution(Sd + 1, float{});
+  // initialize solver
+  explicit_solver expl_solver(Range<float>(-1.0, 1.0), 0.20, Sd, Td);
+  // set boundary conditions:
+  expl_solver.setBoundaryCondition(boundary);
+  // set initial condition:
+  expl_solver.setInitialCondition(initialCondition);
+  // set thermal diffusivity (C^2 in PDE)
+  expl_solver.set2OrderCoefficient([](float x) { return 1.0; });
+  // set convection term in PDE
+  expl_solver.set1OrderCoefficient([](float x) { return 0.0; });
+  // set zero-order term in PDE
+  expl_solver.set0OrderCoefficient([](float x) { return -1.0 * x * x; });
+  // get the solution:
+  expl_solver.solve(solution);
+  // get exact solution:
+  auto exact = [](float x, float t) { return (exp(-0.5 * x * x - t)); };
+
+  float const h = expl_solver.spaceStep();
+  float const start = -1.0;
+  std::cout << "tp : FDM | Exact | Abs Diff\n";
+  float benchmark{};
+  for (std::size_t j = 0; j < solution.size(); ++j) {
+    benchmark = exact(start + j * h, 0.2);
+    std::cout << "t_" << j << "(" << (start + j * h) << ") : " << solution[j]
+              << " |  " << benchmark << " | " << (solution[j] - benchmark)
+              << '\n';
+  }
+}
+
+}  // namespace reaction_diffusion_equation
+
 void testImplSpaceVarPureHeatEquationDirichletBCDeviceCUDA() {
   std::cout << "============================================================\n";
   std::cout << "===== Implicit Pure Heat Equation (Dirichlet BC) ===========\n";
@@ -4123,6 +4576,38 @@ void testExplSpaceVarHomPureHeatEquationSourceRobinBCCUDA() {
   pure_heat_equation_cuda::testExplHomPureHeatEquationSourceFloatRobinBCEuler();
   pure_heat_equation_cuda::
       testExplHomPureHeatEquationSourceDoubleRobinBCEuler();
+
+  std::cout << "============================================================\n";
+}
+
+void testImplSpaceVarHeatEquationDirichletBCHostCUDA() {
+  std::cout << "============================================================\n";
+  std::cout << "========= Implicit Heat Equation (with non-homogeneous \n"
+               "Dirichlet BC) =====\n";
+  std::cout << "============================================================\n";
+
+  reaction_diffusion_equation::
+      testImplSpaceVarHeatEquationDoubleDirichletBCDeviceEuler();
+  reaction_diffusion_equation::
+      testImplSpaceVarHeatEquationFloatDirichletBCDeviceEuler();
+  reaction_diffusion_equation::
+      testImplSpaceVarHeatEquationDoubleDirichletBCDeviceCN();
+  reaction_diffusion_equation::
+      testImplSpaceVarHeatEquationFloatDirichletBCDeviceCN();
+
+  std::cout << "============================================================\n";
+}
+
+void testExplSpaceVarHeatEquationDirichletBCHostCUDA() {
+  std::cout << "============================================================\n";
+  std::cout << "========= Explicit Heat Equation (with non-homogeneous \n"
+               "Dirichlet BC) =====\n";
+  std::cout << "============================================================\n";
+
+  reaction_diffusion_equation::
+      testExplHeatEquationFloatDirichletBCDeviceEuler();
+  reaction_diffusion_equation::
+      testExplHeatEquationDoubleDirichletBCDeviceEuler();
 
   std::cout << "============================================================\n";
 }

@@ -13,6 +13,10 @@ template <typename T>
 using PDECoefficientHolder =
     std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
 
+// move this somewhere else:
+template <typename T>
+using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
+
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
 using lss_one_dim_pde_utility::Discretization;
@@ -42,8 +46,7 @@ class ExplicitEulerLoopSP
         source_{source},
         isSourceSet_{isSourceSet} {}
 
-  void operator()(float const *input,
-                  std::pair<float, float> const &dirichletBC,
+  void operator()(float const *input, DirichletPair<float> const &dirichletBC,
                   unsigned long long const size, float *solution) const;
   void operator()(float const *input,
                   std::pair<float, float> const &leftRobinBC,
@@ -78,8 +81,7 @@ class ExplicitEulerLoopDP
         source_{source},
         isSourceSet_{isSourceSet} {}
 
-  void operator()(double const *input,
-                  std::pair<double, double> const &dirichletBC,
+  void operator()(double const *input, DirichletPair<double> const &dirichletBC,
                   unsigned long long const size, double *solution) const;
   void operator()(double const *input,
                   std::pair<double, double> const &leftRobinBC,
@@ -139,7 +141,7 @@ class ExplicitEulerHeatEquationScheme<float, Container, Alloc> {
   ExplicitEulerHeatEquationScheme &operator=(
       ExplicitEulerHeatEquationScheme &&) = delete;
 
-  void operator()(std::pair<float, float> const &boundaryPair,
+  void operator()(DirichletPair<float> const &boundaryPair,
                   Container<float, Alloc> &solution) const;
   void operator()(std::pair<float, float> const &leftPair,
                   std::pair<float, float> const &rightPair,
@@ -191,7 +193,7 @@ class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
   ExplicitEulerHeatEquationScheme &operator=(
       ExplicitEulerHeatEquationScheme &&) = delete;
 
-  void operator()(std::pair<double, double> const &boundaryPair,
+  void operator()(DirichletPair<double> const &boundaryPair,
                   Container<double, Alloc> &solution) const;
   void operator()(std::pair<double, double> const &leftPair,
                   std::pair<double, double> const &rightPair,
@@ -207,7 +209,7 @@ class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
 
 template <template <typename, typename> typename Container, typename Alloc>
 void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
-    std::pair<float, float> const &boundaryPair,
+    DirichletPair<float> const &boundaryPair,
     Container<float, Alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
@@ -230,7 +232,7 @@ void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
 
 template <template <typename, typename> typename Container, typename Alloc>
 void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
-    std::pair<double, double> const &boundaryPair,
+    DirichletPair<double> const &boundaryPair,
     Container<double, Alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");

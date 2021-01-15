@@ -58,7 +58,8 @@ void testImplPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -132,7 +133,8 @@ void testImplPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -207,7 +209,8 @@ void testImplPureHeatEquationDoubleDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -282,7 +285,8 @@ void testImplPureHeatEquationFloatDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -369,7 +373,8 @@ void testImplPureHeatEquationDoubleDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -443,7 +448,8 @@ void testImplPureHeatEquationFloatDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -518,7 +524,8 @@ void testImplPureHeatEquationDoubleDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -593,7 +600,8 @@ void testImplPureHeatEquationFloatDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -1073,7 +1081,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1154,7 +1163,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -1235,7 +1245,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1316,7 +1327,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -1397,7 +1409,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1478,7 +1491,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -1559,7 +1573,8 @@ void testImplPureHeatEquationSourceFloatDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0f; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -1640,7 +1655,8 @@ void testImplPureHeatEquationSourceDoubleDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2430,7 +2446,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2504,7 +2522,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
@@ -2579,7 +2599,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2654,7 +2676,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCDeviceCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -2742,7 +2766,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2816,7 +2842,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCHostEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -2891,7 +2919,9 @@ void testImplNonHomPureHeatEquationDoubleDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -2966,7 +2996,9 @@ void testImplNonHomPureHeatEquationFloatDirichletBCHostCN() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3059,7 +3091,8 @@ void testExplPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -3130,7 +3163,8 @@ void testExplPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0f, 0.0f);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3216,7 +3250,9 @@ void testExplNonHomPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0);
+  auto const &dirichletLeft = [](double x) { return 0.0; };
+  auto const &dirichletRight = [](double x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
@@ -3287,7 +3323,9 @@ void testExplNonHomPureHeatEquationFloatDirichletBCDeviceEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return x; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 100.0f);
+  auto const &dirichletLeft = [](float x) { return 0.0; };
+  auto const &dirichletRight = [](float x) { return 100.0; };
+  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3372,7 +3410,8 @@ void testExplPureHeatEquationSourceFloatDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](float x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](float x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
@@ -3450,7 +3489,8 @@ void testExplPureHeatEquationSourceDoubleDirichletBCEuler() {
   // initial condition:
   auto initialCondition = [](double x) { return 1.0; };
   // boundary conditions:
-  auto boundary = std::make_pair(0.0, 0.0);
+  auto const &dirichlet = [](double x) { return 0.0; };
+  auto boundary = std::make_pair(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0f);
