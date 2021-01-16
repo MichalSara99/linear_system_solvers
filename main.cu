@@ -179,7 +179,7 @@ int main(int argc, char const *argv[]) {
   // testExplSpaceVarPureHeatEquationRobinBCDeviceCUDA();
   // testExplSpaceVarHomPureHeatEquationSourceRobinBCCUDA();
 
-  testImplSpaceVarHeatEquationDirichletBCHostCUDA();
+  // testImplSpaceVarHeatEquationDirichletBCHostCUDA();
   // testExplSpaceVarHeatEquationDirichletBCHostCUDA();
 
   // ====================================================================

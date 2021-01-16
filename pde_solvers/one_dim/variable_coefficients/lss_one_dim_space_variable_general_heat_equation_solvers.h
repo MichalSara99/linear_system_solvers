@@ -24,6 +24,7 @@ using lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme;
 using lss_one_dim_space_variable_heat_implicit_schemes::
     ImplicitSpaceVariableHeatEquationSchemes;
 using lss_utility::Range;
+using lss_utility::uptr_t;
 
 // Alias for PDE coefficients (a(x),b(x),c(x))
 template <typename T>
@@ -57,8 +58,8 @@ class Implicit1DSpaceVariableGeneralHeatEquation {};
 //  u(x,0) = f(x)
 //
 //	and Dirichlet boundaries:
-//  u(x_1,t) = A
-//	u(x_2,t) = B
+//  u(x_1,t) = A(t)
+//	u(x_2,t) = B(t)
 //
 // ============================================================================
 
@@ -71,8 +72,10 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
     T, BoundaryConditionType::Dirichlet, FDMSolver, Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  FDMSolver<T, BoundaryConditionType::Dirichlet, Container, Alloc>
-      fdmSolver_;                   // finite-difference solver
+  typedef FDMSolver<T, BoundaryConditionType::Dirichlet, Container, Alloc>
+      fdm_solver_t;
+
+  uptr_t<fdm_solver_t> solverPtr_;  // finite-difference solver
   Range<T> spacer_;                 // space range
   T terminalT_;                     // terminal time
   std::size_t timeN_;               // number of time subdivisions
@@ -90,7 +93,7 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
       Range<T> const &spaceRange, T terminalTime,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
-      : fdmSolver_{spaceDiscretization + 1},
+      : solverPtr_{std::make_unique<fdm_solver_t>(spaceDiscretization + 1)},
         spacer_{spaceRange},
         terminalT_{terminalTime},
         timeN_{timeDiscretization},
@@ -178,8 +181,10 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
     T, BoundaryConditionType::Robin, FDMSolver, Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  FDMSolver<T, BoundaryConditionType::Robin, Container, Alloc>
-      fdmSolver_;                   // finite-difference solver
+  typedef FDMSolver<T, BoundaryConditionType::Robin, Container, Alloc>
+      fdm_solver_t;
+
+  uptr_t<fdm_solver_t> solverPtr_;  // finite-difference solver
   Range<T> spacer_;                 // space range
   T terminalT_;                     // terminal time
   std::size_t timeN_;               // number of time subdivisions
@@ -198,7 +203,7 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
       Range<T> const &spaceRange, T terminalTime,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
-      : fdmSolver_{spaceDiscretization + 1},
+      : solverPtr_{std::make_unique<fdm_solver_t>(spaceDiscretization + 1)},
         spacer_{spaceRange},
         terminalT_{terminalTime},
         timeN_{timeDiscretization},
@@ -226,7 +231,7 @@ class Implicit1DSpaceVariableGeneralHeatEquation<
                                    std::pair<T, T> const &right) {
     left_ = left;
     right_ = right;
-    fdmSolver_.setBoundaryCondition(left, right);
+    solverPtr_->setBoundaryCondition(left, right);
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -510,7 +515,7 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
   // store terminal time:
   T const lastTime = terminalT_;
   // set properties of FDMSolver:
-  fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
+  solverPtr_->setDiagonals(std::move(low), std::move(diag), std::move(up));
   // differentiate between inhomogeneous and homogeneous PDE:
   if (isSourceSet_) {
     // wrap the scheme coefficients:
@@ -526,10 +531,10 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs);
-      fdmSolver_.setBoundaryCondition(
+      solverPtr_->setBoundaryCondition(
           std::make_pair(boundary_.first(time), boundary_.second(time)));
-      fdmSolver_.setRhs(rhs);
-      fdmSolver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       discretizeInSpace(h, spacer_.lower(), time, source_, sourceCurr);
       discretizeInSpace(h, spacer_.lower(), 2.0 * time, source_, sourceNext);
@@ -545,10 +550,10 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(),
                 Container<T, Alloc>(), rhs);
-      fdmSolver_.setBoundaryCondition(
+      solverPtr_->setBoundaryCondition(
           std::make_pair(boundary_.first(time), boundary_.second(time)));
-      fdmSolver_.setRhs(rhs);
-      fdmSolver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       time += k;
     }
@@ -612,7 +617,7 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
   // store terminal time:
   T const lastTime = terminalT_;
   // set properties of FDMSolver:
-  fdmSolver_.setDiagonals(std::move(low), std::move(diag), std::move(up));
+  solverPtr_->setDiagonals(std::move(low), std::move(diag), std::move(up));
   // differentiate between inhomogeneous and homogeneous PDE:
   if (isSourceSet_) {
     // wrap the scheme coefficients:
@@ -628,8 +633,8 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs);
-      fdmSolver_.setRhs(rhs);
-      fdmSolver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       discretizeInSpace(h, spacer_.lower(), time, source_, sourceCurr);
       discretizeInSpace(h, spacer_.lower(), 2.0 * time, source_, sourceNext);
@@ -645,8 +650,8 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation<
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(),
                 Container<T, Alloc>(), rhs);
-      fdmSolver_.setRhs(rhs);
-      fdmSolver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       time += k;
     }

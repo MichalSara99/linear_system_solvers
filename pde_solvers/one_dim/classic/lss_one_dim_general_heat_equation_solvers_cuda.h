@@ -20,6 +20,7 @@ using lss_one_dim_pde_utility::Discretization;
 using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
 using lss_utility::FlatMatrix;
 using lss_utility::Range;
+using lss_utility::uptr_t;
 
 // move this somewhere else:
 template <typename T>
@@ -59,15 +60,17 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
                                         Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  RealSparsePolicyCUDA<MemSpace, T> solver_;  // finite-difference solver
-  Range<T> spacer_;                           // space range
-  T terminalT_;                               // terminal time
-  std::size_t timeN_;                         // number of time subdivisions
-  std::size_t spaceN_;                        // number of space subdivisions
-  std::function<T(T)> init_;                  // initi condition
-  std::function<T(T, T)> source_;             // heat source
-  DirichletPair<T> boundary_;                 // boundaries
-  std::tuple<T, T, T> coeffs_;                // coefficients a, b, c in PDE
+  typedef RealSparsePolicyCUDA<MemSpace, T> cuda_solver_t;
+
+  uptr_t<cuda_solver_t> solverPtr_;  // finite-difference solver
+  Range<T> spacer_;                  // space range
+  T terminalT_;                      // terminal time
+  std::size_t timeN_;                // number of time subdivisions
+  std::size_t spaceN_;               // number of space subdivisions
+  std::function<T(T)> init_;         // initi condition
+  std::function<T(T, T)> source_;    // heat source
+  DirichletPair<T> boundary_;        // boundaries
+  std::tuple<T, T, T> coeffs_;       // coefficients a, b, c in PDE
   bool isSourceSet_;
 
  public:
@@ -77,7 +80,8 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
       Range<T> const &spaceRange, T terminalTime,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
-      : spacer_{spaceRange},
+      : solverPtr_{std::make_unique<cuda_solver_t>()},
+        spacer_{spaceRange},
         terminalT_{terminalTime},
         timeN_{timeDiscretization},
         spaceN_{spaceDiscretization},
@@ -158,16 +162,18 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
                                         Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  RealSparsePolicyCUDA<MemSpace, T> solver_;  // finite-difference solver
-  Range<T> spacer_;                           // space range
-  T terminalT_;                               // terminal time
-  std::size_t timeN_;                         // number of time subdivisions
-  std::size_t spaceN_;                        // number of space subdivisions
-  std::function<T(T)> init_;                  // initi condition
-  std::function<T(T, T)> source_;             // heat source
-  std::pair<T, T> leftBoundary_;              // left boundaries
-  std::pair<T, T> rightBoundary_;             // right boundaries
-  std::tuple<T, T, T> coeffs_;                // coefficients a, b, c in PDE
+  typedef RealSparsePolicyCUDA<MemSpace, T> cuda_solver_t;
+
+  uptr_t<cuda_solver_t> solverPtr_;  // finite-difference solver
+  Range<T> spacer_;                  // space range
+  T terminalT_;                      // terminal time
+  std::size_t timeN_;                // number of time subdivisions
+  std::size_t spaceN_;               // number of space subdivisions
+  std::function<T(T)> init_;         // initi condition
+  std::function<T(T, T)> source_;    // heat source
+  std::pair<T, T> leftBoundary_;     // left boundaries
+  std::pair<T, T> rightBoundary_;    // right boundaries
+  std::tuple<T, T, T> coeffs_;       // coefficients a, b, c in PDE
   bool isSourceSet_;
 
  public:
@@ -177,7 +183,8 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
       Range<T> const &spaceRange, T terminalTime,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
-      : spacer_{spaceRange},
+      : solverPtr_{std::make_unique<RealSparsePolicyCUDA<MemSpace, T>>()},
+        spacer_{spaceRange},
         terminalT_{terminalTime},
         timeN_{timeDiscretization},
         spaceN_{spaceDiscretization},
@@ -476,9 +483,9 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   // store terminal time:
   T const lastTime = terminalT_;
   // initialize the solver:
-  solver_.initialize(m);
+  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
-  solver_.setFlatSparseMatrix(std::move(fsm));
+  solverPtr_->setFlatSparseMatrix(std::move(fsm));
   if (isSourceSet_) {
     // wrap the scheme coefficients:
     const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, k);
@@ -495,8 +502,8 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs,
                 std::make_pair(boundary_.first(time), boundary_.second(time)),
                 std::pair<T, T>());
-      solver_.setRhs(rhs);
-      solver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceCurr);
       discretizeInSpace(h, (spacer_.lower() + h), 2.0 * time, source_,
@@ -515,8 +522,8 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
                 Container<T, Alloc>(), rhs,
                 std::make_pair(boundary_.first(time), boundary_.second(time)),
                 std::pair<T, T>());
-      solver_.setRhs(rhs);
-      solver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       time += k;
     }
@@ -586,9 +593,9 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   // store terminal time:
   T const lastTime = terminalT_;
   // initialize the solver:
-  solver_.initialize(m);
+  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
-  solver_.setFlatSparseMatrix(std::move(fsm));
+  solverPtr_->setFlatSparseMatrix(std::move(fsm));
   // differentiate between inhomogeneous and homogeneous PDE:
   if (isSourceSet_) {
     // wrap the scheme coefficients:
@@ -605,8 +612,8 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs,
                 leftBoundary_, rightBoundary_);
-      solver_.setRhs(rhs);
-      solver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceCurr);
       discretizeInSpace(h, (spacer_.lower() + h), 2.0 * time, source_,
@@ -623,8 +630,8 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(),
                 Container<T, Alloc>(), rhs, leftBoundary_, rightBoundary_);
-      solver_.setRhs(rhs);
-      solver_.solve(nextSol);
+      solverPtr_->setRhs(rhs);
+      solverPtr_->solve(nextSol);
       prevSol = nextSol;
       time += k;
     }
