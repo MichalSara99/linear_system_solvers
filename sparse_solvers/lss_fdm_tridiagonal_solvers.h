@@ -2,15 +2,15 @@
 #if !defined(_LSS_FDM_TRIDIAGONAL_SOLVERS)
 #define _LSS_FDM_TRIDIAGONAL_SOLVERS
 
-#include "common/lss_types.h"
+#include "common/lss_enumerations.h"
 #include "lss_fdm_double_sweep_solver.h"
 #include "lss_fdm_thomas_lu_solver.h"
 
 namespace lss_fdm_tridiagonal_solvers {
 
+using lss_enumerations::BoundaryConditionType;
 using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
 using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-using lss_types::BoundaryConditionType;
 
 template <typename T, BoundaryConditionType BCType,
           template <typename, BoundaryConditionType,

@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#include "common/lss_types.h"
+#include "common/lss_enumerations.h"
 #include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
 namespace lss_one_dim_base_explicit_schemes {

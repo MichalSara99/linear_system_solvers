@@ -5,7 +5,7 @@
 
 #pragma warning(disable : 4305)
 
-#include "common/lss_types.h"
+#include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "pde_solvers/one_dim/variable_coefficients/lss_one_dim_space_variable_general_heat_equation_solvers_cuda.h"
 
@@ -25,12 +25,12 @@ namespace advection_equation {
 // =============================================================================
 
 void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "===========================================================\n";
@@ -109,12 +109,12 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -193,12 +193,12 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -277,12 +277,12 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
 }
 
 void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -365,12 +365,12 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
 // ===========================================================================
 
 void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -466,12 +466,12 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -568,12 +568,12 @@ void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -671,12 +671,12 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
 }
 
 void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::MemorySpace;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
-  using lss_types::MemorySpace;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -782,9 +782,9 @@ void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
 // ===========================================================================
 
 void testExplAdvDiffEquationDoubleDirichletBCEuler() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
-  using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -862,9 +862,9 @@ void testExplAdvDiffEquationDoubleDirichletBCEuler() {
 }
 
 void testExplAdvDiffEquationFloatDirichletBCEuler() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
-  using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -946,9 +946,9 @@ void testExplAdvDiffEquationFloatDirichletBCEuler() {
 // ===========================================================================
 
 void testExplAdvDiffEquationDoubleRobinBC() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
-  using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1045,9 +1045,9 @@ void testExplAdvDiffEquationDoubleRobinBC() {
 }
 
 void testExplAdvDiffEquationFloatRobinBC() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
-  using lss_types::BoundaryConditionType;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";

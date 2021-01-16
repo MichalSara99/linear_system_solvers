@@ -5,12 +5,12 @@
 #include <type_traits>
 #include <vector>
 
+#include "common/lss_enumerations.h"
 #include "common/lss_macros.h"
-#include "common/lss_types.h"
 
 namespace lss_fdm_thomas_lu_solver {
 
-using lss_types::BoundaryConditionType;
+using lss_enumerations::BoundaryConditionType;
 
 // =============================================================================
 // ========================== FDMThomasLUSolverBase ============================

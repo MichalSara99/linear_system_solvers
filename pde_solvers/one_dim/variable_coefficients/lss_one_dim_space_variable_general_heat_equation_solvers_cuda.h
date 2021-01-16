@@ -2,7 +2,7 @@
 #if !defined(_LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA)
 #define _LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
 
-#include "common/lss_types.h"
+#include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "lss_one_dim_space_variable_heat_explicit_schemes_cuda.h"
 #include "lss_one_dim_space_variable_heat_implicit_schemes_cuda.h"
@@ -11,15 +11,15 @@
 
 namespace lss_one_dim_space_variable_general_heat_equation_solvers_cuda {
 
+using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::ImplicitPDESchemes;
+using lss_enumerations::MemorySpace;
 using lss_one_dim_pde_utility::Discretization;
 using lss_one_dim_space_variable_heat_explicit_schemes_cuda::
     ExplicitEulerHeatEquationScheme;
 using lss_one_dim_space_variable_heat_implicit_schemes_cuda::
     ImplicitSpaceVariableHeatEquationSchemesCUDA;
 using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-using lss_types::BoundaryConditionType;
-using lss_types::ImplicitPDESchemes;
-using lss_types::MemorySpace;
 using lss_utility::FlatMatrix;
 using lss_utility::Range;
 

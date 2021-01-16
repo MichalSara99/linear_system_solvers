@@ -88,7 +88,7 @@
   <ItemGroup>
     <ClInclude Include="common\lss_helpers.h" />
     <ClInclude Include="common\lss_macros.h" />
-    <ClInclude Include="common\lss_types.h" />
+    <ClInclude Include="common\lss_enumerations.h" />
     <ClInclude Include="common\lss_utility.h" />
     <ClInclude Include="dense_solvers\lss_dense_solvers.h" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.h" />

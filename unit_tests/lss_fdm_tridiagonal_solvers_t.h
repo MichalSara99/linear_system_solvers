@@ -4,15 +4,15 @@
 
 #include <vector>
 
-#include "common/lss_types.h"
+#include "common/lss_enumerations.h"
 #include "sparse_solvers/lss_fdm_double_sweep_solver.h"
 #include "sparse_solvers/lss_fdm_thomas_lu_solver.h"
 #include "sparse_solvers/lss_fdm_tridiagonal_solvers.h"
 
 template <typename T>
 void testBVPDoubleSweepDirichletBC() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -80,9 +80,9 @@ void testBVPDoubleSweepDirichletBC() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_0() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -167,8 +167,8 @@ void testDoubleSweepDirichletBC() {
 
 template <typename T>
 void testBVPThomasLUSolverDirichletBC() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -237,9 +237,9 @@ void testBVPThomasLUSolverDirichletBC() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_1() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -325,8 +325,8 @@ void testThomasLUSolverDirichletBC() {
 //
 template <typename T>
 void testBVPDoubleSweepDirichletBC1() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -394,9 +394,9 @@ void testBVPDoubleSweepDirichletBC1() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_2() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -481,8 +481,8 @@ void testDoubleSweepDirichletBC1() {
 //
 template <typename T>
 void testBVPThomasLUSolverDirichletBC1() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -551,9 +551,9 @@ void testBVPThomasLUSolverDirichletBC1() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_3() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -639,8 +639,8 @@ void testThomasLUSolverDirichletBC1() {
 //
 template <typename T>
 void testBVPDoubleSweepRobinBC() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -714,9 +714,9 @@ void testBVPDoubleSweepRobinBC() {
 
 template <typename T>
 void testBVPFDMSolverRobinBC_0() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -808,8 +808,8 @@ void testDoubleSweepRobinBC() {
 //
 template <typename T>
 void testBVPThomasLUSolverRobinBC() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 
@@ -884,9 +884,9 @@ void testBVPThomasLUSolverRobinBC() {
 
 template <typename T>
 void testBVPFDMSolverRobinBC_1() {
+  using lss_enumerations::BoundaryConditionType;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
-  using lss_types::BoundaryConditionType;
 
   /*
 

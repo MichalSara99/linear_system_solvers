@@ -12,13 +12,15 @@
 
 #include <type_traits>
 
+#include "common/lss_enumerations.h"
 #include "common/lss_helpers.h"
-#include "common/lss_types.h"
 #include "common/lss_utility.h"
 #include "lss_sparse_solvers_policy.h"
 
 namespace lss_sparse_solvers_cuda {
 
+using lss_enumerations::FlatMatrixSort;
+using lss_enumerations::MemorySpace;
 using lss_helpers::RealSparseSolverCUDAHelpers;
 using lss_sparse_solvers_policy::SparseSolverDevice;
 using lss_sparse_solvers_policy::SparseSolverDeviceCholesky;
@@ -27,8 +29,6 @@ using lss_sparse_solvers_policy::SparseSolverHost;
 using lss_sparse_solvers_policy::SparseSolverHostCholesky;
 using lss_sparse_solvers_policy::SparseSolverHostLU;
 using lss_sparse_solvers_policy::SparseSolverHostQR;
-using lss_types::FlatMatrixSort;
-using lss_types::MemorySpace;
 using lss_utility::FlatMatrix;
 
 template <MemorySpace MemSpace, typename T>

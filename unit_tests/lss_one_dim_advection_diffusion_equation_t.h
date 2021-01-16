@@ -4,7 +4,7 @@
 
 #pragma warning(disable : 4305)
 
-#include "common/lss_types.h"
+#include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "pde_solvers/one_dim/classic/lss_one_dim_general_heat_equation_solvers.h"
 #include "sparse_solvers/lss_fdm_double_sweep_solver.h"
@@ -26,11 +26,11 @@
 
 template <typename T>
 void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -107,11 +107,11 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -207,11 +207,11 @@ void testImplAdvDiffEquationDirichletBCDoubleSweep() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -268,11 +268,11 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -344,11 +344,11 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweep() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -405,11 +405,11 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -485,11 +485,11 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLU() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -584,11 +584,11 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -698,11 +698,11 @@ void testImplAdvDiffEquationRobinBCDoubleSweep() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCThomasLUEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -797,11 +797,11 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCThomasLUCN() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ImplicitPDESchemes;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ImplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -918,10 +918,10 @@ void testImplAdvDiffEquationRobinBCThomasLU() {
 
 template <typename T>
 void testExplAdvDiffEquationDirichletBCEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ExplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -997,10 +997,10 @@ void testExplAdvDiffEquationDirichletBCEuler() {
 
 template <typename T>
 void testExplAdvDiffEquationDirichletBCADEBC() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ExplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1076,10 +1076,10 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
 
 template <typename T>
 void testExplAdvDiffEquationDirichletBCADES() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ExplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1175,10 +1175,10 @@ void testExplAdvDiffEquationDirichletBC() {
 
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ExplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1234,10 +1234,10 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
 
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCADEBC() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ExplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1292,10 +1292,10 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
 
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCADES() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ExplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1370,10 +1370,10 @@ void testExplAdvDiffEquationSourceDirichletBC() {
 
 template <typename T>
 void testExplAdvDiffEquationRobinBCEuler() {
+  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
-  using lss_types::BoundaryConditionType;
-  using lss_types::ExplicitPDESchemes;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";

@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <type_traits>
 
+#include "common/lss_enumerations.h"
 #include "common/lss_helpers.h"
 #include "common/lss_macros.h"
-#include "common/lss_types.h"
 #include "common/lss_utility.h"
 #include "lss_dense_solvers_policy.h"
 
@@ -19,8 +19,8 @@ namespace lss_dense_solvers_cuda {
 
 using lss_dense_solvers_policy::DenseSolverDevice;
 using lss_dense_solvers_policy::DenseSolverQR;
+using lss_enumerations::FlatMatrixSort;
 using lss_helpers::RealDenseSolverCUDAHelpers;
-using lss_types::FlatMatrixSort;
 using lss_utility::FlatMatrix;
 
 template <typename T,

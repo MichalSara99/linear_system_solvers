@@ -6,17 +6,17 @@
 
 #include <thread>
 
-#include "common/lss_types.h"
+#include "common/lss_enumerations.h"
 #include "pde_solvers/one_dim/lss_one_dim_base_explicit_schemes.h"
 #include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
 namespace lss_one_dim_heat_explicit_schemes {
 
+using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::ExplicitPDESchemes;
+using lss_enumerations::ImplicitPDESchemes;
 using lss_one_dim_base_explicit_schemes::Explicit1DHeatSchemeBase;
 using lss_one_dim_pde_utility::Discretization;
-using lss_types::BoundaryConditionType;
-using lss_types::ExplicitPDESchemes;
-using lss_types::ImplicitPDESchemes;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x))
 template <typename T>

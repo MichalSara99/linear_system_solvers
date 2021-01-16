@@ -6,7 +6,7 @@
 #include <tuple>
 #include <vector>
 
-#include "lss_types.h"
+#include "lss_enumerations.h"
 
 namespace lss_utility {
 
@@ -64,7 +64,7 @@ class Range {
 // ==========================================================================
 // =============================== FlatMatrix ===============================
 // ==========================================================================
-using lss_types::FlatMatrixSort;
+using lss_enumerations::FlatMatrixSort;
 
 template <typename T>
 struct FlatMatrix {

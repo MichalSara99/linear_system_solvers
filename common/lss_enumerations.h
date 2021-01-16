@@ -1,13 +1,13 @@
 #pragma once
-#if !defined(_LSS_TYPES)
-#define _LSS_TYPES
+#if !defined(_LSS_ENUMERATIONS)
+#define _LSS_ENUMERATIONS
 
 #include <tuple>
 #include <vector>
 
 #include "lss_macros.h"
 
-namespace lss_types {
+namespace lss_enumerations {
 
 // ==========================================================================
 // ============================= MemorySpace ================================
@@ -39,6 +39,6 @@ enum class ImplicitPDESchemes { Euler, CrankNicolson };
 
 enum class ExplicitPDESchemes { Euler, ADEBarakatClark, ADESaulyev };
 
-}  // namespace lss_types
+}  // namespace lss_enumerations
 
-#endif  ///_LSS_TYPES
+#endif  ///_LSS_ENUMERATIONS

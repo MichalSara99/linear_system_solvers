@@ -4,8 +4,8 @@
 
 #include <functional>
 
+#include "common/lss_enumerations.h"
 #include "common/lss_macros.h"
-#include "common/lss_types.h"
 #include "common/lss_utility.h"
 #include "lss_one_dim_heat_explicit_schemes.h"
 #include "lss_one_dim_heat_implicit_schemes.h"
@@ -13,14 +13,14 @@
 
 namespace lss_one_dim_general_heat_equation_solvers {
 
+using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::ExplicitPDESchemes;
+using lss_enumerations::ImplicitPDESchemes;
 using lss_one_dim_heat_explicit_schemes::ADEHeatBakaratClarkScheme;
 using lss_one_dim_heat_explicit_schemes::ADEHeatSaulyevScheme;
 using lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme;
 using lss_one_dim_heat_implicit_schemes::ImplicitHeatEquationSchemes;
 using lss_one_dim_pde_utility::Discretization;
-using lss_types::BoundaryConditionType;
-using lss_types::ExplicitPDESchemes;
-using lss_types::ImplicitPDESchemes;
 using lss_utility::Range;
 
 // move this somewhere else:
