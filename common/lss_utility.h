@@ -148,8 +148,8 @@ struct FlatMatrix {
 }  // namespace lss_utility
 
 template <typename T>
-void lss_utility::FlatMatrix<T>::sort(lss_types::FlatMatrixSort sort) {
-  if (sort == lss_types::FlatMatrixSort::RowMajor) {
+void lss_utility::FlatMatrix<T>::sort(lss_enumerations::FlatMatrixSort sort) {
+  if (sort == lss_enumerations::FlatMatrixSort::RowMajor) {
     std::sort(container_.begin(), container_.end(),
               [this](std::tuple<std::size_t, std::size_t, T> const& lhs,
                      std::tuple<std::size_t, std::size_t, T> const& rhs) {
