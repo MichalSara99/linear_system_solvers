@@ -191,7 +191,8 @@ class RealSparseSolverCUDA<MemorySpace::Device, T> {
 
 template <typename T>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
-    lss_types::MemorySpace::Host, T>::initialize(std::size_t systemSize) {
+    lss_enumerations::MemorySpace::Host, T>::initialize(std::size_t
+                                                            systemSize) {
   // set the size of the linear system:
   systemSize_ = systemSize;
 
@@ -211,7 +212,8 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
 
 template <typename T>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
-    lss_types::MemorySpace::Device, T>::initialize(std::size_t systemSize) {
+    lss_enumerations::MemorySpace::Device, T>::initialize(std::size_t
+                                                              systemSize) {
   // set the size of the linear system:
   systemSize_ = systemSize;
 
@@ -230,8 +232,8 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
 }
 
 template <typename T>
-void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,
-                                                   T>::buildCSR() {
+void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
+    lss_enumerations::MemorySpace::Host, T>::buildCSR() {
   int const nonZeroSize = nonZeroElements();
 
   // CUDA sparse solver is row-major:
@@ -259,7 +261,7 @@ void lss_sparse_solvers_cuda::RealSparseSolverCUDA<lss_types::MemorySpace::Host,
 
 template <typename T>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
-    lss_types::MemorySpace::Device, T>::buildCSR() {
+    lss_enumerations::MemorySpace::Device, T>::buildCSR() {
   int const nonZeroSize = nonZeroElements();
 
   // CUDA sparse solver is row-major:
@@ -290,7 +292,8 @@ template <template <typename T> typename SparseSolverHostPolicy,
           template <typename T, typename Alloc> typename Container,
           typename Alloc, typename>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
-    lss_types::MemorySpace::Host, T>::solve(Container<T, Alloc>& solution) {
+    lss_enumerations::MemorySpace::Host, T>::solve(Container<T, Alloc>&
+                                                       solution) {
   buildCSR();
 
   // get the non-zero size:
@@ -329,7 +332,8 @@ template <template <typename T> typename SparseSolverDevicePolicy,
           template <typename T, typename Alloc> typename Container,
           typename Alloc, typename>
 void lss_sparse_solvers_cuda::RealSparseSolverCUDA<
-    lss_types::MemorySpace::Device, T>::solve(Container<T, Alloc>& solution) {
+    lss_enumerations::MemorySpace::Device, T>::solve(Container<T, Alloc>&
+                                                         solution) {
   buildCSR();
 
   // get the non-zero size:
@@ -374,7 +378,7 @@ template <template <typename T> typename SparseSolverHostPolicy,
           template <typename T, typename Alloc> typename Container,
           typename Alloc, typename>
 Container<T, Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<
-    lss_types::MemorySpace::Host, T>::solve() {
+    lss_enumerations::MemorySpace::Host, T>::solve() {
   buildCSR();
 
   // get the non-zero size:
@@ -416,7 +420,7 @@ template <template <typename T> typename SparseSolverDevicePolicy,
           template <typename T, typename Alloc> typename Container,
           typename Alloc, typename>
 Container<T, Alloc> const lss_sparse_solvers_cuda::RealSparseSolverCUDA<
-    lss_types::MemorySpace::Device, T>::solve() {
+    lss_enumerations::MemorySpace::Device, T>::solve() {
   buildCSR();
 
   // get the non-zero size:

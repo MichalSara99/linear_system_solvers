@@ -184,7 +184,7 @@ Container<T, Alloc> const lss_fdm_double_sweep_solver::FDMDoubleSweepSolverBase<
 template <typename T, template <typename T, typename Alloc> typename Container,
           typename Alloc>
 void lss_fdm_double_sweep_solver::FDMDoubleSweepSolver<
-    T, lss_types::BoundaryConditionType::Dirichlet, Container,
+    T, lss_enumerations::BoundaryConditionType::Dirichlet, Container,
     Alloc>::kernel(Container<T, Alloc>& solution) {
   // clear coefficients:
   K_.clear();
@@ -216,7 +216,7 @@ void lss_fdm_double_sweep_solver::FDMDoubleSweepSolver<
 template <typename T, template <typename T, typename Alloc> typename Container,
           typename Alloc>
 void lss_fdm_double_sweep_solver::FDMDoubleSweepSolver<
-    T, lss_types::BoundaryConditionType::Robin, Container,
+    T, lss_enumerations::BoundaryConditionType::Robin, Container,
     Alloc>::kernel(Container<T, Alloc>& solution) {
   // clear coefficients:
   K_.clear();

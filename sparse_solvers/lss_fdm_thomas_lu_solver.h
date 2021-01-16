@@ -195,7 +195,7 @@ lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<T, Container, Alloc>::solve() {
 template <typename T, template <typename T, typename Alloc> typename Container,
           typename Alloc>
 bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_types::BoundaryConditionType::Dirichlet, Container,
+    T, lss_enumerations::BoundaryConditionType::Dirichlet, Container,
     Alloc>::isDiagonallyDominant() const {
   if (std::abs(b_[0]) < std::abs(c_[0])) return false;
   if (std::abs(b_[systemSize_ - 1]) < std::abs(a_[systemSize_ - 1]))
@@ -209,7 +209,7 @@ bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
 template <typename T, template <typename T, typename Alloc> typename Container,
           typename Alloc>
 void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_types::BoundaryConditionType::Dirichlet, Container,
+    T, lss_enumerations::BoundaryConditionType::Dirichlet, Container,
     Alloc>::kernel(Container<T, Alloc>& solution) {
   // check the diagonal dominance:
   LSS_ASSERT(isDiagonallyDominant() == true,
@@ -256,7 +256,7 @@ void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
 template <typename T, template <typename T, typename Alloc> typename Container,
           typename Alloc>
 bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_types::BoundaryConditionType::Robin, Container,
+    T, lss_enumerations::BoundaryConditionType::Robin, Container,
     Alloc>::isDiagonallyDominant() const {
   auto alpha = left_.first;
   auto beta = right_.first;
@@ -272,7 +272,7 @@ bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
 template <typename T, template <typename T, typename Alloc> typename Container,
           typename Alloc>
 void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_types::BoundaryConditionType::Robin, Container,
+    T, lss_enumerations::BoundaryConditionType::Robin, Container,
     Alloc>::kernel(Container<T, Alloc>& solution) {
   // check the diagonal dominance:
   LSS_ASSERT(isDiagonallyDominant() == true,

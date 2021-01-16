@@ -3,12 +3,23 @@
 #define _LSS_UTILITY
 
 #include <algorithm>
+#include <memory>
 #include <tuple>
 #include <vector>
 
 #include "lss_enumerations.h"
 
 namespace lss_utility {
+
+// ==========================================================================
+// =========================== smart pointer aliases ========================
+// ==========================================================================
+
+template <typename T>
+using sptr_t = std::shared_ptr<T>;
+
+template <typename T>
+using uptr_t = std::unique_ptr<T>;
 
 // ==========================================================================
 // ==================================== Swap ================================
