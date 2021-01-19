@@ -6,8 +6,50 @@
 #include <tuple>
 
 #include "common/lss_macros.h"
+#include "common/lss_utility.h"
 
 namespace lss_one_dim_pde_utility {
+
+using lss_utility::Range;
+
+template <typename T>
+struct OneDimHeatData {
+  // Range for space variable
+  Range<T> spaceRange;
+  // Range for time variable
+  Range<T> timeRange;
+  // Number of time subdivisions
+  std::size_t timeDivision;
+  // Number of space subdivisions
+  std::size_t spaceDivision;
+  // Initial condition
+  std::function<T(T)> initialCondition;
+  // terminal condition
+  std::function<T(T)> terminalCondition;
+  // Independent source function
+  std::function<T(T, T)> sourceFunction;
+  // Flag on source function
+  bool isSourceFunctionSet;
+
+  explicit OneDimHeatData(Range<T> const &space, Range<T> const &time,
+                          std::size_t const &spaceSubdivision,
+                          std::size_t const &timeSubdivision,
+                          std::function<T(T)> const &initialCond,
+                          std::function<T(T)> const &terminalCond,
+                          std::function<T(T, T)> const &source,
+                          bool isSourceSet)
+      : spaceRange{space},
+        timeRange{time},
+        spaceDivision{spaceSubdivision},
+        timeDivision{timeSubdivision},
+        initialCondition{initialCond},
+        terminalCondition{terminalCond},
+        sourceFunction{source},
+        isSourceFunctionSet{isSourceSet} {}
+
+ protected:
+  OneDimHeatData() {}
+};
 
 template <typename T, template <typename, typename> typename Container,
           typename Alloc>
