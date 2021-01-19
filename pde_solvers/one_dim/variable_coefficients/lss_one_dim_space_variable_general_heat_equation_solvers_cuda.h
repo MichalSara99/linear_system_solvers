@@ -480,6 +480,8 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA<
   T const k = timeStep();
   // get space range:
   auto const &spaceRange = dataPtr_->spaceRange;
+  // get source heat function:
+  auto const &heatSource = dataPtr_->sourceFunction;
   // calculate scheme const coefficients:
   T const lambda = k / (h * h);
   T const gamma = k / (2.0 * h);
@@ -535,10 +537,9 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA<
     // create a container to carry discretized source heat
     Container<T, Alloc> sourceCurr(m, T{});
     Container<T, Alloc> sourceNext(m, T{});
-    discretizeInSpace(h, (spaceRange.lower() + h), 0.0,
-                      dataPtr_->sourceFunction, sourceCurr);
-    discretizeInSpace(h, (spaceRange.lower() + h), time,
-                      dataPtr_->sourceFunction, sourceNext);
+    discretizeInSpace(h, (spaceRange.lower() + h), 0.0, heatSource, sourceCurr);
+    discretizeInSpace(h, (spaceRange.lower() + h), time, heatSource,
+                      sourceNext);
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs,
@@ -547,10 +548,10 @@ void implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA<
       solverPtr_->setRhs(rhs);
       solverPtr_->solve(nextSol);
       prevSol = nextSol;
-      discretizeInSpace(h, (spaceRange.lower() + h), time,
-                        dataPtr_->sourceFunction, sourceCurr);
-      discretizeInSpace(h, (spaceRange.lower() + h), 2.0 * time,
-                        dataPtr_->sourceFunction, sourceNext);
+      discretizeInSpace(h, (spaceRange.lower() + h), time, heatSource,
+                        sourceCurr);
+      discretizeInSpace(h, (spaceRange.lower() + h), 2.0 * time, heatSource,
+                        sourceNext);
       time += k;
     }
   } else {
