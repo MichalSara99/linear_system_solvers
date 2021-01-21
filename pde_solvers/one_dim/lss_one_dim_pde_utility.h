@@ -12,8 +12,41 @@ namespace lss_one_dim_pde_utility {
 
 using lss_utility::Range;
 
+// PDE coefficient holder
+template <typename... CoeffType>
+using CoefficientHolder = std::tuple<CoeffType...>;
+
+// One-dim PDE coefficient holder
+template <typename Type>
+using OneDimCoefficientHolder = CoefficientHolder<Type, Type, Type>;
+
+// One-dim PDE coefficients (a,b,c)
 template <typename T>
-struct OneDimHeatData {
+using PDECoefficientHolderConst = OneDimCoefficientHolder<T>;
+
+// One-dim PDE coefficients (a(x),b(x),c(x))
+template <typename T>
+using PDECoefficientHolderFun1Arg =
+    OneDimCoefficientHolder<std::function<T(T)>>;
+
+// One-dim Dirichlet boundary:
+template <typename T>
+using DirichletBoundary = std::pair<std::function<T(T)>, std::function<T(T)>>;
+
+// One-dim Robin boundary:
+template <typename T>
+struct RobinBoundary {
+  std::pair<T, T> left;
+  std::pair<T, T> right;
+
+  RobinBoundary() {}
+  explicit RobinBoundary(std::pair<T, T> const &leftBoundary,
+                         std::pair<T, T> const &rightBoundary)
+      : left{leftBoundary}, right{rightBoundary} {}
+};
+
+template <typename T>
+struct HeatData {
   // Range for space variable
   Range<T> spaceRange;
   // Range for time variable
@@ -31,13 +64,12 @@ struct OneDimHeatData {
   // Flag on source function
   bool isSourceFunctionSet;
 
-  explicit OneDimHeatData(Range<T> const &space, Range<T> const &time,
-                          std::size_t const &spaceSubdivision,
-                          std::size_t const &timeSubdivision,
-                          std::function<T(T)> const &initialCond,
-                          std::function<T(T)> const &terminalCond,
-                          std::function<T(T, T)> const &source,
-                          bool isSourceSet)
+  explicit HeatData(Range<T> const &space, Range<T> const &time,
+                    std::size_t const &spaceSubdivision,
+                    std::size_t const &timeSubdivision,
+                    std::function<T(T)> const &initialCond,
+                    std::function<T(T)> const &terminalCond,
+                    std::function<T(T, T)> const &source, bool isSourceSet)
       : spaceRange{space},
         timeRange{time},
         spaceDivision{spaceSubdivision},
@@ -48,7 +80,7 @@ struct OneDimHeatData {
         isSourceFunctionSet{isSourceSet} {}
 
  protected:
-  OneDimHeatData() {}
+  HeatData() {}
 };
 
 template <typename T, template <typename, typename> typename Container,

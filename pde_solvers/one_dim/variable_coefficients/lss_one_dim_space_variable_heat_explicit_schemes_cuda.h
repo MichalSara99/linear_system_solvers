@@ -8,11 +8,6 @@
 #include "common/lss_utility.h"
 #include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 
-// Alias for PDE coefficients (a(x),b(x),c(x))
-template <typename T>
-using PDECoefficientHolder =
-    std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
-
 // move this somewhere else:
 template <typename T>
 using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
@@ -20,6 +15,7 @@ using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
 using lss_one_dim_pde_utility::Discretization;
+using lss_one_dim_pde_utility::PDECoefficientHolderFun1Arg;
 
 class ExplicitEulerLoopSP
     : public Discretization<float, std::vector, std::allocator<float>> {
@@ -27,7 +23,7 @@ class ExplicitEulerLoopSP
   float spaceStart_;
   float terminalT_;
   std::pair<float, float> deltas_;  // first = delta time, second = delta space;
-  PDECoefficientHolder<float> coeffs_;  // coefficients of PDE
+  PDECoefficientHolderFun1Arg<float> coeffs_;  // coefficients of PDE
   std::function<float(float, float)> source_;
   bool isSourceSet_;
 
@@ -36,7 +32,7 @@ class ExplicitEulerLoopSP
   explicit ExplicitEulerLoopSP() = delete;
   explicit ExplicitEulerLoopSP(float spaceStart, float terminalTime,
                                std::pair<float, float> const &deltas,
-                               PDECoefficientHolder<float> const &coeffs,
+                               PDECoefficientHolderFun1Arg<float> const &coeffs,
                                std::function<float(float, float)> const &source,
                                bool isSourceSet = false)
       : spaceStart_{spaceStart},
@@ -61,7 +57,7 @@ class ExplicitEulerLoopDP
   double terminalT_;
   std::pair<double, double>
       deltas_;  // first = delta time, second = delta space;
-  PDECoefficientHolder<double> coeffs_;  // coefficients of PDE
+  PDECoefficientHolderFun1Arg<double> coeffs_;  // coefficients of PDE
   std::function<double(double, double)> source_;
   bool isSourceSet_;
 
@@ -71,7 +67,7 @@ class ExplicitEulerLoopDP
   explicit ExplicitEulerLoopDP(
       double spaceStart, double terminalTime,
       std::pair<double, double> const &deltas,
-      PDECoefficientHolder<double> const &coeffs,
+      PDECoefficientHolderFun1Arg<double> const &coeffs,
       std::function<double(double, double)> const &source,
       bool isSourceSet = false)
       : spaceStart_{spaceStart},
@@ -108,7 +104,7 @@ class ExplicitEulerHeatEquationScheme<float, Container, Alloc> {
   float spaceStart_;
   float terminalT_;
   std::pair<float, float> deltas_;  // first = delta time, second = delta space;
-  PDECoefficientHolder<float> coeffs_;  // coefficients of PDE
+  PDECoefficientHolderFun1Arg<float> coeffs_;  // coefficients of PDE
   Container<float, Alloc> init_;
   std::function<float(float, float)> source_;
   bool isSourceSet_;
@@ -119,7 +115,7 @@ class ExplicitEulerHeatEquationScheme<float, Container, Alloc> {
   explicit ExplicitEulerHeatEquationScheme(
       float spaceStart, float terminalTime,
       std::pair<float, float> const &deltas,
-      PDECoefficientHolder<float> const &coeffs,
+      PDECoefficientHolderFun1Arg<float> const &coeffs,
       Container<float, Alloc> const &init,
       std::function<float(float, float)> const &source = nullptr,
       bool isSourceSet = false)
@@ -160,7 +156,7 @@ class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
   double terminalT_;
   std::pair<double, double>
       deltas_;  // first = delta time, second = delta space;
-  PDECoefficientHolder<double> coeffs_;  // coefficients of PDE
+  PDECoefficientHolderFun1Arg<double> coeffs_;  // coefficients of PDE
   Container<double, Alloc> init_;
   std::function<double(double, double)> source_;
   bool isSourceSet_;
@@ -171,7 +167,7 @@ class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
   explicit ExplicitEulerHeatEquationScheme(
       double spaceStart, double terminalTime,
       std::pair<double, double> const &deltas,
-      PDECoefficientHolder<double> const &coeffs,
+      PDECoefficientHolderFun1Arg<double> const &coeffs,
       Container<double, Alloc> const &init,
       std::function<double(double, double)> const &source = nullptr,
       bool isSourceSet = false)

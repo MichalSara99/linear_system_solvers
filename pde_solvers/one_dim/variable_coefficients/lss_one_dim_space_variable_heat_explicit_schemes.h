@@ -16,7 +16,9 @@ using lss_enumerations::BoundaryConditionType;
 using lss_enumerations::ExplicitPDESchemes;
 using lss_enumerations::ImplicitPDESchemes;
 using lss_one_dim_base_explicit_schemes::Explicit1DHeatSchemeBase;
+using lss_one_dim_pde_utility::DirichletBoundary;
 using lss_one_dim_pde_utility::Discretization;
+using lss_one_dim_pde_utility::PDECoefficientHolderFun1Arg;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x))
 template <typename T>
@@ -26,10 +28,6 @@ using SchemeCoefficientHolder =
 template <typename T>
 using PDECoefficientHolder =
     std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>>;
-
-// move this somewhere else:
-template <typename T>
-using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
 
 // ============================================================================
 // ======================= ExplicitHeatEulerScheme ============================
@@ -65,7 +63,7 @@ class ExplicitHeatEulerScheme
   bool isStable() const override;
 
   // for Dirichlet BC
-  void operator()(DirichletPair<T> const &dirichletBCPair,
+  void operator()(DirichletBoundary<T> const &dirichletBCPair,
                   std::vector<T> &solution) const override;
   // for Robin BC
   void operator()(std::pair<T, T> const &leftRobinBCPair,
@@ -103,7 +101,7 @@ class ADEHeatBakaratClarkScheme
   bool isStable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(DirichletPair<T> const &dirichletBCPair,
+  void operator()(DirichletBoundary<T> const &dirichletBCPair,
                   std::vector<T> &solution) const override;
   // for Robin BC
   void operator()(std::pair<T, T> const &leftRobinBCPair,
@@ -141,7 +139,7 @@ class ADEHeatSaulyevScheme
   bool isStable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(DirichletPair<T> const &dirichletBCPair,
+  void operator()(DirichletBoundary<T> const &dirichletBCPair,
                   std::vector<T> &solution) const override;
   // for Robin BC
   void operator()(std::pair<T, T> const &leftRobinBCPair,
@@ -178,7 +176,7 @@ bool lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
 
 template <typename T>
 void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
-    T>::operator()(DirichletPair<T> const &dirichletBCPair,
+    T>::operator()(DirichletBoundary<T> const &dirichletBCPair,
                    std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
@@ -316,7 +314,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ExplicitHeatEulerScheme<
 template <typename T>
 void lss_one_dim_space_variable_heat_explicit_schemes::
     ADEHeatBakaratClarkScheme<T>::operator()(
-        DirichletPair<T> const &dirichletBCPair,
+        DirichletBoundary<T> const &dirichletBCPair,
         std::vector<T> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");

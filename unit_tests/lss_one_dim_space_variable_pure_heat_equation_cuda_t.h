@@ -6,6 +6,7 @@
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
+#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
 #include "pde_solvers/one_dim/variable_coefficients/lss_one_dim_space_variable_general_heat_equation_solvers_cuda.h"
 
 #define PI 3.14159
@@ -663,6 +664,7 @@ void testImplPureHeatEquationDoubleRobinBCDeviceEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -719,7 +721,8 @@ void testImplPureHeatEquationDoubleRobinBCDeviceEuler() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -761,6 +764,7 @@ void testImplPureHeatEquationFloatRobinBCDeviceEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -817,7 +821,8 @@ void testImplPureHeatEquationFloatRobinBCDeviceEuler() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -859,6 +864,7 @@ void testImplPureHeatEquationDoubleRobinBCDeviceCN() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -916,7 +922,8 @@ void testImplPureHeatEquationDoubleRobinBCDeviceCN() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -958,6 +965,7 @@ void testImplPureHeatEquationFloatRobinBCDeviceCN() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -1015,7 +1023,8 @@ void testImplPureHeatEquationFloatRobinBCDeviceCN() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1753,6 +1762,7 @@ void testImplPureHeatEquationSourceFloatRobinBCDeviceEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -1791,7 +1801,8 @@ void testImplPureHeatEquationSourceFloatRobinBCDeviceEuler() {
   // initialize solver
   implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1840,6 +1851,7 @@ void testImplPureHeatEquationSourceDoubleRobinBCDeviceEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -1878,7 +1890,8 @@ void testImplPureHeatEquationSourceDoubleRobinBCDeviceEuler() {
   // initialize solver
   implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1927,6 +1940,7 @@ void testImplPureHeatEquationSourceFloatRobinBCHostEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -1965,7 +1979,8 @@ void testImplPureHeatEquationSourceFloatRobinBCHostEuler() {
   // initialize solver
   implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -2014,6 +2029,7 @@ void testImplPureHeatEquationSourceDoubleRobinBCHostEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -2052,7 +2068,8 @@ void testImplPureHeatEquationSourceDoubleRobinBCHostEuler() {
   // initialize solver
   implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -2101,6 +2118,7 @@ void testImplPureHeatEquationSourceFloatRobinBCDeviceCN() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -2139,7 +2157,8 @@ void testImplPureHeatEquationSourceFloatRobinBCDeviceCN() {
   // initialize solver
   implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -2188,6 +2207,7 @@ void testImplPureHeatEquationSourceDoubleRobinBCDeviceCN() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -2226,7 +2246,8 @@ void testImplPureHeatEquationSourceDoubleRobinBCDeviceCN() {
   // initialize solver
   implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -2275,6 +2296,7 @@ void testImplPureHeatEquationSourceFloatRobinBCHostCN() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -2313,7 +2335,8 @@ void testImplPureHeatEquationSourceFloatRobinBCHostCN() {
   // initialize solver
   implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -2362,6 +2385,7 @@ void testImplPureHeatEquationSourceDoubleRobinBCHostCN() {
   using lss_enumerations::BoundaryConditionType;
   using lss_enumerations::ImplicitPDESchemes;
   using lss_enumerations::MemorySpace;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
@@ -2400,7 +2424,8 @@ void testImplPureHeatEquationSourceDoubleRobinBCHostCN() {
   // initialize solver
   implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -3588,6 +3613,7 @@ void testExplPureHeatEquationSourceDoubleDirichletBCEuler() {
 //
 void testExplPureHeatEquationDoubleRobinBCDeviceEuler() {
   using lss_enumerations::BoundaryConditionType;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_utility::Range;
@@ -3643,7 +3669,8 @@ void testExplPureHeatEquationDoubleRobinBCDeviceEuler() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  expl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -3682,6 +3709,7 @@ void testExplPureHeatEquationDoubleRobinBCDeviceEuler() {
 
 void testExplPureHeatEquationFloatRobinBCDeviceEuler() {
   using lss_enumerations::BoundaryConditionType;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_utility::Range;
@@ -3737,7 +3765,8 @@ void testExplPureHeatEquationFloatRobinBCDeviceEuler() {
   auto leftBoundary = std::make_pair(1.0f, 0.0f);
   auto rightBoundary = std::make_pair(1.0f, 0.0f);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  expl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -3781,6 +3810,7 @@ void testExplPureHeatEquationFloatRobinBCDeviceEuler() {
 //
 void testExplHomPureHeatEquationSourceFloatRobinBCEuler() {
   using lss_enumerations::BoundaryConditionType;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_utility::Range;
@@ -3832,7 +3862,8 @@ void testExplHomPureHeatEquationSourceFloatRobinBCEuler() {
   auto leftBoundary = std::make_pair(1.0f, 0.0f);
   auto rightBoundary = std::make_pair(1.0f, 0.0f);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  expl_solver.setBoundaryCondition(
+      RobinBoundary<float>(leftBoundary, rightBoundary));
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -3878,6 +3909,7 @@ void testExplHomPureHeatEquationSourceFloatRobinBCEuler() {
 
 void testExplHomPureHeatEquationSourceDoubleRobinBCEuler() {
   using lss_enumerations::BoundaryConditionType;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_one_dim_space_variable_general_heat_equation_solvers_cuda::
       explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA;
   using lss_utility::Range;
@@ -3929,7 +3961,8 @@ void testExplHomPureHeatEquationSourceDoubleRobinBCEuler() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  expl_solver.setBoundaryCondition(
+      RobinBoundary<double>(leftBoundary, rightBoundary));
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
