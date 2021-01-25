@@ -20,13 +20,11 @@ using lss_one_dim_heat_explicit_schemes::ADEHeatBakaratClarkScheme;
 using lss_one_dim_heat_explicit_schemes::ADEHeatSaulyevScheme;
 using lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme;
 using lss_one_dim_heat_implicit_schemes::ImplicitHeatEquationSchemes;
+using lss_one_dim_pde_utility::DirichletBoundary;
 using lss_one_dim_pde_utility::Discretization;
+using lss_one_dim_pde_utility::RobinBoundary;
 using lss_utility::Range;
 using lss_utility::uptr_t;
-
-// move this somewhere else:
-template <typename T>
-using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
 
 namespace implicit_solvers {
 // ============================================================================
@@ -76,7 +74,7 @@ class Implicit1DGeneralHeatEquation<T, BoundaryConditionType::Dirichlet,
   std::size_t spaceN_;              // number of space subdivisions
   std::function<T(T)> init_;        // init condition
   std::function<T(T, T)> source_;   // heat source F(x,t)
-  DirichletPair<T> boundary_;       // boundaries
+  DirichletBoundary<T> boundary_;   // boundaries
   std::tuple<T, T, T> coeffs_;      // coefficients a, b, c in PDE
   bool isSourceSet_;
 
@@ -109,8 +107,9 @@ class Implicit1DGeneralHeatEquation<T, BoundaryConditionType::Dirichlet,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
-    boundary_ = boundaryPair;
+  inline void setBoundaryCondition(
+      DirichletBoundary<T> const &dirichletBoundary) {
+    boundary_ = dirichletBoundary;
   }
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
     init_ = initialCondition;
@@ -177,8 +176,7 @@ class Implicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, FDMSolver,
   std::size_t spaceN_;              // number of space subdivisions
   std::function<T(T, T)> source_;   // heat source F(x,t)
   std::function<T(T)> init_;        // initi condition
-  std::pair<T, T> left_;            // left boundary pair
-  std::pair<T, T> right_;           // right boundary pair
+  RobinBoundary<T> boundary_;       // boundaries
   std::tuple<T, T, T> coeffs_;      // coefficients a, b, c in PDE
   bool isSourceSet_;
 
@@ -211,11 +209,9 @@ class Implicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, FDMSolver,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &left,
-                                   std::pair<T, T> const &right) {
-    left_ = left;
-    right_ = right;
-    solverPtr_->setBoundaryCondition(left, right);
+  inline void setBoundaryCondition(RobinBoundary<T> const &robinBoundary) {
+    boundary_ = robinBoundary;
+    solverPtr_->setBoundaryCondition(robinBoundary.left, robinBoundary.right);
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -272,7 +268,7 @@ class Explicit1DGeneralHeatEquation<T, BoundaryConditionType::Dirichlet,
   std::size_t spaceN_;             // number of space subdivisions
   std::function<T(T)> init_;       // initi condition
   std::function<T(T, T)> source_;  // heat source	F(x,t)
-  DirichletPair<T> boundary_;      // boundaries
+  DirichletBoundary<T> boundary_;  // boundaries
   std::tuple<T, T, T> coeffs_;     // coefficients a, b, c in PDE
   bool isSourceSet_;
 
@@ -304,8 +300,9 @@ class Explicit1DGeneralHeatEquation<T, BoundaryConditionType::Dirichlet,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
-    boundary_ = boundaryPair;
+  inline void setBoundaryCondition(
+      DirichletBoundary<T> const &dirichletBoundary) {
+    boundary_ = dirichletBoundary;
   }
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
     init_ = initialCondition;
@@ -365,8 +362,7 @@ class Explicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, Container,
   std::size_t spaceN_;             // number of space subdivisions
   std::function<T(T, T)> source_;  // heat source F(x,t)
   std::function<T(T)> init_;       // initi condition
-  std::pair<T, T> left_;           // left boundary pair
-  std::pair<T, T> right_;          // right boundary pair
+  RobinBoundary<T> boundary_;      // boundary
   std::tuple<T, T, T> coeffs_;     // coefficients a, b, c in PDE
   bool isSourceSet_;
 
@@ -398,10 +394,8 @@ class Explicit1DGeneralHeatEquation<T, BoundaryConditionType::Robin, Container,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &left,
-                                   std::pair<T, T> const &right) {
-    left_ = left;
-    right_ = right;
+  inline void setBoundaryCondition(RobinBoundary<T> const &robinBoundary) {
+    boundary_ = robinBoundary;
   }
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
     init_ = initialCondition;
@@ -657,7 +651,7 @@ void explicit_solvers::Explicit1DGeneralHeatEquation<
   ExplicitHeatEulerScheme<T> euler{
       spacer_.lower(), terminalT_, std::make_pair(k, h), coeffs_,
       initCondition,   source_,    isSourceSet_};
-  euler(left_, right_, solution);
+  euler(boundary_, solution);
 }
 
 }  // namespace lss_one_dim_general_heat_equation_solvers

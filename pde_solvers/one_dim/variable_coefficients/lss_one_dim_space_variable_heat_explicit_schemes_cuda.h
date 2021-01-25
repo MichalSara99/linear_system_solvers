@@ -14,8 +14,10 @@ using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
+using lss_one_dim_pde_utility::DirichletBoundary;
 using lss_one_dim_pde_utility::Discretization;
 using lss_one_dim_pde_utility::PDECoefficientHolderFun1Arg;
+using lss_one_dim_pde_utility::RobinBoundary;
 
 class ExplicitEulerLoopSP
     : public Discretization<float, std::vector, std::allocator<float>> {
@@ -42,11 +44,10 @@ class ExplicitEulerLoopSP
         source_{source},
         isSourceSet_{isSourceSet} {}
 
-  void operator()(float const *input, DirichletPair<float> const &dirichletBC,
-                  unsigned long long const size, float *solution) const;
   void operator()(float const *input,
-                  std::pair<float, float> const &leftRobinBC,
-                  std::pair<float, float> const &rightRobinBC,
+                  DirichletBoundary<float> const &dirichletBoundary,
+                  unsigned long long const size, float *solution) const;
+  void operator()(float const *input, RobinBoundary<float> const &robinBoundary,
                   unsigned long long const size, float *solution) const;
 };
 
@@ -77,11 +78,11 @@ class ExplicitEulerLoopDP
         source_{source},
         isSourceSet_{isSourceSet} {}
 
-  void operator()(double const *input, DirichletPair<double> const &dirichletBC,
+  void operator()(double const *input,
+                  DirichletBoundary<double> const &dirichletBoundary,
                   unsigned long long const size, double *solution) const;
   void operator()(double const *input,
-                  std::pair<double, double> const &leftRobinBC,
-                  std::pair<double, double> const &rightRobinBC,
+                  RobinBoundary<double> const &robinBoundary,
                   unsigned long long const size, double *solution) const;
 };
 
@@ -137,10 +138,9 @@ class ExplicitEulerHeatEquationScheme<float, Container, Alloc> {
   ExplicitEulerHeatEquationScheme &operator=(
       ExplicitEulerHeatEquationScheme &&) = delete;
 
-  void operator()(DirichletPair<float> const &boundaryPair,
+  void operator()(DirichletBoundary<float> const &boundaryBoundary,
                   Container<float, Alloc> &solution) const;
-  void operator()(std::pair<float, float> const &leftPair,
-                  std::pair<float, float> const &rightPair,
+  void operator()(RobinBoundary<float> const &robinBoundary,
                   Container<float, Alloc> &solution) const;
 };
 
@@ -189,10 +189,9 @@ class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
   ExplicitEulerHeatEquationScheme &operator=(
       ExplicitEulerHeatEquationScheme &&) = delete;
 
-  void operator()(DirichletPair<double> const &boundaryPair,
+  void operator()(DirichletBoundary<double> const &dirichletBoundary,
                   Container<double, Alloc> &solution) const;
-  void operator()(std::pair<double, double> const &leftPair,
-                  std::pair<double, double> const &rightPair,
+  void operator()(RobinBoundary<double> const &robinBoundary,
                   Container<double, Alloc> &solution) const;
 };
 
@@ -205,7 +204,7 @@ class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
 
 template <template <typename, typename> typename Container, typename Alloc>
 void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
-    DirichletPair<float> const &boundaryPair,
+    DirichletBoundary<float> const &dirichletBoundary,
     Container<float, Alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
@@ -219,7 +218,7 @@ void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
   // launch the Euler loop:
   ExplicitEulerLoopSP loop{spaceStart_, terminalT_, deltas_,
                            coeffs_,     source_,    isSourceSet_};
-  loop(prev, boundaryPair, size, next);
+  loop(prev, dirichletBoundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);
@@ -228,7 +227,7 @@ void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
 
 template <template <typename, typename> typename Container, typename Alloc>
 void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
-    DirichletPair<double> const &boundaryPair,
+    DirichletBoundary<double> const &dirichletBoundary,
     Container<double, Alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
@@ -242,7 +241,7 @@ void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
   // launch the Euler loop:
   ExplicitEulerLoopDP loop{spaceStart_, terminalT_, deltas_,
                            coeffs_,     source_,    isSourceSet_};
-  loop(prev, boundaryPair, size, next);
+  loop(prev, dirichletBoundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);
@@ -251,8 +250,7 @@ void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
 
 template <template <typename, typename> typename Container, typename Alloc>
 void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
-    std::pair<float, float> const &leftPair,
-    std::pair<float, float> const &rightPair,
+    RobinBoundary<float> const &robinBoundary,
     Container<float, Alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
@@ -266,7 +264,7 @@ void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
   // launch the Euler loop:
   ExplicitEulerLoopSP loop{spaceStart_, terminalT_, deltas_,
                            coeffs_,     source_,    isSourceSet_};
-  loop(prev, leftPair, rightPair, size, next);
+  loop(prev, robinBoundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);
@@ -275,8 +273,7 @@ void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
 
 template <template <typename, typename> typename Container, typename Alloc>
 void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
-    std::pair<double, double> const &leftPair,
-    std::pair<double, double> const &rightPair,
+    RobinBoundary<double> const &robinBoundary,
     Container<double, Alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
@@ -290,7 +287,7 @@ void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
   // launch the Euler loop:
   ExplicitEulerLoopDP loop{spaceStart_, terminalT_, deltas_,
                            coeffs_,     source_,    isSourceSet_};
-  loop(prev, leftPair, rightPair, size, next);
+  loop(prev, robinBoundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);

@@ -16,15 +16,13 @@ using lss_enumerations::ImplicitPDESchemes;
 using lss_enumerations::MemorySpace;
 using lss_one_dim_heat_explicit_schemes_cuda::ExplicitEulerHeatEquationScheme;
 using lss_one_dim_heat_implicit_schemes_cuda::ImplicitHeatEquationSchemes;
+using lss_one_dim_pde_utility::DirichletBoundary;
 using lss_one_dim_pde_utility::Discretization;
+using lss_one_dim_pde_utility::RobinBoundary;
 using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
 using lss_utility::FlatMatrix;
 using lss_utility::Range;
 using lss_utility::uptr_t;
-
-// move this somewhere else:
-template <typename T>
-using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
 
 namespace implicit_solvers {
 
@@ -69,7 +67,7 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
   std::size_t spaceN_;               // number of space subdivisions
   std::function<T(T)> init_;         // initi condition
   std::function<T(T, T)> source_;    // heat source
-  DirichletPair<T> boundary_;        // boundaries
+  DirichletBoundary<T> boundary_;    // boundaries
   std::tuple<T, T, T> coeffs_;       // coefficients a, b, c in PDE
   bool isSourceSet_;
 
@@ -104,8 +102,9 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
-    boundary_ = boundaryPair;
+  inline void setBoundaryCondition(
+      DirichletBoundary<T> const &dirichletBoundary) {
+    boundary_ = dirichletBoundary;
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -171,10 +170,10 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
   std::size_t spaceN_;               // number of space subdivisions
   std::function<T(T)> init_;         // initi condition
   std::function<T(T, T)> source_;    // heat source
-  std::pair<T, T> leftBoundary_;     // left boundaries
-  std::pair<T, T> rightBoundary_;    // right boundaries
+  RobinBoundary<T> boundary_;        // boundaries
   std::tuple<T, T, T> coeffs_;       // coefficients a, b, c in PDE
   bool isSourceSet_;
+  void transformRobinBC(RobinBoundary<T> const &boundary);
 
  public:
   typedef T value_type;
@@ -207,12 +206,8 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &left,
-                                   std::pair<T, T> const &right) {
-    leftBoundary_ = left;
-    T beta_ = static_cast<T>(1.0) / right.first;
-    T psi_ = static_cast<T>(-1.0) * right.second / right.first;
-    rightBoundary_ = std::make_pair(beta_, psi_);
+  inline void setBoundaryCondition(RobinBoundary<T> const &robinBoundary) {
+    transformRobinBC(robinBoundary);
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -269,7 +264,7 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
   std::size_t spaceN_;             // number of space subdivisions
   std::function<T(T)> init_;       // initi condition
   std::function<T(T, T)> source_;  // heat source	F(x,t)
-  DirichletPair<T> boundary_;      // boundaries
+  DirichletBoundary<T> boundary_;  // boundaries
   std::tuple<T, T, T> coeffs_;     // coefficients a, b, c in PDE
   bool isSourceSet_;
 
@@ -303,8 +298,9 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(DirichletPair<T> const &boundaryPair) {
-    boundary_ = boundaryPair;
+  inline void setBoundaryCondition(
+      DirichletBoundary<T> const &dirichletBoundary) {
+    boundary_ = dirichletBoundary;
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -367,10 +363,10 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
   std::size_t spaceN_;             // number of space subdivisions
   std::function<T(T)> init_;       // initi condition
   std::function<T(T, T)> source_;  // heat source F(x,t)
-  std::pair<T, T> leftBoundary_;   // left boundary pair
-  std::pair<T, T> rightBoundary_;  // right boundary pair
+  RobinBoundary<T> boundary_;      // boundaries
   std::tuple<T, T, T> coeffs_;     // coefficients a, b, c in PDE
   bool isSourceSet_;
+  void transformRobinBC(RobinBoundary<T> const &boundary);
 
  public:
   typedef T value_type;
@@ -402,12 +398,8 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
   }
   inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
 
-  inline void setBoundaryCondition(std::pair<T, T> const &left,
-                                   std::pair<T, T> const &right) {
-    leftBoundary_ = left;
-    T beta_ = static_cast<T>(1.0) / right.first;
-    T psi_ = static_cast<T>(-1.0) * right.second / right.first;
-    rightBoundary_ = std::make_pair(beta_, psi_);
+  inline void setBoundaryCondition(RobinBoundary<T> const &robinBoundary) {
+    transformRobinBC(robinBoundary);
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
@@ -544,6 +536,19 @@ template <typename T, MemorySpace MemSpace,
           template <typename, typename> typename Container, typename Alloc>
 void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
     T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container,
+    Alloc>::transformRobinBC(RobinBoundary<T> const &boundary) {
+  auto const &beta_ = static_cast<T>(1.0) / boundary.right.first;
+  auto const &psi_ =
+      static_cast<T>(-1.0) * boundary.right.second / boundary.right.first;
+  boundary_.left = boundary.left;
+  boundary_.right = std::make_pair(beta_, psi_);
+}
+
+template <typename T, MemorySpace MemSpace,
+          template <MemorySpace, typename> typename RealSparsePolicyCUDA,
+          template <typename, typename> typename Container, typename Alloc>
+void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
+    T, BoundaryConditionType::Robin, MemSpace, RealSparsePolicyCUDA, Container,
     Alloc>::solve(Container<T, Alloc> &solution, ImplicitPDESchemes scheme) {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
@@ -573,7 +578,7 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   fsm.emplace_back(0, 0, (1.0 + (2.0 * lambda - delta) * theta));
   fsm.emplace_back(
       0, 1,
-      -1.0 * ((lambda + gamma) + (lambda - gamma) * leftBoundary_.first) *
+      -1.0 * ((lambda + gamma) + (lambda - gamma) * boundary_.left.first) *
           theta);
   for (std::size_t t = 1; t < m - 1; ++t) {
     fsm.emplace_back(t, t - 1, -1.0 * (lambda - gamma) * theta);
@@ -582,7 +587,7 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   }
   fsm.emplace_back(
       m - 1, m - 2,
-      -1.0 * ((lambda - gamma) + (lambda + gamma) * rightBoundary_.first) *
+      -1.0 * ((lambda - gamma) + (lambda + gamma) * boundary_.right.first) *
           theta);
   fsm.emplace_back(m - 1, m - 1, (1.0 + (2.0 * lambda - delta) * theta));
   Container<T, Alloc> rhs(m, T{});
@@ -611,7 +616,7 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs,
-                leftBoundary_, rightBoundary_);
+                boundary_.left, boundary_.right);
       solverPtr_->setRhs(rhs);
       solverPtr_->solve(nextSol);
       prevSol = nextSol;
@@ -629,7 +634,7 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, Container<T, Alloc>(),
-                Container<T, Alloc>(), rhs, leftBoundary_, rightBoundary_);
+                Container<T, Alloc>(), rhs, boundary_.left, boundary_.right);
       solverPtr_->setRhs(rhs);
       solverPtr_->solve(nextSol);
       prevSol = nextSol;
@@ -689,6 +694,18 @@ void explicit_solvers::Explicit1DGeneralHeatEquationCUDA<
 
 template <typename T, template <typename, typename> typename Container,
           typename Alloc>
+void explicit_solvers::Explicit1DGeneralHeatEquationCUDA<
+    T, BoundaryConditionType::Robin, Container,
+    Alloc>::transformRobinBC(RobinBoundary<T> const &boundary) {
+  auto const &beta_ = static_cast<T>(1.0) / boundary.right.first;
+  auto const &psi_ =
+      static_cast<T>(-1.0) * boundary.right.second / boundary.right.first;
+  boundary_.left = boundary.left;
+  boundary_.right = std::make_pair(beta_, psi_);
+}
+
+template <typename T, template <typename, typename> typename Container,
+          typename Alloc>
 bool explicit_solvers::Explicit1DGeneralHeatEquationCUDA<
     T, BoundaryConditionType::Robin, Container, Alloc>::isStable() const {
   T const k = timeStep();
@@ -723,7 +740,7 @@ void explicit_solvers::Explicit1DGeneralHeatEquationCUDA<
   ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(
       spaceStart, terminalT_, std::make_pair(k, h), coeffs_, prevSol, source_,
       isSourceSet_);
-  eulerScheme(leftBoundary_, rightBoundary_, solution);
+  eulerScheme(boundary_, solution);
 }
 
 }  // namespace lss_one_dim_general_heat_equation_solvers_cuda

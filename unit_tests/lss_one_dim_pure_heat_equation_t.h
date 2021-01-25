@@ -359,6 +359,7 @@ void testImplPureHeatEquationRobinBCDoubleSweepEuler() {
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -412,7 +413,8 @@ void testImplPureHeatEquationRobinBCDoubleSweepEuler() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -453,6 +455,7 @@ void testImplPureHeatEquationRobinBCDoubleSweepCN() {
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -508,7 +511,8 @@ void testImplPureHeatEquationRobinBCDoubleSweepCN() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -562,6 +566,7 @@ void testImplPureHeatEquationRobinBCThomasLUEuler() {
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -615,7 +620,8 @@ void testImplPureHeatEquationRobinBCThomasLUEuler() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -656,6 +662,7 @@ void testImplPureHeatEquationRobinBCThomasLUCN() {
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -709,7 +716,8 @@ void testImplPureHeatEquationRobinBCThomasLUCN() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1123,6 +1131,7 @@ void testImplPureHeatEquationSourceRobinBCDoubleSweepEuler() {
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1158,7 +1167,8 @@ void testImplPureHeatEquationSourceRobinBCDoubleSweepEuler() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1206,6 +1216,7 @@ void testImplPureHeatEquationSourceRobinBCDoubleSweepCN() {
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1242,7 +1253,8 @@ void testImplPureHeatEquationSourceRobinBCDoubleSweepCN() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1303,6 +1315,7 @@ void testImplPureHeatEquationSourceRobinBCThomasLUEuler() {
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1338,7 +1351,8 @@ void testImplPureHeatEquationSourceRobinBCThomasLUEuler() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1386,6 +1400,7 @@ void testImplPureHeatEquationSourceRobinBCThomasLUCN() {
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1422,7 +1437,8 @@ void testImplPureHeatEquationSourceRobinBCThomasLUCN() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -2562,6 +2578,7 @@ void testExplHomPureHeatEquationRobinBCEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -2615,7 +2632,8 @@ void testExplHomPureHeatEquationRobinBCEuler() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  expl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -2669,6 +2687,7 @@ void testExplHomPureHeatEquationSourceRobinBCEuler() {
   using lss_enumerations::BoundaryConditionType;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -2718,7 +2737,8 @@ void testExplHomPureHeatEquationSourceRobinBCEuler() {
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  expl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)

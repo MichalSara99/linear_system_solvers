@@ -1,31 +1,21 @@
 #include <device_launch_parameters.h>
 
-#include <limits>
-
 #include "lss_one_dim_space_variable_heat_cuda_kernels.h"
 #include "lss_one_dim_space_variable_heat_explicit_schemes_cuda.h"
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
-// Move this somewhere else seperate:
-template <typename T>
-static constexpr T NaN() {
-  return std::numeric_limits<T>::quiet_NaN();
-}
-
-// move this somewhere else:
-template <typename T>
-using DirichletPair = std::pair<std::function<T(T)>, std::function<T(T)>>;
-
+using lss_one_dim_pde_utility::DirichletBoundary;
+using lss_one_dim_pde_utility::RobinBoundary;
 using lss_one_dim_space_variable_heat_cuda_kernels::explicitEulerIterate1D;
 using lss_one_dim_space_variable_heat_cuda_kernels::fillDirichletBC1D;
 using lss_one_dim_space_variable_heat_cuda_kernels::fillRobinBC1D;
+using lss_utility::NaN;
 using lss_utility::swap;
 
-void ExplicitEulerLoopSP::operator()(float const *input,
-                                     DirichletPair<float> const &boundaryPair,
-                                     unsigned long long const size,
-                                     float *solution) const {
+void ExplicitEulerLoopSP::operator()(
+    float const *input, DirichletBoundary<float> const &dirichletBoundary,
+    unsigned long long const size, float *solution) const {
   // prepare pointers on device:
   float *d_prev = NULL;
   float *d_next = NULL;
@@ -61,8 +51,8 @@ void ExplicitEulerLoopSP::operator()(float const *input,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = boundaryPair.first;
-  auto const &right = boundaryPair.second;
+  auto const &left = dirichletBoundary.first;
+  auto const &right = dirichletBoundary.second;
 
   float time = k;
 
@@ -152,10 +142,9 @@ void ExplicitEulerLoopSP::operator()(float const *input,
   cudaFree(d_next);
 }
 
-void ExplicitEulerLoopDP::operator()(double const *input,
-                                     DirichletPair<double> const &boundaryPair,
-                                     unsigned long long const size,
-                                     double *solution) const {
+void ExplicitEulerLoopDP::operator()(
+    double const *input, DirichletBoundary<double> const &dirichletBoundary,
+    unsigned long long const size, double *solution) const {
   // prepare pointers on device:
   double *d_prev = NULL;
   double *d_next = NULL;
@@ -191,8 +180,8 @@ void ExplicitEulerLoopDP::operator()(double const *input,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = boundaryPair.first;
-  auto const &right = boundaryPair.second;
+  auto const &left = dirichletBoundary.first;
+  auto const &right = dirichletBoundary.second;
 
   double time = k;
 
@@ -283,8 +272,7 @@ void ExplicitEulerLoopDP::operator()(double const *input,
 }
 
 void ExplicitEulerLoopSP::operator()(float const *input,
-                                     std::pair<float, float> const &leftPair,
-                                     std::pair<float, float> const &rightPair,
+                                     RobinBoundary<float> const &robinBoundary,
                                      unsigned long long const size,
                                      float *solution) const {
   // prepare pointers on device:
@@ -322,10 +310,10 @@ void ExplicitEulerLoopSP::operator()(float const *input,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  float const leftLinear = leftPair.first;
-  float const leftConst = leftPair.second;
-  float const rightLinear = rightPair.first;
-  float const rightConst = rightPair.second;
+  float const leftLinear = robinBoundary.left.first;
+  float const leftConst = robinBoundary.left.second;
+  float const rightLinear = robinBoundary.right.first;
+  float const rightConst = robinBoundary.right.second;
 
   float time = k;
 
@@ -417,8 +405,7 @@ void ExplicitEulerLoopSP::operator()(float const *input,
 }
 
 void ExplicitEulerLoopDP::operator()(double const *input,
-                                     std::pair<double, double> const &leftPair,
-                                     std::pair<double, double> const &rightPair,
+                                     RobinBoundary<double> const &robinBoundary,
                                      unsigned long long const size,
                                      double *solution) const {
   // prepare pointers on device:
@@ -456,10 +443,10 @@ void ExplicitEulerLoopDP::operator()(double const *input,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  double const leftLinear = leftPair.first;
-  double const leftConst = leftPair.second;
-  double const rightLinear = rightPair.first;
-  double const rightConst = rightPair.second;
+  double const leftLinear = robinBoundary.left.first;
+  double const leftConst = robinBoundary.left.second;
+  double const rightLinear = robinBoundary.right.first;
+  double const rightConst = robinBoundary.right.second;
 
   double time = k;
 

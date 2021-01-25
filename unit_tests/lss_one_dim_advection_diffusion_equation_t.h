@@ -490,6 +490,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -539,7 +540,8 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -589,6 +591,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -639,7 +642,8 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -703,6 +707,7 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -752,7 +757,8 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -802,6 +808,7 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
   using lss_one_dim_general_heat_equation_solvers::implicit_solvers::
       Implicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -852,7 +859,8 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  impl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   impl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
@@ -1374,6 +1382,7 @@ void testExplAdvDiffEquationRobinBCEuler() {
   using lss_enumerations::ExplicitPDESchemes;
   using lss_one_dim_general_heat_equation_solvers::explicit_solvers::
       Explicit1DGeneralHeatEquation;
+  using lss_one_dim_pde_utility::RobinBoundary;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1422,7 +1431,8 @@ void testExplAdvDiffEquationRobinBCEuler() {
   // set boundary conditions:
   auto leftBoundary = std::make_pair(1.0, 0.0);
   auto rightBoundary = std::make_pair(1.0, 0.0);
-  expl_solver.setBoundaryCondition(leftBoundary, rightBoundary);
+  expl_solver.setBoundaryCondition(
+      RobinBoundary<T>(leftBoundary, rightBoundary));
   // set initial condition:
   expl_solver.setInitialCondition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)

@@ -767,7 +767,7 @@ void explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation<
       std::make_pair(k, h), coeffs_,
       schemeCoeffs,         initCondition,
       heatSource,           dataPtr_->isSourceFunctionSet};
-  euler(boundary_.left, boundary_.right, solution);
+  euler(boundary_, solution);
 }
 
 }  // namespace lss_one_dim_space_variable_general_heat_equation_solvers

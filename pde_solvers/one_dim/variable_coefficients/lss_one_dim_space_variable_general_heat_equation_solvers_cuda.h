@@ -807,7 +807,7 @@ void explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquationCUDA<
   ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(
       spaceStart, dataPtr_->timeRange.upper(), std::make_pair(k, h), coeffs_,
       prevSol, dataPtr_->sourceFunction, dataPtr_->isSourceFunctionSet);
-  eulerScheme(boundary_.left, boundary_.right, solution);
+  eulerScheme(boundary_, solution);
 }
 
 }  // namespace lss_one_dim_space_variable_general_heat_equation_solvers_cuda

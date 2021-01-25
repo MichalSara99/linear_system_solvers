@@ -3,6 +3,7 @@
 #define _LSS_UTILITY
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -10,6 +11,15 @@
 #include "lss_enumerations.h"
 
 namespace lss_utility {
+
+// ==========================================================================
+// ================================= NaN ====================================
+// ==========================================================================
+
+template <typename T>
+static constexpr T NaN() {
+  return std::numeric_limits<T>::quiet_NaN();
+}
 
 // ==========================================================================
 // =========================== smart pointer aliases ========================
