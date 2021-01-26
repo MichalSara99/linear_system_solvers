@@ -18,6 +18,8 @@ using lss_one_dim_heat_explicit_schemes_cuda::ExplicitEulerHeatEquationScheme;
 using lss_one_dim_heat_implicit_schemes_cuda::ImplicitHeatEquationSchemes;
 using lss_one_dim_pde_utility::DirichletBoundary;
 using lss_one_dim_pde_utility::Discretization;
+using lss_one_dim_pde_utility::HeatData;
+using lss_one_dim_pde_utility::PDECoefficientHolderConst;
 using lss_one_dim_pde_utility::RobinBoundary;
 using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
 using lss_utility::FlatMatrix;
@@ -59,17 +61,12 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
     : public Discretization<T, Container, Alloc> {
  private:
   typedef RealSparsePolicyCUDA<MemSpace, T> cuda_solver_t;
+  typedef HeatData<T> heat_data_t;
 
-  uptr_t<cuda_solver_t> solverPtr_;  // finite-difference solver
-  Range<T> spacer_;                  // space range
-  T terminalT_;                      // terminal time
-  std::size_t timeN_;                // number of time subdivisions
-  std::size_t spaceN_;               // number of space subdivisions
-  std::function<T(T)> init_;         // initi condition
-  std::function<T(T, T)> source_;    // heat source
-  DirichletBoundary<T> boundary_;    // boundaries
-  std::tuple<T, T, T> coeffs_;       // coefficients a, b, c in PDE
-  bool isSourceSet_;
+  uptr_t<cuda_solver_t> solverPtr_;      // finite-difference solver
+  uptr_t<heat_data_t> dataPtr_;          // heat data
+  DirichletBoundary<T> boundary_;        // boundaries
+  PDECoefficientHolderConst<T> coeffs_;  // coefficients a, b, c in PDE
 
  public:
   typedef T value_type;
@@ -79,12 +76,9 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
       : solverPtr_{std::make_unique<cuda_solver_t>()},
-        spacer_{spaceRange},
-        terminalT_{terminalTime},
-        timeN_{timeDiscretization},
-        spaceN_{spaceDiscretization},
-        source_{nullptr},
-        isSourceSet_{false} {}
+        dataPtr_{std::make_unique<heat_data_t>(
+            spaceRange, Range<T>(T{}, terminalTime), spaceDiscretization,
+            timeDiscretization, nullptr, nullptr, nullptr, false)} {}
 
   ~Implicit1DGeneralHeatEquationCUDA() {}
 
@@ -98,9 +92,13 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
       Implicit1DGeneralHeatEquationCUDA &&) = delete;
 
   inline T spaceStep() const {
-    return (spacer_.spread() / static_cast<T>(spaceN_));
+    return ((dataPtr_->spaceRange.spread()) /
+            static_cast<T>(dataPtr_->spaceDivision));
   }
-  inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
+  inline T timeStep() const {
+    return ((dataPtr_->timeRange.upper()) /
+            static_cast<T>(dataPtr_->timeDivision));
+  }
 
   inline void setBoundaryCondition(
       DirichletBoundary<T> const &dirichletBoundary) {
@@ -108,11 +106,11 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
-    init_ = initialCondition;
+    dataPtr_->initialCondition = initialCondition;
   }
   inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
-    isSourceSet_ = true;
-    source_ = heatSource;
+    dataPtr_->isSourceFunctionSet = true;
+    dataPtr_->sourceFunction = heatSource;
   }
   inline void set2OrderCoefficient(T value) { std::get<0>(coeffs_) = value; }
   inline void set1OrderCoefficient(T value) { std::get<1>(coeffs_) = value; }
@@ -162,17 +160,12 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
     : public Discretization<T, Container, Alloc> {
  private:
   typedef RealSparsePolicyCUDA<MemSpace, T> cuda_solver_t;
+  typedef HeatData<T> heat_data_t;
 
-  uptr_t<cuda_solver_t> solverPtr_;  // finite-difference solver
-  Range<T> spacer_;                  // space range
-  T terminalT_;                      // terminal time
-  std::size_t timeN_;                // number of time subdivisions
-  std::size_t spaceN_;               // number of space subdivisions
-  std::function<T(T)> init_;         // initi condition
-  std::function<T(T, T)> source_;    // heat source
-  RobinBoundary<T> boundary_;        // boundaries
-  std::tuple<T, T, T> coeffs_;       // coefficients a, b, c in PDE
-  bool isSourceSet_;
+  uptr_t<cuda_solver_t> solverPtr_;      // finite-difference solver
+  uptr_t<heat_data_t> dataPtr_;          // one-dim heat data
+  RobinBoundary<T> boundary_;            // boundaries
+  PDECoefficientHolderConst<T> coeffs_;  // coefficients a, b, c in PDE
   void transformRobinBC(RobinBoundary<T> const &boundary);
 
  public:
@@ -183,12 +176,9 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
       : solverPtr_{std::make_unique<RealSparsePolicyCUDA<MemSpace, T>>()},
-        spacer_{spaceRange},
-        terminalT_{terminalTime},
-        timeN_{timeDiscretization},
-        spaceN_{spaceDiscretization},
-        source_{nullptr},
-        isSourceSet_{false} {}
+        dataPtr_{std::make_unique<heat_data_t>(
+            spaceRange, Range<T>(T{}, terminalTime), spaceDiscretization,
+            timeDiscretization, nullptr, nullptr, nullptr, false)} {}
 
   ~Implicit1DGeneralHeatEquationCUDA() {}
 
@@ -202,20 +192,24 @@ class Implicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
       Implicit1DGeneralHeatEquationCUDA &&) = delete;
 
   inline T spaceStep() const {
-    return (spacer_.spread() / static_cast<T>(spaceN_));
+    return ((dataPtr_->spaceRange.spread()) /
+            static_cast<T>(dataPtr_->spaceDivision));
   }
-  inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
+  inline T timeStep() const {
+    return ((dataPtr_->timeRange.upper()) /
+            static_cast<T>(dataPtr_->timeDivision));
+  }
 
   inline void setBoundaryCondition(RobinBoundary<T> const &robinBoundary) {
     transformRobinBC(robinBoundary);
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
-    init_ = initialCondition;
+    dataPtr_->initialCondition = initialCondition;
   }
   inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
-    isSourceSet_ = true;
-    source_ = heatSource;
+    dataPtr_->isSourceFunctionSet = true;
+    dataPtr_->sourceFunction = heatSource;
   }
   inline void set2OrderCoefficient(T value) { std::get<0>(coeffs_) = value; }
   inline void set1OrderCoefficient(T value) { std::get<1>(coeffs_) = value; }
@@ -258,15 +252,11 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
                                         Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  Range<T> spacer_;                // space range
-  T terminalT_;                    // terminal time
-  std::size_t timeN_;              // number of time subdivisions
-  std::size_t spaceN_;             // number of space subdivisions
-  std::function<T(T)> init_;       // initi condition
-  std::function<T(T, T)> source_;  // heat source	F(x,t)
-  DirichletBoundary<T> boundary_;  // boundaries
-  std::tuple<T, T, T> coeffs_;     // coefficients a, b, c in PDE
-  bool isSourceSet_;
+  typedef HeatData<T> heat_data_t;
+
+  uptr_t<heat_data_t> dataPtr_;          // one-dim heat data
+  DirichletBoundary<T> boundary_;        // boundaries
+  PDECoefficientHolderConst<T> coeffs_;  // coefficients a, b, c in PDE
 
  public:
   typedef T value_type;
@@ -275,12 +265,9 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
       Range<T> const &spaceRange, T terminalTime,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
-      : spacer_{spaceRange},
-        terminalT_{terminalTime},
-        timeN_{timeDiscretization},
-        spaceN_{spaceDiscretization},
-        source_{nullptr},
-        isSourceSet_{false} {}
+      : dataPtr_{std::make_unique<heat_data_t>(
+            spaceRange, Range<T>(T{}, terminalTime), spaceDiscretization,
+            timeDiscretization, nullptr, nullptr, nullptr, false)} {}
 
   ~Explicit1DGeneralHeatEquationCUDA() {}
 
@@ -294,9 +281,13 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
       Explicit1DGeneralHeatEquationCUDA &&) = delete;
 
   inline T spaceStep() const {
-    return (spacer_.spread() / static_cast<T>(spaceN_));
+    return ((dataPtr_->spaceRange.spread()) /
+            static_cast<T>(dataPtr_->spaceDivision));
   }
-  inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
+  inline T timeStep() const {
+    return ((dataPtr_->timeRange.upper()) /
+            static_cast<T>(dataPtr_->timeDivision));
+  }
 
   inline void setBoundaryCondition(
       DirichletBoundary<T> const &dirichletBoundary) {
@@ -304,11 +295,11 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Dirichlet,
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
-    init_ = initialCondition;
+    dataPtr_->initialCondition = initialCondition;
   }
   inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
-    isSourceSet_ = true;
-    source_ = heatSource;
+    dataPtr_->isSourceFunctionSet = true;
+    dataPtr_->sourceFunction = heatSource;
   }
   inline void set2OrderCoefficient(T value) { std::get<0>(coeffs_) = value; }
   inline void set1OrderCoefficient(T value) { std::get<1>(coeffs_) = value; }
@@ -357,15 +348,11 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
                                         Container, Alloc>
     : public Discretization<T, Container, Alloc> {
  private:
-  Range<T> spacer_;                // space range
-  T terminalT_;                    // terminal time
-  std::size_t timeN_;              // number of time subdivisions
-  std::size_t spaceN_;             // number of space subdivisions
-  std::function<T(T)> init_;       // initi condition
-  std::function<T(T, T)> source_;  // heat source F(x,t)
-  RobinBoundary<T> boundary_;      // boundaries
-  std::tuple<T, T, T> coeffs_;     // coefficients a, b, c in PDE
-  bool isSourceSet_;
+  typedef HeatData<T> heat_data_t;
+
+  uptr_t<heat_data_t> dataPtr_;          // one-dim heat data
+  RobinBoundary<T> boundary_;            // boundaries
+  PDECoefficientHolderConst<T> coeffs_;  // coefficients a, b, c in PDE
   void transformRobinBC(RobinBoundary<T> const &boundary);
 
  public:
@@ -375,12 +362,9 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
       Range<T> const &spaceRange, T terminalTime,
       std::size_t const &spaceDiscretization,
       std::size_t const &timeDiscretization)
-      : spacer_{spaceRange},
-        terminalT_{terminalTime},
-        timeN_{timeDiscretization},
-        spaceN_{spaceDiscretization},
-        source_{nullptr},
-        isSourceSet_{false} {}
+      : dataPtr_{std::make_unique<heat_data_t>(
+            spaceRange, Range<T>(T{}, terminalTime), spaceDiscretization,
+            timeDiscretization, nullptr, nullptr, nullptr, false)} {}
 
   ~Explicit1DGeneralHeatEquationCUDA() {}
 
@@ -394,20 +378,24 @@ class Explicit1DGeneralHeatEquationCUDA<T, BoundaryConditionType::Robin,
       Explicit1DGeneralHeatEquationCUDA &&) = delete;
 
   inline T spaceStep() const {
-    return (spacer_.spread() / static_cast<T>(spaceN_));
+    return ((dataPtr_->spaceRange.spread()) /
+            static_cast<T>(dataPtr_->spaceDivision));
   }
-  inline T timeStep() const { return (terminalT_ / static_cast<T>(timeN_)); }
+  inline T timeStep() const {
+    return ((dataPtr_->timeRange.upper()) /
+            static_cast<T>(dataPtr_->timeDivision));
+  }
 
   inline void setBoundaryCondition(RobinBoundary<T> const &robinBoundary) {
     transformRobinBC(robinBoundary);
   }
 
   inline void setInitialCondition(std::function<T(T)> const &initialCondition) {
-    init_ = initialCondition;
+    dataPtr_->initialCondition = initialCondition;
   }
   inline void setHeatSource(std::function<T(T, T)> const &heatSource) {
-    isSourceSet_ = true;
-    source_ = heatSource;
+    dataPtr_->isSourceFunctionSet = true;
+    dataPtr_->sourceFunction = heatSource;
   }
   inline void set2OrderCoefficient(T value) { std::get<0>(coeffs_) = value; }
   inline void set1OrderCoefficient(T value) { std::get<1>(coeffs_) = value; }
@@ -441,18 +429,24 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   T const h = spaceStep();
   // get time step:
   T const k = timeStep();
+  // get space range:
+  auto const &spaceRange = dataPtr_->spaceRange;
+  // get source heat function:
+  auto const &heatSource = dataPtr_->sourceFunction;
+  // space divisions:
+  T const &spaceSize = dataPtr_->spaceDivision;
   // calculate scheme const coefficients:
   T const lambda = (std::get<0>(coeffs_) * k) / (h * h);
   T const gamma = (std::get<1>(coeffs_) * k) / (2.0 * h);
   T const delta = (std::get<2>(coeffs_) * k);
   // store size of matrix:
-  std::size_t const m = spaceN_ - 1;
+  std::size_t const m = spaceSize - 1;
   // create container to carry mesh in space and then previous solution:
   Container<T, Alloc> prevSol(m, T{});
   // populate the container with mesh in space
-  discretizeSpace(h, (spacer_.lower() + h), prevSol);
+  discretizeSpace(h, (spaceRange.lower() + h), prevSol);
   // use the mesh in space to get values of initial condition
-  discretizeInitialCondition(init_, prevSol);
+  discretizeInitialCondition(dataPtr_->initialCondition, prevSol);
   // first create and populate the sparse matrix:
   FlatMatrix<T> fsm;
   fsm.setColumns(m);
@@ -473,12 +467,12 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   // create first time point:
   T time = k;
   // store terminal time:
-  T const lastTime = terminalT_;
+  T const lastTime = dataPtr_->timeRange.upper();
   // initialize the solver:
   solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->setFlatSparseMatrix(std::move(fsm));
-  if (isSourceSet_) {
+  if ((dataPtr_->isSourceFunctionSet)) {
     // wrap the scheme coefficients:
     const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, k);
     // get the correct scheme:
@@ -487,8 +481,9 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
     // create a container to carry discretized source heat
     Container<T, Alloc> sourceCurr(m, T{});
     Container<T, Alloc> sourceNext(m, T{});
-    discretizeInSpace(h, (spacer_.lower() + h), 0.0, source_, sourceCurr);
-    discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceNext);
+    discretizeInSpace(h, (spaceRange.lower() + h), 0.0, heatSource, sourceCurr);
+    discretizeInSpace(h, (spaceRange.lower() + h), time, heatSource,
+                      sourceNext);
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs,
@@ -497,8 +492,9 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
       solverPtr_->setRhs(rhs);
       solverPtr_->solve(nextSol);
       prevSol = nextSol;
-      discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceCurr);
-      discretizeInSpace(h, (spacer_.lower() + h), 2.0 * time, source_,
+      discretizeInSpace(h, (spaceRange.lower() + h), time, heatSource,
+                        sourceCurr);
+      discretizeInSpace(h, (spaceRange.lower() + h), 2.0 * time, heatSource,
                         sourceNext);
       time += k;
     }
@@ -558,18 +554,24 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   T const h = spaceStep();
   // get time step:
   T const k = timeStep();
+  // get space range:
+  auto const &spaceRange = dataPtr_->spaceRange;
+  // get source heat function:
+  auto const &heatSource = dataPtr_->sourceFunction;
+  // space divisions:
+  T const &spaceSize = dataPtr_->spaceDivision;
   // calculate scheme const coefficients:
   T const lambda = (std::get<0>(coeffs_) * k) / (h * h);
   T const gamma = (std::get<1>(coeffs_) * k) / (2.0 * h);
   T const delta = (std::get<2>(coeffs_) * k);
   // store size of matrix:
-  std::size_t const m = spaceN_ + 1;
+  std::size_t const m = spaceSize + 1;
   // create container to carry mesh in space and then previous solution:
   Container<T, Alloc> prevSol(m, T{});
   // populate the container with mesh in space
-  discretizeSpace(h, spacer_.lower(), prevSol);
+  discretizeSpace(h, spaceRange.lower(), prevSol);
   // use the mesh in space to get values of initial condition
-  discretizeInitialCondition(init_, prevSol);
+  discretizeInitialCondition(dataPtr_->initialCondition, prevSol);
   // first create and populate the sparse matrix:
   FlatMatrix<T> fsm;
   fsm.setColumns(m);
@@ -596,13 +598,13 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
   // create first time point:
   T time = k;
   // store terminal time:
-  T const lastTime = terminalT_;
+  T const lastTime = dataPtr_->timeRange.upper();
   // initialize the solver:
   solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->setFlatSparseMatrix(std::move(fsm));
   // differentiate between inhomogeneous and homogeneous PDE:
-  if (isSourceSet_) {
+  if (dataPtr_->isSourceFunctionSet) {
     // wrap the scheme coefficients:
     const auto schemeCoeffs = std::make_tuple(lambda, gamma, delta, k);
     // get the correct scheme:
@@ -611,8 +613,9 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
     // create a container to carry discretized source heat
     Container<T, Alloc> sourceCurr(m, T{});
     Container<T, Alloc> sourceNext(m, T{});
-    discretizeInSpace(h, (spacer_.lower() + h), 0.0, source_, sourceCurr);
-    discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceNext);
+    discretizeInSpace(h, (spaceRange.lower() + h), 0.0, heatSource, sourceCurr);
+    discretizeInSpace(h, (spaceRange.lower() + h), time, heatSource,
+                      sourceNext);
     // loop for stepping in time:
     while (time <= lastTime) {
       schemeFun(schemeCoeffs, prevSol, sourceCurr, sourceNext, rhs,
@@ -620,8 +623,9 @@ void implicit_solvers::Implicit1DGeneralHeatEquationCUDA<
       solverPtr_->setRhs(rhs);
       solverPtr_->solve(nextSol);
       prevSol = nextSol;
-      discretizeInSpace(h, (spacer_.lower() + h), time, source_, sourceCurr);
-      discretizeInSpace(h, (spacer_.lower() + h), 2.0 * time, source_,
+      discretizeInSpace(h, (spaceRange.lower() + h), time, heatSource,
+                        sourceCurr);
+      discretizeInSpace(h, (spaceRange.lower() + h), 2.0 * time, heatSource,
                         sourceNext);
       time += k;
     }
@@ -673,18 +677,26 @@ void explicit_solvers::Explicit1DGeneralHeatEquationCUDA<
   T const h = spaceStep();
   // get time step:
   T const k = timeStep();
-  // space start:
-  T const spaceStart = spacer_.lower();
+  // get space range:
+  auto const &spaceRange = dataPtr_->spaceRange;
+  // get time range:
+  auto const &timeRange = dataPtr_->timeRange;
+  // get source heat function:
+  auto const &heatSource = dataPtr_->sourceFunction;
+  // space divisions:
+  T const &spaceSize = dataPtr_->spaceDivision;
+  // flag set:
+  bool const &isSourceSet = dataPtr_->isSourceFunctionSet;
   // create container to carry mesh in space and then previous solution:
-  Container<T, Alloc> prevSol(spaceN_ + 1, T{});
+  Container<T, Alloc> prevSol(spaceSize + 1, T{});
   // populate the container with mesh in space
-  discretizeSpace(h, spaceStart, prevSol);
+  discretizeSpace(h, spaceRange.lower(), prevSol);
   // use the mesh in space to get values of initial condition
-  discretizeInitialCondition(init_, prevSol);
+  discretizeInitialCondition(dataPtr_->initialCondition, prevSol);
 
   ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(
-      spaceStart, terminalT_, std::make_pair(k, h), coeffs_, prevSol, source_,
-      isSourceSet_);
+      spaceRange.lower(), timeRange.upper(), std::make_pair(k, h), coeffs_,
+      prevSol, heatSource, isSourceSet);
   eulerScheme(boundary_, solution);
 }
 
@@ -728,18 +740,25 @@ void explicit_solvers::Explicit1DGeneralHeatEquationCUDA<
   T const h = spaceStep();
   // get time step:
   T const k = timeStep();
-  // space start:
-  T const spaceStart = spacer_.lower();
+  // get space range:
+  auto const &spaceRange = dataPtr_->spaceRange;
+  // get time range:
+  auto const &timeRange = dataPtr_->timeRange;
+  // get source heat function:
+  auto const &heatSource = dataPtr_->sourceFunction;
+  // space divisions:
+  T const &spaceSize = dataPtr_->spaceDivision;
+  // flag set:
+  bool const &isSourceSet = dataPtr_->isSourceFunctionSet;
   // create container to carry mesh in space and then previous solution:
-  Container<T, Alloc> prevSol(spaceN_ + 1, T{});
+  Container<T, Alloc> prevSol(spaceSize + 1, T{});
   // populate the container with mesh in space
-  discretizeSpace(h, spaceStart, prevSol);
+  discretizeSpace(h, spaceRange.lower(), prevSol);
   // use the mesh in space to get values of initial condition
-  discretizeInitialCondition(init_, prevSol);
-
+  discretizeInitialCondition(dataPtr_->initialCondition, prevSol);
   ExplicitEulerHeatEquationScheme<T, Container, Alloc> eulerScheme(
-      spaceStart, terminalT_, std::make_pair(k, h), coeffs_, prevSol, source_,
-      isSourceSet_);
+      spaceRange.lower(), timeRange.upper(), std::make_pair(k, h), coeffs_,
+      prevSol, heatSource, isSourceSet);
   eulerScheme(boundary_, solution);
 }
 
