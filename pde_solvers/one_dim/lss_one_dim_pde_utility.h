@@ -13,96 +13,100 @@ namespace lss_one_dim_pde_utility {
 using lss_utility::Range;
 
 // PDE coefficient holder
-template <typename... CoeffType>
-using CoefficientHolder = std::tuple<CoeffType...>;
+template <typename... coeff_type>
+using coefficient_holder = std::tuple<coeff_type...>;
 
 // One-dim PDE coefficient holder
-template <typename Type>
-using OneDimCoefficientHolder = CoefficientHolder<Type, Type, Type>;
+template <typename type>
+using one_dim_coefficient_holder = coefficient_holder<type, type, type>;
 
 // One-dim PDE coefficients (a,b,c)
-template <typename T>
-using PDECoefficientHolderConst = OneDimCoefficientHolder<T>;
+template <typename fp_type>
+using pde_coefficient_holder_const = one_dim_coefficient_holder<fp_type>;
 
 // One-dim PDE coefficients (a(x),b(x),c(x))
-template <typename T>
-using PDECoefficientHolderFun1Arg =
-    OneDimCoefficientHolder<std::function<T(T)>>;
+template <typename fp_type>
+using pde_coefficient_holder_fun_1_arg =
+    one_dim_coefficient_holder<std::function<fp_type(fp_type)>>;
 
 // One-dim Dirichlet boundary:
-template <typename T>
-using DirichletBoundary = std::pair<std::function<T(T)>, std::function<T(T)>>;
+template <typename fp_type>
+using dirichlet_boundary =
+    std::pair<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
 
 // One-dim Robin boundary:
-template <typename T>
-struct RobinBoundary {
-  std::pair<T, T> left;
-  std::pair<T, T> right;
+template <typename fp_type>
+struct robin_boundary {
+  std::pair<fp_type, fp_type> left;
+  std::pair<fp_type, fp_type> right;
 
-  RobinBoundary() {}
-  explicit RobinBoundary(std::pair<T, T> const &leftBoundary,
-                         std::pair<T, T> const &rightBoundary)
-      : left{leftBoundary}, right{rightBoundary} {}
+  robin_boundary() {}
+  explicit robin_boundary(std::pair<fp_type, fp_type> const &left_boundary,
+                          std::pair<fp_type, fp_type> const &right_boundary)
+      : left{left_boundary}, right{right_boundary} {}
 };
 
-template <typename T>
-struct HeatData {
+template <typename fp_type>
+struct heat_data {
   // Range for space variable
-  Range<T> spaceRange;
+  Range<fp_type> space_range;
   // Range for time variable
-  Range<T> timeRange;
+  Range<fp_type> time_range;
   // Number of time subdivisions
-  std::size_t timeDivision;
+  std::size_t time_division;
   // Number of space subdivisions
-  std::size_t spaceDivision;
+  std::size_t space_division;
   // Initial condition
-  std::function<T(T)> initialCondition;
+  std::function<fp_type(fp_type)> initial_condition;
   // terminal condition
-  std::function<T(T)> terminalCondition;
+  std::function<fp_type(fp_type)> terminal_condition;
   // Independent source function
-  std::function<T(T, T)> sourceFunction;
+  std::function<fp_type(fp_type, fp_type)> source_function;
   // Flag on source function
-  bool isSourceFunctionSet;
+  bool is_source_function_set;
 
-  explicit HeatData(Range<T> const &space, Range<T> const &time,
-                    std::size_t const &spaceSubdivision,
-                    std::size_t const &timeSubdivision,
-                    std::function<T(T)> const &initialCond,
-                    std::function<T(T)> const &terminalCond,
-                    std::function<T(T, T)> const &source, bool isSourceSet)
-      : spaceRange{space},
-        timeRange{time},
-        spaceDivision{spaceSubdivision},
-        timeDivision{timeSubdivision},
-        initialCondition{initialCond},
-        terminalCondition{terminalCond},
-        sourceFunction{source},
-        isSourceFunctionSet{isSourceSet} {}
+  explicit heat_data(Range<fp_type> const &space, Range<fp_type> const &time,
+                     std::size_t const &space_subdivision,
+                     std::size_t const &time_subdivision,
+                     std::function<fp_type(fp_type)> const &initial_condition,
+                     std::function<fp_type(fp_type)> const &terminal_condition,
+                     std::function<fp_type(fp_type, fp_type)> const &source,
+                     bool is_source_set)
+      : space_range{space},
+        time_range{time},
+        space_division{space_subdivision},
+        time_division{time_subdivision},
+        initial_condition{initial_condition},
+        terminal_condition{terminal_condition},
+        source_function{source},
+        is_source_function_set{is_source_set} {}
 
  protected:
-  HeatData() {}
+  heat_data() {}
 };
 
-template <typename T, template <typename, typename> typename Container,
-          typename Alloc>
-class Discretization {
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+class discretization {
  public:
-  virtual ~Discretization() {}
-  void discretizeSpace(T const &step, T const &init,
-                       Container<T, Alloc> &container) const;
+  virtual ~discretization() {}
+  void discretize_space(fp_type const &step, fp_type const &init,
+                        container<fp_type, alloc> &container) const;
 
-  void discretizeInitialCondition(std::function<T(T)> const &init,
-                                  Container<T, Alloc> &container) const;
+  void discretize_initial_condition(std::function<fp_type(fp_type)> const &init,
+                                    container<fp_type, alloc> &container) const;
 
-  void discretizeInSpace(T const &start, T const &step, T const &time,
-                         std::function<T(T, T)> const &fun,
-                         Container<T, Alloc> &output) const;
+  void discretize_in_space(fp_type const &start, fp_type const &step,
+                           fp_type const &time,
+                           std::function<fp_type(fp_type, fp_type)> const &fun,
+                           container<fp_type, alloc> &output) const;
 };
 
-template <typename T, template <typename, typename> typename Container,
-          typename Alloc>
-void Discretization<T, Container, Alloc>::discretizeSpace(
-    T const &step, T const &init, Container<T, Alloc> &container) const {
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+void discretization<fp_type, container, alloc>::discretize_space(
+    fp_type const &step, fp_type const &init,
+    container<fp_type, alloc> &container) const {
   LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
   container[0] = init;
   for (std::size_t t = 1; t < container.size(); ++t) {
@@ -110,21 +114,23 @@ void Discretization<T, Container, Alloc>::discretizeSpace(
   }
 }
 
-template <typename T, template <typename, typename> typename Container,
-          typename Alloc>
-void Discretization<T, Container, Alloc>::discretizeInitialCondition(
-    std::function<T(T)> const &init, Container<T, Alloc> &container) const {
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+void discretization<fp_type, container, alloc>::discretize_initial_condition(
+    std::function<fp_type(fp_type)> const &init,
+    container<fp_type, alloc> &container) const {
   LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
   for (std::size_t t = 0; t < container.size(); ++t) {
     container[t] = init(container[t]);
   }
 }
 
-template <typename T, template <typename, typename> typename Container,
-          typename Alloc>
-void Discretization<T, Container, Alloc>::discretizeInSpace(
-    T const &step, T const &init, T const &time,
-    std::function<T(T, T)> const &fun, Container<T, Alloc> &container) const {
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+void discretization<fp_type, container, alloc>::discretize_in_space(
+    fp_type const &step, fp_type const &init, fp_type const &time,
+    std::function<fp_type(fp_type, fp_type)> const &fun,
+    container<fp_type, alloc> &container) const {
   LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
   container[0] = fun(init, time);
   for (std::size_t t = 1; t < container.size(); ++t) {

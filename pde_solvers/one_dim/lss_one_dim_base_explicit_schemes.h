@@ -11,54 +11,57 @@
 
 namespace lss_one_dim_base_explicit_schemes {
 
-using lss_one_dim_pde_utility::DirichletBoundary;
-using lss_one_dim_pde_utility::Discretization;
-using lss_one_dim_pde_utility::RobinBoundary;
+using lss_one_dim_pde_utility::dirichlet_boundary;
+using lss_one_dim_pde_utility::discretization;
+using lss_one_dim_pde_utility::robin_boundary;
 
 // ============================================================================
-// =========================== Explicit1DHeatSchemeBase  ======================
+// ================================ heat_scheme_base  =========================
 // ============================================================================
 
-template <typename T, typename SchemeCoefficientHolder>
-class Explicit1DHeatSchemeBase
-    : public Discretization<T, std::vector, std::allocator<T>> {
+template <typename fp_type, typename scheme_coefficient_holder>
+class heat_scheme_base
+    : public discretization<fp_type, std::vector, std::allocator<fp_type>> {
  protected:
-  T spaceStart_;
-  T terminalTime_;
+  fp_type space_start_;
+  fp_type terminal_time_;
 
-  std::pair<T, T> deltas_;          // first = delta time, second = delta space
-  SchemeCoefficientHolder coeffs_;  // scheme coefficients of PDE
-  std::vector<T> initialCondition_;
-  std::function<T(T, T)> source_;
-  bool isSourceSet_;
+  std::pair<fp_type, fp_type>
+      deltas_;  // first = delta time, second = delta space
+  scheme_coefficient_holder coeffs_;  // scheme coefficients of PDE
+  std::vector<fp_type> initial_condition_;
+  std::function<fp_type(fp_type, fp_type)> source_;
+  bool is_source_set_;
 
  public:
-  explicit Explicit1DHeatSchemeBase() = delete;
+  explicit heat_scheme_base() = delete;
 
-  explicit Explicit1DHeatSchemeBase(
-      T spaceStart, T terminalTime, std::pair<T, T> const &deltas,
-      SchemeCoefficientHolder const &coeffs,
-      std::vector<T> const &initialCondition,
-      std::function<T(T, T)> const &source = nullptr, bool isSourceSet = false)
-      : spaceStart_{spaceStart},
-        terminalTime_{terminalTime},
+  explicit heat_scheme_base(
+      fp_type space_start, fp_type terminal_time,
+      std::pair<fp_type, fp_type> const &deltas,
+      scheme_coefficient_holder const &coeffs,
+      std::vector<fp_type> const &initial_condition,
+      std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
+      bool is_source_set = false)
+      : space_start_{space_start},
+        terminal_time_{terminal_time},
         deltas_{deltas},
         coeffs_{coeffs},
-        initialCondition_{initialCondition},
+        initial_condition_{initial_condition},
         source_{source},
-        isSourceSet_{isSourceSet} {}
+        is_source_set_{is_source_set} {}
 
-  virtual ~Explicit1DHeatSchemeBase() = default;
+  virtual ~heat_scheme_base() = default;
 
   // stability check:
-  virtual bool isStable() const = 0;
+  virtual bool is_stable() const = 0;
 
   // for Dirichlet BC
-  virtual void operator()(DirichletBoundary<T> const &dirichletBCPair,
-                          std::vector<T> &solution) const = 0;
+  virtual void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                          std::vector<fp_type> &solution) const = 0;
   // for Robin BC
-  virtual void operator()(RobinBoundary<T> const &robinBCPair,
-                          std::vector<T> &solution) const = 0;
+  virtual void operator()(robin_boundary<fp_type> const &robin_boundary,
+                          std::vector<fp_type> &solution) const = 0;
 };
 
 }  // namespace lss_one_dim_base_explicit_schemes

@@ -5,16 +5,16 @@
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
-using lss_one_dim_pde_utility::DirichletBoundary;
-using lss_one_dim_pde_utility::RobinBoundary;
-using lss_one_dim_space_variable_heat_cuda_kernels::explicitEulerIterate1D;
-using lss_one_dim_space_variable_heat_cuda_kernels::fillDirichletBC1D;
-using lss_one_dim_space_variable_heat_cuda_kernels::fillRobinBC1D;
+using lss_one_dim_pde_utility::dirichlet_boundary;
+using lss_one_dim_pde_utility::robin_boundary;
+using lss_one_dim_space_variable_heat_cuda_kernels::explicit_euler_iterate_1d;
+using lss_one_dim_space_variable_heat_cuda_kernels::fill_dirichlet_bc_1d;
+using lss_one_dim_space_variable_heat_cuda_kernels::fill_robin_bc_1d;
 using lss_utility::NaN;
 using lss_utility::swap;
 
-void ExplicitEulerLoopSP::operator()(
-    float const *input, DirichletBoundary<float> const &dirichletBoundary,
+void euler_loop_sp::operator()(
+    float const *input, dirichlet_boundary<float> const &dirichlet_boundary,
     unsigned long long const size, float *solution) const {
   // prepare pointers on device:
   float *d_prev = NULL;
@@ -26,9 +26,9 @@ void ExplicitEulerLoopSP::operator()(
   cudaMemcpy(d_prev, input, size * sizeof(float),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
-  unsigned int const blocksPerGrid =
-      (size + threadsPerBlock - 1) / threadsPerBlock;
+  unsigned int const threads_per_block = THREADS_PER_BLOCK;
+  unsigned int const blocks_per_grid =
+      (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   float const k = std::get<0>(deltas_);
   float const h = std::get<1>(deltas_);
@@ -51,8 +51,8 @@ void ExplicitEulerLoopSP::operator()(
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichletBoundary.first;
-  auto const &right = dirichletBoundary.second;
+  auto const &left = dirichlet_boundary.first;
+  auto const &right = dirichlet_boundary.second;
 
   float time = k;
 
@@ -69,7 +69,7 @@ void ExplicitEulerLoopSP::operator()(
   std::vector<float> h_B(size, NaN<float>());
   std::vector<float> h_D(size, NaN<float>());
 
-  if (isSourceSet_) {
+  if (is_source_set_) {
     // prepare a pointer for source on device:
     float *d_source = NULL;
     // allocate block memory on device:
@@ -77,13 +77,13 @@ void ExplicitEulerLoopSP::operator()(
     // create vector for source on host:
     std::vector<float> h_source(size, NaN<float>());
     // source is zero:
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize source function on host:
-      discretizeInSpace(h, spaceStart_, time, source_, h_source);
+      discretize_in_space(h, space_start_, time, source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -95,10 +95,10 @@ void ExplicitEulerLoopSP::operator()(
       cudaMemcpy(d_D, h_D.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<float><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_source, d_A, d_B, d_D, k, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+      fill_dirichlet_bc_1d<float><<<threads_per_block, blocks_per_grid>>>(
           d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
@@ -108,11 +108,11 @@ void ExplicitEulerLoopSP::operator()(
     cudaFree(d_source);
   } else {
     // source is zero:
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -121,10 +121,10 @@ void ExplicitEulerLoopSP::operator()(
       cudaMemcpy(d_D, h_D.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<float><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_A, d_B, d_D, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+      fill_dirichlet_bc_1d<float><<<threads_per_block, blocks_per_grid>>>(
           d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
@@ -142,8 +142,8 @@ void ExplicitEulerLoopSP::operator()(
   cudaFree(d_next);
 }
 
-void ExplicitEulerLoopDP::operator()(
-    double const *input, DirichletBoundary<double> const &dirichletBoundary,
+void euler_loop_dp::operator()(
+    double const *input, dirichlet_boundary<double> const &dirichlet_boundary,
     unsigned long long const size, double *solution) const {
   // prepare pointers on device:
   double *d_prev = NULL;
@@ -155,9 +155,9 @@ void ExplicitEulerLoopDP::operator()(
   cudaMemcpy(d_prev, input, size * sizeof(double),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
-  unsigned int const blocksPerGrid =
-      (size + threadsPerBlock - 1) / threadsPerBlock;
+  unsigned int const threads_per_block = THREADS_PER_BLOCK;
+  unsigned int const blocks_per_grid =
+      (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   double const k = std::get<0>(deltas_);
   double const h = std::get<1>(deltas_);
@@ -180,8 +180,8 @@ void ExplicitEulerLoopDP::operator()(
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichletBoundary.first;
-  auto const &right = dirichletBoundary.second;
+  auto const &left = dirichlet_boundary.first;
+  auto const &right = dirichlet_boundary.second;
 
   double time = k;
 
@@ -198,7 +198,7 @@ void ExplicitEulerLoopDP::operator()(
   std::vector<double> h_B(size, NaN<double>());
   std::vector<double> h_D(size, NaN<double>());
 
-  if (isSourceSet_) {
+  if (is_source_set_) {
     // prepare a pointer for source on device:
     double *d_source = NULL;
     // allocate block memory on device:
@@ -206,13 +206,13 @@ void ExplicitEulerLoopDP::operator()(
     // create vector for source on host:
     std::vector<double> h_source(size, NaN<double>());
     // source is zero:
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize source function on host:
-      discretizeInSpace(h, spaceStart_, time, source_, h_source);
+      discretize_in_space(h, space_start_, time, source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -224,10 +224,10 @@ void ExplicitEulerLoopDP::operator()(
       cudaMemcpy(d_D, h_D.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<double><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_source, d_A, d_B, d_D, k, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+      fill_dirichlet_bc_1d<double><<<threads_per_block, blocks_per_grid>>>(
           d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
@@ -237,11 +237,11 @@ void ExplicitEulerLoopDP::operator()(
     cudaFree(d_source);
   } else {
     // source is zero:
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -250,10 +250,10 @@ void ExplicitEulerLoopDP::operator()(
       cudaMemcpy(d_D, h_D.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<double><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_A, d_B, d_D, size);
       // fill in the dirichlet boundaries in d_next:
-      fillDirichletBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+      fill_dirichlet_bc_1d<double><<<threads_per_block, blocks_per_grid>>>(
           d_next, left(time), right(time), size);
       // swap the two pointers:
       swap(d_prev, d_next);
@@ -271,10 +271,10 @@ void ExplicitEulerLoopDP::operator()(
   cudaFree(d_next);
 }
 
-void ExplicitEulerLoopSP::operator()(float const *input,
-                                     RobinBoundary<float> const &robinBoundary,
-                                     unsigned long long const size,
-                                     float *solution) const {
+void euler_loop_sp::operator()(float const *input,
+                               robin_boundary<float> const &robin_boundary,
+                               unsigned long long const size,
+                               float *solution) const {
   // prepare pointers on device:
   float *d_prev = NULL;
   float *d_next = NULL;
@@ -285,9 +285,9 @@ void ExplicitEulerLoopSP::operator()(float const *input,
   cudaMemcpy(d_prev, input, size * sizeof(float),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
-  unsigned int const blocksPerGrid =
-      (size + threadsPerBlock - 1) / threadsPerBlock;
+  unsigned int const threads_per_block = THREADS_PER_BLOCK;
+  unsigned int const blocks_per_grid =
+      (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   float const k = std::get<0>(deltas_);
   float const h = std::get<1>(deltas_);
@@ -310,10 +310,10 @@ void ExplicitEulerLoopSP::operator()(float const *input,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  float const leftLinear = robinBoundary.left.first;
-  float const leftConst = robinBoundary.left.second;
-  float const rightLinear = robinBoundary.right.first;
-  float const rightConst = robinBoundary.right.second;
+  float const left_linear = robin_boundary.left.first;
+  float const left_const = robin_boundary.left.second;
+  float const right_linear = robin_boundary.right.first;
+  float const right_const = robin_boundary.right.second;
 
   float time = k;
 
@@ -330,7 +330,7 @@ void ExplicitEulerLoopSP::operator()(float const *input,
   std::vector<float> h_B(size, NaN<float>());
   std::vector<float> h_D(size, NaN<float>());
 
-  if (isSourceSet_) {
+  if (is_source_set_) {
     // prepare a pointer for source on device:
     float *d_source = NULL;
     // allocate block memory on device:
@@ -338,13 +338,13 @@ void ExplicitEulerLoopSP::operator()(float const *input,
     // create vector on host:
     std::vector<float> h_source(size, NaN<float>());
     // source is zero:
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize source function on host:
-      discretizeInSpace(h, spaceStart_, time, source_, h_source);
+      discretize_in_space(h, space_start_, time, source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -356,12 +356,12 @@ void ExplicitEulerLoopSP::operator()(float const *input,
       cudaMemcpy(d_D, h_D.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<float><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_source, d_A, d_B, d_D, k, size);
       // fill in the dirichlet boundaries in d_next:
-      fillRobinBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+      fill_robin_bc_1d<float><<<threads_per_block, blocks_per_grid>>>(
           d_next, h_source.front(), h_source.back(), d_A, d_B, d_D, k,
-          leftLinear, leftConst, rightLinear, rightConst, size);
+          left_linear, left_const, right_linear, right_const, size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;
@@ -369,11 +369,11 @@ void ExplicitEulerLoopSP::operator()(float const *input,
     // free allocated memory blocks on device:
     cudaFree(d_source);
   } else {
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -382,12 +382,12 @@ void ExplicitEulerLoopSP::operator()(float const *input,
       cudaMemcpy(d_D, h_D.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<float><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<float><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_A, d_B, d_D, size);
       // fill in the dirichlet boundaries in d_next:
-      fillRobinBC1D<float><<<threadsPerBlock, blocksPerGrid>>>(
-          d_next, d_A, d_B, d_D, leftLinear, leftConst, rightLinear, rightConst,
-          size);
+      fill_robin_bc_1d<float><<<threads_per_block, blocks_per_grid>>>(
+          d_next, d_A, d_B, d_D, left_linear, left_const, right_linear,
+          right_const, size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;
@@ -404,10 +404,10 @@ void ExplicitEulerLoopSP::operator()(float const *input,
   cudaFree(d_next);
 }
 
-void ExplicitEulerLoopDP::operator()(double const *input,
-                                     RobinBoundary<double> const &robinBoundary,
-                                     unsigned long long const size,
-                                     double *solution) const {
+void euler_loop_dp::operator()(double const *input,
+                               robin_boundary<double> const &robin_boundary,
+                               unsigned long long const size,
+                               double *solution) const {
   // prepare pointers on device:
   double *d_prev = NULL;
   double *d_next = NULL;
@@ -418,9 +418,9 @@ void ExplicitEulerLoopDP::operator()(double const *input,
   cudaMemcpy(d_prev, input, size * sizeof(double),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threadsPerBlock = THREADS_PER_BLOCK;
-  unsigned int const blocksPerGrid =
-      (size + threadsPerBlock - 1) / threadsPerBlock;
+  unsigned int const threads_per_block = THREADS_PER_BLOCK;
+  unsigned int const blocks_per_grid =
+      (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   double const k = std::get<0>(deltas_);
   double const h = std::get<1>(deltas_);
@@ -443,10 +443,10 @@ void ExplicitEulerLoopDP::operator()(double const *input,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  double const leftLinear = robinBoundary.left.first;
-  double const leftConst = robinBoundary.left.second;
-  double const rightLinear = robinBoundary.right.first;
-  double const rightConst = robinBoundary.right.second;
+  double const left_linear = robin_boundary.left.first;
+  double const left_const = robin_boundary.left.second;
+  double const right_linear = robin_boundary.right.first;
+  double const right_const = robin_boundary.right.second;
 
   double time = k;
 
@@ -463,7 +463,7 @@ void ExplicitEulerLoopDP::operator()(double const *input,
   std::vector<double> h_B(size, NaN<double>());
   std::vector<double> h_D(size, NaN<double>());
 
-  if (isSourceSet_) {
+  if (is_source_set_) {
     // prepare a pointer for source on device:
     double *d_source = NULL;
     // allocate block memory on device:
@@ -471,13 +471,13 @@ void ExplicitEulerLoopDP::operator()(double const *input,
     // create vector on host:
     std::vector<double> h_source(size, NaN<double>());
     // source is zero:
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize source function on host:
-      discretizeInSpace(h, spaceStart_, time, source_, h_source);
+      discretize_in_space(h, space_start_, time, source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -489,12 +489,12 @@ void ExplicitEulerLoopDP::operator()(double const *input,
       cudaMemcpy(d_D, h_D.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<double><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_source, d_A, d_B, d_D, k, size);
       // fill in the dirichlet boundaries in d_next:
-      fillRobinBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+      fill_robin_bc_1d<double><<<threads_per_block, blocks_per_grid>>>(
           d_next, h_source.front(), h_source.back(), d_A, d_B, d_D, k,
-          leftLinear, leftConst, rightLinear, rightConst, size);
+          left_linear, left_const, right_linear, right_const, size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;
@@ -502,11 +502,11 @@ void ExplicitEulerLoopDP::operator()(double const *input,
     // free allocated memory blocks on device:
     cudaFree(d_source);
   } else {
-    while (time <= terminalT_) {
+    while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretizeInSpace(h, spaceStart_, time, A, h_A);
-      discretizeInSpace(h, spaceStart_, time, B, h_B);
-      discretizeInSpace(h, spaceStart_, time, D, h_D);
+      discretize_in_space(h, space_start_, time, A, h_A);
+      discretize_in_space(h, space_start_, time, B, h_B);
+      discretize_in_space(h, space_start_, time, D, h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -515,12 +515,12 @@ void ExplicitEulerLoopDP::operator()(double const *input,
       cudaMemcpy(d_D, h_D.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
       // populate new solution in d_next:
-      explicitEulerIterate1D<double><<<threadsPerBlock, blocksPerGrid>>>(
+      explicit_euler_iterate_1d<double><<<threads_per_block, blocks_per_grid>>>(
           d_prev, d_next, d_A, d_B, d_D, size);
       // fill in the dirichlet boundaries in d_next:
-      fillRobinBC1D<double><<<threadsPerBlock, blocksPerGrid>>>(
-          d_next, d_A, d_B, d_D, leftLinear, leftConst, rightLinear, rightConst,
-          size);
+      fill_robin_bc_1d<double><<<threads_per_block, blocks_per_grid>>>(
+          d_next, d_A, d_B, d_D, left_linear, left_const, right_linear,
+          right_const, size);
       // swap the two pointers:
       swap(d_prev, d_next);
       time += k;

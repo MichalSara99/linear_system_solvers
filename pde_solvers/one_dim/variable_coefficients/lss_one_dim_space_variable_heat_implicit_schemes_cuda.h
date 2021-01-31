@@ -12,59 +12,59 @@
 namespace lss_one_dim_space_variable_heat_implicit_schemes_cuda {
 
 using lss_enumerations::BoundaryConditionType;
-using lss_enumerations::ExplicitPDESchemes;
-using lss_enumerations::ImplicitPDESchemes;
-using lss_one_dim_pde_utility::Discretization;
+using lss_enumerations::implicit_pde_schemes_enum;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x),h,k)
-template <typename T>
-using SchemeCoefficientHolder =
-    std::tuple<std::function<T(T)>, std::function<T(T)>, std::function<T(T)>, T,
-               T>;
+template <typename type>
+using scheme_coefficient_holder =
+    std::tuple<std::function<type(type)>, std::function<type(type)>,
+               std::function<type(type)>, type, type>;
 
-template <typename T>
-using SchemeFunctionCUDA = std::function<void(
-    SchemeCoefficientHolder<T> const &, std::vector<T> const &,
-    std::vector<T> const &, std::vector<T> const &, std::vector<T> &,
-    std::pair<T, T> const &, std::pair<T, T> const &)>;
+template <typename type>
+using scheme_function = std::function<void(
+    scheme_coefficient_holder<type> const &, std::vector<type> const &,
+    std::vector<type> const &, std::vector<type> const &, std::vector<type> &,
+    std::pair<type, type> const &, std::pair<type, type> const &)>;
 
 // ============================================================================
-// =============== ImplicitSpaceVariableHeatEquationSchemesCUDA  ==============
+// =========================== heat_equation_schemes  =========================
 // ============================================================================
 
-template <typename T>
-class ImplicitSpaceVariableHeatEquationSchemesCUDA {
+template <typename fp_type>
+class heat_equation_schemes {
  public:
-  static T const getTheta(ImplicitPDESchemes scheme) {
-    double theta{};
-    if (scheme == ImplicitPDESchemes::Euler)
+  static fp_type const get_theta(implicit_pde_schemes_enum scheme) {
+    fp_type theta{};
+    if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
     else
       theta = 0.5;
     return theta;
   }
 
-  static SchemeFunctionCUDA<T> const getScheme(BoundaryConditionType bcType,
-                                               ImplicitPDESchemes scheme) {
-    double theta{};
-    if (scheme == ImplicitPDESchemes::Euler)
+  static scheme_function<fp_type> const get_scheme(
+      BoundaryConditionType bc_type, implicit_pde_schemes_enum scheme) {
+    fp_type theta{};
+    if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
     else
       theta = 0.5;
 
-    auto schemeFunDirichlet =
-        [=](SchemeCoefficientHolder<T> const &coeffs,
-            std::vector<T> const &input, std::vector<T> const &inhomInput,
-            std::vector<T> const &inhomInputNext, std::vector<T> &solution,
-            std::pair<T, T> const &boundaryPair0,
-            std::pair<T, T> const &boundaryPair1) {
-          // inhomInput			= not used here
-          // inhomInputNext		= not uesd here
-          // boundaryPair1		= not used here
+    auto scheme_fun_dirichlet =
+        [=](scheme_coefficient_holder<fp_type> const &coeffs,
+            std::vector<fp_type> const &input,
+            std::vector<fp_type> const &inhom_input,
+            std::vector<fp_type> const &inhom_input_next,
+            std::vector<fp_type> &solution,
+            std::pair<fp_type, fp_type> const &boundary_pair_0,
+            std::pair<fp_type, fp_type> const &boundary_pair_1) {
+          // inhom_input			= not used here
+          // inhom_input_next		= not uesd here
+          // boundary_pair_1		= not used here
 
-          T const left = boundaryPair0.first;
-          T const right = boundaryPair0.second;
-          std::size_t const lastIdx = solution.size() - 1;
+          fp_type const left = boundary_pair_0.first;
+          fp_type const right = boundary_pair_0.second;
+          std::size_t const last_idx = solution.size() - 1;
 
           auto const &A = std::get<0>(coeffs);
           auto const &B = std::get<1>(coeffs);
@@ -75,84 +75,89 @@ class ImplicitSpaceVariableHeatEquationSchemesCUDA {
                         ((1.0 - 2.0 * B(1 * h) * (1.0 - theta)) * input[0]) +
                         (A(1 * h) * left);
 
-          for (std::size_t t = 1; t < lastIdx; ++t) {
+          for (std::size_t t = 1; t < last_idx; ++t) {
             solution[t] =
                 ((D((t + 1) * h) * (1.0 - theta)) * input[t + 1]) +
                 ((1.0 - 2.0 * B((t + 1) * h) * (1.0 - theta)) * input[t]) +
                 ((A((t + 1) * h) * (1.0 - theta)) * input[t - 1]);
           }
 
-          solution[lastIdx] =
-              (D((lastIdx + 1) * h) * right) +
-              ((1.0 - 2.0 * B((lastIdx + 1) * h) * (1.0 - theta)) *
-               input[lastIdx]) +
-              ((A((lastIdx + 1) * h) * (1.0 - theta)) * input[lastIdx - 1]);
+          solution[last_idx] =
+              (D((last_idx + 1) * h) * right) +
+              ((1.0 - 2.0 * B((last_idx + 1) * h) * (1.0 - theta)) *
+               input[last_idx]) +
+              ((A((last_idx + 1) * h) * (1.0 - theta)) * input[last_idx - 1]);
         };
 
-    auto schemeFunRobin = [=](SchemeCoefficientHolder<T> const &coeffs,
-                              std::vector<T> const &input,
-                              std::vector<T> const &inhomInput,
-                              std::vector<T> const &inhomInputNext,
-                              std::vector<T> &solution,
-                              std::pair<T, T> const &boundaryPair0,
-                              std::pair<T, T> const &boundaryPair1) {
-      // inhomInput			= not used here
-      // inhomInputNext		= not uesd here
+    auto scheme_fun_robin =
+        [=](scheme_coefficient_holder<fp_type> const &coeffs,
+            std::vector<fp_type> const &input,
+            std::vector<fp_type> const &inhom_input,
+            std::vector<fp_type> const &inhom_input_next,
+            std::vector<fp_type> &solution,
+            std::pair<fp_type, fp_type> const &boundary_pair_0,
+            std::pair<fp_type, fp_type> const &boundary_pair_1) {
+          // inhom_input			= not used here
+          // inhom_input_next		= not uesd here
 
-      T const leftLinear = boundaryPair0.first;
-      T const leftConst = boundaryPair0.second;
-      T const rightLinear = boundaryPair1.first;
-      T const rightConst = boundaryPair1.second;
-      std::size_t const lastIdx = solution.size() - 1;
+          fp_type const left_linear = boundary_pair_0.first;
+          fp_type const left_const = boundary_pair_0.second;
+          fp_type const right_linear = boundary_pair_1.first;
+          fp_type const right_const = boundary_pair_1.second;
+          std::size_t const last_idx = solution.size() - 1;
 
-      auto const &A = std::get<0>(coeffs);
-      auto const &B = std::get<1>(coeffs);
-      auto const &D = std::get<2>(coeffs);
-      auto const h = std::get<3>(coeffs);
+          auto const &A = std::get<0>(coeffs);
+          auto const &B = std::get<1>(coeffs);
+          auto const &D = std::get<2>(coeffs);
+          auto const h = std::get<3>(coeffs);
 
-      solution[0] =
-          (((D(0 * h) + A(0 * h) * leftLinear) * (1.0 - theta)) * input[1]) +
-          (((1.0 - 2.0 * B(0 * h) * (1.0 - theta))) * input[0]) +
-          (A(0 * h) * leftConst);
+          solution[0] = (((D(0 * h) + A(0 * h) * left_linear) * (1.0 - theta)) *
+                         input[1]) +
+                        (((1.0 - 2.0 * B(0 * h) * (1.0 - theta))) * input[0]) +
+                        (A(0 * h) * left_const);
 
-      for (std::size_t t = 1; t < lastIdx; ++t) {
-        solution[t] = ((D(t * h) * (1.0 - theta)) * input[t + 1]) +
-                      ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
-                      ((A(t * h) * (1.0 - theta)) * input[t - 1]);
-      }
+          for (std::size_t t = 1; t < last_idx; ++t) {
+            solution[t] = ((D(t * h) * (1.0 - theta)) * input[t + 1]) +
+                          ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
+                          ((A(t * h) * (1.0 - theta)) * input[t - 1]);
+          }
 
-      solution[lastIdx] =
-          (((A(lastIdx * h) + D(lastIdx * h) * rightLinear) * (1.0 - theta)) *
-           input[lastIdx - 1]) +
-          ((1.0 - 2.0 * B(lastIdx * h) * (1.0 - theta)) * input[lastIdx]) +
-          (D(lastIdx * h) * rightConst);
-    };
+          solution[last_idx] =
+              (((A(last_idx * h) + D(last_idx * h) * right_linear) *
+                (1.0 - theta)) *
+               input[last_idx - 1]) +
+              ((1.0 - 2.0 * B(last_idx * h) * (1.0 - theta)) *
+               input[last_idx]) +
+              (D(last_idx * h) * right_const);
+        };
 
-    if (bcType == BoundaryConditionType::Dirichlet)
-      return schemeFunDirichlet;
+    if (bc_type == BoundaryConditionType::Dirichlet)
+      return scheme_fun_dirichlet;
     else
-      return schemeFunRobin;
+      return scheme_fun_robin;
   }
 
-  static SchemeFunctionCUDA<T> const getInhomScheme(
-      BoundaryConditionType bcType, ImplicitPDESchemes scheme) {
-    double theta{};
-    if (scheme == ImplicitPDESchemes::Euler)
+  static scheme_function<fp_type> const get_inhom_scheme(
+      BoundaryConditionType bc_type, implicit_pde_schemes_enum scheme) {
+    fp_type theta{};
+    if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
     else
       theta = 0.5;
 
-    auto schemeFunDirichlet =
-        [=](SchemeCoefficientHolder<T> const &coeffs,
-            std::vector<T> const &input, std::vector<T> const &inhomInput,
-            std::vector<T> const &inhomInputNext, std::vector<T> &solution,
-            std::pair<T, T> const &boundaryPair0,
-            std::pair<T, T> const &boundaryPair1) {
-          // boundaryPair1		= not used here
+    auto scheme_fun_dirichlet =
+        [=](scheme_coefficient_holder<fp_type> const &coeffs,
+            std::vector<fp_type> const &input,
+            std::vector<fp_type> const &inhom_input,
+            std::vector<fp_type> const &inhom_input_next,
+            std::vector<fp_type> &solution,
+            std::pair<fp_type, fp_type> const &boundary_pair_0,
+            std::pair<fp_type, fp_type> const &boundary_pair_1) {
+          // boundary_pair_1		= not used here
 
-          T const left = boundaryPair0.first;
-          T const right = boundaryPair0.second;
-          std::size_t const lastIdx = solution.size() - 1;
+          fp_type const left = boundary_pair_0.first;
+          fp_type const right = boundary_pair_0.second;
+          std::size_t const last_idx = solution.size() - 1;
 
           auto const &A = std::get<0>(coeffs);
           auto const &B = std::get<1>(coeffs);
@@ -160,75 +165,80 @@ class ImplicitSpaceVariableHeatEquationSchemesCUDA {
           auto const h = std::get<3>(coeffs);
           auto const k = std::get<4>(coeffs);
 
-          solution[0] =
-              ((D(1 * h) * (1.0 - theta)) * input[1]) +
-              ((1.0 - 2.0 * B(1 * h) * (1.0 - theta)) * input[0]) +
-              (A(1 * h) * left) +
-              k * (theta * inhomInputNext[0] + (1.0 - theta) * inhomInput[0]);
+          solution[0] = ((D(1 * h) * (1.0 - theta)) * input[1]) +
+                        ((1.0 - 2.0 * B(1 * h) * (1.0 - theta)) * input[0]) +
+                        (A(1 * h) * left) +
+                        k * (theta * inhom_input_next[0] +
+                             (1.0 - theta) * inhom_input[0]);
 
-          for (std::size_t t = 1; t < lastIdx; ++t) {
+          for (std::size_t t = 1; t < last_idx; ++t) {
             solution[t] =
                 ((D((t + 1) * h) * (1.0 - theta)) * input[t + 1]) +
                 ((1.0 - 2.0 * B((t + 1) * h) * (1.0 - theta)) * input[t]) +
                 ((A((t + 1) * h) * (1.0 - theta)) * input[t - 1]) +
-                k * (theta * inhomInputNext[t] + (1.0 - theta) * inhomInput[t]);
+                k * (theta * inhom_input_next[t] +
+                     (1.0 - theta) * inhom_input[t]);
           }
 
-          solution[lastIdx] =
-              (D((lastIdx + 1) * h) * right) +
-              ((1.0 - 2.0 * B((lastIdx + 1) * h) * (1.0 - theta)) *
-               input[lastIdx]) +
-              ((A((lastIdx + 1) * h) * (1.0 - theta)) * input[lastIdx - 1]) +
-              k * (theta * inhomInputNext[lastIdx] +
-                   (1.0 - theta) * inhomInput[lastIdx]);
+          solution[last_idx] =
+              (D((last_idx + 1) * h) * right) +
+              ((1.0 - 2.0 * B((last_idx + 1) * h) * (1.0 - theta)) *
+               input[last_idx]) +
+              ((A((last_idx + 1) * h) * (1.0 - theta)) * input[last_idx - 1]) +
+              k * (theta * inhom_input_next[last_idx] +
+                   (1.0 - theta) * inhom_input[last_idx]);
         };
 
-    auto schemeFunRobin = [=](SchemeCoefficientHolder<T> const &coeffs,
-                              std::vector<T> const &input,
-                              std::vector<T> const &inhomInput,
-                              std::vector<T> const &inhomInputNext,
-                              std::vector<T> &solution,
-                              std::pair<T, T> const &boundaryPair0,
-                              std::pair<T, T> const &boundaryPair1) {
-      T const leftLinear = boundaryPair0.first;
-      T const leftConst = boundaryPair0.second;
-      T const rightLinear = boundaryPair1.first;
-      T const rightConst = boundaryPair1.second;
-      std::size_t const lastIdx = solution.size() - 1;
+    auto scheme_fun_robin =
+        [=](scheme_coefficient_holder<fp_type> const &coeffs,
+            std::vector<fp_type> const &input,
+            std::vector<fp_type> const &inhom_input,
+            std::vector<fp_type> const &inhom_input_next,
+            std::vector<fp_type> &solution,
+            std::pair<fp_type, fp_type> const &boundary_pair_0,
+            std::pair<fp_type, fp_type> const &boundary_pair_1) {
+          fp_type const left_linear = boundary_pair_0.first;
+          fp_type const left_const = boundary_pair_0.second;
+          fp_type const right_linear = boundary_pair_1.first;
+          fp_type const right_const = boundary_pair_1.second;
+          std::size_t const last_idx = solution.size() - 1;
 
-      auto const &A = std::get<0>(coeffs);
-      auto const &B = std::get<1>(coeffs);
-      auto const &D = std::get<2>(coeffs);
-      auto const h = std::get<3>(coeffs);
-      auto const k = std::get<4>(coeffs);
+          auto const &A = std::get<0>(coeffs);
+          auto const &B = std::get<1>(coeffs);
+          auto const &D = std::get<2>(coeffs);
+          auto const h = std::get<3>(coeffs);
+          auto const k = std::get<4>(coeffs);
 
-      solution[0] =
-          (((D(0 * h) + A(0 * h) * leftLinear) * (1.0 - theta)) * input[1]) +
-          (((1.0 - 2.0 * B(0 * h) * (1.0 - theta))) * input[0]) +
-          (A(0 * h) * leftConst) +
-          k * (theta * inhomInputNext[0] + (1.0 - theta) * inhomInput[0]);
+          solution[0] = (((D(0 * h) + A(0 * h) * left_linear) * (1.0 - theta)) *
+                         input[1]) +
+                        (((1.0 - 2.0 * B(0 * h) * (1.0 - theta))) * input[0]) +
+                        (A(0 * h) * left_const) +
+                        k * (theta * inhom_input_next[0] +
+                             (1.0 - theta) * inhom_input[0]);
 
-      for (std::size_t t = 1; t < lastIdx; ++t) {
-        solution[t] =
-            ((D(t * h) * (1.0 - theta)) * input[t + 1]) +
-            ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
-            ((A(t * h) * (1.0 - theta)) * input[t - 1]) +
-            k * (theta * inhomInputNext[t] + (1.0 - theta) * inhomInput[t]);
-      }
+          for (std::size_t t = 1; t < last_idx; ++t) {
+            solution[t] = ((D(t * h) * (1.0 - theta)) * input[t + 1]) +
+                          ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
+                          ((A(t * h) * (1.0 - theta)) * input[t - 1]) +
+                          k * (theta * inhom_input_next[t] +
+                               (1.0 - theta) * inhom_input[t]);
+          }
 
-      solution[lastIdx] =
-          (((A(lastIdx * h) + D(lastIdx * h) * rightLinear) * (1.0 - theta)) *
-           input[lastIdx - 1]) +
-          ((1.0 - 2.0 * B(lastIdx * h) * (1.0 - theta)) * input[lastIdx]) +
-          (D(lastIdx * h) * rightConst) +
-          k * (theta * inhomInputNext[lastIdx] +
-               (1.0 - theta) * inhomInput[lastIdx]);
-    };
+          solution[last_idx] =
+              (((A(last_idx * h) + D(last_idx * h) * right_linear) *
+                (1.0 - theta)) *
+               input[last_idx - 1]) +
+              ((1.0 - 2.0 * B(last_idx * h) * (1.0 - theta)) *
+               input[last_idx]) +
+              (D(last_idx * h) * right_const) +
+              k * (theta * inhom_input_next[last_idx] +
+                   (1.0 - theta) * inhom_input[last_idx]);
+        };
 
-    if (bcType == BoundaryConditionType::Dirichlet)
-      return schemeFunDirichlet;
+    if (bc_type == BoundaryConditionType::Dirichlet)
+      return scheme_fun_dirichlet;
     else
-      return schemeFunRobin;
+      return scheme_fun_robin;
   }
 };
 

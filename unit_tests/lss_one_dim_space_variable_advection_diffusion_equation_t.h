@@ -28,10 +28,10 @@ namespace advection_equation {
 template <typename T>
 void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -45,10 +45,10 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, FDMDoubleSweepSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                FDMDoubleSweepSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -56,7 +56,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -66,17 +66,17 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   // initialize solver
   implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(boundary);
+  impl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
-  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+  impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
   auto exact = [](T x, T t, std::size_t n) {
     T const first = 2.0 / PI;
@@ -98,7 +98,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
     return (first * sum);
   };
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -111,10 +111,10 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
 template <typename T>
 void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -129,10 +129,10 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   std::cout << " U(x,0) = -sin(pi*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, FDMDoubleSweepSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                FDMDoubleSweepSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -140,7 +140,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -150,15 +150,15 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   // initialize solver
   implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.09, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(boundary);
+  impl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
   impl_solver.solve(solution);
   // get exact solution:
@@ -182,7 +182,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
     return (first * sum);
   };
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -200,10 +200,10 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -218,10 +218,10 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, FDMDoubleSweepSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                FDMDoubleSweepSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -229,7 +229,7 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -239,21 +239,21 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   // initialize solver
   implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(boundary);
+  impl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // set source function:
-  impl_solver.setHeatSource([](T x, T t) { return x; });
+  impl_solver.set_heat_source([](T x, T t) { return x; });
   // get the solution:
-  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+  impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM \n";
   for (std::size_t j = 0; j < solution.size(); ++j) {
     std::cout << "t_" << j << ": " << solution[j] << '\n';
@@ -263,10 +263,10 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -282,10 +282,10 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   std::cout << " U(x,0) = 1.0, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, FDMDoubleSweepSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                FDMDoubleSweepSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -293,7 +293,7 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -303,21 +303,21 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   // initialize solver
   implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(boundary);
+  impl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // set source function:
-  impl_solver.setHeatSource([](T x, T t) { return x; });
+  impl_solver.set_heat_source([](T x, T t) { return x; });
   // get the solution:
   impl_solver.solve(solution);
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM \n";
   for (std::size_t j = 0; j < solution.size(); ++j) {
     std::cout << "t_" << j << ": " << solution[j] << '\n';
@@ -327,10 +327,10 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -345,10 +345,10 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, FDMThomasLUSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                FDMThomasLUSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -356,7 +356,7 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -366,21 +366,21 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   // initialize solver
   implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(boundary);
+  impl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // set source function:
-  impl_solver.setHeatSource([](T x, T t) { return x; });
+  impl_solver.set_heat_source([](T x, T t) { return x; });
   // get the solution:
-  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+  impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM \n";
   for (std::size_t j = 0; j < solution.size(); ++j) {
     std::cout << "t_" << j << ": " << solution[j] << '\n';
@@ -390,10 +390,10 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -409,10 +409,10 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   std::cout << " U(x,0) = 1.0, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, FDMThomasLUSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                FDMThomasLUSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -420,7 +420,7 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -430,21 +430,21 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   // initialize solver
   implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  impl_solver.setBoundaryCondition(boundary);
+  impl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // set source function:
-  impl_solver.setHeatSource([](T x, T t) { return x; });
+  impl_solver.set_heat_source([](T x, T t) { return x; });
   // get the solution:
   impl_solver.solve(solution);
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM \n";
   for (std::size_t j = 0; j < solution.size(); ++j) {
     std::cout << "t_" << j << ": " << solution[j] << '\n';
@@ -458,11 +458,11 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
 template <typename T>
 void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_one_dim_pde_utility::RobinBoundary;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_pde_utility::robin_boundary;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -476,10 +476,10 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Robin, FDMDoubleSweepSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Robin,
+                                FDMDoubleSweepSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -487,7 +487,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   // number of time subdivisions:
   std::size_t const Td = 150;
   // initial condition:
-  auto initialCondition = [](T x) { return std::exp(0.5 * x); };
+  auto initial_condition = [](T x) { return std::exp(0.5 * x); };
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -510,20 +510,20 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   //				rightLin = 1.0, rightConst = 0.0
   //
   // set boundary conditions:
-  auto leftBoundary = std::make_pair(1.0, 0.0);
-  auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(
-      RobinBoundary<T>(leftBoundary, rightBoundary));
+  auto left_boundary = std::make_pair(1.0, 0.0);
+  auto right_boundary = std::make_pair(1.0, 0.0);
+  impl_solver.set_boundary_condition(
+      robin_boundary<T>(left_boundary, right_boundary));
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
-  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+  impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
   auto exact = [](T x, T t, std::size_t n) {
     T const zero = 2.0 * (1.0 - std::exp(-0.5)) / (1.0 - std::exp(-1.0));
@@ -548,7 +548,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
     return (zero + first * sum);
   };
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -561,11 +561,11 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
 template <typename T>
 void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_one_dim_pde_utility::RobinBoundary;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_pde_utility::robin_boundary;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -580,10 +580,10 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Robin, FDMDoubleSweepSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Robin,
+                                FDMDoubleSweepSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -591,7 +591,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return std::exp(0.5 * x); };
+  auto initial_condition = [](T x) { return std::exp(0.5 * x); };
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -614,18 +614,18 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   //				rightLin = 1.0, rightConst = 0.0
   //
   // set boundary conditions:
-  auto leftBoundary = std::make_pair(1.0, 0.0);
-  auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(
-      RobinBoundary<T>(leftBoundary, rightBoundary));
+  auto left_boundary = std::make_pair(1.0, 0.0);
+  auto right_boundary = std::make_pair(1.0, 0.0);
+  impl_solver.set_boundary_condition(
+      robin_boundary<T>(left_boundary, right_boundary));
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
   impl_solver.solve(solution);
   // get exact solution:
@@ -653,7 +653,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
     return (zero + first * sum);
   };
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -666,11 +666,11 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
 template <typename T>
 void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_one_dim_pde_utility::RobinBoundary;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_pde_utility::robin_boundary;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -684,10 +684,10 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Robin, FDMThomasLUSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Robin,
+                                FDMThomasLUSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -695,7 +695,7 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   // number of time subdivisions:
   std::size_t const Td = 150;
   // initial condition:
-  auto initialCondition = [](T x) { return std::exp(0.5 * x); };
+  auto initial_condition = [](T x) { return std::exp(0.5 * x); };
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -718,20 +718,20 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   //				rightLin = 1.0, rightConst = 0.0
   //
   // set boundary conditions:
-  auto leftBoundary = std::make_pair(1.0, 0.0);
-  auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(
-      RobinBoundary<T>(leftBoundary, rightBoundary));
+  auto left_boundary = std::make_pair(1.0, 0.0);
+  auto right_boundary = std::make_pair(1.0, 0.0);
+  impl_solver.set_boundary_condition(
+      robin_boundary<T>(left_boundary, right_boundary));
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
-  impl_solver.solve(solution, ImplicitPDESchemes::Euler);
+  impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
   auto exact = [](T x, T t, std::size_t n) {
     T const zero = 2.0 * (1.0 - std::exp(-0.5)) / (1.0 - std::exp(-1.0));
@@ -756,7 +756,7 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
     return (zero + first * sum);
   };
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -769,11 +769,11 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
 template <typename T>
 void testImplAdvDiffEquationRobinBCThomasLUCN() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ImplicitPDESchemes;
+  using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_one_dim_pde_utility::RobinBoundary;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      implicit_solvers::Implicit1DSpaceVariableGeneralHeatEquation;
+  using lss_one_dim_pde_utility::robin_boundary;
+  using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -788,10 +788,10 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Implicit1DSpaceVariableGeneralHeatEquation
-  typedef Implicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Robin, FDMThomasLUSolver, std::vector,
-      std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Robin,
+                                FDMThomasLUSolver, std::vector,
+                                std::allocator<T>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -799,7 +799,7 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
   // number of time subdivisions:
   std::size_t const Td = 100;
   // initial condition:
-  auto initialCondition = [](T x) { return std::exp(0.5 * x); };
+  auto initial_condition = [](T x) { return std::exp(0.5 * x); };
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -822,18 +822,18 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
   //				rightLin = 1.0, rightConst = 0.0
   //
   // set boundary conditions:
-  auto leftBoundary = std::make_pair(1.0, 0.0);
-  auto rightBoundary = std::make_pair(1.0, 0.0);
-  impl_solver.setBoundaryCondition(
-      RobinBoundary<T>(leftBoundary, rightBoundary));
+  auto left_boundary = std::make_pair(1.0, 0.0);
+  auto right_boundary = std::make_pair(1.0, 0.0);
+  impl_solver.set_boundary_condition(
+      robin_boundary<T>(left_boundary, right_boundary));
   // set initial condition:
-  impl_solver.setInitialCondition(initialCondition);
+  impl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  impl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  impl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  impl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  impl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  impl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  impl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
   impl_solver.solve(solution);
   // get exact solution:
@@ -860,7 +860,7 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
     return (zero + first * sum);
   };
 
-  T const h = impl_solver.spaceStep();
+  T const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -881,9 +881,9 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
 template <typename T>
 void testExplAdvDiffEquationDirichletBCEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ExplicitPDESchemes;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation;
+  using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -897,9 +897,9 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   std::cout << " U(x,0) = 1, x in <-1,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquation
-  typedef Explicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                std::vector, std::allocator<T>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -907,7 +907,7 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -917,17 +917,17 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   // initialize solver
   explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(boundary);
+  expl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  expl_solver.setInitialCondition(initialCondition);
+  expl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  expl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  expl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  expl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
-  expl_solver.solve(solution, ExplicitPDESchemes::Euler);
+  expl_solver.solve(solution, explicit_pde_schemes_enum::Euler);
   // get exact solution:
   auto exact = [](T x, T t, std::size_t n) {
     T const first = 2.0 / PI;
@@ -949,7 +949,7 @@ void testExplAdvDiffEquationDirichletBCEuler() {
     return (first * sum);
   };
 
-  T const h = expl_solver.spaceStep();
+  T const h = expl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -962,9 +962,9 @@ void testExplAdvDiffEquationDirichletBCEuler() {
 template <typename T>
 void testExplAdvDiffEquationDirichletBCADEBC() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ExplicitPDESchemes;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation;
+  using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -978,9 +978,9 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   std::cout << " U(x,0) = 1, x in <-1,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquation
-  typedef Explicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                std::vector, std::allocator<T>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -988,7 +988,7 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -998,15 +998,15 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   // initialize solver
   explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(boundary);
+  expl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  expl_solver.setInitialCondition(initialCondition);
+  expl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  expl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  expl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  expl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
@@ -1030,7 +1030,7 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
     return (first * sum);
   };
 
-  T const h = expl_solver.spaceStep();
+  T const h = expl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -1043,9 +1043,9 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
 template <typename T>
 void testExplAdvDiffEquationDirichletBCADES() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ExplicitPDESchemes;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation;
+  using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1059,9 +1059,9 @@ void testExplAdvDiffEquationDirichletBCADES() {
   std::cout << " U(x,0) = 1, x in <-1,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquation
-  typedef Explicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                std::vector, std::allocator<T>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -1069,7 +1069,7 @@ void testExplAdvDiffEquationDirichletBCADES() {
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -1079,17 +1079,17 @@ void testExplAdvDiffEquationDirichletBCADES() {
   // initialize solver
   explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(boundary);
+  expl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  expl_solver.setInitialCondition(initialCondition);
+  expl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  expl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  expl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  expl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
-  expl_solver.solve(solution, ExplicitPDESchemes::ADESaulyev);
+  expl_solver.solve(solution, explicit_pde_schemes_enum::ADESaulyev);
   // get exact solution:
   auto exact = [](T x, T t, std::size_t n) {
     T const first = 2.0 / PI;
@@ -1111,7 +1111,7 @@ void testExplAdvDiffEquationDirichletBCADES() {
     return (first * sum);
   };
 
-  T const h = expl_solver.spaceStep();
+  T const h = expl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -1129,9 +1129,9 @@ void testExplAdvDiffEquationDirichletBCADES() {
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ExplicitPDESchemes;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation;
+  using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1146,9 +1146,9 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquation
-  typedef Explicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                std::vector, std::allocator<T>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -1156,7 +1156,7 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -1166,21 +1166,21 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   // initialize solver
   explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(boundary);
+  expl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  expl_solver.setInitialCondition(initialCondition);
+  expl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  expl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  expl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  expl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // set heat source:
-  expl_solver.setHeatSource([](T x, T t) { return x; });
+  expl_solver.set_heat_source([](T x, T t) { return x; });
   // get the solution:
-  expl_solver.solve(solution, ExplicitPDESchemes::Euler);
+  expl_solver.solve(solution, explicit_pde_schemes_enum::Euler);
 
-  T const h = expl_solver.spaceStep();
+  T const h = expl_solver.space_step();
   std::cout << "tp : FDM \n";
   for (std::size_t j = 0; j < solution.size(); ++j) {
     std::cout << "t_" << j << ": " << solution[j] << '\n';
@@ -1190,9 +1190,9 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ExplicitPDESchemes;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation;
+  using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1207,9 +1207,9 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquation
-  typedef Explicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                std::vector, std::allocator<T>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -1217,7 +1217,7 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
-  auto initialCondition = [](T x) { return 1.0; };
+  auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
   auto boundary = std::make_pair(dirichlet, dirichlet);
@@ -1227,17 +1227,17 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   // initialize solver
   explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(boundary);
+  expl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  expl_solver.setInitialCondition(initialCondition);
+  expl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  expl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  expl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  expl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // set heat source:
-  expl_solver.setHeatSource([](T x, T t) { return x; });
+  expl_solver.set_heat_source([](T x, T t) { return x; });
   // get the solution:
   expl_solver.solve(solution);
 
@@ -1250,9 +1250,9 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCADES() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ExplicitPDESchemes;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation;
+  using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1267,9 +1267,9 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
   std::cout << " U(x,0) = 1, x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquation
-  typedef Explicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Dirichlet, std::vector, std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+                                std::vector, std::allocator<T>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -1287,19 +1287,19 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
   // initialize solver
   explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
-  expl_solver.setBoundaryCondition(boundary);
+  expl_solver.set_boundary_condition(boundary);
   // set initial condition:
-  expl_solver.setInitialCondition(initialCondition);
+  expl_solver.set_initial_condition(initialCondition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  expl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  expl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  expl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // set heat source:
-  expl_solver.setHeatSource([](T x, T t) { return x; });
+  expl_solver.set_heat_source([](T x, T t) { return x; });
   // get the solution:
-  expl_solver.solve(solution, ExplicitPDESchemes::ADESaulyev);
+  expl_solver.solve(solution, explicit_pde_schemes_enum::ADESaulyev);
 
   std::cout << "tp : FDM \n";
   for (std::size_t j = 0; j < solution.size(); ++j) {
@@ -1314,10 +1314,10 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
 template <typename T>
 void testExplAdvDiffEquationRobinBCEuler() {
   using lss_enumerations::BoundaryConditionType;
-  using lss_enumerations::ExplicitPDESchemes;
-  using lss_one_dim_pde_utility::RobinBoundary;
-  using lss_one_dim_space_variable_general_heat_equation_solvers::
-      explicit_solvers::Explicit1DSpaceVariableGeneralHeatEquation;
+  using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_pde_utility::robin_boundary;
+  using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
+      general_heat_equation;
   using lss_utility::Range;
 
   std::cout << "============================================================\n";
@@ -1331,9 +1331,9 @@ void testExplAdvDiffEquationRobinBCEuler() {
   std::cout << " U(x,0) = exp(0.5*x), x in <0,1> \n\n";
   std::cout << "============================================================\n";
 
-  // typedef the Explicit1DSpaceVariableGeneralHeatEquation
-  typedef Explicit1DSpaceVariableGeneralHeatEquation<
-      T, BoundaryConditionType::Robin, std::vector, std::allocator<T>>
+  // typedef the general_heat_equation
+  typedef general_heat_equation<T, BoundaryConditionType::Robin, std::vector,
+                                std::allocator<T>>
       explicit_solver;
 
   // number of space subdivisions:
@@ -1341,7 +1341,7 @@ void testExplAdvDiffEquationRobinBCEuler() {
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
-  auto initialCondition = [](T x) { return std::exp(0.5 * x); };
+  auto initial_condition = [](T x) { return std::exp(0.5 * x); };
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1364,18 +1364,18 @@ void testExplAdvDiffEquationRobinBCEuler() {
   //				rightLin = 1.0, rightConst = 0.0
   //
   // set boundary conditions:
-  auto leftBoundary = std::make_pair(1.0, 0.0);
-  auto rightBoundary = std::make_pair(1.0, 0.0);
-  expl_solver.setBoundaryCondition(
-      RobinBoundary<T>(leftBoundary, rightBoundary));
+  auto left_boundary = std::make_pair(1.0, 0.0);
+  auto right_boundary = std::make_pair(1.0, 0.0);
+  expl_solver.set_boundary_condition(
+      robin_boundary<T>(left_boundary, right_boundary));
   // set initial condition:
-  expl_solver.setInitialCondition(initialCondition);
+  expl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set2OrderCoefficient([](T x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](T x) { return 1.0; });
   // set convection term
-  expl_solver.set1OrderCoefficient([](T x) { return -1.0; });
+  expl_solver.set_1_order_coefficient([](T x) { return -1.0; });
   // set zero-order term
-  expl_solver.set0OrderCoefficient([](T x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](T x) { return 0.0; });
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
@@ -1402,7 +1402,7 @@ void testExplAdvDiffEquationRobinBCEuler() {
     return (zero + first * sum);
   };
 
-  T const h = expl_solver.spaceStep();
+  T const h = expl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
   T benchmark{};
   for (std::size_t j = 0; j < solution.size(); ++j) {

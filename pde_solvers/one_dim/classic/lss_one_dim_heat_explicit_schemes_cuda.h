@@ -10,197 +10,191 @@
 
 namespace lss_one_dim_heat_explicit_schemes_cuda {
 
-using lss_one_dim_pde_utility::DirichletBoundary;
-using lss_one_dim_pde_utility::Discretization;
-using lss_one_dim_pde_utility::RobinBoundary;
+using lss_one_dim_pde_utility::dirichlet_boundary;
+using lss_one_dim_pde_utility::discretization;
+using lss_one_dim_pde_utility::robin_boundary;
 
-class ExplicitEulerLoopSP
-    : public Discretization<float, std::vector, std::allocator<float>> {
+class euler_loop_sp
+    : public discretization<float, std::vector, std::allocator<float>> {
  private:
-  float spaceStart_;
-  float terminalT_;
+  float space_start_;
+  float terminal_t_;
   std::pair<float, float> deltas_;  // first = delta time, second = delta space;
   std::tuple<float, float, float> coeffs_;  // coefficients of PDE
   std::function<float(float, float)> source_;
-  bool isSourceSet_;
+  bool is_source_set_;
 
  public:
-  ~ExplicitEulerLoopSP() {}
-  explicit ExplicitEulerLoopSP() = delete;
-  explicit ExplicitEulerLoopSP(float spaceStart, float terminalTime,
-                               std::pair<float, float> const &deltas,
-                               std::tuple<float, float, float> const &coeffs,
-                               std::function<float(float, float)> const &source,
-                               bool isSourceSet = false)
-      : spaceStart_{spaceStart},
-        terminalT_{terminalTime},
+  ~euler_loop_sp() {}
+  explicit euler_loop_sp() = delete;
+  explicit euler_loop_sp(float space_start, float terminal_time,
+                         std::pair<float, float> const &deltas,
+                         std::tuple<float, float, float> const &coeffs,
+                         std::function<float(float, float)> const &source,
+                         bool is_source_set = false)
+      : space_start_{space_start},
+        terminal_t_{terminal_time},
         deltas_{deltas},
         coeffs_{coeffs},
         source_{source},
-        isSourceSet_{isSourceSet} {}
+        is_source_set_{is_source_set} {}
 
   void operator()(float const *input,
-                  DirichletBoundary<float> const &dirichletBoundary,
+                  dirichlet_boundary<float> const &dirichlet_boundary,
                   unsigned long long const size, float *solution) const;
-  void operator()(float const *input, RobinBoundary<float> const &robinBoundary,
+  void operator()(float const *input,
+                  robin_boundary<float> const &robin_boundary,
                   unsigned long long const size, float *solution) const;
 };
 
-class ExplicitEulerLoopDP
-    : public Discretization<double, std::vector, std::allocator<double>> {
+class euler_loop_dp
+    : public discretization<double, std::vector, std::allocator<double>> {
  private:
-  double spaceStart_;
-  double terminalT_;
+  double space_start_;
+  double terminal_t_;
   std::pair<double, double>
       deltas_;  // first = delta time, second = delta space;
   std::tuple<double, double, double> coeffs_;  // coefficients of PDE
   std::function<double(double, double)> source_;
-  bool isSourceSet_;
+  bool is_source_set_;
 
  public:
-  ~ExplicitEulerLoopDP() {}
-  explicit ExplicitEulerLoopDP() = delete;
-  explicit ExplicitEulerLoopDP(
-      double spaceStart, double terminalTime,
-      std::pair<double, double> const &deltas,
-      std::tuple<double, double, double> const &coeffs,
-      std::function<double(double, double)> const &source,
-      bool isSourceSet = false)
-      : spaceStart_{spaceStart},
-        terminalT_{terminalTime},
+  ~euler_loop_dp() {}
+  explicit euler_loop_dp() = delete;
+  explicit euler_loop_dp(double space_start, double terminal_time,
+                         std::pair<double, double> const &deltas,
+                         std::tuple<double, double, double> const &coeffs,
+                         std::function<double(double, double)> const &source,
+                         bool is_source_set = false)
+      : space_start_{space_start},
+        terminal_t_{terminal_time},
         deltas_{deltas},
         coeffs_{coeffs},
         source_{source},
-        isSourceSet_{isSourceSet} {}
+        is_source_set_{is_source_set} {}
 
   void operator()(double const *input,
-                  DirichletBoundary<double> const &dirichletBoundary,
+                  dirichlet_boundary<double> const &dirichlet_boundary,
                   unsigned long long const size, double *solution) const;
   void operator()(double const *input,
-                  RobinBoundary<double> const &robinBoundary,
+                  robin_boundary<double> const &robin_boundary,
                   unsigned long long const size, double *solution) const;
 };
 
 // ============================================================================
-// ============ ExplicitEulerHeatEquationScheme general template ==============
+// ================= euler_heat_equation_scheme general template ==============
 // ============================================================================
 
-template <typename T, template <typename, typename> typename Container,
-          typename Alloc>
-class ExplicitEulerHeatEquationScheme {};
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+class euler_heat_equation_scheme {};
 
 // ============================================================================
-// ==== Single-Precision Floating-Point ExplicitEulerHeatEquationScheme =======
-// partial specialization template ============================================
+// ========= Single-Precision Floating-Point euler_heat_equation_scheme =======
 // ============================================================================
 
-template <template <typename, typename> typename Container, typename Alloc>
-class ExplicitEulerHeatEquationScheme<float, Container, Alloc> {
+template <template <typename, typename> typename container, typename alloc>
+class euler_heat_equation_scheme<float, container, alloc> {
  private:
-  float spaceStart_;
-  float terminalT_;
+  float space_start_;
+  float terminal_t_;
   std::pair<float, float> deltas_;  // first = delta time, second = delta space;
   std::tuple<float, float, float> coeffs_;  // coefficients of PDE
-  Container<float, Alloc> init_;
+  container<float, alloc> init_;
   std::function<float(float, float)> source_;
-  bool isSourceSet_;
+  bool is_source_set_;
 
  public:
   typedef float value_type;
-  explicit ExplicitEulerHeatEquationScheme() = delete;
-  explicit ExplicitEulerHeatEquationScheme(
-      float spaceStart, float terminalTime,
+  explicit euler_heat_equation_scheme() = delete;
+  explicit euler_heat_equation_scheme(
+      float space_start, float terminal_time,
       std::pair<float, float> const &deltas,
       std::tuple<float, float, float> const &coeffs,
-      Container<float, Alloc> const &init,
+      container<float, alloc> const &init,
       std::function<float(float, float)> const &source = nullptr,
-      bool isSourceSet = false)
-      : spaceStart_{spaceStart},
-        terminalT_{terminalTime},
+      bool is_source_set = false)
+      : space_start_{space_start},
+        terminal_t_{terminal_time},
         deltas_{deltas},
         coeffs_{coeffs},
         init_{init},
         source_{source},
-        isSourceSet_{isSourceSet} {}
+        is_source_set_{is_source_set} {}
 
-  ~ExplicitEulerHeatEquationScheme() {}
+  ~euler_heat_equation_scheme() {}
 
-  ExplicitEulerHeatEquationScheme(ExplicitEulerHeatEquationScheme const &) =
+  euler_heat_equation_scheme(euler_heat_equation_scheme const &) = delete;
+  euler_heat_equation_scheme(euler_heat_equation_scheme &&) = delete;
+  euler_heat_equation_scheme &operator=(euler_heat_equation_scheme const &) =
       delete;
-  ExplicitEulerHeatEquationScheme(ExplicitEulerHeatEquationScheme &&) = delete;
-  ExplicitEulerHeatEquationScheme &operator=(
-      ExplicitEulerHeatEquationScheme const &) = delete;
-  ExplicitEulerHeatEquationScheme &operator=(
-      ExplicitEulerHeatEquationScheme &&) = delete;
+  euler_heat_equation_scheme &operator=(euler_heat_equation_scheme &&) = delete;
 
-  void operator()(DirichletBoundary<float> const &dirichletBoundary,
-                  Container<float, Alloc> &solution) const;
-  void operator()(RobinBoundary<float> const &robinBoundary,
-                  Container<float, Alloc> &solution) const;
+  void operator()(dirichlet_boundary<float> const &dirichlet_boundary,
+                  container<float, alloc> &solution) const;
+  void operator()(robin_boundary<float> const &robin_boundary,
+                  container<float, alloc> &solution) const;
 };
 
 // ============================================================================
-// ==== Double-Precision Floating-Point ExplicitEulerHeatEquationScheme partial
-// specialization template ====================================================
+// ====== Double-Precision Floating-Point euler_heat_equation_scheme ==========
 // ============================================================================
 
-template <template <typename, typename> typename Container, typename Alloc>
-class ExplicitEulerHeatEquationScheme<double, Container, Alloc> {
+template <template <typename, typename> typename container, typename alloc>
+class euler_heat_equation_scheme<double, container, alloc> {
  private:
-  double spaceStart_;
-  double terminalT_;
+  double space_start_;
+  double terminal_t_;
   std::pair<double, double>
       deltas_;  // first = delta time, second = delta space;
   std::tuple<double, double, double> coeffs_;  // coefficients of PDE
-  Container<double, Alloc> init_;
+  container<double, alloc> init_;
   std::function<double(double, double)> source_;
-  bool isSourceSet_;
+  bool is_source_set_;
 
  public:
   typedef double value_type;
-  explicit ExplicitEulerHeatEquationScheme() = delete;
-  explicit ExplicitEulerHeatEquationScheme(
-      double spaceStart, double terminalTime,
+  explicit euler_heat_equation_scheme() = delete;
+  explicit euler_heat_equation_scheme(
+      double space_start, double terminal_time,
       std::pair<double, double> const &deltas,
       std::tuple<double, double, double> const &coeffs,
-      Container<double, Alloc> const &init,
+      container<double, alloc> const &init,
       std::function<double(double, double)> const &source = nullptr,
-      bool isSourceSet = false)
-      : spaceStart_{spaceStart},
-        terminalT_{terminalTime},
+      bool is_source_set = false)
+      : space_start_{space_start},
+        terminal_t_{terminal_time},
         deltas_{deltas},
         coeffs_{coeffs},
         init_{init},
         source_{source},
-        isSourceSet_{isSourceSet} {}
+        is_source_set_{is_source_set} {}
 
-  ~ExplicitEulerHeatEquationScheme() {}
+  ~euler_heat_equation_scheme() {}
 
-  ExplicitEulerHeatEquationScheme(ExplicitEulerHeatEquationScheme const &) =
+  euler_heat_equation_scheme(euler_heat_equation_scheme const &) = delete;
+  euler_heat_equation_scheme(euler_heat_equation_scheme &&) = delete;
+  euler_heat_equation_scheme &operator=(euler_heat_equation_scheme const &) =
       delete;
-  ExplicitEulerHeatEquationScheme(ExplicitEulerHeatEquationScheme &&) = delete;
-  ExplicitEulerHeatEquationScheme &operator=(
-      ExplicitEulerHeatEquationScheme const &) = delete;
-  ExplicitEulerHeatEquationScheme &operator=(
-      ExplicitEulerHeatEquationScheme &&) = delete;
+  euler_heat_equation_scheme &operator=(euler_heat_equation_scheme &&) = delete;
 
-  void operator()(DirichletBoundary<double> const &dirichletBoundary,
-                  Container<double, Alloc> &solution) const;
-  void operator()(RobinBoundary<double> const &robinBoundary,
-                  Container<double, Alloc> &solution) const;
+  void operator()(dirichlet_boundary<double> const &dirichlet_boundary,
+                  container<double, alloc> &solution) const;
+  void operator()(robin_boundary<double> const &robin_boundary,
+                  container<double, alloc> &solution) const;
 };
 
 // ============================================================================
 // ========================= IMPLEMENTATIONS  =================================
 
 // ============================================================================
-// ================ ExplicitEulerHeatEquationScheme implementation ============
+// ===================== euler_heat_equation_scheme implementation ============
 // ============================================================================
 
-template <template <typename, typename> typename Container, typename Alloc>
-void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
-    DirichletBoundary<float> const &dirichletBoundary,
-    Container<float, Alloc> &solution) const {
+template <template <typename, typename> typename container, typename alloc>
+void euler_heat_equation_scheme<float, container, alloc>::operator()(
+    dirichlet_boundary<float> const &dirichlet_boundary,
+    container<float, alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
   // get the size of the vector:
@@ -211,19 +205,19 @@ void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
   // create next pointer:
   float *next = (float *)malloc(size * sizeof(float));
   // launch the Euler loop:
-  ExplicitEulerLoopSP loop{spaceStart_, terminalT_, deltas_,
-                           coeffs_,     source_,    isSourceSet_};
-  loop(prev, dirichletBoundary, size, next);
+  euler_loop_sp loop{space_start_, terminal_t_, deltas_,
+                     coeffs_,      source_,     is_source_set_};
+  loop(prev, dirichlet_boundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);
   free(next);
 }
 
-template <template <typename, typename> typename Container, typename Alloc>
-void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
-    DirichletBoundary<double> const &dirichletBoundary,
-    Container<double, Alloc> &solution) const {
+template <template <typename, typename> typename container, typename alloc>
+void euler_heat_equation_scheme<double, container, alloc>::operator()(
+    dirichlet_boundary<double> const &dirichlet_boundary,
+    container<double, alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
   // get the size of the vector:
@@ -234,19 +228,19 @@ void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
   // create next pointer:
   double *next = (double *)malloc(size * sizeof(double));
   // launch the Euler loop:
-  ExplicitEulerLoopDP loop{spaceStart_, terminalT_, deltas_,
-                           coeffs_,     source_,    isSourceSet_};
-  loop(prev, dirichletBoundary, size, next);
+  euler_loop_dp loop{space_start_, terminal_t_, deltas_,
+                     coeffs_,      source_,     is_source_set_};
+  loop(prev, dirichlet_boundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);
   free(next);
 }
 
-template <template <typename, typename> typename Container, typename Alloc>
-void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
-    RobinBoundary<float> const &robinBoundary,
-    Container<float, Alloc> &solution) const {
+template <template <typename, typename> typename container, typename alloc>
+void euler_heat_equation_scheme<float, container, alloc>::operator()(
+    robin_boundary<float> const &robin_boundary,
+    container<float, alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
   // get the size of the vector:
@@ -257,19 +251,19 @@ void ExplicitEulerHeatEquationScheme<float, Container, Alloc>::operator()(
   // create next pointer:
   float *next = (float *)malloc(size * sizeof(float));
   // launch the Euler loop:
-  ExplicitEulerLoopSP loop{spaceStart_, terminalT_, deltas_,
-                           coeffs_,     source_,    isSourceSet_};
-  loop(prev, robinBoundary, size, next);
+  euler_loop_sp loop{space_start_, terminal_t_, deltas_,
+                     coeffs_,      source_,     is_source_set_};
+  loop(prev, robin_boundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);
   free(next);
 }
 
-template <template <typename, typename> typename Container, typename Alloc>
-void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
-    RobinBoundary<double> const &robinBoundary,
-    Container<double, Alloc> &solution) const {
+template <template <typename, typename> typename container, typename alloc>
+void euler_heat_equation_scheme<double, container, alloc>::operator()(
+    robin_boundary<double> const &robin_boundary,
+    container<double, alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
   // get the size of the vector:
@@ -280,9 +274,9 @@ void ExplicitEulerHeatEquationScheme<double, Container, Alloc>::operator()(
   // create next pointer:
   double *next = (double *)malloc(size * sizeof(double));
   // launch the Euler loop:
-  ExplicitEulerLoopDP loop{spaceStart_, terminalT_, deltas_,
-                           coeffs_,     source_,    isSourceSet_};
-  loop(prev, robinBoundary, size, next);
+  euler_loop_dp loop{space_start_, terminal_t_, deltas_,
+                     coeffs_,      source_,     is_source_set_};
+  loop(prev, robin_boundary, size, next);
   // next point to the solution
   std::copy(next, next + size, solution.begin());
   free(prev);

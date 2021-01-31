@@ -13,122 +13,125 @@
 namespace lss_one_dim_heat_explicit_schemes {
 
 using lss_enumerations::BoundaryConditionType;
-using lss_enumerations::ExplicitPDESchemes;
-using lss_enumerations::ImplicitPDESchemes;
-using lss_one_dim_base_explicit_schemes::Explicit1DHeatSchemeBase;
-using lss_one_dim_pde_utility::DirichletBoundary;
-using lss_one_dim_pde_utility::Discretization;
-using lss_one_dim_pde_utility::PDECoefficientHolderConst;
-using lss_one_dim_pde_utility::RobinBoundary;
+using lss_one_dim_base_explicit_schemes::heat_scheme_base;
+using lss_one_dim_pde_utility::dirichlet_boundary;
+using lss_one_dim_pde_utility::pde_coefficient_holder_const;
+using lss_one_dim_pde_utility::robin_boundary;
 
 // ============================================================================
-// ================= ExplicitHeatEulerScheme ==================================
+// ======================= heat_euler_scheme ==================================
 // ============================================================================
 
-template <typename T>
-class ExplicitHeatEulerScheme
-    : public Explicit1DHeatSchemeBase<T, PDECoefficientHolderConst<T>> {
+template <typename fp_type>
+class heat_euler_scheme
+    : public heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>> {
  public:
-  explicit ExplicitHeatEulerScheme() = delete;
-  explicit ExplicitHeatEulerScheme(
-      T spaceStart, T terminalTime, std::pair<T, T> const &deltas,
-      PDECoefficientHolderConst<T> const &coeffs,
-      std::vector<T> const &initialCondition,
-      std::function<T(T, T)> const &source = nullptr, bool isSourceSet = false)
-      : Explicit1DHeatSchemeBase<T, PDECoefficientHolderConst<T>>(
-            spaceStart, terminalTime, deltas, coeffs, initialCondition, source,
-            isSourceSet) {}
+  explicit heat_euler_scheme() = delete;
+  explicit heat_euler_scheme(
+      fp_type space_start, fp_type terminal_time,
+      std::pair<fp_type, fp_type> const &deltas,
+      pde_coefficient_holder_const<fp_type> const &coeffs,
+      std::vector<fp_type> const &initial_condition,
+      std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
+      bool is_source_set = false)
+      : heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>>(
+            space_start, terminal_time, deltas, coeffs, initial_condition,
+            source, is_source_set) {}
 
-  ~ExplicitHeatEulerScheme() {}
+  ~heat_euler_scheme() {}
 
-  ExplicitHeatEulerScheme(ExplicitHeatEulerScheme const &) = delete;
-  ExplicitHeatEulerScheme(ExplicitHeatEulerScheme &&) = delete;
-  ExplicitHeatEulerScheme &operator=(ExplicitHeatEulerScheme const &) = delete;
-  ExplicitHeatEulerScheme &operator=(ExplicitHeatEulerScheme &&) = delete;
+  heat_euler_scheme(heat_euler_scheme const &) = delete;
+  heat_euler_scheme(heat_euler_scheme &&) = delete;
+  heat_euler_scheme &operator=(heat_euler_scheme const &) = delete;
+  heat_euler_scheme &operator=(heat_euler_scheme &&) = delete;
 
   // stability check:
-  bool isStable() const override;
+  bool is_stable() const override;
 
   // for Dirichlet BC
-  void operator()(DirichletBoundary<T> const &dirichletBoundary,
-                  std::vector<T> &solution) const override;
+  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                  std::vector<fp_type> &solution) const override;
   // for Robin BC
-  void operator()(RobinBoundary<T> const &robinBoundary,
-                  std::vector<T> &solution) const override;
+  void operator()(robin_boundary<fp_type> const &robin_boundary,
+                  std::vector<fp_type> &solution) const override;
 };
 
 // ============================================================================
-// ====================== ADEHeatBakaratClarkScheme  ==========================
+// ================== ade_heat_bakarat_clark_scheme  ==========================
 // ============================================================================
 
-template <typename T>
-class ADEHeatBakaratClarkScheme
-    : public Explicit1DHeatSchemeBase<T, PDECoefficientHolderConst<T>> {
+template <typename fp_type>
+class ade_heat_bakarat_clark_scheme
+    : public heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>> {
  public:
-  explicit ADEHeatBakaratClarkScheme() = delete;
-  explicit ADEHeatBakaratClarkScheme(
-      T spaceStart, T terminalTime, std::pair<T, T> const &deltas,
-      PDECoefficientHolderConst<T> const &coeffs,
-      std::vector<T> const &initialCondition,
-      std::function<T(T, T)> const &source = nullptr, bool isSourceSet = false)
-      : Explicit1DHeatSchemeBase<T, PDECoefficientHolderConst<T>>(
-            spaceStart, terminalTime, deltas, coeffs, initialCondition, source,
-            isSourceSet) {}
+  explicit ade_heat_bakarat_clark_scheme() = delete;
+  explicit ade_heat_bakarat_clark_scheme(
+      fp_type space_start, fp_type terminal_time,
+      std::pair<fp_type, fp_type> const &deltas,
+      pde_coefficient_holder_const<fp_type> const &coeffs,
+      std::vector<fp_type> const &initial_condition,
+      std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
+      bool is_source_set = false)
+      : heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>>(
+            space_start, terminal_time, deltas, coeffs, initial_condition,
+            source, is_source_set) {}
 
-  ~ADEHeatBakaratClarkScheme() {}
+  ~ade_heat_bakarat_clark_scheme() {}
 
-  ADEHeatBakaratClarkScheme(ADEHeatBakaratClarkScheme const &) = delete;
-  ADEHeatBakaratClarkScheme(ADEHeatBakaratClarkScheme &&) = delete;
-  ADEHeatBakaratClarkScheme &operator=(ADEHeatBakaratClarkScheme const &) =
+  ade_heat_bakarat_clark_scheme(ade_heat_bakarat_clark_scheme const &) = delete;
+  ade_heat_bakarat_clark_scheme(ade_heat_bakarat_clark_scheme &&) = delete;
+  ade_heat_bakarat_clark_scheme &operator=(
+      ade_heat_bakarat_clark_scheme const &) = delete;
+  ade_heat_bakarat_clark_scheme &operator=(ade_heat_bakarat_clark_scheme &&) =
       delete;
-  ADEHeatBakaratClarkScheme &operator=(ADEHeatBakaratClarkScheme &&) = delete;
 
   // stability check:
-  bool isStable() const override { return true; };
+  bool is_stable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(DirichletBoundary<T> const &dirichletBoundary,
-                  std::vector<T> &solution) const override;
+  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                  std::vector<fp_type> &solution) const override;
   // for Robin BC
-  void operator()(RobinBoundary<T> const &robinBoundary,
-                  std::vector<T> &solution) const override;
+  void operator()(robin_boundary<fp_type> const &robin_boundary,
+                  std::vector<fp_type> &solution) const override;
 };
 
 // ============================================================================
-// ======================= ADEHeatSaulyevScheme ===============================
+// ==================== ade_heat_saulyev_scheme ===============================
 // ============================================================================
 
-template <typename T>
-class ADEHeatSaulyevScheme
-    : public Explicit1DHeatSchemeBase<T, PDECoefficientHolderConst<T>> {
+template <typename fp_type>
+class ade_heat_saulyev_scheme
+    : public heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>> {
  public:
-  explicit ADEHeatSaulyevScheme() = delete;
-  explicit ADEHeatSaulyevScheme(T spaceStart, T terminalTime,
-                                std::pair<T, T> const &deltas,
-                                PDECoefficientHolderConst<T> const &coeffs,
-                                std::vector<T> const &initialCondition,
-                                std::function<T(T, T)> const &source = nullptr,
-                                bool isSourceSet = false)
-      : Explicit1DHeatSchemeBase<T, PDECoefficientHolderConst<T>>(
-            spaceStart, terminalTime, deltas, coeffs, initialCondition, source,
-            isSourceSet) {}
+  explicit ade_heat_saulyev_scheme() = delete;
+  explicit ade_heat_saulyev_scheme(
+      fp_type space_start, fp_type terminal_time,
+      std::pair<fp_type, fp_type> const &deltas,
+      pde_coefficient_holder_const<fp_type> const &coeffs,
+      std::vector<fp_type> const &initial_condition,
+      std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
+      bool is_source_set = false)
+      : heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>>(
+            space_start, terminal_time, deltas, coeffs, initial_condition,
+            source, is_source_set) {}
 
-  ~ADEHeatSaulyevScheme() {}
+  ~ade_heat_saulyev_scheme() {}
 
-  ADEHeatSaulyevScheme(ADEHeatSaulyevScheme const &) = delete;
-  ADEHeatSaulyevScheme(ADEHeatSaulyevScheme &&) = delete;
-  ADEHeatSaulyevScheme &operator=(ADEHeatSaulyevScheme const &) = delete;
-  ADEHeatSaulyevScheme &operator=(ADEHeatSaulyevScheme &&) = delete;
+  ade_heat_saulyev_scheme(ade_heat_saulyev_scheme const &) = delete;
+  ade_heat_saulyev_scheme(ade_heat_saulyev_scheme &&) = delete;
+  ade_heat_saulyev_scheme &operator=(ade_heat_saulyev_scheme const &) = delete;
+  ade_heat_saulyev_scheme &operator=(ade_heat_saulyev_scheme &&) = delete;
 
   // stability check:
-  bool isStable() const override { return true; };
+  bool is_stable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(DirichletBoundary<T> const &dirichletBoundary,
-                  std::vector<T> &solution) const override;
+  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                  std::vector<fp_type> &solution) const override;
   // for Robin BC
-  void operator()(RobinBoundary<T> const &robinBoundary,
-                  std::vector<T> &solution) const override;
+  void operator()(robin_boundary<fp_type> const &robin_boundary,
+                  std::vector<fp_type> &solution) const override;
 };
 
 }  // namespace lss_one_dim_heat_explicit_schemes
@@ -136,357 +139,360 @@ class ADEHeatSaulyevScheme
 // ============================================================================
 // =========================== IMPLEMENTATIONS ================================
 
-template <typename T>
-bool lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme<T>::isStable()
+template <typename fp_type>
+bool lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::is_stable()
     const {
-  T const A = std::get<0>(coeffs_);
-  T const B = std::get<1>(coeffs_);
-  T const k = std::get<0>(deltas_);
-  T const h = std::get<1>(deltas_);
+  fp_type const A = std::get<0>(coeffs_);
+  fp_type const B = std::get<1>(coeffs_);
+  fp_type const k = std::get<0>(deltas_);
+  fp_type const h = std::get<1>(deltas_);
 
   return (((2.0 * A * k / (h * h)) <= 1.0) && (B * (k / h) <= 1.0));
 }
 
-template <typename T>
-void lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme<T>::operator()(
-    DirichletBoundary<T> const &dirichletBoundary,
-    std::vector<T> &solution) const {
+template <typename fp_type>
+void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
+    dirichlet_boundary<fp_type> const &dirichlet_boundary,
+    std::vector<fp_type> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
-      solution.size() == initialCondition_.size(),
+      solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
-  LSS_ASSERT(isStable() == true, "This discretization is not stable.");
+  LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
   // get delta time:
-  T const k = std::get<0>(deltas_);
+  fp_type const k = std::get<0>(deltas_);
   // get delta space:
-  T const h = std::get<1>(deltas_);
+  fp_type const h = std::get<1>(deltas_);
   // create first time point:
-  T time = k;
+  fp_type time = k;
   // get coefficients:
-  T const A = std::get<0>(coeffs_);
-  T const B = std::get<1>(coeffs_);
-  T const C = std::get<2>(coeffs_);
+  fp_type const A = std::get<0>(coeffs_);
+  fp_type const B = std::get<1>(coeffs_);
+  fp_type const C = std::get<2>(coeffs_);
   // calculate scheme coefficients:
-  T const lambda = (A * k) / (h * h);
-  T const gamma = (B * k) / (2.0 * h);
-  T const delta = C * k;
+  fp_type const lambda = (A * k) / (h * h);
+  fp_type const gamma = (B * k) / (2.0 * h);
+  fp_type const delta = C * k;
   // set up coefficients:
-  T const a = 1.0 - (2.0 * lambda - delta);
-  T const b = lambda + gamma;
-  T const c = lambda - gamma;
+  fp_type const a = 1.0 - (2.0 * lambda - delta);
+  fp_type const b = lambda + gamma;
+  fp_type const c = lambda - gamma;
   // previous solution:
-  std::vector<T> prevSol = initialCondition_;
+  std::vector<fp_type> prev_sol = initial_condition_;
   // left space boundary:
-  auto const &left = dirichletBoundary.first;
+  auto const &left = dirichlet_boundary.first;
   // right space boundary:
-  auto const &right = dirichletBoundary.second;
+  auto const &right = dirichlet_boundary.second;
   // size of the space vector:
-  std::size_t const spaceSize = solution.size();
-  if (!isSourceSet_) {
+  std::size_t const space_size = solution.size();
+  if (!is_source_set_) {
     // loop for stepping in time:
-    while (time <= terminalTime_) {
+    while (time <= terminal_time_) {
       solution[0] = left(time);
       solution[solution.size() - 1] = right(time);
-      for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
+      for (std::size_t t = 1; t < space_size - 1; ++t) {
+        solution[t] =
+            a * prev_sol[t] + b * prev_sol[t + 1] + c * prev_sol[t - 1];
       }
-      prevSol = solution;
+      prev_sol = solution;
       time += k;
     }
   } else {
     // create a container to carry discretized source heat
-    std::vector<T> sourceCurr(solution.size(), T{});
-    discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
+    std::vector<fp_type> source_curr(solution.size(), fp_type{});
+    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
     // loop for stepping in time:
-    while (time <= terminalTime_) {
+    while (time <= terminal_time_) {
       solution[0] = left(time);
       solution[solution.size() - 1] = right(time);
-      for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1] +
-                      k * sourceCurr[t];
+      for (std::size_t t = 1; t < space_size - 1; ++t) {
+        solution[t] = a * prev_sol[t] + b * prev_sol[t + 1] +
+                      c * prev_sol[t - 1] + k * source_curr[t];
       }
-      discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
-      prevSol = solution;
+      discretize_in_space(h, space_start_, time, source_, source_curr);
+      prev_sol = solution;
       time += k;
     }
   }
 }
 
-template <typename T>
-void lss_one_dim_heat_explicit_schemes::ExplicitHeatEulerScheme<T>::operator()(
-    RobinBoundary<T> const &robinBoundary, std::vector<T> &solution) const {
+template <typename fp_type>
+void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
+    robin_boundary<fp_type> const &robin_boundary,
+    std::vector<fp_type> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
-      solution.size() == initialCondition_.size(),
+      solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
-  LSS_ASSERT(isStable() == true, "This discretization is not stable.");
+  LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
   // get delta time:
-  T const k = std::get<0>(deltas_);
+  fp_type const k = std::get<0>(deltas_);
   // get delta space:
-  T const h = std::get<1>(deltas_);
+  fp_type const h = std::get<1>(deltas_);
   // create first time point:
-  T time = k;
+  fp_type time = k;
   // get coefficients:
-  T const A = std::get<0>(coeffs_);
-  T const B = std::get<1>(coeffs_);
-  T const C = std::get<2>(coeffs_);
+  fp_type const A = std::get<0>(coeffs_);
+  fp_type const B = std::get<1>(coeffs_);
+  fp_type const C = std::get<2>(coeffs_);
   // calculate scheme coefficients:
-  T const lambda = (A * k) / (h * h);
-  T const gamma = (B * k) / (2.0 * h);
-  T const delta = C * k;
+  fp_type const lambda = (A * k) / (h * h);
+  fp_type const gamma = (B * k) / (2.0 * h);
+  fp_type const delta = C * k;
   // left space boundary:
-  T const leftLin = robinBoundary.left.first;
-  T const leftConst = robinBoundary.left.second;
+  fp_type const left_lin = robin_boundary.left.first;
+  fp_type const left_const = robin_boundary.left.second;
   // right space boundary:
-  T const rightLin_ = robinBoundary.right.first;
-  T const rightConst_ = robinBoundary.right.second;
+  fp_type const right_lin_ = robin_boundary.right.first;
+  fp_type const right_const_ = robin_boundary.right.second;
   // conversion of right hand boundaries:
-  T const rightLin = 1.0 / rightLin_;
-  T const rightConst = -1.0 * (rightConst_ / rightLin_);
+  fp_type const right_lin = 1.0 / right_lin_;
+  fp_type const right_const = -1.0 * (right_const_ / right_lin_);
   // set up coefficients:
-  T const a = 1.0 - (2.0 * lambda - delta);
-  T const b = lambda + gamma;
-  T const c = lambda - gamma;
+  fp_type const a = 1.0 - (2.0 * lambda - delta);
+  fp_type const b = lambda + gamma;
+  fp_type const c = lambda - gamma;
   // previous solution:
-  std::vector<T> prevSol = initialCondition_;
+  std::vector<fp_type> prev_sol = initial_condition_;
   // size of the space vector:
-  std::size_t const spaceSize = solution.size();
-  if (!isSourceSet_) {
+  std::size_t const space_size = solution.size();
+  if (!is_source_set_) {
     // loop for stepping in time:
-    while (time <= terminalTime_) {
+    while (time <= terminal_time_) {
       solution[0] =
-          (b + (c * leftLin)) * prevSol[1] + a * prevSol[0] + c * leftConst;
+          (b + (c * left_lin)) * prev_sol[1] + a * prev_sol[0] + c * left_const;
       solution[solution.size() - 1] =
-          (c + (b * rightLin)) * prevSol[solution.size() - 2] +
-          a * prevSol[solution.size() - 1] + b * rightConst;
-      for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1];
+          (c + (b * right_lin)) * prev_sol[solution.size() - 2] +
+          a * prev_sol[solution.size() - 1] + b * right_const;
+      for (std::size_t t = 1; t < space_size - 1; ++t) {
+        solution[t] =
+            a * prev_sol[t] + b * prev_sol[t + 1] + c * prev_sol[t - 1];
       }
-      prevSol = solution;
+      prev_sol = solution;
       time += k;
     }
   } else {
     // create a container to carry discretized source heat
-    std::vector<T> sourceCurr(solution.size(), T{});
-    discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
+    std::vector<fp_type> source_curr(solution.size(), fp_type{});
+    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
     // loop for stepping in time:
-    // loop for stepping in time:
-    while (time <= terminalTime_) {
+    while (time <= terminal_time_) {
       solution[0] =
-          (b + (c * leftLin)) * prevSol[1] + a * prevSol[0] + c * leftConst;
+          (b + (c * left_lin)) * prev_sol[1] + a * prev_sol[0] + c * left_const;
       solution[solution.size() - 1] =
-          (c + (b * rightLin)) * prevSol[solution.size() - 2] +
-          a * prevSol[solution.size() - 1] + b * rightConst;
-      for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-        solution[t] = a * prevSol[t] + b * prevSol[t + 1] + c * prevSol[t - 1] +
-                      k * sourceCurr[t];
+          (c + (b * right_lin)) * prev_sol[solution.size() - 2] +
+          a * prev_sol[solution.size() - 1] + b * right_const;
+      for (std::size_t t = 1; t < space_size - 1; ++t) {
+        solution[t] = a * prev_sol[t] + b * prev_sol[t + 1] +
+                      c * prev_sol[t - 1] + k * source_curr[t];
       }
-      discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
-      prevSol = solution;
+      discretize_in_space(h, space_start_, time, source_, source_curr);
+      prev_sol = solution;
       time += k;
     }
   }
 }
 
-template <typename T>
-void lss_one_dim_heat_explicit_schemes::ADEHeatBakaratClarkScheme<
-    T>::operator()(DirichletBoundary<T> const &dirichletBoundary,
-                   std::vector<T> &solution) const {
+template <typename fp_type>
+void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
+    fp_type>::operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         std::vector<fp_type> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
-      solution.size() == initialCondition_.size(),
+      solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
   // get delta time:
-  T const k = std::get<0>(deltas_);
+  fp_type const k = std::get<0>(deltas_);
   // get delta space:
-  T const h = std::get<1>(deltas_);
+  fp_type const h = std::get<1>(deltas_);
   // create first time point:
-  T time = k;
+  fp_type time = k;
   // get coefficients:
-  T const A = std::get<0>(coeffs_);
-  T const B = std::get<1>(coeffs_);
-  T const C = std::get<2>(coeffs_);
+  fp_type const A = std::get<0>(coeffs_);
+  fp_type const B = std::get<1>(coeffs_);
+  fp_type const C = std::get<2>(coeffs_);
   // calculate scheme coefficients:
-  T const lambda = (A * k) / (h * h);
-  T const gamma = (B * k) / (2.0 * h);
-  T const delta = C * k / 2.0;
+  fp_type const lambda = (A * k) / (h * h);
+  fp_type const gamma = (B * k) / (2.0 * h);
+  fp_type const delta = C * k / 2.0;
   // set up coefficients:
-  T const divisor = 1.0 + lambda - delta;
-  T const a = (1.0 - lambda + delta) / divisor;
-  T const b = (lambda + gamma) / divisor;
-  T const c = (lambda - gamma) / divisor;
-  T const d = k / divisor;
+  fp_type const divisor = 1.0 + lambda - delta;
+  fp_type const a = (1.0 - lambda + delta) / divisor;
+  fp_type const b = (lambda + gamma) / divisor;
+  fp_type const c = (lambda - gamma) / divisor;
+  fp_type const d = k / divisor;
   // left space boundary:
-  auto const &left = dirichletBoundary.first;
+  auto const &left = dirichlet_boundary.first;
   // right space boundary:
-  auto const &right = dirichletBoundary.second;
+  auto const &right = dirichlet_boundary.second;
   // conmponents of the solution:
-  std::vector<T> com1(initialCondition_);
-  std::vector<T> com2(initialCondition_);
+  std::vector<fp_type> com_1(initial_condition_);
+  std::vector<fp_type> com_2(initial_condition_);
   // size of the space vector:
-  std::size_t const spaceSize = solution.size();
+  std::size_t const space_size = solution.size();
   // create a container to carry discretized source heat
-  std::vector<T> sourceCurr(spaceSize, T{});
-  std::vector<T> sourceNext(spaceSize, T{});
+  std::vector<fp_type> source_curr(space_size, fp_type{});
+  std::vector<fp_type> source_next(space_size, fp_type{});
   // create upsweep anonymous function:
-  auto upSweep = [=](std::vector<T> &upComponent, std::vector<T> const &rhs,
-                     T rhsCoeff) {
-    for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-      upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] +
-                       c * upComponent[t - 1] + d * rhsCoeff * rhs[t];
+  auto up_sweep = [=](std::vector<fp_type> &up_component,
+                      std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+    for (std::size_t t = 1; t < space_size - 1; ++t) {
+      up_component[t] = a * up_component[t] + b * up_component[t + 1] +
+                        c * up_component[t - 1] + d * rhs_coeff * rhs[t];
     }
   };
   // create downsweep anonymous function:
-  auto downSweep = [=](std::vector<T> &downComponent, std::vector<T> const &rhs,
-                       T rhsCoeff) {
-    for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-      downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] +
-                         c * downComponent[t - 1] + d * rhsCoeff * rhs[t];
+  auto down_sweep = [=](std::vector<fp_type> &down_component,
+                        std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+    for (std::size_t t = space_size - 2; t >= 1; --t) {
+      down_component[t] = a * down_component[t] + b * down_component[t + 1] +
+                          c * down_component[t - 1] + d * rhs_coeff * rhs[t];
     }
   };
 
-  if (!isSourceSet_) {
+  if (!is_source_set_) {
     // loop for stepping in time:
-    while (time <= terminalTime_) {
-      com1[0] = com2[0] = left(time);
-      com1[solution.size() - 1] = com2[solution.size() - 1] = right(time);
-      std::thread upSweepTr(std::move(upSweep), std::ref(com1), sourceCurr,
-                            0.0);
-      std::thread downSweepTr(std::move(downSweep), std::ref(com2), sourceCurr,
+    while (time <= terminal_time_) {
+      com_1[0] = com_2[0] = left(time);
+      com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+      std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_curr,
                               0.0);
-      upSweepTr.join();
-      downSweepTr.join();
-      for (std::size_t t = 0; t < spaceSize; ++t) {
-        solution[t] = 0.5 * (com1[t] + com2[t]);
+      std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
+                                source_curr, 0.0);
+      up_sweep_tr.join();
+      down_sweep_tr.join();
+      for (std::size_t t = 0; t < space_size; ++t) {
+        solution[t] = 0.5 * (com_1[t] + com_2[t]);
       }
       time += k;
     }
   } else {
-    discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
-    discretizeInSpace(h, spaceStart_, time, source_, sourceNext);
+    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
+    discretize_in_space(h, space_start_, time, source_, source_next);
     // loop for stepping in time:
-    while (time <= terminalTime_) {
-      com1[0] = com2[0] = left(time);
-      com1[solution.size() - 1] = com2[solution.size() - 1] = right(time);
-      std::thread upSweepTr(std::move(upSweep), std::ref(com1), sourceNext,
-                            1.0);
-      std::thread downSweepTr(std::move(downSweep), std::ref(com2), sourceCurr,
+    while (time <= terminal_time_) {
+      com_1[0] = com_2[0] = left(time);
+      com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+      std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_next,
                               1.0);
-      upSweepTr.join();
-      downSweepTr.join();
-      for (std::size_t t = 0; t < spaceSize; ++t) {
-        solution[t] = 0.5 * (com1[t] + com2[t]);
+      std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
+                                source_curr, 1.0);
+      up_sweep_tr.join();
+      down_sweep_tr.join();
+      for (std::size_t t = 0; t < space_size; ++t) {
+        solution[t] = 0.5 * (com_1[t] + com_2[t]);
       }
-      discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
-      discretizeInSpace(h, spaceStart_, 2.0 * time, source_, sourceNext);
+      discretize_in_space(h, space_start_, time, source_, source_curr);
+      discretize_in_space(h, space_start_, 2.0 * time, source_, source_next);
       time += k;
     }
   }
 }
 
-template <typename T>
-void lss_one_dim_heat_explicit_schemes::ADEHeatBakaratClarkScheme<
-    T>::operator()(RobinBoundary<T> const &robinBoundary,
-                   std::vector<T> &solution) const {
+template <typename fp_type>
+void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
+    fp_type>::operator()(robin_boundary<fp_type> const &robin_boundary,
+                         std::vector<fp_type> &solution) const {
   throw new std::exception("Not available.");
 }
 
-template <typename T>
-void lss_one_dim_heat_explicit_schemes::ADEHeatSaulyevScheme<T>::operator()(
-    DirichletBoundary<T> const &dirichletBoundary,
-    std::vector<T> &solution) const {
+template <typename fp_type>
+void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
+    fp_type>::operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         std::vector<fp_type> &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
-      solution.size() == initialCondition_.size(),
+      solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
   // get delta time:
-  T const k = std::get<0>(deltas_);
+  fp_type const k = std::get<0>(deltas_);
   // get delta space:
-  T const h = std::get<1>(deltas_);
+  fp_type const h = std::get<1>(deltas_);
   // create first time point:
-  T time = k;
+  fp_type time = k;
   // get coefficients:
-  T const A = std::get<0>(coeffs_);
-  T const B = std::get<1>(coeffs_);
-  T const C = std::get<2>(coeffs_);
+  fp_type const A = std::get<0>(coeffs_);
+  fp_type const B = std::get<1>(coeffs_);
+  fp_type const C = std::get<2>(coeffs_);
   // calculate scheme coefficients:
-  T const lambda = (A * k) / (h * h);
-  T const gamma = (B * k) / (2.0 * h);
-  T const delta = C * k / 2.0;
+  fp_type const lambda = (A * k) / (h * h);
+  fp_type const gamma = (B * k) / (2.0 * h);
+  fp_type const delta = C * k / 2.0;
   // set up coefficients:
-  T const divisor = 1.0 + lambda - delta;
-  T const a = (1.0 - lambda + delta) / divisor;
-  T const b = (lambda + gamma) / divisor;
-  T const c = (lambda - gamma) / divisor;
-  T const d = k / divisor;
+  fp_type const divisor = 1.0 + lambda - delta;
+  fp_type const a = (1.0 - lambda + delta) / divisor;
+  fp_type const b = (lambda + gamma) / divisor;
+  fp_type const c = (lambda - gamma) / divisor;
+  fp_type const d = k / divisor;
   // left space boundary:
-  auto const &left = dirichletBoundary.first;
+  auto const &left = dirichlet_boundary.first;
   // right space boundary:
-  auto const &right = dirichletBoundary.second;
+  auto const &right = dirichlet_boundary.second;
   // get the initial condition :
-  solution = initialCondition_;
+  solution = initial_condition_;
   // size of the space vector:
-  std::size_t const spaceSize = solution.size();
+  std::size_t const space_size = solution.size();
   // create a container to carry discretized source heat
-  std::vector<T> sourceCurr(spaceSize, T{});
-  std::vector<T> sourceNext(spaceSize, T{});
+  std::vector<fp_type> source_curr(space_size, fp_type{});
+  std::vector<fp_type> source_next(space_size, fp_type{});
   // create upsweep anonymous function:
-  auto upSweep = [=](std::vector<T> &upComponent, std::vector<T> const &rhs,
-                     T rhsCoeff) {
-    for (std::size_t t = 1; t < spaceSize - 1; ++t) {
-      upComponent[t] = a * upComponent[t] + b * upComponent[t + 1] +
-                       c * upComponent[t - 1] + d * rhsCoeff * rhs[t];
+  auto up_sweep = [=](std::vector<fp_type> &up_component,
+                      std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+    for (std::size_t t = 1; t < space_size - 1; ++t) {
+      up_component[t] = a * up_component[t] + b * up_component[t + 1] +
+                        c * up_component[t - 1] + d * rhs_coeff * rhs[t];
     }
   };
   // create downsweep anonymous function:
-  auto downSweep = [=](std::vector<T> &downComponent, std::vector<T> const &rhs,
-                       T rhsCoeff) {
-    for (std::size_t t = spaceSize - 2; t >= 1; --t) {
-      downComponent[t] = a * downComponent[t] + b * downComponent[t + 1] +
-                         c * downComponent[t - 1] + d * rhsCoeff * rhs[t];
+  auto down_sweep = [=](std::vector<fp_type> &down_component,
+                        std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+    for (std::size_t t = space_size - 2; t >= 1; --t) {
+      down_component[t] = a * down_component[t] + b * down_component[t + 1] +
+                          c * down_component[t - 1] + d * rhs_coeff * rhs[t];
     }
   };
 
-  if (!isSourceSet_) {
+  if (!is_source_set_) {
     // loop for stepping in time:
     std::size_t t = 1;
-    while (time <= terminalTime_) {
+    while (time <= terminal_time_) {
       solution[0] = left(time);
       solution[solution.size() - 1] = right(time);
       if (t % 2 == 0)
-        downSweep(solution, sourceCurr, 0.0);
+        down_sweep(solution, source_curr, 0.0);
       else
-        upSweep(solution, sourceCurr, 0.0);
+        up_sweep(solution, source_curr, 0.0);
       ++t;
       time += k;
     }
   } else {
-    discretizeInSpace(h, spaceStart_, 0.0, source_, sourceCurr);
-    discretizeInSpace(h, spaceStart_, time, source_, sourceNext);
+    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
+    discretize_in_space(h, space_start_, time, source_, source_next);
     // loop for stepping in time:
     std::size_t t = 1;
-    while (time <= terminalTime_) {
+    while (time <= terminal_time_) {
       solution[0] = left(time);
       solution[solution.size() - 1] = right(time);
       if (t % 2 == 0)
-        downSweep(solution, sourceCurr, 1.0);
+        down_sweep(solution, source_curr, 1.0);
       else
-        upSweep(solution, sourceNext, 1.0);
+        up_sweep(solution, source_next, 1.0);
       ++t;
-      discretizeInSpace(h, spaceStart_, time, source_, sourceCurr);
-      discretizeInSpace(h, spaceStart_, 2.0 * time, source_, sourceNext);
+      discretize_in_space(h, space_start_, time, source_, source_curr);
+      discretize_in_space(h, space_start_, 2.0 * time, source_, source_next);
       time += k;
     }
   }
 }
 
-template <typename T>
-void lss_one_dim_heat_explicit_schemes::ADEHeatSaulyevScheme<T>::operator()(
-    RobinBoundary<T> const &robinBoundary, std::vector<T> &solution) const {
+template <typename fp_type>
+void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
+    fp_type>::operator()(robin_boundary<fp_type> const &robin_boundary,
+                         std::vector<fp_type> &solution) const {
   throw new std::exception("Not available.");
 }
 

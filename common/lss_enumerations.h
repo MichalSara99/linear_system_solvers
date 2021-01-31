@@ -31,13 +31,13 @@ enum class BoundaryConditionType { Dirichlet, Robin };
 // =========================== ImplicitPDESchemes ===========================
 // ==========================================================================
 
-enum class ImplicitPDESchemes { Euler, CrankNicolson };
+enum class implicit_pde_schemes_enum { Euler, CrankNicolson };
 
 // ==========================================================================
 // =========================== ExplicitPDESchemes ===========================
 // ==========================================================================
 
-enum class ExplicitPDESchemes { Euler, ADEBarakatClark, ADESaulyev };
+enum class explicit_pde_schemes_enum { Euler, ADEBarakatClark, ADESaulyev };
 
 }  // namespace lss_enumerations
 
