@@ -15,197 +15,199 @@
 #include "common/lss_utility.h"
 #include "lss_dense_solvers_policy.h"
 
-namespace lss_dense_solvers_cuda {
+namespace lss_dense_solvers {
 
-using lss_dense_solvers_policy::DenseSolverDevice;
-using lss_dense_solvers_policy::DenseSolverQR;
-using lss_enumerations::FlatMatrixSort;
-using lss_helpers::RealDenseSolverCUDAHelpers;
-using lss_utility::FlatMatrix;
+using lss_dense_solvers_policy::dense_solver_device;
+using lss_dense_solvers_policy::dense_solver_qr;
+using lss_enumerations::flat_matrix_sort_enum;
+using lss_helpers::real_dense_solver_cuda_helpers;
+using lss_utility::flat_matrix;
 
 template <typename T,
           typename =
               typename std::enable_if<std::is_floating_point<T>::value>::type>
-class RealDenseSolverCUDA {};
+class real_dense_solver_cuda {};
 
 template <typename T>
-class RealDenseSolverCUDA<T> {
+class real_dense_solver_cuda<T> {
  private:
-  std::size_t matrixRows_;
-  std::size_t matrixCols_;
-  FlatMatrix<T> matrixElements_;
+  std::size_t matrix_rows_;
+  std::size_t matrix_cols_;
+  flat_matrix<T> matrix_elements_;
 
-  thrust::host_vector<T> h_matrixValues_;
-  thrust::host_vector<T> h_rhsValues_;
+  thrust::host_vector<T> h_matrix_values_;
+  thrust::host_vector<T> h_rhs_values_;
 
   void populate();
 
  public:
   typedef T value_type;
-  explicit RealDenseSolverCUDA() : matrixCols_{0}, matrixRows_{0} {}
-  virtual ~RealDenseSolverCUDA() {}
+  explicit real_dense_solver_cuda() : matrix_cols_{0}, matrix_rows_{0} {}
+  virtual ~real_dense_solver_cuda() {}
 
-  RealDenseSolverCUDA(RealDenseSolverCUDA const&) = delete;
-  RealDenseSolverCUDA& operator=(RealDenseSolverCUDA const&) = delete;
-  RealDenseSolverCUDA(RealDenseSolverCUDA&&) = delete;
-  RealDenseSolverCUDA& operator=(RealDenseSolverCUDA&&) = delete;
+  real_dense_solver_cuda(real_dense_solver_cuda const&) = delete;
+  real_dense_solver_cuda& operator=(real_dense_solver_cuda const&) = delete;
+  real_dense_solver_cuda(real_dense_solver_cuda&&) = delete;
+  real_dense_solver_cuda& operator=(real_dense_solver_cuda&&) = delete;
 
-  void initialize(std::size_t matrixRows, std::size_t matrixColumns);
+  void initialize(std::size_t matrix_rows, std::size_t matrix_columns);
 
-  template <template <typename T, typename Alloc>
-            typename Container = std::vector,
-            typename Alloc = std::allocator<T>>
-  inline void setRhs(Container<T, Alloc> const& rhs) {
-    LSS_ASSERT(rhs.size() == matrixRows_,
+  template <template <typename T, typename alloc>
+            typename container = std::vector,
+            typename alloc = std::allocator<T>>
+  inline void set_rhs(container<T, alloc> const& rhs) {
+    LSS_ASSERT(rhs.size() == matrix_rows_,
                " Right-hand side vector of the system has incorrect size.");
-    thrust::copy(rhs.begin(), rhs.end(), h_rhsValues_.begin());
+    thrust::copy(rhs.begin(), rhs.end(), h_rhs_values_.begin());
   }
 
-  inline void setRhsValue(std::size_t idx, T value) {
-    LSS_ASSERT((idx < matrixRows_), "idx is outside range");
-    h_rhsValues_[idx] = value;
+  inline void set_rhs_value(std::size_t idx, T value) {
+    LSS_ASSERT((idx < matrix_rows_), "idx is outside range");
+    h_rhs_values_[idx] = value;
   }
 
-  inline void setFlatDenseMatrix(FlatMatrix<T> matrix) {
+  inline void set_flat_dense_matrix(flat_matrix<T> matrix) {
     LSS_ASSERT(
-        (matrix.rows() == matrixRows_) && (matrix.columns() == matrixCols_),
-        " FlatMatrix has incorrect number of rows or columns");
-    matrixElements_ = std::move(matrix);
+        (matrix.rows() == matrix_rows_) && (matrix.columns() == matrix_cols_),
+        " flat_matrix has incorrect number of rows or columns");
+    matrix_elements_ = std::move(matrix);
   }
 
-  inline void setFlatDenseMatrixValue(std::size_t rowIdx, std::size_t colIdx,
-                                      T value) {
-    LSS_ASSERT((rowIdx < matrixRows_), " row index is out of range");
-    LSS_ASSERT((colIdx < matrixCols_), " column index is out of range");
-    matrixElements_.emplace_back(rowIdx, colIdx, value);
+  inline void set_flat_dense_matrix_value(std::size_t row_idx,
+                                          std::size_t col_idx, T value) {
+    LSS_ASSERT((row_idx < matrix_rows_), " row index is out of range");
+    LSS_ASSERT((col_idx < matrix_cols_), " column index is out of range");
+    matrix_elements_.emplace_back(row_idx, col_idx, value);
   }
 
-  inline void setFlatDenseMatrixValue(
+  inline void set_flat_dense_matrix_value(
       std::tuple<std::size_t, std::size_t, T> triplet) {
-    LSS_ASSERT((std::get<0>(triplet) < matrixRows_),
+    LSS_ASSERT((std::get<0>(triplet) < matrix_rows_),
                " row index is out of range");
-    LSS_ASSERT((std::get<1>(triplet) < matrixCols_),
+    LSS_ASSERT((std::get<1>(triplet) < matrix_cols_),
                " column index is out of range");
-    matrixElements_.emplace_back(std::move(triplet));
+    matrix_elements_.emplace_back(std::move(triplet));
   }
 
-  template <template <typename> typename DenseSolverPolicy = DenseSolverQR,
-            template <typename T, typename Alloc>
-            typename Container = std::vector,
-            typename Alloc = std::allocator<T>,
+  template <template <typename> typename dense_solver_policy = dense_solver_qr,
+            template <typename T, typename alloc>
+            typename container = std::vector,
+            typename alloc = std::allocator<T>,
             typename = typename std::enable_if<std::is_base_of<
-                DenseSolverDevice<T>, DenseSolverPolicy<T>>::value>::type>
-  void solve(Container<T, Alloc>& container);
+                dense_solver_device<T>, dense_solver_policy<T>>::value>::type>
+  void solve(container<T, alloc>& container);
 
-  template <template <typename> typename DenseSolverPolicy = DenseSolverQR,
-            template <typename T, typename Alloc>
-            typename Container = std::vector,
-            typename Alloc = std::allocator<T>,
+  template <template <typename> typename dense_solver_policy = dense_solver_qr,
+            template <typename T, typename alloc>
+            typename container = std::vector,
+            typename alloc = std::allocator<T>,
             typename = typename std::enable_if<std::is_base_of<
-                DenseSolverDevice<T>, DenseSolverPolicy<T>>::value>::type>
-  Container<T, Alloc> const solve();
+                dense_solver_device<T>, dense_solver_policy<T>>::value>::type>
+  container<T, alloc> const solve();
 };
 
-}  // namespace lss_dense_solvers_cuda
+}  // namespace lss_dense_solvers
 
 template <typename T>
-void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::populate() {
+void lss_dense_solvers::real_dense_solver_cuda<T>::populate() {
   // CUDA Dense solver is column-major:
-  matrixElements_.sort(FlatMatrixSort::ColumnMajor);
+  matrix_elements_.sort(flat_matrix_sort_enum::ColumnMajor);
 
-  for (std::size_t t = 0; t < matrixElements_.size(); ++t) {
-    h_matrixValues_[t] = std::get<2>(matrixElements_.at(t));
+  for (std::size_t t = 0; t < matrix_elements_.size(); ++t) {
+    h_matrix_values_[t] = std::get<2>(matrix_elements_.at(t));
   }
 }
 
 template <typename T>
-void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::initialize(
-    std::size_t matrixRows, std::size_t matrixColumns) {
+void lss_dense_solvers::real_dense_solver_cuda<T>::initialize(
+    std::size_t matrix_rows, std::size_t matrix_columns) {
   // set the sizes of the system components:
-  matrixCols_ = matrixColumns;
-  matrixRows_ = matrixRows;
+  matrix_cols_ = matrix_columns;
+  matrix_rows_ = matrix_rows;
 
   // clear the containers:
-  matrixElements_.clear();
-  h_matrixValues_.clear();
-  h_rhsValues_.clear();
+  matrix_elements_.clear();
+  h_matrix_values_.clear();
+  h_rhs_values_.clear();
 
   // resize the containers to the correct size:
-  h_matrixValues_.resize(matrixCols_ * matrixRows_);
-  h_rhsValues_.resize(matrixRows_);
+  h_matrix_values_.resize(matrix_cols_ * matrix_rows_);
+  h_rhs_values_.resize(matrix_rows_);
 }
 
 template <typename T>
-template <template <typename> typename DenseSolverPolicy,
-          template <typename T, typename Alloc> typename Container,
-          typename Alloc, typename>
-void lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve(
-    Container<T, Alloc>& container) {
+template <template <typename> typename dense_solver_policy,
+          template <typename T, typename alloc> typename container,
+          typename alloc, typename>
+void lss_dense_solvers::real_dense_solver_cuda<T>::solve(
+    container<T, alloc>& container) {
   populate();
 
   // get the dimensions:
-  std::size_t lda = std::max(matrixElements_.rows(), matrixElements_.columns());
-  std::size_t m = std::min(matrixElements_.rows(), matrixElements_.columns());
-  std::size_t ldb = h_rhsValues_.size();
+  std::size_t lda =
+      std::max(matrix_elements_.rows(), matrix_elements_.columns());
+  std::size_t m = std::min(matrix_elements_.rows(), matrix_elements_.columns());
+  std::size_t ldb = h_rhs_values_.size();
 
   // step 1: create device containers:
-  thrust::device_vector<T> d_matrixValues = h_matrixValues_;
-  thrust::device_vector<T> d_rhsValues = h_rhsValues_;
+  thrust::device_vector<T> d_matrix_values = h_matrix_values_;
+  thrust::device_vector<T> d_rhs_values = h_rhs_values_;
   thrust::device_vector<T> d_solution(m);
 
   // step 2: cast to raw pointers:
-  T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
-  T* d_rhsVals = thrust::raw_pointer_cast(d_rhsValues.data());
+  T* d_mat_vals = thrust::raw_pointer_cast(d_matrix_values.data());
+  T* d_rhs_vals = thrust::raw_pointer_cast(d_rhs_values.data());
   T* d_sol = thrust::raw_pointer_cast(d_solution.data());
 
   // create the helpers:
-  RealDenseSolverCUDAHelpers helpers;
+  real_dense_solver_cuda_helpers helpers;
   helpers.initialize();
 
   // call the DenseSolverPolicy:
-  DenseSolverPolicy<T>::solve(helpers.getDenseSolverHandle(),
-                              helpers.getCublasHandle(), m, d_matVals, lda,
-                              d_rhsVals, d_sol);
+  dense_solver_policy<T>::solve(helpers.get_dense_solver_handle(),
+                                helpers.get_cublas_handle(), m, d_mat_vals, lda,
+                                d_rhs_vals, d_sol);
 
   thrust::copy(d_solution.begin(), d_solution.end(), container.begin());
 }
 
 template <typename T>
-template <template <typename> typename DenseSolverPolicy,
-          template <typename T, typename Alloc> typename Container,
-          typename Alloc, typename>
-Container<T, Alloc> const
-lss_dense_solvers_cuda::RealDenseSolverCUDA<T>::solve() {
+template <template <typename> typename dense_solver_policy,
+          template <typename T, typename alloc> typename container,
+          typename alloc, typename>
+container<T, alloc> const
+lss_dense_solvers::real_dense_solver_cuda<T>::solve() {
   populate();
 
   // get the dimensions:
-  std::size_t lda = std::max(matrixElements_.rows(), matrixElements_.columns());
-  std::size_t m = std::min(matrixElements_.rows(), matrixElements_.columns());
-  std::size_t ldb = h_rhsValues_.size();
+  std::size_t lda =
+      std::max(matrix_elements_.rows(), matrix_elements_.columns());
+  std::size_t m = std::min(matrix_elements_.rows(), matrix_elements_.columns());
+  std::size_t ldb = h_rhs_values_.size();
 
   // prepare container for solution:
   thrust::host_vector<T> h_solution(m);
 
   // step 1: create device vectors:
-  thrust::device_vector<T> d_matrixValues = h_matrixValues_;
-  thrust::device_vector<T> d_rhsValues = h_rhsValues_;
+  thrust::device_vector<T> d_matrix_values = h_matrix_values_;
+  thrust::device_vector<T> d_rhs_values = h_rhs_values_;
   thrust::device_vector<T> d_solution = h_solution;
 
   // step 2: cast to raw pointers:
-  T* d_matVals = thrust::raw_pointer_cast(d_matrixValues.data());
-  T* d_rhsVals = thrust::raw_pointer_cast(d_rhsValues.data());
+  T* d_mat_vals = thrust::raw_pointer_cast(d_matrix_values.data());
+  T* d_rhs_vals = thrust::raw_pointer_cast(d_rhs_values.data());
   T* d_sol = thrust::raw_pointer_cast(d_solution.data());
 
   // create the helpers:
-  RealDenseSolverCUDAHelpers helpers;
+  real_dense_solver_cuda_helpers helpers;
   helpers.initialize();
 
   // call the DenseSolverPolicy:
-  DenseSolverPolicy<T>::solve(helpers.getDenseSolverHandle(),
-                              helpers.getCublasHandle(), m, d_matVals, lda,
-                              d_rhsVals, d_sol);
+  dense_solver_policy<T>::solve(helpers.get_dense_solver_handle(),
+                                helpers.get_cublas_handle(), m, d_mat_vals, lda,
+                                d_rhs_vals, d_sol);
 
-  Container<T, Alloc> solution(h_solution.size());
+  container<T, alloc> solution(h_solution.size());
   thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
 
   return solution;

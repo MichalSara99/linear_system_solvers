@@ -6,9 +6,9 @@
 #include "dense_solvers/lss_dense_solvers_policy.h"
 
 void deviceDenseDefaultQRTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverQR;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -39,12 +39,12 @@ void deviceDenseDefaultQRTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -60,16 +60,16 @@ void deviceDenseDefaultQRTest() {
   std::vector<double> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  RealDenseSolverCUDA<double> rds;
+  real_dense_solver_cuda<double> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
-  auto solution = rds.solve<DenseSolverQR>();
+  auto solution = rds.solve<dense_solver_qr>();
 
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
@@ -79,9 +79,9 @@ void deviceDenseDefaultQRTest() {
 }
 
 void deviceDenseDefaultQRPointersTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverQR;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -112,12 +112,12 @@ void deviceDenseDefaultQRPointersTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -133,17 +133,17 @@ void deviceDenseDefaultQRPointersTest() {
   std::vector<double> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  RealDenseSolverCUDA<double> rds;
+  real_dense_solver_cuda<double> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
   std::vector<double> solution(m);
-  rds.solve<DenseSolverQR>(solution);
+  rds.solve<dense_solver_qr>(solution);
 
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {
@@ -153,9 +153,9 @@ void deviceDenseDefaultQRPointersTest() {
 }
 
 void deviceDenseFloatQRTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverQR;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -186,12 +186,12 @@ void deviceDenseFloatQRTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -207,16 +207,16 @@ void deviceDenseFloatQRTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  RealDenseSolverCUDA<float> rds;
+  real_dense_solver_cuda<float> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
-  auto solution = rds.solve<DenseSolverQR>();
+  auto solution = rds.solve<dense_solver_qr>();
 
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
@@ -226,9 +226,9 @@ void deviceDenseFloatQRTest() {
 }
 
 void deviceDenseFloatQRPointersTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverQR;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -259,12 +259,12 @@ void deviceDenseFloatQRPointersTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -280,17 +280,17 @@ void deviceDenseFloatQRPointersTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  RealDenseSolverCUDA<float> rds;
+  real_dense_solver_cuda<float> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
   std::vector<float> solution(m);
-  rds.solve<DenseSolverQR>(solution);
+  rds.solve<dense_solver_qr>(solution);
 
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {
@@ -313,9 +313,9 @@ void deviceDenseQRTest() {
 }
 
 void deviceDenseDefaultLUTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverLU;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_lu;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -346,12 +346,12 @@ void deviceDenseDefaultLUTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -367,16 +367,16 @@ void deviceDenseDefaultLUTest() {
   std::vector<double> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  RealDenseSolverCUDA<double> rds;
+  real_dense_solver_cuda<double> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
-  auto solution = rds.solve<DenseSolverLU>();
+  auto solution = rds.solve<dense_solver_lu>();
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
     std::cout << e << " ";
@@ -385,9 +385,9 @@ void deviceDenseDefaultLUTest() {
 }
 
 void deviceDenseDefaultLUPointersTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverLU;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_lu;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -418,12 +418,12 @@ void deviceDenseDefaultLUPointersTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -439,17 +439,17 @@ void deviceDenseDefaultLUPointersTest() {
   std::vector<double> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  RealDenseSolverCUDA<double> rds;
+  real_dense_solver_cuda<double> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
   std::vector<double> solution(m);
-  rds.solve<DenseSolverLU>(solution);
+  rds.solve<dense_solver_lu>(solution);
 
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {
@@ -459,9 +459,9 @@ void deviceDenseDefaultLUPointersTest() {
 }
 
 void deviceDenseFloatLUTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverLU;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_lu;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -492,12 +492,12 @@ void deviceDenseFloatLUTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -513,16 +513,16 @@ void deviceDenseFloatLUTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  RealDenseSolverCUDA<float> rds;
+  real_dense_solver_cuda<float> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
-  auto solution = rds.solve<DenseSolverLU>();
+  auto solution = rds.solve<dense_solver_lu>();
 
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
@@ -532,9 +532,9 @@ void deviceDenseFloatLUTest() {
 }
 
 void deviceDenseFloatLUPointersTest() {
-  using lss_dense_solvers_cuda::FlatMatrix;
-  using lss_dense_solvers_cuda::RealDenseSolverCUDA;
-  using lss_dense_solvers_policy::DenseSolverLU;
+  using lss_dense_solvers::flat_matrix;
+  using lss_dense_solvers::real_dense_solver_cuda;
+  using lss_dense_solvers_policy::dense_solver_lu;
 
   std::cout << "===================================\n";
   std::cout << "Solving system of equations:\n";
@@ -565,12 +565,12 @@ void deviceDenseFloatLUPointersTest() {
   */
 
   // first create and populate the dense matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -586,17 +586,17 @@ void deviceDenseFloatLUPointersTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  RealDenseSolverCUDA<float> rds;
+  real_dense_solver_cuda<float> rds;
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
 
   // insert sparse matrix A and vector b:
-  rds.setFlatDenseMatrix(std::move(fsm));
-  rds.setRhs(b);
+  rds.set_flat_dense_matrix(std::move(fsm));
+  rds.set_rhs(b);
 
   std::vector<float> solution(m);
-  rds.solve<DenseSolverLU>(solution);
+  rds.solve<dense_solver_lu>(solution);
 
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {

@@ -23,13 +23,13 @@
 // =============================================================================
 
 void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "===========================================================\n";
   std::cout << "Solving Boundary-value Advection-Diffusion equation: \n\n";
@@ -44,9 +44,9 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
   std::cout << "===========================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<double, BoundaryConditionType::Dirichlet,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<double>>
+  typedef general_heat_equation_cuda<
+      double, boundary_condition_enum::Dirichlet, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<double>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -62,7 +62,7 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
   // initialize solver
-  implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<double>(0.0, 1.0), 0.1, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -105,13 +105,13 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -126,9 +126,9 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<float, BoundaryConditionType::Dirichlet,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<float>>
+  typedef general_heat_equation_cuda<
+      float, boundary_condition_enum::Dirichlet, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<float>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -144,7 +144,7 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
   // initialize solver
-  implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -187,13 +187,13 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << " Solving Boundary-value Advection-Diffusion equation: \n\n";
@@ -208,9 +208,9 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<double, BoundaryConditionType::Dirichlet,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<double>>
+  typedef general_heat_equation_cuda<
+      double, boundary_condition_enum::Dirichlet, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<double>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -226,7 +226,7 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
   // initialize solver
-  implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<double>(0.0, 1.0), 0.1, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -269,13 +269,13 @@ void testImplAdvDiffEquationDoubleDirichletBCDeviceCN() {
 }
 
 void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection-Diffusion equation: \n\n";
@@ -290,9 +290,9 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<float, BoundaryConditionType::Dirichlet,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<float>>
+  typedef general_heat_equation_cuda<
+      float, boundary_condition_enum::Dirichlet, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<float>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -308,7 +308,7 @@ void testImplAdvDiffEquationFloatDirichletBCDeviceCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
   // initialize solver
-  implicit_solver impl_solver(Range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0f, 1.0f), 0.1f, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -368,14 +368,14 @@ void testImplAdvDiffEquationDirichletBCDeviceCUDA() {
 // ===========================================================================
 
 void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << " Solving Boundary-value Advection-Diffusion equation: \n\n";
@@ -389,9 +389,9 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<double, BoundaryConditionType::Robin,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<double>>
+  typedef general_heat_equation_cuda<
+      double, boundary_condition_enum::Robin, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<double>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -404,7 +404,7 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
   // initialize solver
-  implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<double>(0.0, 1.0), 0.1, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -469,14 +469,14 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection-Diffusion equation: \n\n";
@@ -490,9 +490,9 @@ void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<float, BoundaryConditionType::Robin,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<float>>
+  typedef general_heat_equation_cuda<
+      float, boundary_condition_enum::Robin, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<float>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -505,7 +505,7 @@ void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
   // initialize solver
-  implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.1f, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0, 1.0), 0.1f, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -571,14 +571,14 @@ void testImplAdvDiffEquationFloatRobinBCDeviceEuler() {
 }
 
 void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -593,9 +593,9 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<double, BoundaryConditionType::Robin,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<double>>
+  typedef general_heat_equation_cuda<
+      double, boundary_condition_enum::Robin, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<double>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -608,7 +608,7 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
   // initialize solver
-  implicit_solver impl_solver(Range<double>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<double>(0.0, 1.0), 0.1, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -674,14 +674,14 @@ void testImplAdvDiffEquationDoubleRobinBCDeviceCN() {
 }
 
 void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_enumerations::MemorySpace;
+  using lss_enumerations::memory_space_enum;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation_cuda;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_utility::Range;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -696,9 +696,9 @@ void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<float, BoundaryConditionType::Robin,
-                                     MemorySpace::Device, RealSparseSolverCUDA,
-                                     std::vector, std::allocator<float>>
+  typedef general_heat_equation_cuda<
+      float, boundary_condition_enum::Robin, memory_space_enum::Device,
+      real_sparse_solver_cuda, std::vector, std::allocator<float>>
       implicit_solver;
 
   // number of space subdivisions:
@@ -711,7 +711,7 @@ void testImplAdvDiffEquationFloatRobinBCDeviceCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
   // initialize solver
-  implicit_solver impl_solver(Range<float>(0.0, 1.0), 0.1f, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0, 1.0), 0.1f, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -798,10 +798,10 @@ void testImplAdvDiffEquationRobinBCDeviceCUDA() {
 // ===========================================================================
 
 void testExplAdvDiffEquationDoubleDirichletBCEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation_cuda;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection-Diffusion equation: \n\n";
@@ -815,7 +815,7 @@ void testExplAdvDiffEquationDoubleDirichletBCEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<double, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation_cuda<double, boundary_condition_enum::Dirichlet,
                                      std::vector, std::allocator<double>>
       explicit_solver;
 
@@ -832,7 +832,7 @@ void testExplAdvDiffEquationDoubleDirichletBCEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
   // initialize solver
-  explicit_solver expl_solver(Range<double>(0.0, 1.0), 0.2, Sd, Td);
+  explicit_solver expl_solver(range<double>(0.0, 1.0), 0.2, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -875,10 +875,10 @@ void testExplAdvDiffEquationDoubleDirichletBCEuler() {
 }
 
 void testExplAdvDiffEquationFloatDirichletBCEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation_cuda;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Heat equation: \n\n";
@@ -892,7 +892,7 @@ void testExplAdvDiffEquationFloatDirichletBCEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<float, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation_cuda<float, boundary_condition_enum::Dirichlet,
                                      std::vector, std::allocator<float>>
       explicit_solver;
 
@@ -909,7 +909,7 @@ void testExplAdvDiffEquationFloatDirichletBCEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0f);
   // initialize solver
-  explicit_solver expl_solver(Range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
+  explicit_solver expl_solver(range<float>(0.0f, 1.0f), 0.2f, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -967,11 +967,11 @@ void testExplAdvDiffEquationDirichletBCCUDA() {
 // ===========================================================================
 
 void testExplAdvDiffEquationDoubleRobinBC() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation_cuda;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -986,7 +986,7 @@ void testExplAdvDiffEquationDoubleRobinBC() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<double, BoundaryConditionType::Robin,
+  typedef general_heat_equation_cuda<double, boundary_condition_enum::Robin,
                                      std::vector, std::allocator<double>>
       explicit_solver;
 
@@ -1000,7 +1000,7 @@ void testExplAdvDiffEquationDoubleRobinBC() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, 0.0);
   // initialize solver
-  explicit_solver expl_solver(Range<double>(0.0, 1.0), 0.5, Sd, Td);
+  explicit_solver expl_solver(range<double>(0.0, 1.0), 0.5, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -1066,11 +1066,11 @@ void testExplAdvDiffEquationDoubleRobinBC() {
 }
 
 void testExplAdvDiffEquationFloatRobinBC() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation_cuda;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -1085,7 +1085,7 @@ void testExplAdvDiffEquationFloatRobinBC() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation_cuda
-  typedef general_heat_equation_cuda<float, BoundaryConditionType::Robin,
+  typedef general_heat_equation_cuda<float, boundary_condition_enum::Robin,
                                      std::vector, std::allocator<float>>
       explicit_solver;
 
@@ -1099,7 +1099,7 @@ void testExplAdvDiffEquationFloatRobinBC() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, 0.0);
   // initialize solver
-  explicit_solver expl_solver(Range<float>(0.0, 1.0), 0.5, Sd, Td);
+  explicit_solver expl_solver(range<float>(0.0, 1.0), 0.5, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //

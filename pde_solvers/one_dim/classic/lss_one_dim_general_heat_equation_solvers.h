@@ -13,7 +13,7 @@
 
 namespace lss_one_dim_classic_pde_solvers {
 
-using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::explicit_pde_schemes_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
 using lss_one_dim_pde_utility::dirichlet_boundary;
@@ -21,7 +21,7 @@ using lss_one_dim_pde_utility::discretization;
 using lss_one_dim_pde_utility::heat_data;
 using lss_one_dim_pde_utility::pde_coefficient_holder_const;
 using lss_one_dim_pde_utility::robin_boundary;
-using lss_utility::Range;
+using lss_utility::range;
 using lss_utility::uptr_t;
 
 namespace implicit_solvers {
@@ -29,10 +29,10 @@ namespace implicit_solvers {
 // ================== general_heat_equation General Template ==================
 // ============================================================================
 
-template <typename fp_type, BoundaryConditionType BType,
-          template <typename, BoundaryConditionType,
+template <typename fp_type, boundary_condition_enum b_type,
+          template <typename, boundary_condition_enum,
                     template <typename, typename> typename cont, typename>
-          typename FDMSolver,
+          typename fdm_solver,
           template <typename, typename> typename container, typename alloc>
 class general_heat_equation {};
 
@@ -52,15 +52,16 @@ class general_heat_equation {};
 // ============================================================================
 
 template <typename fp_type,
-          template <typename, BoundaryConditionType,
+          template <typename, boundary_condition_enum,
                     template <typename, typename> typename cont, typename>
-          typename FDMSolver,
+          typename fdm_solver,
           template <typename, typename> typename container, typename alloc>
-class general_heat_equation<fp_type, BoundaryConditionType::Dirichlet,
-                            FDMSolver, container, alloc>
+class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
+                            fdm_solver, container, alloc>
     : public discretization<fp_type, container, alloc> {
  private:
-  typedef FDMSolver<fp_type, BoundaryConditionType::Dirichlet, container, alloc>
+  typedef fdm_solver<fp_type, boundary_condition_enum::Dirichlet, container,
+                     alloc>
       fdm_solver_t;
   typedef heat_data<fp_type> heat_data_t;
 
@@ -72,13 +73,13 @@ class general_heat_equation<fp_type, BoundaryConditionType::Dirichlet,
  public:
   typedef fp_type value_type;
   explicit general_heat_equation() = delete;
-  explicit general_heat_equation(Range<fp_type> const &space_range,
+  explicit general_heat_equation(range<fp_type> const &space_range,
                                  fp_type terminal_time,
                                  std::size_t const &space_discretization,
                                  std::size_t const &time_discretization)
       : solverPtr_{std::make_unique<fdm_solver_t>(space_discretization + 1)},
         dataPtr_{std::make_unique<heat_data_t>(
-            space_range, Range<fp_type>(fp_type{}, terminal_time),
+            space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
@@ -157,15 +158,15 @@ class general_heat_equation<fp_type, BoundaryConditionType::Dirichlet,
 // ============================================================================
 
 template <typename fp_type,
-          template <typename, BoundaryConditionType,
+          template <typename, boundary_condition_enum,
                     template <typename, typename> typename cont, typename>
-          typename FDMSolver,
+          typename fdm_solver,
           template <typename, typename> typename container, typename alloc>
-class general_heat_equation<fp_type, BoundaryConditionType::Robin, FDMSolver,
+class general_heat_equation<fp_type, boundary_condition_enum::Robin, fdm_solver,
                             container, alloc>
     : public discretization<fp_type, container, alloc> {
  private:
-  typedef FDMSolver<fp_type, BoundaryConditionType::Robin, container, alloc>
+  typedef fdm_solver<fp_type, boundary_condition_enum::Robin, container, alloc>
       fdm_solver_t;
   typedef heat_data<fp_type> heat_data_t;
 
@@ -177,13 +178,13 @@ class general_heat_equation<fp_type, BoundaryConditionType::Robin, FDMSolver,
  public:
   typedef fp_type value_type;
   explicit general_heat_equation() = delete;
-  explicit general_heat_equation(Range<fp_type> const &space_range,
+  explicit general_heat_equation(range<fp_type> const &space_range,
                                  fp_type terminal_time,
                                  std::size_t const &space_discretization,
                                  std::size_t const &time_discretization)
       : solverPtr_{std::make_unique<fdm_solver_t>(space_discretization + 1)},
         dataPtr_{std::make_unique<heat_data_t>(
-            space_range, Range<fp_type>(fp_type{}, terminal_time),
+            space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
@@ -206,7 +207,8 @@ class general_heat_equation<fp_type, BoundaryConditionType::Robin, FDMSolver,
   inline void set_boundary_condition(
       robin_boundary<fp_type> const &robin_boundary) {
     boundary_ = robin_boundary;
-    solverPtr_->setBoundaryCondition(robin_boundary.left, robin_boundary.right);
+    solverPtr_->set_boundary_condition(robin_boundary.left,
+                                       robin_boundary.right);
   }
 
   inline void set_initial_condition(
@@ -241,7 +243,7 @@ namespace explicit_solvers {
 // ================== general_heat_equation General Template ==================
 // ============================================================================
 
-template <typename fp_type, BoundaryConditionType BType,
+template <typename fp_type, boundary_condition_enum b_type,
           template <typename, typename> typename container, typename alloc>
 class general_heat_equation {};
 
@@ -262,7 +264,7 @@ class general_heat_equation {};
 
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
-class general_heat_equation<fp_type, BoundaryConditionType::Dirichlet,
+class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
                             container, alloc>
     : public discretization<fp_type, container, alloc> {
  private:
@@ -275,12 +277,12 @@ class general_heat_equation<fp_type, BoundaryConditionType::Dirichlet,
  public:
   typedef fp_type value_type;
   explicit general_heat_equation() = delete;
-  explicit general_heat_equation(Range<fp_type> const &space_range,
+  explicit general_heat_equation(range<fp_type> const &space_range,
                                  fp_type terminal_time,
                                  std::size_t const &space_discretization,
                                  std::size_t const &time_discretization)
       : dataPtr_{std::make_unique<heat_data_t>(
-            space_range, Range<fp_type>(fp_type{}, terminal_time),
+            space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
@@ -361,7 +363,7 @@ class general_heat_equation<fp_type, BoundaryConditionType::Dirichlet,
 
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
-class general_heat_equation<fp_type, BoundaryConditionType::Robin, container,
+class general_heat_equation<fp_type, boundary_condition_enum::Robin, container,
                             alloc>
     : public discretization<fp_type, container, alloc> {
  private:
@@ -374,12 +376,12 @@ class general_heat_equation<fp_type, BoundaryConditionType::Robin, container,
  public:
   typedef fp_type value_type;
   explicit general_heat_equation() = delete;
-  explicit general_heat_equation(Range<fp_type> const &space_range,
+  explicit general_heat_equation(range<fp_type> const &space_range,
                                  fp_type terminal_time,
                                  std::size_t const &space_discretization,
                                  std::size_t const &time_discretization)
       : dataPtr_{std::make_unique<heat_data_t>(
-            space_range, Range<fp_type>(fp_type{}, terminal_time),
+            space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
@@ -434,12 +436,12 @@ class general_heat_equation<fp_type, BoundaryConditionType::Robin, container,
 // ============================================================================
 
 template <typename fp_type,
-          template <typename, BoundaryConditionType,
+          template <typename, boundary_condition_enum,
                     template <typename, typename> typename cont, typename>
-          typename FDMSolver,
+          typename fdm_solver,
           template <typename, typename> typename container, typename alloc>
 void implicit_solvers::general_heat_equation<
-    fp_type, BoundaryConditionType::Dirichlet, FDMSolver, container,
+    fp_type, boundary_condition_enum::Dirichlet, fdm_solver, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
   LSS_ASSERT(solution.size() > 0,
@@ -468,7 +470,7 @@ void implicit_solvers::general_heat_equation<
   discretize_space(h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
   discretize_initial_condition(dataPtr_->initial_condition, prev_sol);
-  // prepare containers for diagonal vectors for FDMSolver:
+  // prepare containers for diagonal vectors for fdm_solver:
   container<fp_type, alloc> low(space_size + 1,
                                 -1.0 * (lambda - gamma) * theta);
   container<fp_type, alloc> diag(space_size + 1,
@@ -481,8 +483,8 @@ void implicit_solvers::general_heat_equation<
   fp_type time = k;
   // store terminal time:
   fp_type const last_time = dataPtr_->time_range.upper();
-  // set properties of FDMSolver:
-  solverPtr_->setDiagonals(std::move(low), std::move(diag), std::move(up));
+  // set properties of fdm_solver:
+  solverPtr_->set_diagonals(std::move(low), std::move(diag), std::move(up));
   // differentiate between inhomogeneous and homogeneous PDE:
   if ((dataPtr_->is_source_function_set)) {
     // wrap the scheme coefficients:
@@ -498,9 +500,9 @@ void implicit_solvers::general_heat_equation<
     // loop for stepping in time:
     while (time <= last_time) {
       scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs);
-      solverPtr_->setBoundaryCondition(
+      solverPtr_->set_boundary_condition(
           std::make_pair(boundary_.first(time), boundary_.second(time)));
-      solverPtr_->setRhs(rhs);
+      solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
       discretize_in_space(h, space_range.lower(), time, heat_source,
@@ -519,9 +521,9 @@ void implicit_solvers::general_heat_equation<
     while (time <= last_time) {
       scheme_fun(scheme_coeffs, prev_sol, container<fp_type, alloc>(),
                  container<fp_type, alloc>(), rhs);
-      solverPtr_->setBoundaryCondition(
+      solverPtr_->set_boundary_condition(
           std::make_pair(boundary_.first(time), boundary_.second(time)));
-      solverPtr_->setRhs(rhs);
+      solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
       time += k;
@@ -536,12 +538,12 @@ void implicit_solvers::general_heat_equation<
 // ============================================================================
 
 template <typename fp_type,
-          template <typename, BoundaryConditionType,
+          template <typename, boundary_condition_enum,
                     template <typename, typename> typename cont, typename>
-          typename FDMSolver,
+          typename fdm_solver,
           template <typename, typename> typename container, typename alloc>
 void implicit_solvers::general_heat_equation<
-    fp_type, BoundaryConditionType::Robin, FDMSolver, container,
+    fp_type, boundary_condition_enum::Robin, fdm_solver, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
   LSS_ASSERT(solution.size() > 0,
@@ -570,7 +572,7 @@ void implicit_solvers::general_heat_equation<
   discretize_space(h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
   discretize_initial_condition(dataPtr_->initial_condition, prev_sol);
-  // prepare containers for diagonal vectors for FDMSolver:
+  // prepare containers for diagonal vectors for fdm_solver:
   container<fp_type, alloc> low(space_size + 1,
                                 -1.0 * (lambda - gamma) * theta);
   container<fp_type, alloc> diag(space_size + 1,
@@ -583,8 +585,8 @@ void implicit_solvers::general_heat_equation<
   fp_type time = k;
   // store terminal time:
   fp_type const last_time = dataPtr_->time_range.upper();
-  // set properties of FDMSolver:
-  solverPtr_->setDiagonals(std::move(low), std::move(diag), std::move(up));
+  // set properties of fdm_solver:
+  solverPtr_->set_diagonals(std::move(low), std::move(diag), std::move(up));
   // differentiate between inhomogeneous and homogeneous PDE:
   if (dataPtr_->is_source_function_set) {
     // wrap the scheme coefficients:
@@ -600,7 +602,7 @@ void implicit_solvers::general_heat_equation<
     // loop for stepping in time:
     while (time <= last_time) {
       scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs);
-      solverPtr_->setRhs(rhs);
+      solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
       discretize_in_space(h, space_range.lower(), time, heat_source,
@@ -619,7 +621,7 @@ void implicit_solvers::general_heat_equation<
     while (time <= last_time) {
       scheme_fun(scheme_coeffs, prev_sol, container<fp_type, alloc>(),
                  container<fp_type, alloc>(), rhs);
-      solverPtr_->setRhs(rhs);
+      solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
       time += k;
@@ -636,7 +638,7 @@ void implicit_solvers::general_heat_equation<
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 void explicit_solvers::general_heat_equation<
-    fp_type, BoundaryConditionType::Dirichlet, container,
+    fp_type, boundary_condition_enum::Dirichlet, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   explicit_pde_schemes_enum scheme) {
   LSS_ASSERT(solution.size() > 0,
@@ -689,7 +691,7 @@ void explicit_solvers::general_heat_equation<
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 void explicit_solvers::general_heat_equation<
-    fp_type, BoundaryConditionType::Robin, container,
+    fp_type, boundary_condition_enum::Robin, container,
     alloc>::solve(container<fp_type, alloc> &solution) {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");

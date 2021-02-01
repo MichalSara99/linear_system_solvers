@@ -26,12 +26,12 @@
 
 template <typename T>
 void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -45,8 +45,8 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
-                                FDMDoubleSweepSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
+                                fdm_double_sweep_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -63,7 +63,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -107,12 +107,12 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -127,8 +127,8 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
-                                FDMDoubleSweepSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
+                                fdm_double_sweep_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -145,7 +145,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.09, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.09, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -207,12 +207,12 @@ void testImplAdvDiffEquationDirichletBCDoubleSweep() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation with "
@@ -227,8 +227,8 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
-                                FDMDoubleSweepSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
+                                fdm_double_sweep_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -245,7 +245,7 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -268,12 +268,12 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation with \n"
@@ -289,8 +289,8 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
-                                FDMDoubleSweepSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
+                                fdm_double_sweep_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -307,7 +307,7 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -344,12 +344,12 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweep() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation with "
@@ -364,8 +364,8 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
-                                FDMThomasLUSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
+                                fdm_thomas_lu_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -382,7 +382,7 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -405,12 +405,12 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation with \n"
@@ -426,8 +426,8 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
-                                FDMThomasLUSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
+                                fdm_thomas_lu_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -444,7 +444,7 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -485,13 +485,13 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLU() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -505,8 +505,8 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Robin,
-                                FDMDoubleSweepSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Robin,
+                                fdm_double_sweep_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -520,7 +520,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.1, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -586,13 +586,13 @@ void testImplAdvDiffEquationRobinBCDoubleSweepEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -607,8 +607,8 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Robin,
-                                FDMDoubleSweepSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Robin,
+                                fdm_double_sweep_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -622,7 +622,7 @@ void testImplAdvDiffEquationRobinBCDoubleSweepCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.1, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -702,13 +702,13 @@ void testImplAdvDiffEquationRobinBCDoubleSweep() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCThomasLUEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -722,8 +722,8 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Robin,
-                                FDMThomasLUSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Robin,
+                                fdm_thomas_lu_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -737,7 +737,7 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.1, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -803,13 +803,13 @@ void testImplAdvDiffEquationRobinBCThomasLUEuler() {
 
 template <typename T>
 void testImplAdvDiffEquationRobinBCThomasLUCN() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -824,8 +824,8 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Robin,
-                                FDMThomasLUSolver, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Robin,
+                                fdm_thomas_lu_solver, std::vector,
                                 std::allocator<T>>
       implicit_solver;
 
@@ -839,7 +839,7 @@ void testImplAdvDiffEquationRobinBCThomasLUCN() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  implicit_solver impl_solver(Range<T>(0.0, 1.0), 0.1, Sd, Td);
+  implicit_solver impl_solver(range<T>(0.0, 1.0), 0.1, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //
@@ -926,11 +926,11 @@ void testImplAdvDiffEquationRobinBCThomasLU() {
 
 template <typename T>
 void testExplAdvDiffEquationDirichletBCEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -944,7 +944,7 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
                                 std::vector, std::allocator<T>>
       explicit_solver;
 
@@ -961,7 +961,7 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  explicit_solver expl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -1005,11 +1005,11 @@ void testExplAdvDiffEquationDirichletBCEuler() {
 
 template <typename T>
 void testExplAdvDiffEquationDirichletBCADEBC() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -1023,7 +1023,7 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
                                 std::vector, std::allocator<T>>
       explicit_solver;
 
@@ -1040,7 +1040,7 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  explicit_solver expl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -1084,11 +1084,11 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
 
 template <typename T>
 void testExplAdvDiffEquationDirichletBCADES() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -1102,7 +1102,7 @@ void testExplAdvDiffEquationDirichletBCADES() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
                                 std::vector, std::allocator<T>>
       explicit_solver;
 
@@ -1119,7 +1119,7 @@ void testExplAdvDiffEquationDirichletBCADES() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  explicit_solver expl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -1183,11 +1183,11 @@ void testExplAdvDiffEquationDirichletBC() {
 
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation with \n"
@@ -1202,7 +1202,7 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
                                 std::vector, std::allocator<T>>
       explicit_solver;
 
@@ -1219,7 +1219,7 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  explicit_solver expl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -1242,11 +1242,11 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
 
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCADEBC() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation with \n"
@@ -1261,7 +1261,7 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
                                 std::vector, std::allocator<T>>
       explicit_solver;
 
@@ -1278,7 +1278,7 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  explicit_solver expl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -1300,11 +1300,11 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
 
 template <typename T>
 void testExplAdvDiffEquationSourceDirichletBCADES() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation with \n"
@@ -1319,7 +1319,7 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Dirichlet,
+  typedef general_heat_equation<T, boundary_condition_enum::Dirichlet,
                                 std::vector, std::allocator<T>>
       explicit_solver;
 
@@ -1336,7 +1336,7 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  explicit_solver expl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
@@ -1378,12 +1378,12 @@ void testExplAdvDiffEquationSourceDirichletBC() {
 
 template <typename T>
 void testExplAdvDiffEquationRobinBCEuler() {
-  using lss_enumerations::BoundaryConditionType;
+  using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
   using lss_one_dim_pde_utility::robin_boundary;
-  using lss_utility::Range;
+  using lss_utility::range;
 
   std::cout << "============================================================\n";
   std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
@@ -1397,7 +1397,7 @@ void testExplAdvDiffEquationRobinBCEuler() {
   std::cout << "============================================================\n";
 
   // typedef the general_heat_equation
-  typedef general_heat_equation<T, BoundaryConditionType::Robin, std::vector,
+  typedef general_heat_equation<T, boundary_condition_enum::Robin, std::vector,
                                 std::allocator<T>>
       explicit_solver;
 
@@ -1411,7 +1411,7 @@ void testExplAdvDiffEquationRobinBCEuler() {
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
   // initialize solver
-  explicit_solver expl_solver(Range<T>(0.0, 1.0), 0.08, Sd, Td);
+  explicit_solver expl_solver(range<T>(0.0, 1.0), 0.08, Sd, Td);
   // boundary conditions:
   // Robin boundaries are assumed to be of following form:
   //

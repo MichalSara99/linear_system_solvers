@@ -9,7 +9,7 @@
 
 namespace lss_one_dim_space_variable_heat_implicit_schemes {
 
-using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x),h,k)

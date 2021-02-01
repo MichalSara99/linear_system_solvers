@@ -11,7 +11,7 @@
 
 namespace lss_one_dim_heat_implicit_schemes_cuda {
 
-using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x),h,k)
@@ -41,7 +41,7 @@ class heat_equation_schemes {
   }
 
   static scheme_function<fp_type> const get_scheme(
-      BoundaryConditionType bc_type, implicit_pde_schemes_enum scheme) {
+      boundary_condition_enum bc_type, implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
@@ -127,14 +127,14 @@ class heat_equation_schemes {
               ((lambda + gamma) * right_const);
         };
 
-    if (bc_type == BoundaryConditionType::Dirichlet)
+    if (bc_type == boundary_condition_enum::Dirichlet)
       return scheme_fun_dirichlet;
     else
       return scheme_fun_robin;
   }
 
   static scheme_function<fp_type> const get_inhom_scheme(
-      BoundaryConditionType bc_type, implicit_pde_schemes_enum scheme) {
+      boundary_condition_enum bc_type, implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
@@ -229,7 +229,7 @@ class heat_equation_schemes {
                    (1.0 - theta) * inhom_input[last_idx]);
         };
 
-    if (bc_type == BoundaryConditionType::Dirichlet)
+    if (bc_type == boundary_condition_enum::Dirichlet)
       return scheme_fun_dirichlet;
     else
       return scheme_fun_robin;

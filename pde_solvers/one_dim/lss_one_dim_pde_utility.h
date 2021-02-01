@@ -10,7 +10,7 @@
 
 namespace lss_one_dim_pde_utility {
 
-using lss_utility::Range;
+using lss_utility::range;
 
 // PDE coefficient holder
 template <typename... coeff_type>
@@ -48,10 +48,10 @@ struct robin_boundary {
 
 template <typename fp_type>
 struct heat_data {
-  // Range for space variable
-  Range<fp_type> space_range;
-  // Range for time variable
-  Range<fp_type> time_range;
+  // range for space variable
+  range<fp_type> space_range;
+  // range for time variable
+  range<fp_type> time_range;
   // Number of time subdivisions
   std::size_t time_division;
   // Number of space subdivisions
@@ -65,7 +65,7 @@ struct heat_data {
   // Flag on source function
   bool is_source_function_set;
 
-  explicit heat_data(Range<fp_type> const &space, Range<fp_type> const &time,
+  explicit heat_data(range<fp_type> const &space, range<fp_type> const &time,
                      std::size_t const &space_subdivision,
                      std::size_t const &time_subdivision,
                      std::function<fp_type(fp_type)> const &initial_condition,

@@ -11,8 +11,8 @@
 
 template <typename T>
 void testBVPDoubleSweepDirichletBC() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
 
   /*
 
@@ -58,13 +58,13 @@ void testBVPDoubleSweepDirichletBC() {
   T left = 0.0;
   T right = 0.0;
 
-  FDMDoubleSweepSolver<T, BoundaryConditionType::Dirichlet, std::vector,
-                       std::allocator<T>>
+  fdm_double_sweep_solver<T, boundary_condition_enum::Dirichlet, std::vector,
+                          std::allocator<T>>
       dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(std::make_pair(left, right));
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(std::make_pair(left, right));
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -80,9 +80,9 @@ void testBVPDoubleSweepDirichletBC() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_0() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
+  using lss_fdm_tridiagonal_solvers::fdm_tridiagonal_solver;
 
   /*
 
@@ -129,16 +129,16 @@ void testBVPFDMSolverDirichletBC_0() {
   T right = 0.0f;
 
   // typedef the solver
-  typedef FDMTridiagonalSolver<T, BoundaryConditionType::Dirichlet,
-                               FDMDoubleSweepSolver, std::vector,
-                               std::allocator<T>>
+  typedef fdm_tridiagonal_solver<T, boundary_condition_enum::Dirichlet,
+                                 fdm_double_sweep_solver, std::vector,
+                                 std::allocator<T>>
       DoubleSweep;
 
   DoubleSweep dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(std::make_pair(left, right));
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(std::make_pair(left, right));
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -167,8 +167,8 @@ void testDoubleSweepDirichletBC() {
 
 template <typename T>
 void testBVPThomasLUSolverDirichletBC() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
 
   /*
 
@@ -215,13 +215,13 @@ void testBVPThomasLUSolverDirichletBC() {
   T left = 0.0;
   T right = 0.0;
 
-  FDMThomasLUSolver<T, BoundaryConditionType::Dirichlet, std::vector,
-                    std::allocator<T>>
+  fdm_thomas_lu_solver<T, boundary_condition_enum::Dirichlet, std::vector,
+                       std::allocator<T>>
       dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(std::make_pair(left, right));
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(std::make_pair(left, right));
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -237,9 +237,9 @@ void testBVPThomasLUSolverDirichletBC() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_1() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
+  using lss_fdm_tridiagonal_solvers::fdm_tridiagonal_solver;
 
   /*
 
@@ -287,16 +287,16 @@ void testBVPFDMSolverDirichletBC_1() {
   T right = 0.0;
 
   // typedef the solver
-  typedef FDMTridiagonalSolver<T, BoundaryConditionType::Dirichlet,
-                               FDMThomasLUSolver, std::vector,
-                               std::allocator<T>>
+  typedef fdm_tridiagonal_solver<T, boundary_condition_enum::Dirichlet,
+                                 fdm_thomas_lu_solver, std::vector,
+                                 std::allocator<T>>
       ThomasLU;
 
   ThomasLU ts{N + 1};
-  ts.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                  std::move(upperDiag));
-  ts.setBoundaryCondition(std::make_pair(left, right));
-  ts.setRhs(rhs);
+  ts.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                   std::move(upperDiag));
+  ts.set_boundary_condition(std::make_pair(left, right));
+  ts.set_rhs(rhs);
   // get the solution:
   auto solution = ts.solve();
 
@@ -325,8 +325,8 @@ void testThomasLUSolverDirichletBC() {
 //
 template <typename T>
 void testBVPDoubleSweepDirichletBC1() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
 
   /*
 
@@ -372,13 +372,13 @@ void testBVPDoubleSweepDirichletBC1() {
   T left = 1.0;
   T right = 1.0;
 
-  FDMDoubleSweepSolver<T, BoundaryConditionType::Dirichlet, std::vector,
-                       std::allocator<T>>
+  fdm_double_sweep_solver<T, boundary_condition_enum::Dirichlet, std::vector,
+                          std::allocator<T>>
       dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(std::make_pair(left, right));
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(std::make_pair(left, right));
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -394,9 +394,9 @@ void testBVPDoubleSweepDirichletBC1() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_2() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
+  using lss_fdm_tridiagonal_solvers::fdm_tridiagonal_solver;
 
   /*
 
@@ -443,16 +443,16 @@ void testBVPFDMSolverDirichletBC_2() {
   T right = 1.0;
 
   // typedef the solver
-  typedef FDMTridiagonalSolver<T, BoundaryConditionType::Dirichlet,
-                               FDMDoubleSweepSolver, std::vector,
-                               std::allocator<T>>
+  typedef fdm_tridiagonal_solver<T, boundary_condition_enum::Dirichlet,
+                                 fdm_double_sweep_solver, std::vector,
+                                 std::allocator<T>>
       DoubleSweep;
 
   DoubleSweep dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(std::make_pair(left, right));
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(std::make_pair(left, right));
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -481,8 +481,8 @@ void testDoubleSweepDirichletBC1() {
 //
 template <typename T>
 void testBVPThomasLUSolverDirichletBC1() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
 
   /*
 
@@ -529,13 +529,13 @@ void testBVPThomasLUSolverDirichletBC1() {
   T left = 1.0;
   T right = 1.0;
 
-  FDMThomasLUSolver<T, BoundaryConditionType::Dirichlet, std::vector,
-                    std::allocator<T>>
+  fdm_thomas_lu_solver<T, boundary_condition_enum::Dirichlet, std::vector,
+                       std::allocator<T>>
       dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(std::make_pair(left, right));
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(std::make_pair(left, right));
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -551,9 +551,9 @@ void testBVPThomasLUSolverDirichletBC1() {
 
 template <typename T>
 void testBVPFDMSolverDirichletBC_3() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
+  using lss_fdm_tridiagonal_solvers::fdm_tridiagonal_solver;
 
   /*
 
@@ -601,16 +601,16 @@ void testBVPFDMSolverDirichletBC_3() {
   T right = 1.0;
 
   // typedef the solver
-  typedef FDMTridiagonalSolver<T, BoundaryConditionType::Dirichlet,
-                               FDMThomasLUSolver, std::vector,
-                               std::allocator<T>>
+  typedef fdm_tridiagonal_solver<T, boundary_condition_enum::Dirichlet,
+                                 fdm_thomas_lu_solver, std::vector,
+                                 std::allocator<T>>
       ThomasLU;
 
   ThomasLU ts{N + 1};
-  ts.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                  std::move(upperDiag));
-  ts.setBoundaryCondition(std::make_pair(left, right));
-  ts.setRhs(rhs);
+  ts.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                   std::move(upperDiag));
+  ts.set_boundary_condition(std::make_pair(left, right));
+  ts.set_rhs(rhs);
   // get the solution:
   auto solution = ts.solve();
 
@@ -639,8 +639,8 @@ void testThomasLUSolverDirichletBC1() {
 //
 template <typename T>
 void testBVPDoubleSweepRobinBC() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
 
   /*
 
@@ -692,13 +692,13 @@ void testBVPDoubleSweepRobinBC() {
   T rightConst = 0.0;
   auto right = std::make_pair(rightLin, rightConst);
 
-  FDMDoubleSweepSolver<T, BoundaryConditionType::Robin, std::vector,
-                       std::allocator<T>>
+  fdm_double_sweep_solver<T, boundary_condition_enum::Robin, std::vector,
+                          std::allocator<T>>
       dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(left, right);
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(left, right);
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -714,9 +714,9 @@ void testBVPDoubleSweepRobinBC() {
 
 template <typename T>
 void testBVPFDMSolverRobinBC_0() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_double_sweep_solver::FDMDoubleSweepSolver;
-  using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
+  using lss_fdm_tridiagonal_solvers::fdm_tridiagonal_solver;
 
   /*
 
@@ -769,16 +769,16 @@ void testBVPFDMSolverRobinBC_0() {
   auto right = std::make_pair(rightLin, rightConst);
 
   // typedef the solver
-  typedef FDMTridiagonalSolver<T, BoundaryConditionType::Robin,
-                               FDMDoubleSweepSolver, std::vector,
-                               std::allocator<T>>
+  typedef fdm_tridiagonal_solver<T, boundary_condition_enum::Robin,
+                                 fdm_double_sweep_solver, std::vector,
+                                 std::allocator<T>>
       DoubleSweep;
 
   DoubleSweep dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(left, right);
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(left, right);
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -808,8 +808,8 @@ void testDoubleSweepRobinBC() {
 //
 template <typename T>
 void testBVPThomasLUSolverRobinBC() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
 
   /*
 
@@ -862,13 +862,13 @@ void testBVPThomasLUSolverRobinBC() {
   T rightConst = 0.0;
   auto right = std::make_pair(rightLin, rightConst);
 
-  FDMThomasLUSolver<T, BoundaryConditionType::Robin, std::vector,
-                    std::allocator<T>>
+  fdm_thomas_lu_solver<T, boundary_condition_enum::Robin, std::vector,
+                       std::allocator<T>>
       dss{N + 1};
-  dss.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                   std::move(upperDiag));
-  dss.setBoundaryCondition(left, right);
-  dss.setRhs(rhs);
+  dss.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                    std::move(upperDiag));
+  dss.set_boundary_condition(left, right);
+  dss.set_rhs(rhs);
   // get the solution:
   auto solution = dss.solve();
 
@@ -884,9 +884,9 @@ void testBVPThomasLUSolverRobinBC() {
 
 template <typename T>
 void testBVPFDMSolverRobinBC_1() {
-  using lss_enumerations::BoundaryConditionType;
-  using lss_fdm_thomas_lu_solver::FDMThomasLUSolver;
-  using lss_fdm_tridiagonal_solvers::FDMTridiagonalSolver;
+  using lss_enumerations::boundary_condition_enum;
+  using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
+  using lss_fdm_tridiagonal_solvers::fdm_tridiagonal_solver;
 
   /*
 
@@ -940,16 +940,16 @@ void testBVPFDMSolverRobinBC_1() {
   auto right = std::make_pair(rightLin, rightConst);
 
   // typedef the solver
-  typedef FDMTridiagonalSolver<T, BoundaryConditionType::Robin,
-                               FDMThomasLUSolver, std::vector,
-                               std::allocator<T>>
+  typedef fdm_tridiagonal_solver<T, boundary_condition_enum::Robin,
+                                 fdm_thomas_lu_solver, std::vector,
+                                 std::allocator<T>>
       ThomasLU;
 
   ThomasLU ts{N + 1};
-  ts.setDiagonals(std::move(lowerDiag), std::move(diagonal),
-                  std::move(upperDiag));
-  ts.setBoundaryCondition(left, right);
-  ts.setRhs(rhs);
+  ts.set_diagonals(std::move(lowerDiag), std::move(diagonal),
+                   std::move(upperDiag));
+  ts.set_boundary_condition(left, right);
+  ts.set_rhs(rhs);
   // get the solution:
   auto solution = ts.solve();
 

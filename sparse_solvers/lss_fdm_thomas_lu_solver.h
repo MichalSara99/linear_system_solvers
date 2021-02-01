@@ -10,181 +10,184 @@
 
 namespace lss_fdm_thomas_lu_solver {
 
-using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::boundary_condition_enum;
 
 // =============================================================================
-// ========================== FDMThomasLUSolverBase ============================
+// ========================== fdm_thomas_lu_solver_base ========================
 // =============================================================================
 
 template <typename T,
-          template <typename T, typename Allocator> typename Container =
+          template <typename T, typename allocator> typename container =
               std::vector,
-          typename Alloc = std::allocator<T>>
-class FDMThomasLUSolverBase {
+          typename alloc = std::allocator<T>>
+class fdm_thomas_lu_solver_base {
  protected:
-  std::size_t systemSize_, discretizationSize_;
-  Container<T, Alloc> a_, b_, c_, f_;
-  Container<T, Alloc> beta_, gamma_;
+  std::size_t system_size_, discretization_size_;
+  container<T, alloc> a_, b_, c_, f_;
+  container<T, alloc> beta_, gamma_;
 
-  virtual void kernel(Container<T, Alloc>& solution) = 0;
-  virtual bool isDiagonallyDominant() const = 0;
+  virtual void kernel(container<T, alloc>& solution) = 0;
+  virtual bool is_diagonally_dominant() const = 0;
 
  public:
   typedef T value_type;
-  explicit FDMThomasLUSolverBase() = delete;
-  explicit FDMThomasLUSolverBase(std::size_t discretizationSize)
-      : discretizationSize_{discretizationSize},
-        systemSize_{discretizationSize - 2} {
+  explicit fdm_thomas_lu_solver_base() = delete;
+  explicit fdm_thomas_lu_solver_base(std::size_t discretization_size)
+      : discretization_size_{discretization_size},
+        system_size_{discretization_size - 2} {
   }  // because we subtract the boundary values which are known{}
 
-  virtual ~FDMThomasLUSolverBase() {}
+  virtual ~fdm_thomas_lu_solver_base() {}
 
-  void setDiagonals(Container<T, Alloc> lowerDiagonal,
-                    Container<T, Alloc> diagonal,
-                    Container<T, Alloc> upperDiagonal);
+  void set_diagonals(container<T, alloc> lower_diagonal,
+                     container<T, alloc> diagonal,
+                     container<T, alloc> upper_diagonal);
 
-  void setRhs(Container<T, Alloc> const& rhs);
+  void set_rhs(container<T, alloc> const& rhs);
 
-  void solve(Container<T, Alloc>& solution);
+  void solve(container<T, alloc>& solution);
 
-  Container<T, Alloc> const solve();
+  container<T, alloc> const solve();
 };
 
 // =============================================================================
-// ==================== Concrete FDMThomasLUSolver =============================
+// ==================== Concrete fdm_thomas_lu_solver
+// =============================
 // =============================================================================
 
-template <typename T, BoundaryConditionType BCType,
-          template <typename T, typename Allocator> typename Container,
-          typename Alloc>
-class FDMThomasLUSolver {
+template <typename T, boundary_condition_enum BCType,
+          template <typename T, typename allocator> typename container,
+          typename alloc>
+class fdm_thomas_lu_solver {
  protected:
-  void kernel(Container<T, Alloc>& solution) override {}
+  void kernel(container<T, alloc>& solution) override {}
 };
 
 // Thomas LU Solver specialization for Dirichlet BC:
 template <typename T,
-          template <typename T, typename Allocator> typename Container,
-          typename Alloc>
-class FDMThomasLUSolver<T, BoundaryConditionType::Dirichlet, Container, Alloc>
-    : public FDMThomasLUSolverBase<T, Container, Alloc> {
+          template <typename T, typename allocator> typename container,
+          typename alloc>
+class fdm_thomas_lu_solver<T, boundary_condition_enum::Dirichlet, container,
+                           alloc>
+    : public fdm_thomas_lu_solver_base<T, container, alloc> {
  private:
   std::pair<T, T> boundary_;
 
  public:
   typedef T value_type;
-  explicit FDMThomasLUSolver() = delete;
-  explicit FDMThomasLUSolver(std::size_t discretizationSize)
-      : FDMThomasLUSolverBase<T, Container, Alloc>(discretizationSize) {}
+  explicit fdm_thomas_lu_solver() = delete;
+  explicit fdm_thomas_lu_solver(std::size_t discretization_size)
+      : fdm_thomas_lu_solver_base<T, container, alloc>(discretization_size) {}
 
-  ~FDMThomasLUSolver() {}
+  ~fdm_thomas_lu_solver() {}
 
-  FDMThomasLUSolver(FDMThomasLUSolver const&) = delete;
-  FDMThomasLUSolver(FDMThomasLUSolver&&) = delete;
-  FDMThomasLUSolver& operator=(FDMThomasLUSolver const&) = delete;
-  FDMThomasLUSolver& operator=(FDMThomasLUSolver&&) = delete;
+  fdm_thomas_lu_solver(fdm_thomas_lu_solver const&) = delete;
+  fdm_thomas_lu_solver(fdm_thomas_lu_solver&&) = delete;
+  fdm_thomas_lu_solver& operator=(fdm_thomas_lu_solver const&) = delete;
+  fdm_thomas_lu_solver& operator=(fdm_thomas_lu_solver&&) = delete;
 
-  inline void setBoundaryCondition(std::pair<T, T> const& boundaryPair) {
-    boundary_ = boundaryPair;
+  inline void set_boundary_condition(std::pair<T, T> const& boundary_pair) {
+    boundary_ = boundary_pair;
   }
 
  protected:
-  bool isDiagonallyDominant() const override;
-  void kernel(Container<T, Alloc>& solution) override;
+  bool is_diagonally_dominant() const override;
+  void kernel(container<T, alloc>& solution) override;
 };
 
 // Thomas LU Solver specialization for Robin BC:
 template <typename T,
-          template <typename T, typename Allocator> typename Container,
-          typename Alloc>
-class FDMThomasLUSolver<T, BoundaryConditionType::Robin, Container, Alloc>
-    : public FDMThomasLUSolverBase<T, Container, Alloc> {
+          template <typename T, typename allocator> typename container,
+          typename alloc>
+class fdm_thomas_lu_solver<T, boundary_condition_enum::Robin, container, alloc>
+    : public fdm_thomas_lu_solver_base<T, container, alloc> {
  private:
   std::pair<T, T> left_;
   std::pair<T, T> right_;
 
  public:
   typedef T value_type;
-  explicit FDMThomasLUSolver() = delete;
-  explicit FDMThomasLUSolver(std::size_t discretizationSize)
-      : FDMThomasLUSolverBase<T, Container, Alloc>(discretizationSize) {}
+  explicit fdm_thomas_lu_solver() = delete;
+  explicit fdm_thomas_lu_solver(std::size_t discretization_size)
+      : fdm_thomas_lu_solver_base<T, container, alloc>(discretization_size) {}
 
-  ~FDMThomasLUSolver() {}
+  ~fdm_thomas_lu_solver() {}
 
-  FDMThomasLUSolver(FDMThomasLUSolver const&) = delete;
-  FDMThomasLUSolver(FDMThomasLUSolver&&) = delete;
-  FDMThomasLUSolver& operator=(FDMThomasLUSolver const&) = delete;
-  FDMThomasLUSolver& operator=(FDMThomasLUSolver&&) = delete;
+  fdm_thomas_lu_solver(fdm_thomas_lu_solver const&) = delete;
+  fdm_thomas_lu_solver(fdm_thomas_lu_solver&&) = delete;
+  fdm_thomas_lu_solver& operator=(fdm_thomas_lu_solver const&) = delete;
+  fdm_thomas_lu_solver& operator=(fdm_thomas_lu_solver&&) = delete;
 
-  inline void setBoundaryCondition(std::pair<T, T> const& left,
-                                   std::pair<T, T> const& right) {
+  inline void set_boundary_condition(std::pair<T, T> const& left,
+                                     std::pair<T, T> const& right) {
     left_ = left;
     right_ = right;
   }
 
  protected:
-  bool isDiagonallyDominant() const override;
-  void kernel(Container<T, Alloc>& solution) override;
+  bool is_diagonally_dominant() const override;
+  void kernel(container<T, alloc>& solution) override;
 };
 
 }  // namespace lss_fdm_thomas_lu_solver
 
 // =============================================================================
-// =================== FDMThomasLUSolverBase implementation ====================
+// =================== fdm_thomas_lu_solver_base implementation
+// ====================
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-void lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<
-    T, Container, Alloc>::setRhs(Container<T, Alloc> const& rhs) {
-  LSS_ASSERT(rhs.size() == discretizationSize_,
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+void lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver_base<
+    T, container, alloc>::set_rhs(container<T, alloc> const& rhs) {
+  LSS_ASSERT(rhs.size() == discretization_size_,
              "Inncorect size for right-hand side");
   f_.clear();
-  f_.resize(systemSize_);
-  for (std::size_t t = 0; t < systemSize_; ++t) f_[t] = rhs[t + 1];
+  f_.resize(system_size_);
+  for (std::size_t t = 0; t < system_size_; ++t) f_[t] = rhs[t + 1];
 }
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-void lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<
-    T, Container, Alloc>::setDiagonals(Container<T, Alloc> lowerDiagonal,
-                                       Container<T, Alloc> diagonal,
-                                       Container<T, Alloc> upperDiagonal) {
-  LSS_ASSERT(lowerDiagonal.size() == discretizationSize_,
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+void lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver_base<
+    T, container, alloc>::set_diagonals(container<T, alloc> lower_diagonal,
+                                        container<T, alloc> diagonal,
+                                        container<T, alloc> upper_diagonal) {
+  LSS_ASSERT(lower_diagonal.size() == discretization_size_,
              "Inncorect size for lowerDiagonal");
-  LSS_ASSERT(diagonal.size() == discretizationSize_,
+  LSS_ASSERT(diagonal.size() == discretization_size_,
              "Inncorect size for diagonal");
-  LSS_ASSERT(upperDiagonal.size() == discretizationSize_,
+  LSS_ASSERT(upper_diagonal.size() == discretization_size_,
              "Inncorect size for upperDiagonal");
   a_.clear();
-  a_.resize(systemSize_);
+  a_.resize(system_size_);
   b_.clear();
-  b_.resize(systemSize_);
+  b_.resize(system_size_);
   c_.clear();
-  c_.resize(systemSize_);
-  for (std::size_t t = 0; t < systemSize_; ++t) {
-    a_[t] = std::move(lowerDiagonal[t + 1]);
+  c_.resize(system_size_);
+  for (std::size_t t = 0; t < system_size_; ++t) {
+    a_[t] = std::move(lower_diagonal[t + 1]);
     b_[t] = std::move(diagonal[t + 1]);
-    c_[t] = std::move(upperDiagonal[t + 1]);
+    c_[t] = std::move(upper_diagonal[t + 1]);
   }
 
   // LSS_ASSERT(isDiagonallyDominant() == true,
   //	"Tridiagonal matrix must be diagonally dominant.");
 }
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-void lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<
-    T, Container, Alloc>::solve(Container<T, Alloc>& solution) {
-  LSS_ASSERT(solution.size() == discretizationSize_,
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+void lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver_base<
+    T, container, alloc>::solve(container<T, alloc>& solution) {
+  LSS_ASSERT(solution.size() == discretization_size_,
              "Incorrect size of solution container");
   kernel(solution);
 }
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-Container<T, Alloc> const
-lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<T, Container, Alloc>::solve() {
-  Container<T, Alloc> solution(discretizationSize_);
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+container<T, alloc> const lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver_base<
+    T, container, alloc>::solve() {
+  container<T, alloc> solution(discretization_size_);
   kernel(solution);
   return solution;
 }
@@ -192,27 +195,27 @@ lss_fdm_thomas_lu_solver::FDMThomasLUSolverBase<T, Container, Alloc>::solve() {
 // =============================================================================
 // ======================== ThomasLUSolver implementation ======================
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_enumerations::BoundaryConditionType::Dirichlet, Container,
-    Alloc>::isDiagonallyDominant() const {
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+bool lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver<
+    T, lss_enumerations::boundary_condition_enum::Dirichlet, container,
+    alloc>::is_diagonally_dominant() const {
   if (std::abs(b_[0]) < std::abs(c_[0])) return false;
-  if (std::abs(b_[systemSize_ - 1]) < std::abs(a_[systemSize_ - 1]))
+  if (std::abs(b_[system_size_ - 1]) < std::abs(a_[system_size_ - 1]))
     return false;
 
-  for (std::size_t t = 0; t < systemSize_ - 1; ++t)
+  for (std::size_t t = 0; t < system_size_ - 1; ++t)
     if (std::abs(b_[t]) < (std::abs(a_[t]) + std::abs(c_[t]))) return false;
   return true;
 }
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_enumerations::BoundaryConditionType::Dirichlet, Container,
-    Alloc>::kernel(Container<T, Alloc>& solution) {
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+void lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver<
+    T, lss_enumerations::boundary_condition_enum::Dirichlet, container,
+    alloc>::kernel(container<T, alloc>& solution) {
   // check the diagonal dominance:
-  LSS_ASSERT(isDiagonallyDominant() == true,
+  LSS_ASSERT(is_diagonally_dominant() == true,
              "Tridiagonal matrix must be diagonally dominant.");
 
   // clear the working containers:
@@ -220,62 +223,62 @@ void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
   gamma_.clear();
 
   // resize the working containers:
-  beta_.resize(systemSize_);
-  gamma_.resize(systemSize_);
+  beta_.resize(system_size_);
+  gamma_.resize(system_size_);
 
   // init values for the working containers:
   beta_[0] = b_[0];
   gamma_[0] = c_[0] / beta_[0];
 
-  for (std::size_t t = 1; t < systemSize_ - 1; ++t) {
+  for (std::size_t t = 1; t < system_size_ - 1; ++t) {
     beta_[t] = b_[t] - (a_[t] * gamma_[t - 1]);
     gamma_[t] = c_[t] / beta_[t];
   }
-  beta_[systemSize_ - 1] =
-      b_[systemSize_ - 1] - (a_[systemSize_ - 1] * gamma_[systemSize_ - 2]);
+  beta_[system_size_ - 1] =
+      b_[system_size_ - 1] - (a_[system_size_ - 1] * gamma_[system_size_ - 2]);
 
   solution[1] = (f_[0] - a_[0] * boundary_.first) / beta_[0];
-  for (std::size_t t = 1; t < systemSize_; ++t) {
+  for (std::size_t t = 1; t < system_size_; ++t) {
     solution[t + 1] = (f_[t] - (a_[t] * solution[t])) / beta_[t];
   }
-  solution[systemSize_] =
-      ((f_[systemSize_ - 1] - c_[systemSize_ - 1] * boundary_.second) -
-       (a_[systemSize_ - 1] * solution[systemSize_ - 1])) /
-      beta_[systemSize_ - 1];
+  solution[system_size_] =
+      ((f_[system_size_ - 1] - c_[system_size_ - 1] * boundary_.second) -
+       (a_[system_size_ - 1] * solution[system_size_ - 1])) /
+      beta_[system_size_ - 1];
 
-  f_[systemSize_ - 1] = solution[systemSize_];
-  for (long t = systemSize_ - 2; t >= 0; --t) {
+  f_[system_size_ - 1] = solution[system_size_];
+  for (long t = system_size_ - 2; t >= 0; --t) {
     f_[t] = solution[t + 1] - (gamma_[t] * f_[t + 1]);
   }
   // fill in the known boundary values:
   solution[0] = boundary_.first;
-  solution[discretizationSize_ - 1] = boundary_.second;
+  solution[discretization_size_ - 1] = boundary_.second;
   std::copy(f_.begin(), f_.end(), std::next(solution.begin()));
 }
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-bool lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_enumerations::BoundaryConditionType::Robin, Container,
-    Alloc>::isDiagonallyDominant() const {
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+bool lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver<
+    T, lss_enumerations::boundary_condition_enum::Robin, container,
+    alloc>::is_diagonally_dominant() const {
   auto alpha = left_.first;
   auto beta = right_.first;
   if (std::abs(alpha * a_[0] + b_[0]) < std::abs(c_[0])) return false;
-  if (std::abs(b_[systemSize_ - 1] + (c_[systemSize_ - 1] / beta)) <
-      std::abs(a_[systemSize_ - 1]))
+  if (std::abs(b_[system_size_ - 1] + (c_[system_size_ - 1] / beta)) <
+      std::abs(a_[system_size_ - 1]))
     return false;
-  for (std::size_t t = 0; t < systemSize_ - 1; ++t)
+  for (std::size_t t = 0; t < system_size_ - 1; ++t)
     if (std::abs(b_[t]) < (std::abs(a_[t]) + std::abs(c_[t]))) return false;
   return true;
 }
 
-template <typename T, template <typename T, typename Alloc> typename Container,
-          typename Alloc>
-void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
-    T, lss_enumerations::BoundaryConditionType::Robin, Container,
-    Alloc>::kernel(Container<T, Alloc>& solution) {
+template <typename T, template <typename T, typename alloc> typename container,
+          typename alloc>
+void lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver<
+    T, lss_enumerations::boundary_condition_enum::Robin, container,
+    alloc>::kernel(container<T, alloc>& solution) {
   // check the diagonal dominance:
-  LSS_ASSERT(isDiagonallyDominant() == true,
+  LSS_ASSERT(is_diagonally_dominant() == true,
              "Tridiagonal matrix must be diagonally dominant.");
 
   // clear the working containers:
@@ -283,39 +286,39 @@ void lss_fdm_thomas_lu_solver::FDMThomasLUSolver<
   gamma_.clear();
 
   // resize the working containers:
-  beta_.resize(systemSize_);
-  gamma_.resize(systemSize_);
+  beta_.resize(system_size_);
+  gamma_.resize(system_size_);
 
   // init values for the working containers:
   beta_[0] = left_.first * a_[0] + b_[0];
   gamma_[0] = c_[0] / beta_[0];
 
-  for (std::size_t t = 1; t < systemSize_ - 1; ++t) {
+  for (std::size_t t = 1; t < system_size_ - 1; ++t) {
     beta_[t] = b_[t] - (a_[t] * gamma_[t - 1]);
     gamma_[t] = c_[t] / beta_[t];
   }
-  beta_[systemSize_ - 1] =
-      (b_[systemSize_ - 1] + (c_[systemSize_ - 1] / right_.first)) -
-      (a_[systemSize_ - 1] * gamma_[systemSize_ - 2]);
+  beta_[system_size_ - 1] =
+      (b_[system_size_ - 1] + (c_[system_size_ - 1] / right_.first)) -
+      (a_[system_size_ - 1] * gamma_[system_size_ - 2]);
 
   solution[1] = (f_[0] - a_[0] * left_.second) / beta_[0];
-  for (std::size_t t = 1; t < systemSize_; ++t) {
+  for (std::size_t t = 1; t < system_size_; ++t) {
     solution[t + 1] = (f_[t] - (a_[t] * solution[t])) / beta_[t];
   }
-  solution[systemSize_] =
-      ((f_[systemSize_ - 1] +
-        (c_[systemSize_ - 1] * right_.second) / right_.first) -
-       (a_[systemSize_ - 1] * solution[systemSize_ - 1])) /
-      beta_[systemSize_ - 1];
+  solution[system_size_] =
+      ((f_[system_size_ - 1] +
+        (c_[system_size_ - 1] * right_.second) / right_.first) -
+       (a_[system_size_ - 1] * solution[system_size_ - 1])) /
+      beta_[system_size_ - 1];
 
-  f_[systemSize_ - 1] = solution[systemSize_];
-  for (long t = systemSize_ - 2; t >= 0; --t) {
+  f_[system_size_ - 1] = solution[system_size_];
+  for (long t = system_size_ - 2; t >= 0; --t) {
     f_[t] = solution[t + 1] - (gamma_[t] * f_[t + 1]);
   }
 
   solution[0] = (left_.first * f_[0]) + left_.second;
-  solution[discretizationSize_ - 1] =
-      (f_[systemSize_ - 1] - right_.second) / right_.first;
+  solution[discretization_size_ - 1] =
+      (f_[system_size_ - 1] - right_.second) / right_.first;
   std::copy(f_.begin(), f_.end(), std::next(solution.begin()));
 }
 

@@ -1,17 +1,17 @@
 #pragma once
-#if !defined(_LSS_SPARSE_SOLVERS_CUDA_T)
-#define _LSS_SPARSE_SOLVERS_CUDA_T
+#if !defined(_lss_sparse_solvers_T)
+#define _lss_sparse_solvers_T
 
-#include "sparse_solvers/lss_sparse_solvers_cuda.h"
+#include "sparse_solvers/lss_sparse_solvers.h"
 #include "sparse_solvers/lss_sparse_solvers_policy.h"
 
 void deviceSparseDefaultQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceQR;
-  using lss_sparse_solvers_policy::SparseSolverHostLU;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_qr;
+  using lss_sparse_solvers_policy::sparse_solver_host_lu;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -48,12 +48,12 @@ void deviceSparseDefaultQRTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -76,16 +76,16 @@ void deviceSparseDefaultQRTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
-  auto solution = rss.solve<SparseSolverDeviceQR>();
+  auto solution = rss.solve<sparse_solver_device_qr>();
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
     std::cout << e << " ";
@@ -94,10 +94,10 @@ void deviceSparseDefaultQRTest() {
 }
 
 void deviceSparseFloatQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -134,12 +134,12 @@ void deviceSparseFloatQRTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -162,16 +162,16 @@ void deviceSparseFloatQRTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Device, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, float> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
-  auto solution = rss.solve<SparseSolverDeviceQR>();
+  auto solution = rss.solve<sparse_solver_device_qr>();
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
     std::cout << e << " ";
@@ -180,10 +180,10 @@ void deviceSparseFloatQRTest() {
 }
 
 void deviceSparseDefaultQRPointerTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -220,12 +220,12 @@ void deviceSparseDefaultQRPointerTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -248,17 +248,17 @@ void deviceSparseDefaultQRPointerTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverDeviceQR>(solution);
+  rss.solve<sparse_solver_device_qr>(solution);
 
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {
@@ -268,10 +268,10 @@ void deviceSparseDefaultQRPointerTest() {
 }
 
 void deviceSparseFloatQRPointerTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -308,12 +308,12 @@ void deviceSparseFloatQRPointerTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -336,17 +336,17 @@ void deviceSparseFloatQRPointerTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Device, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, float> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<float> solution(m);
-  rss.solve<SparseSolverDeviceQR>(solution);
+  rss.solve<sparse_solver_device_qr>(solution);
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {
     std::cout << solution[t] << " ";
@@ -368,12 +368,12 @@ void deviceSparseQRTest() {
 }
 
 void hostSparseDefaultQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceQR;
-  using lss_sparse_solvers_policy::SparseSolverHostLU;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_qr;
+  using lss_sparse_solvers_policy::sparse_solver_host_lu;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -410,12 +410,12 @@ void hostSparseDefaultQRTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -438,16 +438,16 @@ void hostSparseDefaultQRTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
-  auto solution = rss.solve<SparseSolverHostQR>();
+  auto solution = rss.solve<sparse_solver_host_qr>();
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
     std::cout << e << " ";
@@ -456,10 +456,10 @@ void hostSparseDefaultQRTest() {
 }
 
 void hostSparseFloatQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -496,12 +496,12 @@ void hostSparseFloatQRTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -524,16 +524,16 @@ void hostSparseFloatQRTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
-  auto solution = rss.solve<SparseSolverHostQR>();
+  auto solution = rss.solve<sparse_solver_host_qr>();
   std::cout << "Solution is: \n[";
   for (auto const& e : solution) {
     std::cout << e << " ";
@@ -542,10 +542,10 @@ void hostSparseFloatQRTest() {
 }
 
 void hostSparseDefaultQRPointerTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -582,12 +582,12 @@ void hostSparseDefaultQRPointerTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -610,17 +610,17 @@ void hostSparseDefaultQRPointerTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverHostQR>(solution);
+  rss.solve<sparse_solver_host_qr>(solution);
 
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {
@@ -630,10 +630,10 @@ void hostSparseDefaultQRPointerTest() {
 }
 
 void hostSparseFloatQRPointerTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "===================================\n";
   std::cout << "Solving sparse system of equations:\n";
@@ -670,12 +670,12 @@ void hostSparseFloatQRPointerTest() {
   */
 
   // first create and populate the sparse matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -698,17 +698,17 @@ void hostSparseFloatQRPointerTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<float> solution(m);
-  rss.solve<SparseSolverHostQR>(solution);
+  rss.solve<sparse_solver_host_qr>(solution);
 
   std::cout << "Solution is: \n[";
   for (std::size_t t = 0; t < m; ++t) {
@@ -731,10 +731,10 @@ void hostSparseQRTest() {
 }
 
 void hostBVPDirichletBCDefaultQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "=================================\n";
   std::cout << " Using QR decomposition to \n";
@@ -749,7 +749,7 @@ void hostBVPDirichletBCDefaultQRTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -759,8 +759,8 @@ void hostBVPDirichletBCDefaultQRTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -781,17 +781,17 @@ void hostBVPDirichletBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverHostQR>(solution);
+  rss.solve<sparse_solver_host_qr>(solution);
 
   // exact value:
   auto exact = [](double x) { return x * (1.0 - x); };
@@ -806,10 +806,10 @@ void hostBVPDirichletBCDefaultQRTest() {
 }
 
 void hostBVPDirichletBCDefaultLUTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostLU;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_lu;
 
   std::cout << "=================================\n";
   std::cout << " Using LU decomposition to \n";
@@ -824,7 +824,7 @@ void hostBVPDirichletBCDefaultLUTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -834,8 +834,8 @@ void hostBVPDirichletBCDefaultLUTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -856,17 +856,17 @@ void hostBVPDirichletBCDefaultLUTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverHostLU>(solution);
+  rss.solve<sparse_solver_host_lu>(solution);
 
   // exact value:
   auto exact = [](double x) { return x * (1.0 - x); };
@@ -881,10 +881,10 @@ void hostBVPDirichletBCDefaultLUTest() {
 }
 
 void hostBVPDirichletBCDefaultCholeskyTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostCholesky;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_cholesky;
 
   std::cout << "=================================\n";
   std::cout << " Using Cholesky decomposition to \n";
@@ -899,7 +899,7 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -909,8 +909,8 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -931,17 +931,17 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverHostCholesky>(solution);
+  rss.solve<sparse_solver_host_cholesky>(solution);
 
   // exact value:
   auto exact = [](double x) { return x * (1.0 - x); };
@@ -956,10 +956,10 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
 }
 
 void hostBVPDirichletBCFloatQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "=================================\n";
   std::cout << " Using QR decomposition to \n";
@@ -974,7 +974,7 @@ void hostBVPDirichletBCFloatQRTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -984,8 +984,8 @@ void hostBVPDirichletBCFloatQRTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1006,17 +1006,17 @@ void hostBVPDirichletBCFloatQRTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<float> solution(m);
-  rss.solve<SparseSolverHostQR>(solution);
+  rss.solve<sparse_solver_host_qr>(solution);
 
   // exact value:
   auto exact = [](float x) { return x * (1.0 - x); };
@@ -1031,10 +1031,10 @@ void hostBVPDirichletBCFloatQRTest() {
 }
 
 void hostBVPDirichletBCFloatLUTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostLU;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_lu;
 
   std::cout << "=================================\n";
   std::cout << " Using LU decomposition to \n";
@@ -1049,7 +1049,7 @@ void hostBVPDirichletBCFloatLUTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1059,8 +1059,8 @@ void hostBVPDirichletBCFloatLUTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1081,17 +1081,17 @@ void hostBVPDirichletBCFloatLUTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<float> solution(m);
-  rss.solve<SparseSolverHostLU>(solution);
+  rss.solve<sparse_solver_host_lu>(solution);
 
   // exact value:
   auto exact = [](float x) { return x * (1.0 - x); };
@@ -1106,10 +1106,10 @@ void hostBVPDirichletBCFloatLUTest() {
 }
 
 void hostBVPDirichletBCFloatCholeskyTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostCholesky;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_cholesky;
 
   std::cout << "=================================\n";
   std::cout << " Using Cholesky decomposition to \n";
@@ -1124,7 +1124,7 @@ void hostBVPDirichletBCFloatCholeskyTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<float> fsm;
+  flat_matrix<float> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1134,8 +1134,8 @@ void hostBVPDirichletBCFloatCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1156,17 +1156,17 @@ void hostBVPDirichletBCFloatCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<float> solution(m);
-  rss.solve<SparseSolverHostCholesky>(solution);
+  rss.solve<sparse_solver_host_cholesky>(solution);
 
   // exact value:
   auto exact = [](float x) { return x * (1.0 - x); };
@@ -1196,10 +1196,10 @@ void testDirichletBCBVPOnHost() {
 }
 
 void deviceBVPDirichletBCDefaultQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_qr;
 
   std::cout << "=================================\n";
   std::cout << " Using QR decomposition to \n";
@@ -1213,7 +1213,7 @@ void deviceBVPDirichletBCDefaultQRTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1223,8 +1223,8 @@ void deviceBVPDirichletBCDefaultQRTest() {
   // because we already know the boundary values
   // at timepoints t_0 and t_20:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1245,17 +1245,17 @@ void deviceBVPDirichletBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverDeviceQR>(solution);
+  rss.solve<sparse_solver_device_qr>(solution);
 
   // exact value:
   auto exact = [](double x) { return x * (1.0 - x); };
@@ -1270,10 +1270,10 @@ void deviceBVPDirichletBCDefaultQRTest() {
 }
 
 void deviceBVPDirichletBCDefaultCholeskyTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceCholesky;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_cholesky;
 
   std::cout << "=================================\n";
   std::cout << " Using Cholesky decomposition to \n";
@@ -1287,7 +1287,7 @@ void deviceBVPDirichletBCDefaultCholeskyTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1297,8 +1297,8 @@ void deviceBVPDirichletBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1319,17 +1319,17 @@ void deviceBVPDirichletBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverDeviceCholesky>(solution);
+  rss.solve<sparse_solver_device_cholesky>(solution);
 
   // exact value:
   auto exact = [](double x) { return x * (1.0 - x); };
@@ -1355,10 +1355,10 @@ void testDirichletBCBVPOnDevice() {
 }
 
 void hostBVPRobinBCDefaultQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_qr;
 
   std::cout << "=================================\n";
   std::cout << " Using QR decomposition to \n";
@@ -1373,7 +1373,7 @@ void hostBVPRobinBCDefaultQRTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1388,8 +1388,8 @@ void hostBVPRobinBCDefaultQRTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1408,17 +1408,17 @@ void hostBVPRobinBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverHostQR>(solution);
+  rss.solve<sparse_solver_host_qr>(solution);
 
   // exact value:
   auto exact = [](double x) { return (-x * x + x + 1.0); };
@@ -1438,10 +1438,10 @@ void hostBVPRobinBCDefaultQRTest() {
 }
 
 void hostBVPRobinBCDefaultLUTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostLU;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_lu;
 
   std::cout << "=================================\n";
   std::cout << " Using LU decomposition to \n";
@@ -1456,7 +1456,7 @@ void hostBVPRobinBCDefaultLUTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1471,8 +1471,8 @@ void hostBVPRobinBCDefaultLUTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1491,17 +1491,17 @@ void hostBVPRobinBCDefaultLUTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverHostLU>(solution);
+  rss.solve<sparse_solver_host_lu>(solution);
 
   // exact value:
   auto exact = [](double x) { return (-x * x + x + 1.0); };
@@ -1521,10 +1521,10 @@ void hostBVPRobinBCDefaultLUTest() {
 }
 
 void hostBVPRobinBCDefaultCholeskyTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverHostCholesky;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_host_cholesky;
 
   std::cout << "=================================\n";
   std::cout << " Using Cholesky decomposition to \n";
@@ -1539,7 +1539,7 @@ void hostBVPRobinBCDefaultCholeskyTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1554,8 +1554,8 @@ void hostBVPRobinBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1574,17 +1574,17 @@ void hostBVPRobinBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverHostCholesky>(solution);
+  rss.solve<sparse_solver_host_cholesky>(solution);
 
   // exact value:
   auto exact = [](double x) { return (-x * x + x + 1.0); };
@@ -1616,10 +1616,10 @@ void testRobinBCBVPOnHost() {
 }
 
 void deviceBVPRobinBCDefaultQRTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceQR;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_qr;
 
   std::cout << "=================================\n";
   std::cout << " Using QR decomposition to \n";
@@ -1634,7 +1634,7 @@ void deviceBVPRobinBCDefaultQRTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1649,8 +1649,8 @@ void deviceBVPRobinBCDefaultQRTest() {
   // because we already know the boundary values
   // at timepoints t_0 and t_20:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1669,17 +1669,17 @@ void deviceBVPRobinBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverDeviceQR>(solution);
+  rss.solve<sparse_solver_device_qr>(solution);
 
   // exact value:
   auto exact = [](double x) { return (-x * x + x + 1.0); };
@@ -1699,10 +1699,10 @@ void deviceBVPRobinBCDefaultQRTest() {
 }
 
 void deviceBVPRobinBCDefaultCholeskyTest() {
-  using lss_sparse_solvers_cuda::FlatMatrix;
-  using lss_sparse_solvers_cuda::MemorySpace;
-  using lss_sparse_solvers_cuda::RealSparseSolverCUDA;
-  using lss_sparse_solvers_policy::SparseSolverDeviceCholesky;
+  using lss_sparse_solvers::flat_matrix;
+  using lss_sparse_solvers::memory_space_enum;
+  using lss_sparse_solvers::real_sparse_solver_cuda;
+  using lss_sparse_solvers_policy::sparse_solver_device_cholesky;
 
   std::cout << "=================================\n";
   std::cout << " Using Cholesky decomposition to \n";
@@ -1717,7 +1717,7 @@ void deviceBVPRobinBCDefaultCholeskyTest() {
   std::cout << "=================================\n";
 
   // first create and populate the sparse matrix:
-  FlatMatrix<double> fsm;
+  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1732,8 +1732,8 @@ void deviceBVPRobinBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.setColumns(m);
-  fsm.setRows(m);
+  fsm.set_columns(m);
+  fsm.set_rows(m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1752,17 +1752,17 @@ void deviceBVPRobinBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  RealSparseSolverCUDA<MemorySpace::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
 
   // insert sparse matrix A and vector b:
-  rss.setFlatSparseMatrix(std::move(fsm));
-  rss.setRhs(b);
+  rss.set_flat_sparse_matrix(std::move(fsm));
+  rss.set_rhs(b);
 
   std::vector<double> solution(m);
-  rss.solve<SparseSolverDeviceCholesky>(solution);
+  rss.solve<sparse_solver_device_cholesky>(solution);
 
   // exact value:
   auto exact = [](double x) { return (-x * x + x + 1.0); };
@@ -1792,4 +1792,4 @@ void testRobinBCBVPOnDevice() {
   std::cout << "==================================================\n";
 }
 
-#endif  ///_LSS_SPARSE_SOLVERS_CUDA_T
+#endif  ///_lss_sparse_solvers_T

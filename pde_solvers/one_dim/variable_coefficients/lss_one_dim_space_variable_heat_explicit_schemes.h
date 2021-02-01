@@ -12,7 +12,7 @@
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes {
 
-using lss_enumerations::BoundaryConditionType;
+using lss_enumerations::boundary_condition_enum;
 using lss_one_dim_base_explicit_schemes::heat_scheme_base;
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::pde_coefficient_holder_fun_1_arg;
