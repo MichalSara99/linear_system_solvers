@@ -720,7 +720,7 @@ bool explicit_solvers::general_heat_equation_cuda<
   auto const &a = std::get<0>(coeffs_);
   auto const &b = std::get<1>(coeffs_);
   auto const &c = std::get<2>(coeffs_);
-  fp_type const k = space_step();
+  fp_type const k = time_step();
   fp_type const h = space_step();
   fp_type const lambda = k / (h * h);
   fp_type const gamma = k / h;

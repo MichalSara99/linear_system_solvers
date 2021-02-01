@@ -56,12 +56,12 @@ class heat_equation_schemes {
             std::vector<fp_type> &solution,
             std::pair<fp_type, fp_type> const &boundary_pair_0,
             std::pair<fp_type, fp_type> const &boundary_pair_1) {
-          // inhomInput			= not used here
-          // inhomInputNext		= not uesd here
-          // boundaryPair1		= not used here
+          // inhom_input			= not used here
+          // inhom_input_next		= not uesd here
+          // boundary_pair_1		= not used here
 
           fp_type const left = boundary_pair_0.first;
-          fp_type const right = boundary_pair_1.second;
+          fp_type const right = boundary_pair_0.second;
           std::size_t const last_idx = solution.size() - 1;
 
           fp_type const lambda = std::get<0>(coeffs);
