@@ -44,4 +44,7 @@
     } while (false);                                                       \
   }
 
+#define LSS_VERIFY(variable, message) \
+  { LSS_ASSERT(variable, message); }
+
 #endif  ///_LSS_MACROS

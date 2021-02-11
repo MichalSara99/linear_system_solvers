@@ -446,6 +446,7 @@ void implicit_solvers::general_heat_equation<
                   implicit_pde_schemes_enum scheme) {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
+
   // get correct theta according to the scheme:
   fp_type const theta =
       lss_one_dim_heat_implicit_schemes::heat_equation_schemes<
