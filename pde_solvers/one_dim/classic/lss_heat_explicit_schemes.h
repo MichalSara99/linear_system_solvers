@@ -17,6 +17,7 @@ using lss_one_dim_base_explicit_schemes::heat_scheme_base;
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::pde_coefficient_holder_const;
 using lss_one_dim_pde_utility::robin_boundary;
+using lss_one_dim_pde_utility::v_discretization;
 
 // ============================================================================
 // ======================= heat_euler_scheme ==================================
@@ -201,7 +202,8 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
   } else {
     // create a container to carry discretized source heat
     std::vector<fp_type> source_curr(solution.size(), fp_type{});
-    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
+    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
+                                                   source_, source_curr);
     // loop for stepping in time:
     while (time <= terminal_time_) {
       solution[0] = left(time);
@@ -210,7 +212,8 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
         solution[t] = a * prev_sol[t] + b * prev_sol[t + 1] +
                       c * prev_sol[t - 1] + k * source_curr[t];
       }
-      discretize_in_space(h, space_start_, time, source_, source_curr);
+      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
+                                                     source_, source_curr);
       prev_sol = solution;
       time += k;
     }
@@ -276,7 +279,8 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
   } else {
     // create a container to carry discretized source heat
     std::vector<fp_type> source_curr(solution.size(), fp_type{});
-    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
+    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
+                                                   source_, source_curr);
     // loop for stepping in time:
     while (time <= terminal_time_) {
       solution[0] =
@@ -288,7 +292,8 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
         solution[t] = a * prev_sol[t] + b * prev_sol[t + 1] +
                       c * prev_sol[t - 1] + k * source_curr[t];
       }
-      discretize_in_space(h, space_start_, time, source_, source_curr);
+      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
+                                                     source_, source_curr);
       prev_sol = solution;
       time += k;
     }
@@ -370,8 +375,10 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
       time += k;
     }
   } else {
-    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
-    discretize_in_space(h, space_start_, time, source_, source_next);
+    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
+                                                   source_, source_curr);
+    v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
+                                                   source_, source_next);
     // loop for stepping in time:
     while (time <= terminal_time_) {
       com_1[0] = com_2[0] = left(time);
@@ -385,8 +392,10 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
       for (std::size_t t = 0; t < space_size; ++t) {
         solution[t] = 0.5 * (com_1[t] + com_2[t]);
       }
-      discretize_in_space(h, space_start_, time, source_, source_curr);
-      discretize_in_space(h, space_start_, 2.0 * time, source_, source_next);
+      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
+                                                     source_, source_curr);
+      v_discretization<fp_type>::discretize_in_space(
+          h, space_start_, 2.0 * time, source_, source_next);
       time += k;
     }
   }
@@ -470,8 +479,10 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
       time += k;
     }
   } else {
-    discretize_in_space(h, space_start_, 0.0, source_, source_curr);
-    discretize_in_space(h, space_start_, time, source_, source_next);
+    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
+                                                   source_, source_curr);
+    v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
+                                                   source_, source_next);
     // loop for stepping in time:
     std::size_t t = 1;
     while (time <= terminal_time_) {
@@ -482,8 +493,10 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
       else
         up_sweep(solution, source_next, 1.0);
       ++t;
-      discretize_in_space(h, space_start_, time, source_, source_curr);
-      discretize_in_space(h, space_start_, 2.0 * time, source_, source_next);
+      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
+                                                     source_, source_curr);
+      v_discretization<fp_type>::discretize_in_space(
+          h, space_start_, 2.0 * time, source_, source_next);
       time += k;
     }
   }

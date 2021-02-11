@@ -10,6 +10,7 @@ using lss_one_dim_heat_cuda_kernels::fill_dirichlet_bc_1d;
 using lss_one_dim_heat_cuda_kernels::fill_robin_bc_1d;
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::robin_boundary;
+using lss_one_dim_pde_utility::v_discretization;
 using lss_utility::NaN;
 using lss_utility::swap;
 
@@ -55,7 +56,8 @@ void euler_loop_sp::operator()(
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<float>::discretize_in_space(h, space_start_, time,
+                                                   source_, h_source);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -135,7 +137,8 @@ void euler_loop_dp::operator()(
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<double>::discretize_in_space(h, space_start_, time,
+                                                    source_, h_source);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -217,7 +220,8 @@ void euler_loop_sp::operator()(float const *input,
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<float>::discretize_in_space(h, space_start_, time,
+                                                   source_, h_source);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -301,7 +305,8 @@ void euler_loop_dp::operator()(double const *input,
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<double>::discretize_in_space(h, space_start_, time,
+                                                    source_, h_source);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);

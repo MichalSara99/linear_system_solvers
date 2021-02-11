@@ -1,50 +1,58 @@
 #pragma once
-#if !defined(_LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA)
-#define _LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
+#if !defined(_LSS_BLACK_SCHOLES_EQUATION_SOLVERS)
+#define _LSS_BLACK_SCHOLES_EQUATION_SOLVERS
+
+#include <functional>
 
 #include "common/lss_enumerations.h"
+#include "common/lss_macros.h"
 #include "common/lss_utility.h"
-#include "lss_space_variable_heat_explicit_schemes_cuda.h"
-#include "lss_space_variable_heat_implicit_schemes_cuda.h"
+#include "lss_space_variable_heat_explicit_schemes.h"
+#include "lss_space_variable_heat_explicit_schemes_policy.h"
+#include "lss_space_variable_heat_implicit_schemes.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
-#include "sparse_solvers/lss_sparse_solvers_cuda.h"
 
-namespace lss_one_dim_space_variable_pde_solvers_cuda {
+namespace lss_one_dim_space_variable_pde_solvers {
 
 using lss_enumerations::boundary_condition_enum;
+using lss_enumerations::explicit_pde_schemes_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
-using lss_enumerations::memory_space_enum;
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::discretization;
 using lss_one_dim_pde_utility::heat_data;
 using lss_one_dim_pde_utility::pde_coefficient_holder_fun_1_arg;
 using lss_one_dim_pde_utility::robin_boundary;
-using lss_sparse_solvers::real_sparse_solver_cuda;
-using lss_utility::flat_matrix;
+using lss_one_dim_space_variable_heat_explicit_schemes_policy::
+    ade_heat_bakarat_clark_scheme_backward_policy;
+using lss_one_dim_space_variable_heat_explicit_schemes_policy::
+    ade_heat_saulyev_scheme_backward_policy;
+using lss_one_dim_space_variable_heat_explicit_schemes_policy::
+    heat_euler_scheme_backward_policy;
 using lss_utility::range;
 using lss_utility::uptr_t;
 
 namespace implicit_solvers {
 
 // ============================================================================
-// ================= general_heat_equation_cuda General Template ==============
+// =================== black_scholes_equation General Template ================
 // ============================================================================
 
 template <typename fp_type, boundary_condition_enum b_type,
-          memory_space_enum memory_space,
-          template <memory_space_enum, typename>
-          typename real_sparse_policy_cuda,
+          template <typename, boundary_condition_enum,
+                    template <typename, typename> typename cont, typename>
+          typename FDMSolver,
           template <typename, typename> typename container, typename alloc>
-class general_heat_equation_cuda {};
+class black_scholes_equation {};
 
 // ============================================================================
-// ====== general_heat_equation_cuda Dirichlet Specialisation Template ========
+// ========= black_scholes_equation Dirichlet Specialisation Template =========
 // ============================================================================
 //
-//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t), t > 0, x_1 < x < x_2
+//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t),
+//	x_1 < x < x_2, 0 < t < T
 //
-//	with initial condition
-//  u(x,0) = f(x)
+//	with terminal condition
+//  u(x,T) = f(x)
 //
 //	and Dirichlet boundaries:
 //  u(x_1,t) = A(t)
@@ -52,42 +60,43 @@ class general_heat_equation_cuda {};
 //
 // ============================================================================
 
-template <typename fp_type, memory_space_enum memory_space,
-          template <memory_space_enum, typename>
-          typename real_sparse_policy_cuda,
+template <typename fp_type,
+          template <typename, boundary_condition_enum,
+                    template <typename, typename> typename cont, typename>
+          typename FDMSolver,
           template <typename, typename> typename container, typename alloc>
-class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
-                                 memory_space, real_sparse_policy_cuda,
-                                 container, alloc> {
+class black_scholes_equation<fp_type, boundary_condition_enum::Dirichlet,
+                             FDMSolver, container, alloc> {
  private:
-  typedef real_sparse_policy_cuda<memory_space, fp_type> cuda_solver_t;
+  typedef FDMSolver<fp_type, boundary_condition_enum::Dirichlet, container,
+                    alloc>
+      fdm_solver_t;
   typedef heat_data<fp_type> heat_data_t;
 
-  uptr_t<cuda_solver_t> solverPtr_;       // finite-difference solver
+  uptr_t<fdm_solver_t> solverPtr_;        // finite-difference solver
   uptr_t<heat_data_t> dataPtr_;           // one-dim heat data
   dirichlet_boundary<fp_type> boundary_;  // boundaries
   pde_coefficient_holder_fun_1_arg<fp_type> coeffs_;  // coefficients of PDE
 
  public:
   typedef fp_type value_type;
-  explicit general_heat_equation_cuda() = delete;
-  explicit general_heat_equation_cuda(range<fp_type> const &space_range,
-                                      fp_type terminal_time,
-                                      std::size_t const &space_discretization,
-                                      std::size_t const &time_discretization)
-      : solverPtr_{std::make_unique<cuda_solver_t>()},
+  explicit black_scholes_equation() = delete;
+  explicit black_scholes_equation(range<fp_type> const &space_range,
+                                  fp_type terminal_time,
+                                  std::size_t const &space_discretization,
+                                  std::size_t const &time_discretization)
+      : solverPtr_{std::make_unique<fdm_solver_t>(space_discretization + 1)},
         dataPtr_{std::make_unique<heat_data_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
-  ~general_heat_equation_cuda() {}
+  ~black_scholes_equation() {}
 
-  general_heat_equation_cuda(general_heat_equation_cuda const &) = delete;
-  general_heat_equation_cuda(general_heat_equation_cuda &&) = delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda const &) =
-      delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda &&) = delete;
+  black_scholes_equation(black_scholes_equation const &) = delete;
+  black_scholes_equation(black_scholes_equation &&) = delete;
+  black_scholes_equation &operator=(black_scholes_equation const &) = delete;
+  black_scholes_equation &operator=(black_scholes_equation &&) = delete;
 
   inline fp_type space_step() const {
     return ((dataPtr_->space_range.spread()) /
@@ -102,10 +111,9 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
       dirichlet_boundary<fp_type> const &dirichlet_boundary) {
     boundary_ = dirichlet_boundary;
   }
-
-  inline void set_initial_condition(
-      std::function<fp_type(fp_type)> const &initial_condition) {
-    dataPtr_->initial_condition = initial_condition;
+  inline void set_terminal_condition(
+      std::function<fp_type(fp_type)> const &terminal_condition) {
+    dataPtr_->terminal_condition = terminal_condition;
   }
   inline void set_heat_source(
       std::function<fp_type(fp_type, fp_type)> const &heat_source) {
@@ -124,19 +132,21 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
       std::function<fp_type(fp_type)> const &c) {
     std::get<2>(coeffs_) = c;
   }
+
   void solve(container<fp_type, alloc> &solution,
              implicit_pde_schemes_enum scheme =
                  implicit_pde_schemes_enum::CrankNicolson);
 };
 
 // ============================================================================
-// ===== general_heat_equation_cuda Robin Specialisation Template =============
+// ============ black_scholes_equation Robin Specialisation Template ==========
 // ============================================================================
 //
-//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t), t > 0, x_1 < x < x_2
+//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t),
+//	x_1 < x < x_2, 0 < t < T
 //
-//	with initial condition
-//  u(x,0) = f(x)
+//	with terminal condition
+//  u(x,T) = f(x)
 //
 //	and Robin boundaries:
 //  d_1*u_x(x_1,t) + f_1*u(x_1,t) = A
@@ -151,7 +161,7 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
 //	U_0 = ((2*d_1 + f_1*h)/(2*d_1 - f_1*h)) * U_1 +
 //			(2*h/(f_1*h - 2*d_1))*A
 //	U_N-1 = ((2*d_2 + f_2*h)/(2*d_2 - f_2*h)) * U_N +
-//			(2*h/(f_2*h - 2*d_2))*B
+//			(2*h/(f_2*h -2*d_2))*B
 //
 //	or
 //
@@ -160,43 +170,42 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
 //
 // ============================================================================
 
-template <typename fp_type, memory_space_enum memory_space,
-          template <memory_space_enum, typename>
-          typename real_sparse_policy_cuda,
+template <typename fp_type,
+          template <typename, boundary_condition_enum,
+                    template <typename, typename> typename cont, typename>
+          typename FDMSolver,
           template <typename, typename> typename container, typename alloc>
-class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
-                                 memory_space, real_sparse_policy_cuda,
-                                 container, alloc> {
+class black_scholes_equation<fp_type, boundary_condition_enum::Robin, FDMSolver,
+                             container, alloc> {
  private:
-  typedef real_sparse_policy_cuda<memory_space, fp_type> cuda_solver_t;
+  typedef FDMSolver<fp_type, boundary_condition_enum::Robin, container, alloc>
+      fdm_solver_t;
   typedef heat_data<fp_type> heat_data_t;
 
-  uptr_t<cuda_solver_t> solverPtr_;   // finite-difference solver
+  uptr_t<fdm_solver_t> solverPtr_;    // finite-difference solver
   uptr_t<heat_data_t> dataPtr_;       // one-dim heat data
   robin_boundary<fp_type> boundary_;  // Robin boundary
   pde_coefficient_holder_fun_1_arg<fp_type> coeffs_;  // coefficients of PDE
-  void transform_robin_bc(robin_boundary<fp_type> const &robin_boundary);
 
  public:
   typedef fp_type value_type;
-  explicit general_heat_equation_cuda() = delete;
-  explicit general_heat_equation_cuda(range<fp_type> const &space_range,
-                                      fp_type terminal_time,
-                                      std::size_t const &space_discretization,
-                                      std::size_t const &time_discretization)
-      : solverPtr_{std::make_unique<cuda_solver_t>()},
+  explicit black_scholes_equation() = delete;
+  explicit black_scholes_equation(range<fp_type> const &space_range,
+                                  fp_type terminal_time,
+                                  std::size_t const &space_discretization,
+                                  std::size_t const &time_discretization)
+      : solverPtr_{std::make_unique<fdm_solver_t>(space_discretization + 1)},
         dataPtr_{std::make_unique<heat_data_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
-  ~general_heat_equation_cuda() {}
+  ~black_scholes_equation() {}
 
-  general_heat_equation_cuda(general_heat_equation_cuda const &) = delete;
-  general_heat_equation_cuda(general_heat_equation_cuda &&) = delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda const &) =
-      delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda &&) = delete;
+  black_scholes_equation(black_scholes_equation const &) = delete;
+  black_scholes_equation(black_scholes_equation &&) = delete;
+  black_scholes_equation &operator=(black_scholes_equation const &) = delete;
+  black_scholes_equation &operator=(black_scholes_equation &&) = delete;
 
   inline fp_type space_step() const {
     return ((dataPtr_->space_range.spread()) /
@@ -209,12 +218,13 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
 
   inline void set_boundary_condition(
       robin_boundary<fp_type> const &robin_boundary) {
-    transform_robin_bc(robin_boundary);
+    boundary_ = robin_boundary;
+    solverPtr_->set_boundary_condition(boundary_.left, boundary_.right);
   }
 
-  inline void set_initial_condition(
-      std::function<fp_type(fp_type)> const &initial_condition) {
-    dataPtr_->initial_condition = initial_condition;
+  inline void set_terminal_condition(
+      std::function<fp_type(fp_type)> const &terminal_condition) {
+    dataPtr_->terminal_condition = terminal_condition;
   }
   inline void set_heat_source(
       std::function<fp_type(fp_type, fp_type)> const &heat_source) {
@@ -233,6 +243,7 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
       std::function<fp_type(fp_type)> const &c) {
     std::get<2>(coeffs_) = c;
   }
+
   void solve(container<fp_type, alloc> &solution,
              implicit_pde_schemes_enum scheme =
                  implicit_pde_schemes_enum::CrankNicolson);
@@ -243,21 +254,22 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
 namespace explicit_solvers {
 
 // ============================================================================
-// ================= general_heat_equation_cuda General Template ==============
+// ================ black_scholes_equation General Template ===================
 // ============================================================================
 
 template <typename fp_type, boundary_condition_enum b_type,
           template <typename, typename> typename container, typename alloc>
-class general_heat_equation_cuda {};
+class black_scholes_equation {};
 
 // ============================================================================
-// ========= general_heat_equation_cuda Dirichlet Specialisation Template =====
+// ============ black_scholes_equation Dirichlet Specialisation Template ======
 // ============================================================================
 //
-//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t), t > 0, x_1 < x < x_2
+//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t),
+//	x_1 < x < x_2, 0 < t < T
 //
-//	with initial condition
-//  u(x,0) = f(x)
+//	with terminal condition
+//  u(x,T) = f(x)
 //
 //	and Dirichlet boundaries:
 //  u(x_1,t) = A(t)
@@ -267,8 +279,8 @@ class general_heat_equation_cuda {};
 
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
-class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
-                                 container, alloc> {
+class black_scholes_equation<fp_type, boundary_condition_enum::Dirichlet,
+                             container, alloc> {
  private:
   typedef heat_data<fp_type> heat_data_t;
 
@@ -278,23 +290,22 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
 
  public:
   typedef fp_type value_type;
-  explicit general_heat_equation_cuda() = delete;
-  explicit general_heat_equation_cuda(range<fp_type> const &space_range,
-                                      fp_type terminal_time,
-                                      std::size_t const &space_discretization,
-                                      std::size_t const &time_discretization)
+  explicit black_scholes_equation() = delete;
+  explicit black_scholes_equation(range<fp_type> const &space_range,
+                                  fp_type terminal_time,
+                                  std::size_t const &space_discretization,
+                                  std::size_t const &time_discretization)
       : dataPtr_{std::make_unique<heat_data_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
-  ~general_heat_equation_cuda() {}
+  ~black_scholes_equation() {}
 
-  general_heat_equation_cuda(general_heat_equation_cuda const &) = delete;
-  general_heat_equation_cuda(general_heat_equation_cuda &&) = delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda const &) =
-      delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda &&) = delete;
+  black_scholes_equation(black_scholes_equation const &) = delete;
+  black_scholes_equation(black_scholes_equation &&) = delete;
+  black_scholes_equation &operator=(black_scholes_equation const &) = delete;
+  black_scholes_equation &operator=(black_scholes_equation &&) = delete;
 
   inline fp_type space_step() const {
     return ((dataPtr_->space_range.spread()) /
@@ -309,10 +320,9 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
       dirichlet_boundary<fp_type> const &dirichlet_boundary) {
     boundary_ = dirichlet_boundary;
   }
-
-  inline void set_initial_condition(
-      std::function<fp_type(fp_type)> const &initial_condition) {
-    dataPtr_->initial_condition = initial_condition;
+  inline void set_terminal_condition(
+      std::function<fp_type(fp_type)> const &terminal_condition) {
+    dataPtr_->terminal_condition = terminal_condition;
   }
   inline void set_heat_source(
       std::function<fp_type(fp_type, fp_type)> const &heat_source) {
@@ -331,20 +341,21 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
       std::function<fp_type(fp_type)> const &c) {
     std::get<2>(coeffs_) = c;
   }
-  // stability check:
-  bool is_stable() const;
 
-  void solve(container<fp_type, alloc> &solution);
+  void solve(container<fp_type, alloc> &solution,
+             explicit_pde_schemes_enum scheme =
+                 explicit_pde_schemes_enum::ADEBarakatClark);
 };
 
 // ============================================================================
-// ========= general_heat_equation_cuda Robin Specialisation Template =========
+// =========== black_scholes_equation Robin Specialisation Template ===========
 // ============================================================================
 //
-//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t), t > 0, x_1 < x < x_2
+//	u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t),
+//	x_1 < x < x_2, 0 < t < T
 //
-//	with initial condition
-//  u(x,0) = f(x)
+//	with terminal condition
+//  u(x,T) = f(x)
 //
 //	and Robin boundaries:
 //  d_1*u_x(x_1,t) + f_1*u(x_1,t) = A
@@ -359,7 +370,7 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
 //	U_0 = ((2*d_1 + f_1*h)/(2*d_1 - f_1*h)) * U_1 +
 //			(2*h/(f_1*h - 2*d_1))*A
 //	U_N-1 = ((2*d_2 + f_2*h)/(2*d_2 - f_2*h)) * U_N +
-//			(2*h/(f_2*h - 2*d_2))*B
+//			(2*h/(f_2*h -2*d_2))*B
 //
 //	or
 //
@@ -370,35 +381,33 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
 
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
-class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
-                                 container, alloc> {
+class black_scholes_equation<fp_type, boundary_condition_enum::Robin, container,
+                             alloc> {
  private:
   typedef heat_data<fp_type> heat_data_t;
 
   uptr_t<heat_data_t> dataPtr_;                       // one-dim heat data
   robin_boundary<fp_type> boundary_;                  // Robin boundary
   pde_coefficient_holder_fun_1_arg<fp_type> coeffs_;  // coefficients of PDE
-  void transform_robin_bc(robin_boundary<fp_type> const &robin_boundary);
 
  public:
   typedef fp_type value_type;
-  explicit general_heat_equation_cuda() = delete;
-  explicit general_heat_equation_cuda(range<fp_type> const &space_range,
-                                      fp_type terminal_time,
-                                      std::size_t const &space_discretization,
-                                      std::size_t const &time_discretization)
+  explicit black_scholes_equation() = delete;
+  explicit black_scholes_equation(range<fp_type> const &space_range,
+                                  fp_type terminal_time,
+                                  std::size_t const &space_discretization,
+                                  std::size_t const &time_discretization)
       : dataPtr_{std::make_unique<heat_data_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
             nullptr, false)} {}
 
-  ~general_heat_equation_cuda() {}
+  ~black_scholes_equation() {}
 
-  general_heat_equation_cuda(general_heat_equation_cuda const &) = delete;
-  general_heat_equation_cuda(general_heat_equation_cuda &&) = delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda const &) =
-      delete;
-  general_heat_equation_cuda &operator=(general_heat_equation_cuda &&) = delete;
+  black_scholes_equation(black_scholes_equation const &) = delete;
+  black_scholes_equation(black_scholes_equation &&) = delete;
+  black_scholes_equation &operator=(black_scholes_equation const &) = delete;
+  black_scholes_equation &operator=(black_scholes_equation &&) = delete;
 
   inline fp_type space_step() const {
     return ((dataPtr_->space_range.spread()) /
@@ -411,14 +420,12 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
 
   inline void set_boundary_condition(
       robin_boundary<fp_type> const &robin_boundary) {
-    transform_robin_bc(robin_boundary);
+    boundary_ = robin_boundary;
   }
-
-  inline void set_initial_condition(
-      std::function<fp_type(fp_type)> const &initial_condition) {
-    dataPtr_->initial_condition = initial_condition;
+  inline void set_terminal_condition(
+      std::function<fp_type(fp_type)> const &terminal_condition) {
+    dataPtr_->terminal_condition = terminal_condition;
   }
-
   inline void set_heat_source(
       std::function<fp_type(fp_type, fp_type)> const &heat_source) {
     dataPtr_->is_source_function_set = true;
@@ -437,38 +444,37 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
     std::get<2>(coeffs_) = c;
   }
 
-  // stability check:
-  bool is_stable() const;
-
   void solve(container<fp_type, alloc> &solution);
 };
+
 }  // namespace explicit_solvers
 
 // ============================================================================
-// ============================= IMPLEMENTATIONS ==============================
+// ========================= IMPLEMENTATIONS ==================================
 
 // ============================================================================
-// ========= general_heat_equation_cuda (Dirichlet) implementation ============
+// =========== black_scholes_equation (Dirichlet) implementation ==============
 // ============================================================================
 
-template <typename fp_type, memory_space_enum memory_space,
-          template <memory_space_enum, typename>
-          typename real_sparse_policy_cuda,
+template <typename fp_type,
+          template <typename, boundary_condition_enum,
+                    template <typename, typename> typename cont, typename>
+          typename FDMSolver,
           template <typename, typename> typename container, typename alloc>
-void implicit_solvers::general_heat_equation_cuda<
-    fp_type, boundary_condition_enum::Dirichlet, memory_space,
-    real_sparse_policy_cuda, container,
+void implicit_solvers::black_scholes_equation<
+    fp_type, boundary_condition_enum::Dirichlet, FDMSolver, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
-  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
+  LSS_VERIFY(dataPtr_->terminal_condition, "Terminal condition must be set.");
   LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
   LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
   LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get correct theta according to the scheme:
-  fp_type const theta = lss_one_dim_space_variable_heat_implicit_schemes_cuda::
-      heat_equation_schemes<fp_type>::get_theta(scheme);
+  fp_type const theta =
+      lss_one_dim_space_variable_heat_implicit_schemes::heat_equation_schemes<
+          fp_type>::get_theta(scheme);
   // get space step:
   fp_type const h = space_step();
   // get time step:
@@ -477,6 +483,8 @@ void implicit_solvers::general_heat_equation_cuda<
   auto const &space_range = dataPtr_->space_range;
   // get source heat function:
   auto const &heat_source = dataPtr_->source_function;
+  // space divisions:
+  std::size_t const space_size = dataPtr_->space_division;
   // calculate scheme const coefficients:
   fp_type const lambda = k / (h * h);
   fp_type const gamma = k / (2.0 * h);
@@ -485,240 +493,82 @@ void implicit_solvers::general_heat_equation_cuda<
   auto const &a = std::get<0>(coeffs_);
   auto const &b = std::get<1>(coeffs_);
   auto const &c = std::get<2>(coeffs_);
-  // store size of matrix:
-  std::size_t const m = dataPtr_->space_division - 1;
   // create container to carry mesh in space and then previous solution:
-  container<fp_type, alloc> prev_sol(m, fp_type{});
-  // populate the container with mesh in space
-  discretization<fp_type, container, alloc>::discretize_space(
-      h, (space_range.lower() + h), prev_sol);
-  // use the mesh in space to get values of initial condition
-  discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
-  // first create and populate the sparse matrix:
-  flat_matrix<fp_type> fsm;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
-  // prepare space variable coefficients:
-  auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-  auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-  auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
-  // populate the matrix:
-  fsm.emplace_back(0, 0, (1.0 + 2.0 * B(1 * h) * theta));
-  fsm.emplace_back(0, 1, (-1.0 * D(1 * h) * theta));
-  for (std::size_t t = 1; t < m - 1; ++t) {
-    fsm.emplace_back(t, t - 1, (-1.0 * A((t + 1) * h) * theta));
-    fsm.emplace_back(t, t, (1.0 + 2.0 * B((t + 1) * h) * theta));
-    fsm.emplace_back(t, t + 1, (-1.0 * D((t + 1) * h) * theta));
-  }
-  fsm.emplace_back(m - 1, m - 2, (-1.0 * A(m * h) * theta));
-  fsm.emplace_back(m - 1, m - 1, (1.0 + 2.0 * B(m * h) * theta));
-  container<fp_type, alloc> rhs(m, fp_type{});
-  // create container to carry new solution:
-  container<fp_type, alloc> next_sol(m, fp_type{});
-  // create first time point:
-  fp_type time = k;
-  // store terminal time:
-  fp_type const last_time = dataPtr_->time_range.upper();
-  // initialize the solver:
-  solverPtr_->initialize(m);
-  // insert sparse matrix A and vector b:
-  solverPtr_->set_flat_sparse_matrix(std::move(fsm));
-  if ((dataPtr_->is_source_function_set)) {
-    // wrap the scheme coefficients:
-    const auto scheme_coeffs = std::make_tuple(A, B, D, h, k);
-    // get the correct scheme:
-    auto scheme_fun = lss_one_dim_space_variable_heat_implicit_schemes_cuda::
-        heat_equation_schemes<fp_type>::get_inhom_scheme(
-            boundary_condition_enum::Dirichlet, scheme);
-    // create a container to carry discretized source heat
-    container<fp_type, alloc> source_curr(m, fp_type{});
-    container<fp_type, alloc> source_next(m, fp_type{});
-    discretization<fp_type, container, alloc>::discretize_in_space(
-        h, (space_range.lower() + h), 0.0, heat_source, source_curr);
-    discretization<fp_type, container, alloc>::discretize_in_space(
-        h, (space_range.lower() + h), time, heat_source, source_next);
-    // loop for stepping in time:
-    while (time <= last_time) {
-      scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs,
-                 std::make_pair(boundary_.first(time), boundary_.second(time)),
-                 std::pair<fp_type, fp_type>());
-      solverPtr_->set_rhs(rhs);
-      solverPtr_->solve(next_sol);
-      prev_sol = next_sol;
-      discretization<fp_type, container, alloc>::discretize_in_space(
-          h, (space_range.lower() + h), time, heat_source, source_curr);
-      discretization<fp_type, container, alloc>::discretize_in_space(
-          h, (space_range.lower() + h), 2.0 * time, heat_source, source_next);
-      time += k;
-    }
-  } else {
-    // wrap the scheme coefficients:
-    const auto scheme_coeffs = std::make_tuple(A, B, D, h, fp_type{});
-    // get the correct scheme:
-    auto schemeFun = lss_one_dim_space_variable_heat_implicit_schemes_cuda::
-        heat_equation_schemes<fp_type>::get_scheme(
-            boundary_condition_enum::Dirichlet, scheme);
-    // loop for stepping in time:
-    while (time <= last_time) {
-      schemeFun(scheme_coeffs, prev_sol, container<fp_type, alloc>(),
-                container<fp_type, alloc>(), rhs,
-                std::make_pair(boundary_.first(time), boundary_.second(time)),
-                std::pair<fp_type, fp_type>());
-      solverPtr_->set_rhs(rhs);
-      solverPtr_->solve(next_sol);
-      prev_sol = next_sol;
-      time += k;
-    }
-  }
-
-  // copy into solution vector
-  solution[0] = boundary_.first(last_time);
-  std::copy(prev_sol.begin(), prev_sol.end(), std::next(solution.begin()));
-  solution[solution.size() - 1] = boundary_.second(last_time);
-}
-
-// ============================================================================
-// =========== general_heat_equation_cuda (Robin BC) implementation ===========
-// ============================================================================
-
-template <typename fp_type, memory_space_enum memory_space,
-          template <memory_space_enum, typename>
-          typename real_sparse_policy_cuda,
-          template <typename, typename> typename container, typename alloc>
-void implicit_solvers::general_heat_equation_cuda<
-    fp_type, boundary_condition_enum::Robin, memory_space,
-    real_sparse_policy_cuda, container,
-    alloc>::transform_robin_bc(robin_boundary<fp_type> const &boundary) {
-  auto const &beta_ = static_cast<fp_type>(1.0) / boundary.right.first;
-  auto const &psi_ =
-      static_cast<fp_type>(-1.0) * boundary.right.second / boundary.right.first;
-  boundary_.left = boundary.left;
-  boundary_.right = std::make_pair(beta_, psi_);
-}
-
-template <typename fp_type, memory_space_enum memory_space,
-          template <memory_space_enum, typename>
-          typename real_sparse_policy_cuda,
-          template <typename, typename> typename container, typename alloc>
-void implicit_solvers::general_heat_equation_cuda<
-    fp_type, boundary_condition_enum::Robin, memory_space,
-    real_sparse_policy_cuda, container,
-    alloc>::solve(container<fp_type, alloc> &solution,
-                  implicit_pde_schemes_enum scheme) {
-  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
-  LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
-  LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
-  LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
-  LSS_ASSERT(solution.size() > 0,
-             "The input solution container must be initialized.");
-  // get correct theta according to the scheme:
-  fp_type const theta = lss_one_dim_space_variable_heat_implicit_schemes_cuda::
-      heat_equation_schemes<fp_type>::get_theta(scheme);
-  // get space step:
-  fp_type const h = space_step();
-  // get time step:
-  fp_type const k = time_step();
-  // get space range:
-  auto const &space_range = dataPtr_->space_range;
-  // get source heat function:
-  auto const &heat_source = dataPtr_->source_function;
-  // calculate scheme const coefficients:
-  fp_type const lambda = k / (h * h);
-  fp_type const gamma = k / (2.0 * h);
-  fp_type const delta = 0.5 * k;
-  // save scheme variable coefficients:
-  auto const &a = std::get<0>(coeffs_);
-  auto const &b = std::get<1>(coeffs_);
-  auto const &c = std::get<2>(coeffs_);
-  // store size of matrix:
-  std::size_t const m = dataPtr_->space_division + 1;
-  // create container to carry mesh in space and then previous solution:
-  container<fp_type, alloc> prev_sol(m, fp_type{});
+  container<fp_type, alloc> prev_sol(space_size + 1, fp_type{});
   // populate the container with mesh in space
   discretization<fp_type, container, alloc>::discretize_space(
       h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
   discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
-  // first create and populate the sparse matrix:
-  flat_matrix<fp_type> fsm;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+      dataPtr_->terminal_condition, prev_sol);
+  // since coefficients are different in space :
+  container<fp_type, alloc> low(space_size + 1, fp_type{});
+  container<fp_type, alloc> diag(space_size + 1, fp_type{});
+  container<fp_type, alloc> up(space_size + 1, fp_type{});
   // prepare space variable coefficients:
   auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
   auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
   auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
-  // populate the matrix:
-  fsm.emplace_back(0, 0, (1.0 + 2.0 * B(0 * h) * theta));
-  fsm.emplace_back(
-      0, 1, (-1.0 * (boundary_.left.first * A(0 * h) + D(0 * h)) * theta));
-  for (std::size_t t = 1; t < m - 1; ++t) {
-    fsm.emplace_back(t, t - 1, (-1.0 * A(t * h) * theta));
-    fsm.emplace_back(t, t, (1.0 + 2.0 * B(t * h) * theta));
-    fsm.emplace_back(t, t + 1, (-1.0 * D(t * h) * theta));
+  for (std::size_t t = 0; t < low.size(); ++t) {
+    low[t] = -1.0 * A(t * h) * theta;
+    diag[t] = (1.0 + 2.0 * B(t * h) * theta);
+    up[t] = -1.0 * D(t * h) * theta;
   }
-  fsm.emplace_back(
-      m - 1, m - 2,
-      (-1.0 * (A((m - 1) * h) + boundary_.right.first * D((m - 1) * h)) *
-       theta));
-  fsm.emplace_back(m - 1, m - 1, (1.0 + 2.0 * B((m - 1) * h) * theta));
-
-  container<fp_type, alloc> rhs(m, fp_type{});
+  container<fp_type, alloc> rhs(space_size + 1, fp_type{});
   // create container to carry new solution:
-  container<fp_type, alloc> next_sol(m, fp_type{});
-  // create first time point:
-  fp_type time = k;
+  container<fp_type, alloc> next_sol(space_size + 1, fp_type{});
   // store terminal time:
   fp_type const last_time = dataPtr_->time_range.upper();
-  // initialize the solver:
-  solverPtr_->initialize(m);
-  // insert sparse matrix A and vector b:
-  solverPtr_->set_flat_sparse_matrix(std::move(fsm));
+  // create one but last time point:
+  fp_type time = last_time - k;
+  // set properties of FDMSolver:
+  solverPtr_->set_diagonals(std::move(low), std::move(diag), std::move(up));
   // differentiate between inhomogeneous and homogeneous PDE:
   if ((dataPtr_->is_source_function_set)) {
     // wrap the scheme coefficients:
     const auto scheme_coeffs = std::make_tuple(A, B, D, h, k);
     // get the correct scheme:
-    auto scheme_fun = lss_one_dim_space_variable_heat_implicit_schemes_cuda::
-        heat_equation_schemes<fp_type>::get_inhom_scheme(
-            boundary_condition_enum::Robin, scheme);
+    auto scheme_fun =
+        lss_one_dim_space_variable_heat_implicit_schemes::heat_equation_schemes<
+            fp_type>::get_inhom_scheme(scheme);
     // create a container to carry discretized source heat
-    container<fp_type, alloc> source_curr(m, fp_type{});
-    container<fp_type, alloc> source_next(m, fp_type{});
+    container<fp_type, alloc> source_curr(space_size + 1, fp_type{});
+    container<fp_type, alloc> source_next(space_size + 1, fp_type{});
     discretization<fp_type, container, alloc>::discretize_in_space(
-        h, (space_range.lower() + h), 0.0, heat_source, source_curr);
+        h, space_range.lower(), 0.0, heat_source, source_curr);
     discretization<fp_type, container, alloc>::discretize_in_space(
-        h, (space_range.lower() + h), time, heat_source, source_next);
+        h, space_range.lower(), time, heat_source, source_next);
     // loop for stepping in time:
-    while (time <= last_time) {
-      scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs,
-                 boundary_.left, boundary_.right);
+    while (time >= 0.0) {
+      scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs);
+      solverPtr_->set_boundary_condition(
+          std::make_pair(boundary_.first(time), boundary_.second(time)));
       solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
       discretization<fp_type, container, alloc>::discretize_in_space(
-          h, (space_range.lower() + h), time, heat_source, source_curr);
+          h, space_range.lower(), time, heat_source, source_curr);
       discretization<fp_type, container, alloc>::discretize_in_space(
-          h, (space_range.lower() + h), 2.0 * time, heat_source, source_next);
-      time += k;
+          h, space_range.lower(), 2.0 * time, heat_source, source_next);
+      time -= k;
     }
   } else {
     // wrap the scheme coefficients:
     const auto scheme_coeffs = std::make_tuple(A, B, D, h, fp_type{});
     // get the correct scheme:
-    auto scheme_fun = lss_one_dim_space_variable_heat_implicit_schemes_cuda::
-        heat_equation_schemes<fp_type>::get_scheme(
-            boundary_condition_enum::Robin, scheme);
+    auto scheme_fun =
+        lss_one_dim_space_variable_heat_implicit_schemes::heat_equation_schemes<
+            fp_type>::get_scheme(scheme);
     // loop for stepping in time:
-    while (time <= last_time) {
+    while (time >= 0.0) {
       scheme_fun(scheme_coeffs, prev_sol, container<fp_type, alloc>(),
-                 container<fp_type, alloc>(), rhs, boundary_.left,
-                 boundary_.right);
+                 container<fp_type, alloc>(), rhs);
+      solverPtr_->set_boundary_condition(
+          std::make_pair(boundary_.first(time), boundary_.second(time)));
       solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
-      time += k;
+      time -= k;
     }
   }
   // copy into solution vector
@@ -726,44 +576,138 @@ void implicit_solvers::general_heat_equation_cuda<
 }
 
 // ============================================================================
-// ========= general_heat_equation_cuda (Dirichlet BC) implementation =========
+// =============== black_scholes_equation (Robin) implementation ==============
+// ============================================================================
+
+template <typename fp_type,
+          template <typename, boundary_condition_enum,
+                    template <typename, typename> typename cont, typename>
+          typename FDMSolver,
+          template <typename, typename> typename container, typename alloc>
+void implicit_solvers::black_scholes_equation<
+    fp_type, boundary_condition_enum::Robin, FDMSolver, container,
+    alloc>::solve(container<fp_type, alloc> &solution,
+                  implicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->terminal_condition, "Terminal condition must be set.");
+  LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
+  LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
+  LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
+  LSS_ASSERT(solution.size() > 0,
+             "The input solution container must be initialized.");
+  // get correct theta according to the scheme:
+  fp_type const theta =
+      lss_one_dim_space_variable_heat_implicit_schemes::heat_equation_schemes<
+          fp_type>::get_theta(scheme);
+  // get space step:
+  fp_type const h = space_step();
+  // get time step:
+  fp_type const k = time_step();
+  // get space range:
+  auto const &space_range = dataPtr_->space_range;
+  // space divisions:
+  std::size_t const &space_size = dataPtr_->space_division;
+  // get source heat function:
+  auto const &heat_source = dataPtr_->source_function;
+  // calculate scheme const coefficients:
+  fp_type const lambda = k / (h * h);
+  fp_type const gamma = k / (2.0 * h);
+  fp_type const delta = 0.5 * k;
+  // save scheme variable coefficients:
+  auto const &a = std::get<0>(coeffs_);
+  auto const &b = std::get<1>(coeffs_);
+  auto const &c = std::get<2>(coeffs_);
+  // create container to carry mesh in space and then previous solution:
+  container<fp_type, alloc> prev_sol(space_size + 1, fp_type{});
+  // populate the container with mesh in space
+  discretization<fp_type, container, alloc>::discretize_space(
+      h, space_range.lower(), prev_sol);
+  // use the mesh in space to get values of initial condition
+  discretization<fp_type, container, alloc>::discretize_initial_condition(
+      dataPtr_->terminal_condition, prev_sol);
+  // since coefficients are different in space :
+  container<fp_type, alloc> low(space_size + 1, fp_type{});
+  container<fp_type, alloc> diag(space_size + 1, fp_type{});
+  container<fp_type, alloc> up(space_size + 1, fp_type{});
+  // prepare space variable coefficients:
+  auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
+  auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
+  auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+  for (std::size_t t = 0; t < low.size(); ++t) {
+    low[t] = -1.0 * A(t * h) * theta;
+    diag[t] = (1.0 + 2.0 * B(t * h) * theta);
+    up[t] = -1.0 * D(t * h) * theta;
+  }
+  container<fp_type, alloc> rhs(space_size + 1, fp_type{});
+  // create container to carry new solution:
+  container<fp_type, alloc> next_sol(space_size + 1, fp_type{});
+  // store terminal time:
+  fp_type const last_time = dataPtr_->time_range.upper();
+  // create one but last time point:
+  fp_type time = last_time - k;
+  // set properties of FDMSolver:
+  solverPtr_->set_diagonals(std::move(low), std::move(diag), std::move(up));
+  // differentiate between inhomogeneous and homogeneous PDE:
+  if ((dataPtr_->is_source_function_set)) {
+    // wrap the scheme coefficients:
+    const auto scheme_coeffs = std::make_tuple(A, B, D, h, k);
+    // get the correct scheme:
+    auto scheme_fun =
+        lss_one_dim_space_variable_heat_implicit_schemes::heat_equation_schemes<
+            fp_type>::get_inhom_scheme(scheme);
+    // create a container to carry discretized source heat
+    container<fp_type, alloc> source_curr(space_size + 1, fp_type{});
+    container<fp_type, alloc> source_next(space_size + 1, fp_type{});
+    discretization<fp_type, container, alloc>::discretize_in_space(
+        h, space_range.lower(), 0.0, heat_source, source_curr);
+    discretization<fp_type, container, alloc>::discretize_in_space(
+        h, space_range.lower(), time, heat_source, source_next);
+    // loop for stepping in time:
+    while (time >= 0.0) {
+      scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs);
+      solverPtr_->set_rhs(rhs);
+      solverPtr_->solve(next_sol);
+      prev_sol = next_sol;
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h, space_range.lower(), time, heat_source, source_curr);
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h, space_range.lower(), 2.0 * time, heat_source, source_next);
+      time -= k;
+    }
+  } else {
+    // wrap the scheme coefficients:
+    const auto scheme_coeffs = std::make_tuple(A, B, D, h, fp_type{});
+    // get the correct scheme:
+    auto scheme_fun =
+        lss_one_dim_space_variable_heat_implicit_schemes::heat_equation_schemes<
+            fp_type>::get_scheme(scheme);
+    // loop for stepping in time:
+    while (time >= 0.0) {
+      scheme_fun(scheme_coeffs, prev_sol, container<fp_type, alloc>(),
+                 container<fp_type, alloc>(), rhs);
+      solverPtr_->set_rhs(rhs);
+      solverPtr_->solve(next_sol);
+      prev_sol = next_sol;
+      time -= k;
+    }
+  }
+  // copy into solution vector
+  std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+}
+
+// ============================================================================
+// ================ black_scholes_equation (Dirichlet) implementation =========
 // ============================================================================
 
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
-bool explicit_solvers::general_heat_equation_cuda<
-    fp_type, boundary_condition_enum::Dirichlet, container, alloc>::is_stable()
-    const {
-  auto const &a = std::get<0>(coeffs_);
-  auto const &b = std::get<1>(coeffs_);
-  auto const &c = std::get<2>(coeffs_);
-  fp_type const k = time_step();
-  fp_type const h = space_step();
-  fp_type const lambda = k / (h * h);
-  fp_type const gamma = k / h;
-
-  const std::size_t space_size = dataPtr_->space_division + 1;
-  for (std::size_t i = 0; i < space_size; ++i) {
-    if (c(i * h) > 0.0) return false;
-    if ((2.0 * lambda * a(i * h) - k * c(i * h)) > 1.0) return false;
-    if (((gamma * std::abs(b(i * h))) * (gamma * std::abs(b(i * h)))) >
-        (2.0 * lambda * a(i * h)))
-      return false;
-  }
-  return true;
-}
-
-template <typename fp_type, template <typename, typename> typename container,
-          typename alloc>
-void explicit_solvers::general_heat_equation_cuda<
+void explicit_solvers::black_scholes_equation<
     fp_type, boundary_condition_enum::Dirichlet, container,
-    alloc>::solve(container<fp_type, alloc> &solution) {
-  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
+    alloc>::solve(container<fp_type, alloc> &solution,
+                  explicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->terminal_condition, "Terminal condition must be set.");
   LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
   LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
   LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
-
-  LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get space step:
@@ -772,81 +716,88 @@ void explicit_solvers::general_heat_equation_cuda<
   fp_type const k = time_step();
   // get space range:
   auto const &space_range = dataPtr_->space_range;
-  // get time range:
-  auto const &time_range = dataPtr_->time_range;
+  // space divisions:
+  std::size_t const &space_size = dataPtr_->space_division;
   // get source heat function:
   auto const &heat_source = dataPtr_->source_function;
-  // space divisions:
-  std::size_t const space_size = dataPtr_->space_division;
   // flag set:
   bool const &is_source_set = dataPtr_->is_source_function_set;
-  // create container to carry mesh in space and then previous solution:
-  container<fp_type, alloc> prev_sol(space_size + 1, fp_type{});
-  // populate the container with mesh in space
-  discretization<fp_type, container, alloc>::discretize_space(
-      h, space_range.lower(), prev_sol);
-  // use the mesh in space to get values of initial condition
-  discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
-
-  lss_one_dim_space_variable_heat_explicit_schemes_cuda::
-      euler_heat_equation_scheme<fp_type, container, alloc>
-          euler_scheme(space_range.lower(), time_range.upper(),
-                       std::make_pair(k, h), coeffs_, prev_sol, heat_source,
-                       is_source_set);
-  euler_scheme(boundary_, solution);
-}
-
-// ============================================================================
-// ========= general_heat_equation_cuda (Robin BC) implementation =============
-// ============================================================================
-
-template <typename fp_type, template <typename, typename> typename container,
-          typename alloc>
-void explicit_solvers::general_heat_equation_cuda<
-    fp_type, boundary_condition_enum::Robin, container,
-    alloc>::transform_robin_bc(robin_boundary<fp_type> const &boundary) {
-  auto const &beta_ = static_cast<fp_type>(1.0) / boundary.right.first;
-  auto const &psi_ =
-      static_cast<fp_type>(-1.0) * boundary.right.second / boundary.right.first;
-  boundary_.left = boundary.left;
-  boundary_.right = std::make_pair(beta_, psi_);
-}
-
-template <typename fp_type, template <typename, typename> typename container,
-          typename alloc>
-bool explicit_solvers::general_heat_equation_cuda<
-    fp_type, boundary_condition_enum::Robin, container, alloc>::is_stable()
-    const {
+  // calculate scheme const coefficients:
+  fp_type const lambda = k / (h * h);
+  fp_type const gamma = k / (2.0 * h);
+  fp_type const delta = 0.5 * k;
+  // save scheme variable coefficients:
   auto const &a = std::get<0>(coeffs_);
   auto const &b = std::get<1>(coeffs_);
   auto const &c = std::get<2>(coeffs_);
-  fp_type const k = time_step();
-  fp_type const h = space_step();
-  fp_type const lambda = k / (h * h);
-  fp_type const gamma = k / h;
-
-  const std::size_t space_size = dataPtr_->space_division + 1;
-  for (std::size_t i = 0; i < space_size; ++i) {
-    if (c(i * h) > 0.0) return false;
-    if ((2.0 * lambda * a(i * h) - k * c(i * h)) > 1.0) return false;
-    if (((gamma * std::abs(b(i * h))) * (gamma * std::abs(b(i * h)))) >
-        (2.0 * lambda * a(i * h)))
-      return false;
+  // prepare space variable coefficients:
+  auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
+  auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
+  auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+  // wrap up the scheme coefficients:
+  auto scheme_coeffs = std::make_tuple(A, B, D);
+  // create container to carry mesh in space and then previous solution:
+  container<fp_type, alloc> init_condition(space_size + 1, fp_type{});
+  // populate the container with mesh in space
+  discretization<fp_type, container, alloc>::discretize_space(
+      h, space_range.lower(), init_condition);
+  // use the mesh in space to get values of terminal condition
+  discretization<fp_type, container, alloc>::discretize_initial_condition(
+      dataPtr_->terminal_condition, init_condition);
+  // get the correct scheme:
+  if (scheme == explicit_pde_schemes_enum::Euler) {
+    lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
+        fp_type, heat_euler_scheme_backward_policy<
+                     fp_type, pde_coefficient_holder_fun_1_arg<fp_type>,
+                     container, alloc>>
+        euler{space_range.lower(),  dataPtr_->time_range.upper(),
+              std::make_pair(k, h), coeffs_,
+              scheme_coeffs,        init_condition,
+              heat_source,          dataPtr_->is_source_function_set};
+    euler(boundary_, solution);
+  } else if (scheme == explicit_pde_schemes_enum::ADEBarakatClark) {
+    lss_one_dim_space_variable_heat_explicit_schemes::
+        ade_heat_bakarat_clark_scheme<
+            fp_type, ade_heat_bakarat_clark_scheme_backward_policy<
+                         fp_type, pde_coefficient_holder_fun_1_arg<fp_type>,
+                         container, alloc>>
+            adebc{space_range.lower(),
+                  dataPtr_->time_range.upper(),
+                  std::make_pair(k, h),
+                  scheme_coeffs,
+                  init_condition,
+                  heat_source,
+                  dataPtr_->is_source_function_set};
+    adebc(boundary_, solution);
+  } else {
+    lss_one_dim_space_variable_heat_explicit_schemes::ade_heat_saulyev_scheme<
+        fp_type, ade_heat_saulyev_scheme_backward_policy<
+                     fp_type, pde_coefficient_holder_fun_1_arg<fp_type>,
+                     container, alloc>>
+        ades{space_range.lower(),
+             dataPtr_->time_range.upper(),
+             std::make_pair(k, h),
+             scheme_coeffs,
+             init_condition,
+             heat_source,
+             dataPtr_->is_source_function_set};
+    ades(boundary_, solution);
   }
-  return true;
 }
+
+// ============================================================================
+// ================ black_scholes_equation (Robin) implementation =============
+// ============================================================================
 
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
-void explicit_solvers::general_heat_equation_cuda<
+void explicit_solvers::black_scholes_equation<
     fp_type, boundary_condition_enum::Robin, container,
     alloc>::solve(container<fp_type, alloc> &solution) {
-  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
+  LSS_VERIFY(dataPtr_->terminal_condition, "Terminal condition must be set.");
   LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
   LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
   LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
-  LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get space step:
@@ -855,30 +806,45 @@ void explicit_solvers::general_heat_equation_cuda<
   fp_type const k = time_step();
   // get space range:
   auto const &space_range = dataPtr_->space_range;
-  // get time range:
-  auto const &time_range = dataPtr_->time_range;
+  // space divisions:
+  std::size_t const &space_size = dataPtr_->space_division;
   // get source heat function:
   auto const &heat_source = dataPtr_->source_function;
-  // space divisions:
-  std::size_t const space_size = dataPtr_->space_division;
-  // flag set:
-  bool const &is_source_set = dataPtr_->is_source_function_set;
+  // calculate scheme const coefficients:
+  fp_type const lambda = k / (h * h);
+  fp_type const gamma = k / (2.0 * h);
+  fp_type const delta = 0.5 * k;
+  // save scheme variable coefficients:
+  auto const &a = std::get<0>(coeffs_);
+  auto const &b = std::get<1>(coeffs_);
+  auto const &c = std::get<2>(coeffs_);
+  // prepare space variable coefficients:
+  auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
+  auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
+  auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+  // wrap up the scheme coefficients:
+  auto scheme_coeffs = std::make_tuple(A, B, D);
   // create container to carry mesh in space and then previous solution:
-  container<fp_type, alloc> prev_sol(space_size + 1, fp_type{});
+  container<fp_type, alloc> init_condition(space_size + 1, fp_type{});
   // populate the container with mesh in space
   discretization<fp_type, container, alloc>::discretize_space(
-      h, space_range.lower(), prev_sol);
-  // use the mesh in space to get values of initial condition
+      h, space_range.lower(), init_condition);
+  // use the mesh in space to get values of terminal condition
   discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
-  lss_one_dim_space_variable_heat_explicit_schemes_cuda::
-      euler_heat_equation_scheme<fp_type, container, alloc>
-          euler_scheme(space_range.lower(), time_range.upper(),
-                       std::make_pair(k, h), coeffs_, prev_sol, heat_source,
-                       is_source_set);
-  euler_scheme(boundary_, solution);
+      dataPtr_->terminal_condition, init_condition);
+  // get the correct scheme:
+  // Here we have only ExplicitEulerScheme available
+  lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
+      fp_type,
+      heat_euler_scheme_backward_policy<
+          fp_type, pde_coefficient_holder_fun_1_arg<fp_type>, container, alloc>>
+      euler{space_range.lower(),  dataPtr_->time_range.upper(),
+            std::make_pair(k, h), coeffs_,
+            scheme_coeffs,        init_condition,
+            heat_source,          dataPtr_->is_source_function_set};
+  euler(boundary_, solution);
 }
 
-}  // namespace lss_one_dim_space_variable_pde_solvers_cuda
+}  // namespace lss_one_dim_space_variable_pde_solvers
 
-#endif  ///_LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
+#endif  //_LSS_BLACK_SCHOLES_EQUATION_SOLVERS

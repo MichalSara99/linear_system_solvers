@@ -20,8 +20,7 @@ using lss_one_dim_pde_utility::robin_boundary;
 // ============================================================================
 
 template <typename fp_type, typename scheme_coefficient_holder>
-class heat_scheme_base
-    : public discretization<fp_type, std::vector, std::allocator<fp_type>> {
+class heat_scheme_base {
  protected:
   fp_type space_start_;
   fp_type terminal_time_;

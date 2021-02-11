@@ -11,12 +11,10 @@
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
 using lss_one_dim_pde_utility::dirichlet_boundary;
-using lss_one_dim_pde_utility::discretization;
 using lss_one_dim_pde_utility::pde_coefficient_holder_fun_1_arg;
 using lss_one_dim_pde_utility::robin_boundary;
 
-class euler_loop_sp
-    : public discretization<float, std::vector, std::allocator<float>> {
+class euler_loop_sp {
  private:
   float space_start_;
   float terminal_t_;
@@ -48,8 +46,7 @@ class euler_loop_sp
                   unsigned long long const size, float *solution) const;
 };
 
-class euler_loop_dp
-    : public discretization<double, std::vector, std::allocator<double>> {
+class euler_loop_dp {
  private:
   double space_start_;
   double terminal_t_;

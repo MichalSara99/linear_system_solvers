@@ -7,6 +7,7 @@ namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::robin_boundary;
+using lss_one_dim_pde_utility::v_discretization;
 using lss_one_dim_space_variable_heat_cuda_kernels::explicit_euler_iterate_1d;
 using lss_one_dim_space_variable_heat_cuda_kernels::fill_dirichlet_bc_1d;
 using lss_one_dim_space_variable_heat_cuda_kernels::fill_robin_bc_1d;
@@ -79,11 +80,15 @@ void euler_loop_sp::operator()(
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<float>::discretize_in_space(h, space_start_, time,
+                                                   source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, A,
+                                                   h_A);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, B,
+                                                   h_B);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, D,
+                                                   h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -110,9 +115,12 @@ void euler_loop_sp::operator()(
     // source is zero:
     while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, A,
+                                                   h_A);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, B,
+                                                   h_B);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, D,
+                                                   h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -208,11 +216,15 @@ void euler_loop_dp::operator()(
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<double>::discretize_in_space(h, space_start_, time,
+                                                    source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, A,
+                                                    h_A);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, B,
+                                                    h_B);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, D,
+                                                    h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -239,9 +251,12 @@ void euler_loop_dp::operator()(
     // source is zero:
     while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, A,
+                                                    h_A);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, B,
+                                                    h_B);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, D,
+                                                    h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -340,11 +355,15 @@ void euler_loop_sp::operator()(float const *input,
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<float>::discretize_in_space(h, space_start_, time,
+                                                   source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, A,
+                                                   h_A);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, B,
+                                                   h_B);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, D,
+                                                   h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -371,9 +390,12 @@ void euler_loop_sp::operator()(float const *input,
   } else {
     while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, A,
+                                                   h_A);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, B,
+                                                   h_B);
+      v_discretization<float>::discretize_in_space(h, space_start_, time, D,
+                                                   h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(float),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -473,11 +495,15 @@ void euler_loop_dp::operator()(double const *input,
     // source is zero:
     while (time <= terminal_t_) {
       // discretize source function on host:
-      discretize_in_space(h, space_start_, time, source_, h_source);
+      v_discretization<double>::discretize_in_space(h, space_start_, time,
+                                                    source_, h_source);
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, A,
+                                                    h_A);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, B,
+                                                    h_B);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, D,
+                                                    h_D);
       // copy h_source contents to d_source (host => device ):
       cudaMemcpy(d_source, h_source.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);
@@ -504,9 +530,12 @@ void euler_loop_dp::operator()(double const *input,
   } else {
     while (time <= terminal_t_) {
       // discretize PDE space variable coeffs on host:
-      discretize_in_space(h, space_start_, time, A, h_A);
-      discretize_in_space(h, space_start_, time, B, h_B);
-      discretize_in_space(h, space_start_, time, D, h_D);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, A,
+                                                    h_A);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, B,
+                                                    h_B);
+      v_discretization<double>::discretize_in_space(h, space_start_, time, D,
+                                                    h_D);
       // copy h_A,h_B,h_D over to d_A,d_B,d_D (host => device ):
       cudaMemcpy(d_A, h_A.data(), size * sizeof(double),
                  cudaMemcpyKind::cudaMemcpyHostToDevice);

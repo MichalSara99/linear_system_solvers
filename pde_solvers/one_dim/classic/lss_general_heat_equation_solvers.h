@@ -57,8 +57,7 @@ template <typename fp_type,
           typename fdm_solver,
           template <typename, typename> typename container, typename alloc>
 class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
-                            fdm_solver, container, alloc>
-    : public discretization<fp_type, container, alloc> {
+                            fdm_solver, container, alloc> {
  private:
   typedef fdm_solver<fp_type, boundary_condition_enum::Dirichlet, container,
                      alloc>
@@ -163,8 +162,7 @@ template <typename fp_type,
           typename fdm_solver,
           template <typename, typename> typename container, typename alloc>
 class general_heat_equation<fp_type, boundary_condition_enum::Robin, fdm_solver,
-                            container, alloc>
-    : public discretization<fp_type, container, alloc> {
+                            container, alloc> {
  private:
   typedef fdm_solver<fp_type, boundary_condition_enum::Robin, container, alloc>
       fdm_solver_t;
@@ -265,8 +263,7 @@ class general_heat_equation {};
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
-                            container, alloc>
-    : public discretization<fp_type, container, alloc> {
+                            container, alloc> {
  private:
   typedef heat_data<fp_type> heat_data_t;
 
@@ -364,8 +361,7 @@ class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 class general_heat_equation<fp_type, boundary_condition_enum::Robin, container,
-                            alloc>
-    : public discretization<fp_type, container, alloc> {
+                            alloc> {
  private:
   typedef heat_data<fp_type> heat_data_t;
 
@@ -469,9 +465,11 @@ void implicit_solvers::general_heat_equation<
   // create container to carry mesh in space and then previous solution:
   container<fp_type, alloc> prev_sol(space_size + 1, fp_type{});
   // populate the container with mesh in space
-  discretize_space(h, space_range.lower(), prev_sol);
+  discretization<fp_type, container, alloc>::discretize_space(
+      h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
-  discretize_initial_condition(dataPtr_->initial_condition, prev_sol);
+  discretization<fp_type, container, alloc>::discretize_initial_condition(
+      dataPtr_->initial_condition, prev_sol);
   // prepare containers for diagonal vectors for fdm_solver:
   container<fp_type, alloc> low(space_size + 1,
                                 -1.0 * (lambda - gamma) * theta);
@@ -497,8 +495,10 @@ void implicit_solvers::general_heat_equation<
     // create a container to carry discretized source heat
     container<fp_type, alloc> source_curr(space_size + 1, fp_type{});
     container<fp_type, alloc> source_next(space_size + 1, fp_type{});
-    discretize_in_space(h, space_range.lower(), 0.0, heat_source, source_curr);
-    discretize_in_space(h, space_range.lower(), time, heat_source, source_next);
+    discretization<fp_type, container, alloc>::discretize_in_space(
+        h, space_range.lower(), 0.0, heat_source, source_curr);
+    discretization<fp_type, container, alloc>::discretize_in_space(
+        h, space_range.lower(), time, heat_source, source_next);
     // loop for stepping in time:
     while (time <= last_time) {
       scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs);
@@ -507,10 +507,10 @@ void implicit_solvers::general_heat_equation<
       solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
-      discretize_in_space(h, space_range.lower(), time, heat_source,
-                          source_curr);
-      discretize_in_space(h, space_range.lower(), 2.0 * time, heat_source,
-                          source_next);
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h, space_range.lower(), time, heat_source, source_curr);
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h, space_range.lower(), 2.0 * time, heat_source, source_next);
       time += k;
     }
   } else {
@@ -572,9 +572,11 @@ void implicit_solvers::general_heat_equation<
   // create container to carry mesh in space and then previous solution:
   container<fp_type, alloc> prev_sol(space_size + 1, fp_type{});
   // populate the container with mesh in space
-  discretize_space(h, space_range.lower(), prev_sol);
+  discretization<fp_type, container, alloc>::discretize_space(
+      h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
-  discretize_initial_condition(dataPtr_->initial_condition, prev_sol);
+  discretization<fp_type, container, alloc>::discretize_initial_condition(
+      dataPtr_->initial_condition, prev_sol);
   // prepare containers for diagonal vectors for fdm_solver:
   container<fp_type, alloc> low(space_size + 1,
                                 -1.0 * (lambda - gamma) * theta);
@@ -600,18 +602,20 @@ void implicit_solvers::general_heat_equation<
     // create a container to carry discretized source heat
     container<fp_type, alloc> source_curr(space_size + 1, fp_type{});
     container<fp_type, alloc> source_next(space_size + 1, fp_type{});
-    discretize_in_space(h, space_range.lower(), 0.0, heat_source, source_curr);
-    discretize_in_space(h, space_range.lower(), time, heat_source, source_next);
+    discretization<fp_type, container, alloc>::discretize_in_space(
+        h, space_range.lower(), 0.0, heat_source, source_curr);
+    discretization<fp_type, container, alloc>::discretize_in_space(
+        h, space_range.lower(), time, heat_source, source_next);
     // loop for stepping in time:
     while (time <= last_time) {
       scheme_fun(scheme_coeffs, prev_sol, source_curr, source_next, rhs);
       solverPtr_->set_rhs(rhs);
       solverPtr_->solve(next_sol);
       prev_sol = next_sol;
-      discretize_in_space(h, space_range.lower(), time, heat_source,
-                          source_curr);
-      discretize_in_space(h, space_range.lower(), 2.0 * time, heat_source,
-                          source_next);
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h, space_range.lower(), time, heat_source, source_curr);
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h, space_range.lower(), 2.0 * time, heat_source, source_next);
       time += k;
     }
   } else {
@@ -664,9 +668,11 @@ void explicit_solvers::general_heat_equation<
   // create container to carry mesh in space and then previous solution:
   container<fp_type, alloc> init_condition(space_size + 1, fp_type{});
   // populate the container with mesh in space
-  discretize_space(h, space_range.lower(), init_condition);
+  discretization<fp_type, container, alloc>::discretize_space(
+      h, space_range.lower(), init_condition);
   // use the mesh in space to get values of initial condition
-  discretize_initial_condition(dataPtr_->initial_condition, init_condition);
+  discretization<fp_type, container, alloc>::discretize_initial_condition(
+      dataPtr_->initial_condition, init_condition);
   // get the correct scheme:
   if (scheme == explicit_pde_schemes_enum::Euler) {
     lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type> euler{
@@ -717,9 +723,11 @@ void explicit_solvers::general_heat_equation<
   // create container to carry mesh in space and then previous solution:
   container<fp_type, alloc> init_condition(space_size + 1, fp_type{});
   // populate the container with mesh in space
-  discretize_space(h, space_range.lower(), init_condition);
+  discretization<fp_type, container, alloc>::discretize_space(
+      h, space_range.lower(), init_condition);
   // use the mesh in space to get values of initial condition
-  discretize_initial_condition(dataPtr_->initial_condition, init_condition);
+  discretization<fp_type, container, alloc>::discretize_initial_condition(
+      dataPtr_->initial_condition, init_condition);
   // get the correct scheme:
   // Here we have only ExplicitEulerScheme available
   lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type> euler{

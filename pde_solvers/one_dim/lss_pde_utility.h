@@ -89,24 +89,24 @@ template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 class discretization {
  public:
-  virtual ~discretization() {}
-  void discretize_space(fp_type const &step, fp_type const &init,
-                        container<fp_type, alloc> &container) const;
+  static void discretize_space(fp_type const &step, fp_type const &init,
+                               container<fp_type, alloc> &container);
 
-  void discretize_initial_condition(std::function<fp_type(fp_type)> const &init,
-                                    container<fp_type, alloc> &container) const;
+  static void discretize_initial_condition(
+      std::function<fp_type(fp_type)> const &init,
+      container<fp_type, alloc> &container);
 
-  void discretize_in_space(fp_type const &start, fp_type const &step,
-                           fp_type const &time,
-                           std::function<fp_type(fp_type, fp_type)> const &fun,
-                           container<fp_type, alloc> &output) const;
+  static void discretize_in_space(
+      fp_type const &start, fp_type const &step, fp_type const &time,
+      std::function<fp_type(fp_type, fp_type)> const &fun,
+      container<fp_type, alloc> &output);
 };
 
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 void discretization<fp_type, container, alloc>::discretize_space(
     fp_type const &step, fp_type const &init,
-    container<fp_type, alloc> &container) const {
+    container<fp_type, alloc> &container) {
   LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
   container[0] = init;
   for (std::size_t t = 1; t < container.size(); ++t) {
@@ -118,7 +118,7 @@ template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 void discretization<fp_type, container, alloc>::discretize_initial_condition(
     std::function<fp_type(fp_type)> const &init,
-    container<fp_type, alloc> &container) const {
+    container<fp_type, alloc> &container) {
   LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
   for (std::size_t t = 0; t < container.size(); ++t) {
     container[t] = init(container[t]);
@@ -130,13 +130,18 @@ template <typename fp_type, template <typename, typename> typename container,
 void discretization<fp_type, container, alloc>::discretize_in_space(
     fp_type const &step, fp_type const &init, fp_type const &time,
     std::function<fp_type(fp_type, fp_type)> const &fun,
-    container<fp_type, alloc> &container) const {
+    container<fp_type, alloc> &container) {
   LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
   container[0] = fun(init, time);
   for (std::size_t t = 1; t < container.size(); ++t) {
     container[t] = fun(container[t - 1] + step, time);
   }
 }
+
+// vector discretization:
+template <typename fp_type>
+using v_discretization =
+    discretization<fp_type, std::vector, std::allocator<fp_type>>;
 
 }  // namespace lss_one_dim_pde_utility
 
