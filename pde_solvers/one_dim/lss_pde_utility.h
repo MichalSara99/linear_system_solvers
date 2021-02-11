@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_PDE_UTILITY)
-#define _LSS_ONE_DIM_PDE_UTILITY
+#if !defined(_LSS_PDE_UTILITY)
+#define _LSS_PDE_UTILITY
 
 #include <functional>
 #include <tuple>
@@ -140,4 +140,4 @@ void discretization<fp_type, container, alloc>::discretize_in_space(
 
 }  // namespace lss_one_dim_pde_utility
 
-#endif  ///_LSS_ONE_DIM_PDE_UTILITY
+#endif  ///_LSS_PDE_UTILITY

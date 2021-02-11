@@ -1,12 +1,12 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA)
-#define _LSS_ONE_DIM_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA
+#if !defined(_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA)
+#define _LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA
 
 #include <tuple>
 
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
-#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
@@ -286,4 +286,4 @@ void euler_heat_equation_scheme<double, container, alloc>::operator()(
 
 }  // namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda
 
-#endif  ///_LSS_ONE_DIM_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA
+#endif  ///_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA

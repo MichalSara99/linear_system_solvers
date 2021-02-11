@@ -6,7 +6,7 @@
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
-#include "pde_solvers/one_dim/classic/lss_one_dim_general_heat_equation_solvers_cuda.h"
+#include "pde_solvers/one_dim/classic/lss_general_heat_equation_solvers_cuda.h"
 
 #define PI 3.14159
 

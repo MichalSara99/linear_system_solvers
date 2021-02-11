@@ -6,7 +6,7 @@
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
-#include "pde_solvers/one_dim/variable_coefficients/lss_one_dim_space_variable_general_heat_equation_solvers.h"
+#include "pde_solvers/one_dim/variable_coefficients/lss_space_variable_general_heat_equation_solvers.h"
 #include "sparse_solvers/lss_fdm_double_sweep_solver.h"
 #include "sparse_solvers/lss_fdm_thomas_lu_solver.h"
 

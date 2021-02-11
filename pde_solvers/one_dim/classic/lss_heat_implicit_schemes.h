@@ -1,13 +1,13 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES)
-#define _LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES
+#if !defined(_LSS_HEAT_IMPLICIT_SCHEMES)
+#define _LSS_HEAT_IMPLICIT_SCHEMES
 
 #pragma warning(disable : 4244)
 
 #include <thread>
 
 #include "common/lss_enumerations.h"
-#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_heat_implicit_schemes {
 
@@ -99,4 +99,4 @@ class heat_equation_schemes {
 
 }  // namespace lss_one_dim_heat_implicit_schemes
 
-#endif  //_LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES
+#endif  //_LSS_HEAT_IMPLICIT_SCHEMES

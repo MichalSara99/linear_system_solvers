@@ -1,13 +1,13 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES_CUDA)
-#define _LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES_CUDA
+#if !defined(_LSS_HEAT_IMPLICIT_SCHEMES_CUDA)
+#define _LSS_HEAT_IMPLICIT_SCHEMES_CUDA
 
 #pragma warning(disable : 4244)
 
 #include <thread>
 
 #include "common/lss_enumerations.h"
-#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_heat_implicit_schemes_cuda {
 
@@ -238,4 +238,4 @@ class heat_equation_schemes {
 
 }  // namespace lss_one_dim_heat_implicit_schemes_cuda
 
-#endif  //_LSS_ONE_DIM_HEAT_IMPLICIT_SCHEMES_CUDA
+#endif  //_LSS_HEAT_IMPLICIT_SCHEMES_CUDA

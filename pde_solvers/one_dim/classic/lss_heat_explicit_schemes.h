@@ -1,14 +1,14 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_HEAT_EXPLICIT_SCHEMES)
-#define _LSS_ONE_DIM_HEAT_EXPLICIT_SCHEMES
+#if !defined(_LSS_HEAT_EXPLICIT_SCHEMES)
+#define _LSS_HEAT_EXPLICIT_SCHEMES
 
 #pragma warning(disable : 4244)
 
 #include <thread>
 
 #include "common/lss_enumerations.h"
-#include "pde_solvers/one_dim/lss_one_dim_base_explicit_schemes.h"
-#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include "pde_solvers/one_dim/lss_base_explicit_schemes.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_heat_explicit_schemes {
 
@@ -496,4 +496,4 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
   throw new std::exception("Not available.");
 }
 
-#endif  ///_LSS_ONE_DIM_HEAT_EXPLICIT_SCHEMES
+#endif  ///_LSS_HEAT_EXPLICIT_SCHEMES

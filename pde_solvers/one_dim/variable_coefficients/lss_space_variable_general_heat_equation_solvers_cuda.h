@@ -1,12 +1,12 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA)
-#define _LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
+#if !defined(_LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA)
+#define _LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
-#include "lss_one_dim_space_variable_heat_explicit_schemes_cuda.h"
-#include "lss_one_dim_space_variable_heat_implicit_schemes_cuda.h"
-#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include "lss_space_variable_heat_explicit_schemes_cuda.h"
+#include "lss_space_variable_heat_implicit_schemes_cuda.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 #include "sparse_solvers/lss_sparse_solvers_cuda.h"
 
 namespace lss_one_dim_space_variable_pde_solvers_cuda {
@@ -877,4 +877,4 @@ void explicit_solvers::general_heat_equation_cuda<
 
 }  // namespace lss_one_dim_space_variable_pde_solvers_cuda
 
-#endif  ///_LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
+#endif  ///_LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA

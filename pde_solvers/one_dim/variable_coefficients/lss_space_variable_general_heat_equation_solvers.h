@@ -1,15 +1,15 @@
 #pragma once
-#if !defined(_LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS)
-#define _LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS
+#if !defined(_LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS)
+#define _LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS
 
 #include <functional>
 
 #include "common/lss_enumerations.h"
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
-#include "lss_one_dim_space_variable_heat_explicit_schemes.h"
-#include "lss_one_dim_space_variable_heat_implicit_schemes.h"
-#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
+#include "lss_space_variable_heat_explicit_schemes.h"
+#include "lss_space_variable_heat_implicit_schemes.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_space_variable_pde_solvers {
 
@@ -817,4 +817,4 @@ void explicit_solvers::general_heat_equation<
 
 }  // namespace lss_one_dim_space_variable_pde_solvers
 
-#endif  //_LSS_ONE_DIM_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS
+#endif  //_LSS_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS

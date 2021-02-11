@@ -6,8 +6,8 @@
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
-#include "pde_solvers/one_dim/lss_one_dim_pde_utility.h"
-#include "pde_solvers/one_dim/variable_coefficients/lss_one_dim_space_variable_general_heat_equation_solvers_cuda.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
+#include "pde_solvers/one_dim/variable_coefficients/lss_space_variable_general_heat_equation_solvers_cuda.h"
 
 #define PI 3.14159
 
