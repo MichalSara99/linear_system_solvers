@@ -454,6 +454,7 @@ void implicit_solvers::general_heat_equation_cuda<
     real_sparse_policy_cuda, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get correct theta according to the scheme:
@@ -590,6 +591,7 @@ void implicit_solvers::general_heat_equation_cuda<
     real_sparse_policy_cuda, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get correct theta according to the scheme:
@@ -721,6 +723,7 @@ template <typename fp_type, template <typename, typename> typename container,
 void explicit_solvers::general_heat_equation_cuda<
     fp_type, boundary_condition_enum::Dirichlet, container,
     alloc>::solve(container<fp_type, alloc> &solution) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
@@ -787,6 +790,7 @@ template <typename fp_type, template <typename, typename> typename container,
 void explicit_solvers::general_heat_equation_cuda<
     fp_type, boundary_condition_enum::Robin, container,
     alloc>::solve(container<fp_type, alloc> &solution) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");

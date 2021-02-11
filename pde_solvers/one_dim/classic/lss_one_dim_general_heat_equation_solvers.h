@@ -444,6 +444,7 @@ void implicit_solvers::general_heat_equation<
     fp_type, boundary_condition_enum::Dirichlet, fdm_solver, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
 
@@ -547,6 +548,7 @@ void implicit_solvers::general_heat_equation<
     fp_type, boundary_condition_enum::Robin, fdm_solver, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get correct theta according to the scheme:
@@ -642,6 +644,7 @@ void explicit_solvers::general_heat_equation<
     fp_type, boundary_condition_enum::Dirichlet, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   explicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get space step:
@@ -694,6 +697,7 @@ template <typename fp_type, template <typename, typename> typename container,
 void explicit_solvers::general_heat_equation<
     fp_type, boundary_condition_enum::Robin, container,
     alloc>::solve(container<fp_type, alloc> &solution) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   // get space step:

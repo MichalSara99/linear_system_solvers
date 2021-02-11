@@ -464,6 +464,7 @@ void implicit_solvers::general_heat_equation_cuda<
     real_sparse_policy_cuda, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
   LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
   LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
@@ -607,6 +608,7 @@ void implicit_solvers::general_heat_equation_cuda<
     real_sparse_policy_cuda, container,
     alloc>::solve(container<fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
   LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
   LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
@@ -756,6 +758,7 @@ template <typename fp_type, template <typename, typename> typename container,
 void explicit_solvers::general_heat_equation_cuda<
     fp_type, boundary_condition_enum::Dirichlet, container,
     alloc>::solve(container<fp_type, alloc> &solution) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
   LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
   LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
@@ -837,6 +840,7 @@ template <typename fp_type, template <typename, typename> typename container,
 void explicit_solvers::general_heat_equation_cuda<
     fp_type, boundary_condition_enum::Robin, container,
     alloc>::solve(container<fp_type, alloc> &solution) {
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
   LSS_VERIFY(std::get<0>(coeffs_), "2.order coefficient needs to be set.");
   LSS_VERIFY(std::get<1>(coeffs_), "1.order coefficient needs to be set.");
   LSS_VERIFY(std::get<2>(coeffs_), "0.order coefficient needs to be set.");
