@@ -3170,11 +3170,11 @@ void testExplPureHeatEquationDoubleDirichletBCDeviceEuler() {
   // set initial condition:
   expl_solver.set_initial_condition(initial_condition);
   // set thermal diffusivity (C^2 in PDE)
-  expl_solver.set_2_order_coefficient([](float x) { return 1.0; });
+  expl_solver.set_2_order_coefficient([](double x) { return 1.0; });
   // set convection term in PDE
-  expl_solver.set_1_order_coefficient([](float x) { return 0.0; });
+  expl_solver.set_1_order_coefficient([](double x) { return 0.0; });
   // set zero-order term in PDE
-  expl_solver.set_0_order_coefficient([](float x) { return 0.0; });
+  expl_solver.set_0_order_coefficient([](double x) { return 0.0; });
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:

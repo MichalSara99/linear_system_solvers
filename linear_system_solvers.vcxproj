@@ -110,6 +110,7 @@
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_cuda_kernels.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes_cuda.h" />
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes_cuda_policy.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes_policy.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_implicit_schemes.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_implicit_schemes_cuda.h" />
@@ -121,6 +122,7 @@
     <ClInclude Include="sparse_solvers\lss_sparse_solvers_policy.h" />
     <ClInclude Include="unit_tests\lss_dense_solvers_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_fdm_tridiagonal_solvers_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_black_scholes_equation_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_space_variable_advection_diffusion_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_pure_heat_equation_cuda_t.h" />
@@ -134,7 +136,7 @@
   <ItemGroup>
     <CudaCompile Include="main.cu" />
     <CudaCompile Include="pde_solvers\one_dim\classic\lss_heat_explicit_schemes_cuda.cu" />
-    <CudaCompile Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes_cuda.cu" />
+    <CudaCompile Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes_cuda_policy.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

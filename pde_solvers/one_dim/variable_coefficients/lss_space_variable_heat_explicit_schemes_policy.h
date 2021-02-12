@@ -31,14 +31,14 @@ struct heat_euler_scheme_forward_policy {
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Dirichlet boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
   // Robin boundary without source:
@@ -46,14 +46,14 @@ struct heat_euler_scheme_forward_policy {
                        container<fp_type, alloc> const &init_solution,
                        robin_boundary<fp_type> const &robin_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Robin boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        robin_boundary<fp_type> const &robin_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
 };
@@ -66,14 +66,14 @@ struct heat_euler_scheme_backward_policy {
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Dirichlet boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
   // Robin boundary without source:
@@ -81,14 +81,14 @@ struct heat_euler_scheme_backward_policy {
                        container<fp_type, alloc> const &init_solution,
                        robin_boundary<fp_type> const &robin_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Robin boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        robin_boundary<fp_type> const &robin_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
 };
@@ -105,14 +105,14 @@ struct ade_heat_bakarat_clark_scheme_forward_policy {
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Dirichlet boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
 };
@@ -125,14 +125,14 @@ struct ade_heat_bakarat_clark_scheme_backward_policy {
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Dirichlet boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
 };
@@ -149,14 +149,14 @@ struct ade_heat_saulyev_scheme_forward_policy {
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Dirichlet boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
 };
@@ -169,14 +169,14 @@ struct ade_heat_saulyev_scheme_backward_policy {
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time);
   // Dirichlet boundary with source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
                        dirichlet_boundary<fp_type> const &dirichlet_boundary,
                        std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const holder,
+                       coefficient_holder const &holder,
                        fp_type const &terminal_time, fp_type const &space_start,
                        std::function<fp_type(fp_type, fp_type)> const &source);
 };
@@ -199,7 +199,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          dirichlet_boundary<fp_type> const &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -241,7 +241,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  dirichlet_boundary<fp_type> const &dirichlet_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
@@ -293,7 +293,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          robin_boundary<fp_type> const &robin_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -345,7 +345,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  robin_boundary<fp_type> const &robin_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
@@ -412,7 +412,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          dirichlet_boundary<fp_type> const &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -454,7 +454,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  dirichlet_boundary<fp_type> const &dirichlet_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
@@ -506,7 +506,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          robin_boundary<fp_type> const &robin_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -558,7 +558,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  robin_boundary<fp_type> const &robin_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
@@ -625,7 +625,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          dirichlet_boundary<fp_type> const &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -699,7 +699,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  dirichlet_boundary<fp_type> const &dirichlet_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
@@ -786,7 +786,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          dirichlet_boundary<fp_type> const &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -860,7 +860,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  dirichlet_boundary<fp_type> const &dirichlet_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
@@ -947,7 +947,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          dirichlet_boundary<fp_type> const &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -1017,7 +1017,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  dirichlet_boundary<fp_type> const &dirichlet_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
@@ -1100,7 +1100,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                          container<fp_type, alloc> const &init_solution,
                          dirichlet_boundary<fp_type> const &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
-                         coefficient_holder const holder,
+                         coefficient_holder const &holder,
                          fp_type const &terminal_time) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
@@ -1170,7 +1170,7 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
                  container<fp_type, alloc> const &init_solution,
                  dirichlet_boundary<fp_type> const &dirichlet_boundary,
                  std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const holder, fp_type const &terminal_time,
+                 coefficient_holder const &holder, fp_type const &terminal_time,
                  fp_type const &space_start,
                  std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
