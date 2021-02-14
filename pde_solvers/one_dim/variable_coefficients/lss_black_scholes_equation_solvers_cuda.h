@@ -501,7 +501,7 @@ void implicit_solvers::black_sholes_equation_cuda<
       h, (space_range.lower() + h), prev_sol);
   // use the mesh in space to get values of initial condition
   discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
+      dataPtr_->terminal_condition, prev_sol);
   // first create and populate the sparse matrix:
   flat_matrix<fp_type> fsm;
   fsm.set_columns(m);
@@ -580,9 +580,9 @@ void implicit_solvers::black_sholes_equation_cuda<
   }
 
   // copy into solution vector
-  solution[0] = boundary_.first(last_time);
+  solution[0] = boundary_.first(0.0);
   std::copy(prev_sol.begin(), prev_sol.end(), std::next(solution.begin()));
-  solution[solution.size() - 1] = boundary_.second(last_time);
+  solution[solution.size() - 1] = boundary_.second(0.0);
 }
 
 // ============================================================================
@@ -647,7 +647,7 @@ void implicit_solvers::black_sholes_equation_cuda<
       h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
   discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
+      dataPtr_->terminal_condition, prev_sol);
   // first create and populate the sparse matrix:
   flat_matrix<fp_type> fsm;
   fsm.set_columns(m);
@@ -794,7 +794,7 @@ void explicit_solvers::black_sholes_equation_cuda<
       h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
   discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
+      dataPtr_->terminal_condition, prev_sol);
 
   lss_one_dim_space_variable_heat_explicit_schemes_cuda::
       euler_heat_equation_scheme<
@@ -880,7 +880,7 @@ void explicit_solvers::black_sholes_equation_cuda<
       h, space_range.lower(), prev_sol);
   // use the mesh in space to get values of initial condition
   discretization<fp_type, container, alloc>::discretize_initial_condition(
-      dataPtr_->initial_condition, prev_sol);
+      dataPtr_->terminal_condition, prev_sol);
   lss_one_dim_space_variable_heat_explicit_schemes_cuda::
       euler_heat_equation_scheme<
           fp_type, container, alloc,

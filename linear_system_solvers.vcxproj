@@ -122,6 +122,7 @@
     <ClInclude Include="sparse_solvers\lss_sparse_solvers_policy.h" />
     <ClInclude Include="unit_tests\lss_dense_solvers_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_fdm_tridiagonal_solvers_t.h" />
+    <ClInclude Include="unit_tests\lss_one_dim_black_scholes_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_black_scholes_equation_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_space_variable_advection_diffusion_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_advection_diffusion_equation_t.h" />

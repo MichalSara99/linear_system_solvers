@@ -4,6 +4,7 @@
 #include "unit_tests/lss_fdm_tridiagonal_solvers_t.h"
 #include "unit_tests/lss_one_dim_advection_diffusion_equation_cuda_t.h"
 #include "unit_tests/lss_one_dim_advection_diffusion_equation_t.h"
+#include "unit_tests/lss_one_dim_black_scholes_equation_cuda_t.h"
 #include "unit_tests/lss_one_dim_black_scholes_equation_t.h"
 #include "unit_tests/lss_one_dim_pure_heat_equation_cuda_t.h"
 #include "unit_tests/lss_one_dim_pure_heat_equation_t.h"
@@ -200,8 +201,20 @@ int main(int argc, char const *argv[]) {
   // ============== lss_one_dim_black_scholes_equation_t.h ==============
   // ====================================================================
 
-  // testImplEuropeanBlackScholesDirichletBCDoubleSweep();
-  // testImplEuropeanBlackScholesDirichletBCThomasLU();
+  // testImplEuropeanBlackScholesCallDirichletBCDoubleSweep();
+  // testImplEuropeanBlackScholesCallDirichletBCThomasLU();
+  // testImplEuropeanBlackScholesPutDirichletBCDoubleSweep();
+  // testImplEuropeanBlackScholesPutDirichletBCThomasLU();
+  // testExplEuropeanBlackScholesCallOptionDirichletBC();
+  // testExplEuropeanBlackScholesPutOptionDirichletBC();
+
+  // ====================================================================
+
+  // ====================================================================
+  // ========= lss_one_dim_black_scholes_equation_cuda_t.h ==============
+  // ====================================================================
+
+  // testImplEuropeanBlackScholesCallDirichletBCDeviceCUDA();
 
   // ====================================================================
 

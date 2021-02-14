@@ -106,6 +106,7 @@ class black_scholes_exact {
 
   T put(T spot) const {
     T const call_p = call(spot);
+    T const tau = maturity_ - time_;
     return (strike_ * std::exp(-rate_ * tau) - spot + call_p);
   }
 };
