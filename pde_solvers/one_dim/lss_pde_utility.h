@@ -132,9 +132,8 @@ void discretization<fp_type, container, alloc>::discretize_in_space(
     std::function<fp_type(fp_type, fp_type)> const &fun,
     container<fp_type, alloc> &container) {
   LSS_ASSERT(container.size() > 0, "The input container must be initialized.");
-  container[0] = fun(init, time);
-  for (std::size_t t = 1; t < container.size(); ++t) {
-    container[t] = fun(container[t - 1] + step, time);
+  for (std::size_t t = 0; t < container.size(); ++t) {
+    container[t] = fun(init + static_cast<fp_type>(t) * step, time);
   }
 }
 

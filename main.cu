@@ -215,6 +215,9 @@ int main(int argc, char const *argv[]) {
   // ====================================================================
 
   // testImplEuropeanBlackScholesCallDirichletBCDeviceCUDA();
+  // testImplEuropeanBlackScholesPutDirichletBCDeviceCUDA();
+  // testExplEuropeanBlackScholesCallDirichletBCDeviceCUDA();
+  // testExplEuropeanBlackScholesPutDirichletBCDeviceCUDA();
 
   // ====================================================================
 

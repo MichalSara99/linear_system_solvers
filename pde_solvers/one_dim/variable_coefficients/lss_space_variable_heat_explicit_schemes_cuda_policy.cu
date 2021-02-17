@@ -1005,7 +1005,7 @@ void heat_euler_scheme_backward_policy<
   auto const &left = dirichlet_boundary.first;
   auto const &right = dirichlet_boundary.second;
 
-  float time = terminal_time - k;
+  double time = terminal_time - k;
 
   // prepare pointers for PDE space variable coeffs on device:
   double *d_A = NULL;
