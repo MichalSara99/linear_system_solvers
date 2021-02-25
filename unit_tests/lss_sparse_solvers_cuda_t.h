@@ -47,13 +47,10 @@ void deviceSparseDefaultQRTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -76,7 +73,7 @@ void deviceSparseDefaultQRTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -133,13 +130,10 @@ void deviceSparseFloatQRTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<float> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -162,7 +156,7 @@ void deviceSparseFloatQRTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Device, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, float> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -219,13 +213,10 @@ void deviceSparseDefaultQRPointerTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -248,7 +239,7 @@ void deviceSparseDefaultQRPointerTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -307,13 +298,10 @@ void deviceSparseFloatQRPointerTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<float> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -336,7 +324,7 @@ void deviceSparseFloatQRPointerTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Device, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, float> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -409,13 +397,10 @@ void hostSparseDefaultQRTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -438,7 +423,7 @@ void hostSparseDefaultQRTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -495,13 +480,11 @@ void hostSparseFloatQRTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+
+  // first create and populate the sparse matrix:
+  flat_matrix<float> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -524,7 +507,7 @@ void hostSparseFloatQRTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -581,13 +564,10 @@ void hostSparseDefaultQRPointerTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 6;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -610,7 +590,7 @@ void hostSparseDefaultQRPointerTest() {
   std::vector<double> b = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -669,13 +649,11 @@ void hostSparseFloatQRPointerTest() {
 
   */
 
-  // first create and populate the sparse matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 6;
   // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<float> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -698,7 +676,7 @@ void hostSparseFloatQRPointerTest() {
   std::vector<float> b = {0.0f, 2.0f, 4.0f, 6.0f, 8.0f, 10.0f};
 
   // create sparse solver on DEVICE:
-  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -748,8 +726,6 @@ void hostBVPDirichletBCDefaultQRTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -759,8 +735,8 @@ void hostBVPDirichletBCDefaultQRTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -781,7 +757,7 @@ void hostBVPDirichletBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -823,8 +799,6 @@ void hostBVPDirichletBCDefaultLUTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -834,8 +808,8 @@ void hostBVPDirichletBCDefaultLUTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -856,7 +830,7 @@ void hostBVPDirichletBCDefaultLUTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -898,8 +872,6 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -909,8 +881,8 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -931,7 +903,7 @@ void hostBVPDirichletBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -973,8 +945,6 @@ void hostBVPDirichletBCFloatQRTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<float> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -984,8 +954,8 @@ void hostBVPDirichletBCFloatQRTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<float> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1006,7 +976,7 @@ void hostBVPDirichletBCFloatQRTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1048,8 +1018,6 @@ void hostBVPDirichletBCFloatLUTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<float> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1059,8 +1027,8 @@ void hostBVPDirichletBCFloatLUTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<float> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1081,7 +1049,7 @@ void hostBVPDirichletBCFloatLUTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1123,8 +1091,6 @@ void hostBVPDirichletBCFloatCholeskyTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<float> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1134,8 +1100,8 @@ void hostBVPDirichletBCFloatCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<float> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1156,7 +1122,7 @@ void hostBVPDirichletBCFloatCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, float> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, float> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1212,8 +1178,6 @@ void deviceBVPDirichletBCDefaultQRTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1223,8 +1187,8 @@ void deviceBVPDirichletBCDefaultQRTest() {
   // because we already know the boundary values
   // at timepoints t_0 and t_20:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1245,7 +1209,7 @@ void deviceBVPDirichletBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1286,8 +1250,6 @@ void deviceBVPDirichletBCDefaultCholeskyTest() {
   std::cout << " u(t) = t(1-t)\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 20;
@@ -1297,8 +1259,8 @@ void deviceBVPDirichletBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, -2.0);
   fsm.emplace_back(0, 1, 1.0);
@@ -1319,7 +1281,7 @@ void deviceBVPDirichletBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] - right;
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1372,8 +1334,6 @@ void hostBVPRobinBCDefaultQRTest() {
   std::cout << " u(t) = -t*t + t + 1\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1388,8 +1348,8 @@ void hostBVPRobinBCDefaultQRTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1408,7 +1368,7 @@ void hostBVPRobinBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1455,8 +1415,6 @@ void hostBVPRobinBCDefaultLUTest() {
   std::cout << " u(t) = -t*t + t + 1\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1471,8 +1429,8 @@ void hostBVPRobinBCDefaultLUTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1491,7 +1449,7 @@ void hostBVPRobinBCDefaultLUTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1538,8 +1496,6 @@ void hostBVPRobinBCDefaultCholeskyTest() {
   std::cout << " u(t) = -t*t + t + 1\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1554,8 +1510,8 @@ void hostBVPRobinBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1574,7 +1530,7 @@ void hostBVPRobinBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Host, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Host, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1633,8 +1589,6 @@ void deviceBVPRobinBCDefaultQRTest() {
   std::cout << " u(t) = -t*t + t + 1\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1649,8 +1603,8 @@ void deviceBVPRobinBCDefaultQRTest() {
   // because we already know the boundary values
   // at timepoints t_0 and t_20:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1669,7 +1623,7 @@ void deviceBVPRobinBCDefaultQRTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);
@@ -1716,8 +1670,6 @@ void deviceBVPRobinBCDefaultCholeskyTest() {
   std::cout << " u(t) = -t*t + t + 1\n";
   std::cout << "=================================\n";
 
-  // first create and populate the sparse matrix:
-  flat_matrix<double> fsm;
   // discretization:
   // t_0,t_1,t_2,...,t_20
   int const N = 100;
@@ -1732,8 +1684,8 @@ void deviceBVPRobinBCDefaultCholeskyTest() {
   // because we already know the boundary values
   // at t_0 = 0 and t_20 = 0:
   int const m = N - 1;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the sparse matrix:
+  flat_matrix<double> fsm(m, m);
   // populate the matrix:
   fsm.emplace_back(0, 0, (alpha * 1.0 - 2.0));
   fsm.emplace_back(0, 1, 1.0);
@@ -1752,7 +1704,7 @@ void deviceBVPRobinBCDefaultCholeskyTest() {
   b[b.size() - 1] = b[b.size() - 1] + psi * (1.0 / beta);
 
   // create sparse solver on HOST:
-  real_sparse_solver_cuda<memory_space_enum::Device, double> rss;
+  real_sparse_solver_cuda<memory_space_enum::Device, double> rss(m);
 
   // because we used default cstor we need to call initialize
   rss.initialize(m);

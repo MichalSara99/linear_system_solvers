@@ -16,19 +16,19 @@ void testBVPDoubleSweepDirichletBC() {
 
   /*
 
-          Solve BVP:
+  Solve BVP:
 
-                          u''(t) = - 2,
+  u''(t) = - 2,
 
-          where
+  where
 
-                          t \in (0, 1)
-                          u(0) = 0 ,  u(1) = 0
+  t \in (0, 1)
+  u(0) = 0 ,  u(1) = 0
 
 
-          Exact solution is
+  Exact solution is
 
-                          u(t) = t(1-t)
+  u(t) = t(1-t)
 
   */
   std::cout << "=================================\n";
@@ -172,19 +172,19 @@ void testBVPThomasLUSolverDirichletBC() {
 
   /*
 
-          Solve BVP:
+  Solve BVP:
 
-                          u''(t) = - 2,
+  u''(t) = - 2,
 
-          where
+  where
 
-                          t \in (0, 1)
-                          u(0) = 0 ,  u(1) = 0
+  t \in (0, 1)
+  u(0) = 0 ,  u(1) = 0
 
 
-          Exact solution is
+  Exact solution is
 
-                          u(t) = t(1-t)
+  u(t) = t(1-t)
 
   */
   std::cout << "=================================\n";

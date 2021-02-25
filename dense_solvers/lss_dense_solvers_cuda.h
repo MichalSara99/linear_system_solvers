@@ -22,6 +22,7 @@ using lss_dense_solvers_policy::dense_solver_qr;
 using lss_enumerations::flat_matrix_sort_enum;
 using lss_helpers::real_dense_solver_cuda_helpers;
 using lss_utility::flat_matrix;
+using lss_utility::uptr_t;
 
 template <typename T,
           typename =
@@ -31,18 +32,21 @@ class real_dense_solver_cuda {};
 template <typename T>
 class real_dense_solver_cuda<T> {
  private:
-  std::size_t matrix_rows_;
-  std::size_t matrix_cols_;
-  flat_matrix<T> matrix_elements_;
+  int matrix_rows_;
+  int matrix_cols_;
+  uptr_t<flat_matrix<T>> matrix_data_ptr_;
 
   thrust::host_vector<T> h_matrix_values_;
   thrust::host_vector<T> h_rhs_values_;
 
   void populate();
 
+  explicit real_dense_solver_cuda() {}
+
  public:
   typedef T value_type;
-  explicit real_dense_solver_cuda() : matrix_cols_{0}, matrix_rows_{0} {}
+  explicit real_dense_solver_cuda(int matrix_rows, int matrix_columns)
+      : matrix_cols_{matrix_columns}, matrix_rows_{matrix_rows} {}
   virtual ~real_dense_solver_cuda() {}
 
   real_dense_solver_cuda(real_dense_solver_cuda const&) = delete;
@@ -50,7 +54,7 @@ class real_dense_solver_cuda<T> {
   real_dense_solver_cuda(real_dense_solver_cuda&&) = delete;
   real_dense_solver_cuda& operator=(real_dense_solver_cuda&&) = delete;
 
-  void initialize(std::size_t matrix_rows, std::size_t matrix_columns);
+  void initialize(int matrix_rows, int matrix_columns);
 
   template <template <typename T, typename alloc>
             typename container = std::vector,
@@ -70,23 +74,7 @@ class real_dense_solver_cuda<T> {
     LSS_ASSERT(
         (matrix.rows() == matrix_rows_) && (matrix.columns() == matrix_cols_),
         " flat_matrix has incorrect number of rows or columns");
-    matrix_elements_ = std::move(matrix);
-  }
-
-  inline void set_flat_dense_matrix_value(std::size_t row_idx,
-                                          std::size_t col_idx, T value) {
-    LSS_ASSERT((row_idx < matrix_rows_), " row index is out of range");
-    LSS_ASSERT((col_idx < matrix_cols_), " column index is out of range");
-    matrix_elements_.emplace_back(row_idx, col_idx, value);
-  }
-
-  inline void set_flat_dense_matrix_value(
-      std::tuple<std::size_t, std::size_t, T> triplet) {
-    LSS_ASSERT((std::get<0>(triplet) < matrix_rows_),
-               " row index is out of range");
-    LSS_ASSERT((std::get<1>(triplet) < matrix_cols_),
-               " column index is out of range");
-    matrix_elements_.emplace_back(std::move(triplet));
+    matrix_data_ptr_ = std::make_unique<flat_matrix<T>>(std::move(matrix));
   }
 
   template <template <typename> typename dense_solver_policy = dense_solver_qr,
@@ -110,23 +98,23 @@ class real_dense_solver_cuda<T> {
 
 template <typename T>
 void lss_dense_solvers::real_dense_solver_cuda<T>::populate() {
+  LSS_VERIFY(matrix_data_ptr_, "flat_matrix has not been provided.");
   // CUDA Dense solver is column-major:
-  matrix_elements_.sort(flat_matrix_sort_enum::ColumnMajor);
+  matrix_data_ptr_->sort(flat_matrix_sort_enum::ColumnMajor);
 
-  for (std::size_t t = 0; t < matrix_elements_.size(); ++t) {
-    h_matrix_values_[t] = std::get<2>(matrix_elements_.at(t));
+  for (std::size_t t = 0; t < matrix_data_ptr_->size(); ++t) {
+    h_matrix_values_[t] = std::get<2>(matrix_data_ptr_->at(t));
   }
 }
 
 template <typename T>
 void lss_dense_solvers::real_dense_solver_cuda<T>::initialize(
-    std::size_t matrix_rows, std::size_t matrix_columns) {
+    int matrix_rows, int matrix_columns) {
   // set the sizes of the system components:
   matrix_cols_ = matrix_columns;
   matrix_rows_ = matrix_rows;
 
   // clear the containers:
-  matrix_elements_.clear();
   h_matrix_values_.clear();
   h_rhs_values_.clear();
 
@@ -145,8 +133,9 @@ void lss_dense_solvers::real_dense_solver_cuda<T>::solve(
 
   // get the dimensions:
   std::size_t lda =
-      std::max(matrix_elements_.rows(), matrix_elements_.columns());
-  std::size_t m = std::min(matrix_elements_.rows(), matrix_elements_.columns());
+      std::max(matrix_data_ptr_->rows(), matrix_data_ptr_->columns());
+  std::size_t m =
+      std::min(matrix_data_ptr_->rows(), matrix_data_ptr_->columns());
   std::size_t ldb = h_rhs_values_.size();
 
   // step 1: create device containers:
@@ -181,8 +170,9 @@ lss_dense_solvers::real_dense_solver_cuda<T>::solve() {
 
   // get the dimensions:
   std::size_t lda =
-      std::max(matrix_elements_.rows(), matrix_elements_.columns());
-  std::size_t m = std::min(matrix_elements_.rows(), matrix_elements_.columns());
+      std::max(matrix_data_ptr_->rows(), matrix_data_ptr_->columns());
+  std::size_t m =
+      std::min(matrix_data_ptr_->rows(), matrix_data_ptr_->columns());
   std::size_t ldb = h_rhs_values_.size();
 
   // prepare container for solution:

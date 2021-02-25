@@ -23,28 +23,26 @@ void deviceDenseDefaultQRTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<double> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -60,7 +58,7 @@ void deviceDenseDefaultQRTest() {
   std::vector<double> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  real_dense_solver_cuda<double> rds;
+  real_dense_solver_cuda<double> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
@@ -96,28 +94,26 @@ void deviceDenseDefaultQRPointersTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<double> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -133,7 +129,7 @@ void deviceDenseDefaultQRPointersTest() {
   std::vector<double> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  real_dense_solver_cuda<double> rds;
+  real_dense_solver_cuda<double> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
@@ -170,28 +166,26 @@ void deviceDenseFloatQRTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<float> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -207,7 +201,7 @@ void deviceDenseFloatQRTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  real_dense_solver_cuda<float> rds;
+  real_dense_solver_cuda<float> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
@@ -243,28 +237,26 @@ void deviceDenseFloatQRPointersTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<float> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -280,7 +272,7 @@ void deviceDenseFloatQRPointersTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  real_dense_solver_cuda<float> rds;
+  real_dense_solver_cuda<float> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
@@ -330,28 +322,26 @@ void deviceDenseDefaultLUTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<float> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -364,10 +354,10 @@ void deviceDenseDefaultLUTest() {
   fsm.emplace_back(2, 2, 1.0);
 
   // lets use std::vector to populate vector b:
-  std::vector<double> b = {6.0, 15.0, 4.0};
+  std::vector<float> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  real_dense_solver_cuda<double> rds;
+  real_dense_solver_cuda<float> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
@@ -402,28 +392,26 @@ void deviceDenseDefaultLUPointersTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<double> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<double> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0);
   fsm.emplace_back(0, 1, 2.0);
@@ -439,7 +427,7 @@ void deviceDenseDefaultLUPointersTest() {
   std::vector<double> b = {6.0, 15.0, 4.0};
 
   // create dense solver:
-  real_dense_solver_cuda<double> rds;
+  real_dense_solver_cuda<double> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
@@ -476,28 +464,26 @@ void deviceDenseFloatLUTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<float> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -513,7 +499,7 @@ void deviceDenseFloatLUTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  real_dense_solver_cuda<float> rds;
+  real_dense_solver_cuda<float> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);
@@ -549,28 +535,26 @@ void deviceDenseFloatLUPointersTest() {
 
   /*
 
-      Solving for x in
+  Solving for x in
 
-                  Ax = b,
-      where
+  Ax = b,
+  where
 
-                  [ 1 2 3 ]
-              A = [ 4 5 6 ]
-                  [ 2 1 1 ]
+  [ 1 2 3 ]
+  A = [ 4 5 6 ]
+  [ 2 1 1 ]
 
-              x = [1 1 1]^T
-              b = [6 15 4]^T
+  x = [1 1 1]^T
+  b = [6 15 4]^T
 
 
   */
 
-  // first create and populate the dense matrix:
-  flat_matrix<float> fsm;
   // size of the system:
   int const m = 3;
-  // set number of columns and rows:
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  // first create and populate the dense matrix:
+  flat_matrix<float> fsm(m, m);
+
   // populate the matrix:
   fsm.emplace_back(0, 0, 1.0f);
   fsm.emplace_back(0, 1, 2.0f);
@@ -586,7 +570,7 @@ void deviceDenseFloatLUPointersTest() {
   std::vector<float> b = {6.0f, 15.0f, 4.0f};
 
   // create dense solver:
-  real_dense_solver_cuda<float> rds;
+  real_dense_solver_cuda<float> rds(m, m);
 
   // because we used default cstor we need to call initialize
   rds.initialize(m, m);

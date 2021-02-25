@@ -160,29 +160,42 @@ template <typename T>
 struct flat_matrix {
  private:
   std::vector<std::tuple<std::size_t, std::size_t, T>> container_;
+  std::vector<std::size_t> column_cnt_;
+  std::vector<T> diagonal_;
   std::size_t ncols_, nrows_;
+
+  explicit flat_matrix() {}
 
  public:
   explicit flat_matrix(std::size_t nrows, std::size_t ncols)
-      : nrows_{nrows}, ncols_{ncols} {}
-
-  explicit flat_matrix() : flat_matrix<T>(0, 0) {}
+      : nrows_{nrows}, ncols_{ncols} {
+    column_cnt_.resize(nrows);
+    diagonal_.resize(nrows);
+  }
 
   virtual ~flat_matrix() {}
 
   flat_matrix(flat_matrix<T> const& copy)
-      : ncols_{copy.ncols_}, nrows_{copy.nrows_}, container_{copy.container_} {}
+      : ncols_{copy.ncols_},
+        nrows_{copy.nrows_},
+        container_{copy.container_},
+        column_cnt_{copy.column_cnt_},
+        diagonal_{copy.diagonal_} {}
 
   flat_matrix(flat_matrix<T>&& other) noexcept
       : ncols_{std::move(other.ncols_)},
         nrows_{std::move(other.nrows_)},
-        container_{std::move(other.container_)} {}
+        container_{std::move(other.container_)},
+        column_cnt_{std::move(other.column_cnt_)},
+        diagonal_{std::move(other.diagonal_)} {}
 
   flat_matrix<T>& operator=(flat_matrix<T> const& copy) {
     if (this != &copy) {
       ncols_ = copy.ncols_;
       nrows_ = copy.nrows_;
       container_ = copy.container_;
+      column_cnt_ = copy.column_cnt_;
+      diagonal_ = copy.diagonal_;
     }
     return *this;
   }
@@ -192,21 +205,29 @@ struct flat_matrix {
       ncols_ = std::move(other.ncols_);
       nrows_ = std::move(other.nrows_);
       container_ = std::move(other.container_);
+      column_cnt_ = std::move(other.column_cnt_);
+      diagonal_ = std::move(other.diagonal_);
     }
     return *this;
   }
 
-  inline void set_rows(std::size_t nrows) { nrows_ = nrows; }
-  inline void set_columns(std::size_t ncols) { ncols_ = ncols; }
   inline std::size_t rows() const { return nrows_; }
   inline std::size_t columns() const { return ncols_; }
   inline std::size_t size() const { return container_.size(); }
   inline void clear() { container_.clear(); }
+  inline T diagonal_at_row(std::size_t row_idx) const {
+    return diagonal_[row_idx];
+  }
+  inline std::size_t non_zero_column_size(std::size_t row_idx) const {
+    return column_cnt_[row_idx];
+  }
 
   inline void emplace_back(std::size_t row_idx, std::size_t col_idx, T value) {
     LSS_ASSERT(row_idx < nrows_, " rowIdx is outside <0," << nrows_ << ")");
     LSS_ASSERT(col_idx < ncols_, " colIdx is outside <0," << ncols_ << ")");
     container_.emplace_back(std::make_tuple(row_idx, col_idx, value));
+    column_cnt_[row_idx]++;
+    if (row_idx == col_idx) diagonal_[row_idx] = value;
   }
 
   inline void emplace_back(std::tuple<std::size_t, std::size_t, T> tuple) {
@@ -215,6 +236,9 @@ struct flat_matrix {
     LSS_ASSERT(std::get<1>(tuple) < ncols_,
                " colIdx is outside <0," << ncols_ << ")");
     container_.emplace_back(std::move(tuple));
+    column_cnt_[std::get<0>(tuple)]++;
+    if (std::get<1>(tuple) == std::get<0>(tuple))
+      diagonal_[std::get<1>(tuple)] = std::get<2>(tuple);
   }
 
   void sort(flat_matrix_sort_enum sort);

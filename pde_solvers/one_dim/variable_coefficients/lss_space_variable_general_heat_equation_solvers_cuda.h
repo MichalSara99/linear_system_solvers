@@ -75,7 +75,7 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
                                       fp_type terminal_time,
                                       std::size_t const &space_discretization,
                                       std::size_t const &time_discretization)
-      : solverPtr_{std::make_unique<cuda_solver_t>()},
+      : solverPtr_{std::make_unique<cuda_solver_t>(space_discretization - 1)},
         dataPtr_{std::make_unique<heat_data_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
@@ -184,7 +184,7 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Robin,
                                       fp_type terminal_time,
                                       std::size_t const &space_discretization,
                                       std::size_t const &time_discretization)
-      : solverPtr_{std::make_unique<cuda_solver_t>()},
+      : solverPtr_{std::make_unique<cuda_solver_t>(space_discretization + 1)},
         dataPtr_{std::make_unique<heat_data_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
@@ -496,9 +496,7 @@ void implicit_solvers::general_heat_equation_cuda<
   discretization<fp_type, container, alloc>::discretize_initial_condition(
       dataPtr_->initial_condition, prev_sol);
   // first create and populate the sparse matrix:
-  flat_matrix<fp_type> fsm;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  flat_matrix<fp_type> fsm(m, m);
   // prepare space variable coefficients:
   auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
   auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
@@ -520,8 +518,6 @@ void implicit_solvers::general_heat_equation_cuda<
   fp_type time = k;
   // store terminal time:
   fp_type const last_time = dataPtr_->time_range.upper();
-  // initialize the solver:
-  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->set_flat_sparse_matrix(std::move(fsm));
   if ((dataPtr_->is_source_function_set)) {
@@ -642,9 +638,7 @@ void implicit_solvers::general_heat_equation_cuda<
   discretization<fp_type, container, alloc>::discretize_initial_condition(
       dataPtr_->initial_condition, prev_sol);
   // first create and populate the sparse matrix:
-  flat_matrix<fp_type> fsm;
-  fsm.set_columns(m);
-  fsm.set_rows(m);
+  flat_matrix<fp_type> fsm(m, m);
   // prepare space variable coefficients:
   auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
   auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
@@ -671,8 +665,6 @@ void implicit_solvers::general_heat_equation_cuda<
   fp_type time = k;
   // store terminal time:
   fp_type const last_time = dataPtr_->time_range.upper();
-  // initialize the solver:
-  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->set_flat_sparse_matrix(std::move(fsm));
   // differentiate between inhomogeneous and homogeneous PDE:

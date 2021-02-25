@@ -30,6 +30,7 @@ using lss_sparse_solvers_policy::sparse_solver_host_cholesky;
 using lss_sparse_solvers_policy::sparse_solver_host_lu;
 using lss_sparse_solvers_policy::sparse_solver_host_qr;
 using lss_utility::flat_matrix;
+using lss_utility::uptr_t;
 
 template <memory_space_enum memory_space, typename T>
 class real_sparse_solver_cuda {};
@@ -42,7 +43,7 @@ template <typename T>
 class real_sparse_solver_cuda<memory_space_enum::Host, T> {
  protected:
   int system_size_;
-  flat_matrix<T> matrix_elements_;
+  uptr_t<flat_matrix<T>> matrix_data_ptr_;
 
   thrust::host_vector<T> h_matrix_values_;
   thrust::host_vector<T> h_vector_values_;  // of systemSize length
@@ -50,10 +51,14 @@ class real_sparse_solver_cuda<memory_space_enum::Host, T> {
   thrust::host_vector<int> h_row_counts_;  // of systemSize + 1 length
 
   void build_csr();
+  explicit real_sparse_solver_cuda() {}
 
  public:
   typedef T value_type;
-  explicit real_sparse_solver_cuda() : system_size_{0} {}
+  void initialize(std::size_t system_size);
+
+  explicit real_sparse_solver_cuda(int system_size)
+      : system_size_{system_size} {}
   virtual ~real_sparse_solver_cuda() {}
 
   real_sparse_solver_cuda(real_sparse_solver_cuda const&) = delete;
@@ -61,10 +66,8 @@ class real_sparse_solver_cuda<memory_space_enum::Host, T> {
   real_sparse_solver_cuda(real_sparse_solver_cuda&&) = delete;
   real_sparse_solver_cuda& operator=(real_sparse_solver_cuda&&) = delete;
 
-  void initialize(std::size_t system_size);
-
   inline std::size_t non_zero_elements() const {
-    return matrix_elements_.size();
+    return matrix_data_ptr_->size();
   }
 
   template <template <typename T, typename alloc>
@@ -81,17 +84,10 @@ class real_sparse_solver_cuda<memory_space_enum::Host, T> {
   }
 
   inline void set_flat_sparse_matrix(flat_matrix<T> matrix) {
-    matrix_elements_ = std::move(matrix);
-  }
-
-  inline void set_flat_sparse_matrix_value(std::size_t row_idx,
-                                           std::size_t col_idx, T value) {
-    matrix_elements_.emplace_back(row_idx, col_idx, value);
-  }
-
-  inline void set_flat_sparse_matrix_value(
-      std::tuple<std::size_t, std::size_t, T> triplet) {
-    matrix_elements_.emplace_back(std::move(triplet));
+    LSS_ASSERT(matrix.columns() == system_size_,
+               " Incorrect number of columns");
+    LSS_ASSERT(matrix.rows() == system_size_, " Incorrect number of rows");
+    matrix_data_ptr_ = std::make_unique<flat_matrix<T>>(std::move(matrix));
   }
 
   template <
@@ -122,7 +118,7 @@ template <typename T>
 class real_sparse_solver_cuda<memory_space_enum::Device, T> {
  protected:
   int system_size_;
-  flat_matrix<T> matrix_elements_;
+  uptr_t<flat_matrix<T>> matrix_data_ptr_;
 
   thrust::host_vector<T> h_matrix_values_;
   thrust::host_vector<T> h_vector_values_;  // of systemSize length
@@ -130,10 +126,12 @@ class real_sparse_solver_cuda<memory_space_enum::Device, T> {
   thrust::host_vector<int> h_row_counts_;  // of systemSize + 1 length
 
   void build_csr();
+  explicit real_sparse_solver_cuda() {}
 
  public:
   typedef T value_type;
-  explicit real_sparse_solver_cuda() : system_size_{0} {}
+  explicit real_sparse_solver_cuda(int system_size)
+      : system_size_{system_size} {}
   virtual ~real_sparse_solver_cuda() {}
 
   real_sparse_solver_cuda(real_sparse_solver_cuda const&) = delete;
@@ -144,7 +142,8 @@ class real_sparse_solver_cuda<memory_space_enum::Device, T> {
   void initialize(std::size_t system_size);
 
   inline std::size_t non_zero_elements() const {
-    return matrix_elements_.size();
+    LSS_VERIFY(matrix_data_ptr_, "flat_matrix has not been provided.");
+    return matrix_data_ptr_->size();
   }
 
   template <template <typename T, typename alloc>
@@ -161,17 +160,10 @@ class real_sparse_solver_cuda<memory_space_enum::Device, T> {
   }
 
   inline void set_flat_sparse_matrix(flat_matrix<T> matrix) {
-    matrix_elements_ = std::move(matrix);
-  }
-
-  inline void set_flat_sparse_matrix_value(std::size_t row_idx,
-                                           std::size_t col_idx, T value) {
-    matrix_elements_.emplace_back(row_idx, col_idx, value);
-  }
-
-  inline void set_flat_sparse_matrix_value(
-      std::tuple<std::size_t, std::size_t, T> triplet) {
-    matrix_elements_.emplace_back(std::move(triplet));
+    LSS_ASSERT(matrix.columns() == system_size_,
+               " Incorrect number of columns");
+    LSS_ASSERT(matrix.rows() == system_size_, " Incorrect number of rows");
+    matrix_data_ptr_ = std::make_unique<flat_matrix<T>>(std::move(matrix));
   }
 
   template <template <typename T>
@@ -205,7 +197,6 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
   system_size_ = system_size;
 
   // clear the containers:
-  matrix_elements_.clear();
   h_matrix_values_.clear();
   h_vector_values_.clear();
   h_column_indices_.clear();
@@ -214,8 +205,6 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
   // resize the containers to the correct size:
   h_vector_values_.resize(system_size_);
   h_row_counts_.resize((system_size_ + 1));
-  matrix_elements_.set_columns(system_size_);
-  matrix_elements_.set_rows(system_size_);
 }
 
 template <typename T>
@@ -226,7 +215,6 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
   system_size_ = system_size;
 
   // clear the containers:
-  matrix_elements_.clear();
   h_matrix_values_.clear();
   h_vector_values_.clear();
   h_column_indices_.clear();
@@ -235,8 +223,6 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
   // resize the containers to the correct size:
   h_vector_values_.resize(system_size_);
   h_row_counts_.resize((system_size_ + 1));
-  matrix_elements_.set_columns(system_size_);
-  matrix_elements_.set_rows(system_size_);
 }
 
 template <typename T>
@@ -244,8 +230,9 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
     lss_enumerations::memory_space_enum::Host, T>::build_csr() {
   int const nonZeroSize = non_zero_elements();
 
+  LSS_VERIFY(matrix_data_ptr_, "flat_matrix has not been provided.");
   // CUDA sparse solver is row-major:
-  matrix_elements_.sort(flat_matrix_sort_enum::RowMajor);
+  matrix_data_ptr_->sort(flat_matrix_sort_enum::RowMajor);
 
   h_column_indices_.resize(nonZeroSize);
   h_matrix_values_.resize(nonZeroSize);
@@ -256,13 +243,13 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
   h_row_counts_[nRowElement++] = nElement;
 
   for (int i = 0; i < nonZeroSize; ++i) {
-    if (lastRow < std::get<0>(matrix_elements_.at(i))) {
+    if (lastRow < std::get<0>(matrix_data_ptr_->at(i))) {
       h_row_counts_[nRowElement++] = i;
       lastRow++;
     }
 
-    h_column_indices_[i] = std::get<1>(matrix_elements_.at(i));
-    h_matrix_values_[i] = std::get<2>(matrix_elements_.at(i));
+    h_column_indices_[i] = std::get<1>(matrix_data_ptr_->at(i));
+    h_matrix_values_[i] = std::get<2>(matrix_data_ptr_->at(i));
   }
   h_row_counts_[nRowElement] = nonZeroSize;
 }
@@ -272,8 +259,9 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
     lss_enumerations::memory_space_enum::Device, T>::build_csr() {
   int const non_zero_size = non_zero_elements();
 
+  LSS_VERIFY(matrix_data_ptr_, "flat_matrix has not been provided.");
   // CUDA sparse solver is row-major:
-  matrix_elements_.sort(flat_matrix_sort_enum::RowMajor);
+  matrix_data_ptr_->sort(flat_matrix_sort_enum::RowMajor);
 
   h_column_indices_.resize(non_zero_size);
   h_matrix_values_.resize(non_zero_size);
@@ -284,13 +272,13 @@ void lss_sparse_solvers::real_sparse_solver_cuda<
   h_row_counts_[nRowElement++] = nElement;
 
   for (std::size_t i = 0; i < non_zero_size; ++i) {
-    if (lastRow < std::get<0>(matrix_elements_.at(i))) {
+    if (lastRow < std::get<0>(matrix_data_ptr_->at(i))) {
       h_row_counts_[nRowElement++] = i;
       lastRow++;
     }
 
-    h_column_indices_[i] = std::get<1>(matrix_elements_.at(i));
-    h_matrix_values_[i] = std::get<2>(matrix_elements_.at(i));
+    h_column_indices_[i] = std::get<1>(matrix_data_ptr_->at(i));
+    h_matrix_values_[i] = std::get<2>(matrix_data_ptr_->at(i));
   }
   h_row_counts_[nRowElement] = non_zero_size;
 }
