@@ -525,6 +525,8 @@ void implicit_solvers::black_sholes_equation_cuda<
   fp_type const last_time = dataPtr_->time_range.upper();
   // create first time point:
   fp_type time = last_time - k;
+  // initialise the solver:
+  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->set_flat_sparse_matrix(std::move(fsm));
   if ((dataPtr_->is_source_function_set)) {
@@ -672,6 +674,8 @@ void implicit_solvers::black_sholes_equation_cuda<
   fp_type const last_time = dataPtr_->time_range.upper();
   // create first time point:
   fp_type time = last_time - k;
+  // initialise the solver:
+  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->set_flat_sparse_matrix(std::move(fsm));
   // differentiate between inhomogeneous and homogeneous PDE:

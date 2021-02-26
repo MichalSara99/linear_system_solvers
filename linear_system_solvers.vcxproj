@@ -117,6 +117,10 @@
     <ClInclude Include="sparse_solvers\lss_fdm_double_sweep_solver.h" />
     <ClInclude Include="sparse_solvers\lss_fdm_thomas_lu_solver.h" />
     <ClInclude Include="sparse_solvers\lss_fdm_tridiagonal_solvers.h" />
+    <ClInclude Include="sparse_solvers\lss_sor_solver.h" />
+    <ClInclude Include="sparse_solvers\lss_sor_solver_cuda.h" />
+    <ClInclude Include="sparse_solvers\lss_sor_solver_kernels.h" />
+    <ClInclude Include="sparse_solvers\lss_sor_solver_traits.h" />
     <ClInclude Include="sparse_solvers\lss_sparse_solvers.h" />
     <ClInclude Include="sparse_solvers\lss_sparse_solvers_cuda.h" />
     <ClInclude Include="sparse_solvers\lss_sparse_solvers_policy.h" />
@@ -132,12 +136,15 @@
     <ClInclude Include="unit_tests\lss_one_dim_space_variable_advection_diffusion_equation_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_space_variable_pure_heat_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_one_dim_space_variable_pure_heat_equation_t.h" />
+    <ClInclude Include="unit_tests\lss_sor_solver_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_sor_solver_t.h" />
     <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
     <CudaCompile Include="pde_solvers\one_dim\classic\lss_heat_explicit_schemes_cuda.cu" />
     <CudaCompile Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes_cuda_policy.cu" />
+    <CudaCompile Include="sparse_solvers\lss_sor_solver_cuda.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -499,6 +499,8 @@ void implicit_solvers::general_heat_equation_cuda<
   fp_type time = k;
   // store terminal time:
   fp_type const last_time = dataPtr_->time_range.upper();
+  // initialise the solver:
+  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->set_flat_sparse_matrix(std::move(fsm));
   if ((dataPtr_->is_source_function_set)) {
@@ -640,6 +642,8 @@ void implicit_solvers::general_heat_equation_cuda<
   fp_type time = k;
   // store terminal time:
   fp_type const last_time = dataPtr_->time_range.upper();
+  // initialise the solver:
+  solverPtr_->initialize(m);
   // insert sparse matrix A and vector b:
   solverPtr_->set_flat_sparse_matrix(std::move(fsm));
   // differentiate between inhomogeneous and homogeneous PDE:

@@ -12,6 +12,8 @@
 #include "unit_tests/lss_one_dim_space_variable_advection_diffusion_equation_t.h"
 #include "unit_tests/lss_one_dim_space_variable_pure_heat_equation_cuda_t.h"
 #include "unit_tests/lss_one_dim_space_variable_pure_heat_equation_t.h"
+#include "unit_tests/lss_sor_solver_cuda_t.h"
+#include "unit_tests/lss_sor_solver_t.h"
 #include "unit_tests/lss_sparse_solvers_cuda_t.h"
 
 int main(int argc, char const *argv[]) {
@@ -48,6 +50,26 @@ int main(int argc, char const *argv[]) {
   // ====================================================================
 
   // ====================================================================
+  // =========================== lss_sor_solver_t.h =====================
+  // ====================================================================
+
+  // testSOR();
+  // testBVPDirichletBCSOR();
+  // testBVPRobinBCSOR();
+
+  // ====================================================================
+
+  // ====================================================================
+  // ====================== lss_sor_solver_cuda_t.h =====================
+  // ====================================================================
+
+  // testSORCUDA();
+  // testBVPDirichletBCSORCUDA();
+  // testBVPRobinBCSOR();
+
+  // ====================================================================
+
+  // ====================================================================
   // ==================== lss_dense_solvers_cuda_t.h ====================
   // ====================================================================
 
@@ -72,9 +94,9 @@ int main(int argc, char const *argv[]) {
   // testImplNonHomPureHeatEquationDirichletBCThomasLU();
   // testExplPureHeatEquationDirichletBC();
   // testExplPureHeatEquationSourceDirichletBC();
-  testExplNonHomPureHeatEquationDirichletBC();
-  testExplHomPureHeatEquationRobinBC();
-  testExplHomPureHeatEquationSourceRobinBC();
+  // testExplNonHomPureHeatEquationDirichletBC();
+  // testExplHomPureHeatEquationRobinBC();
+  // testExplHomPureHeatEquationSourceRobinBC();
 
   // ====================================================================
 
@@ -82,11 +104,11 @@ int main(int argc, char const *argv[]) {
   // ============ lss_one_dim_pure_heat_equation_cuda_t.h ===============
   // ====================================================================
 
-  testImplPureHeatEquationDirichletBCDeviceCUDA();
-  testImplPureHeatEquationDirichletBCHostCUDA();
-  testImplPureHeatEquationRobinBCDeviceCUDA();
-  testImplPureHeatEquationSourceDirichletBCCUDA();
-  testImplPureHeatEquationSourceRobinBCCUDA();
+  // testImplPureHeatEquationDirichletBCDeviceCUDA();
+  // testImplPureHeatEquationDirichletBCHostCUDA();
+  // testImplPureHeatEquationRobinBCDeviceCUDA();
+  // testImplPureHeatEquationSourceDirichletBCCUDA();
+  // testImplPureHeatEquationSourceRobinBCCUDA();
   // testImplNonHomPureHeatEquationDirichletBCDeviceCUDA();
   // testImplNonHomPureHeatEquationDirichletBCHostCUDA();
   // testExplPureHeatEquationDirichletBCDeviceCUDA();

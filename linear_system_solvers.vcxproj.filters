@@ -168,6 +168,24 @@
     <ClInclude Include="unit_tests\lss_one_dim_black_scholes_equation_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="unit_tests\lss_sor_solver_cuda_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\lss_sor_solver_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_sor_solver.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_sor_solver_cuda.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_sor_solver_kernels.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\lss_sor_solver_traits.h">
+      <Filter>sparse_solvers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
@@ -176,6 +194,9 @@
     </CudaCompile>
     <CudaCompile Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_explicit_schemes_cuda_policy.cu">
       <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </CudaCompile>
+    <CudaCompile Include="sparse_solvers\lss_sor_solver_cuda.cu">
+      <Filter>sparse_solvers</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>
