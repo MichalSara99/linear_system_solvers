@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA_POLICY)
-#define _LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA_POLICY
+#if !defined(_LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA_POLICY)
+#define _LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA_POLICY
 
 #pragma warning(disable : 4244)
 
@@ -97,4 +97,4 @@ struct heat_euler_scheme_backward_policy {
 
 }  // namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda_policy
 
-#endif  //_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA_POLICY
+#endif  //_LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA_POLICY

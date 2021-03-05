@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_SPACE_VARIABLE_HEAT_CUDA_KERNELS)
-#define _LSS_SPACE_VARIABLE_HEAT_CUDA_KERNELS
+#if !defined(_LSS_1D_SPACE_VARIABLE_HEAT_CUDA_KERNELS)
+#define _LSS_1D_SPACE_VARIABLE_HEAT_CUDA_KERNELS
 
 #include <device_launch_parameters.h>
 
@@ -83,4 +83,4 @@ __global__ void explicit_euler_iterate_1d(fp_type* prev, fp_type* next,
 
 }  // namespace lss_one_dim_space_variable_heat_cuda_kernels
 
-#endif  ///_LSS_SPACE_VARIABLE_HEAT_CUDA_KERNELS
+#endif  ///_LSS_1D_SPACE_VARIABLE_HEAT_CUDA_KERNELS

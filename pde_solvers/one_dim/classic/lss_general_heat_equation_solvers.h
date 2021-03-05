@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_GENERAL_HEAT_EQUATION_SOLVERS)
-#define _LSS_GENERAL_HEAT_EQUATION_SOLVERS
+#if !defined(_LSS_1D_GENERAL_HEAT_EQUATION_SOLVERS)
+#define _LSS_1D_GENERAL_HEAT_EQUATION_SOLVERS
 
 #include <functional>
 
@@ -738,4 +738,4 @@ void explicit_solvers::general_heat_equation<
 
 }  // namespace lss_one_dim_classic_pde_solvers
 
-#endif  //_LSS_GENERAL_HEAT_EQUATION_SOLVERS
+#endif  //_LSS_1D_GENERAL_HEAT_EQUATION_SOLVERS

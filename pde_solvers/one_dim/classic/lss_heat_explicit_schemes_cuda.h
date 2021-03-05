@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_HEAT_EXPLICIT_SCHEMES_CUDA)
-#define _LSS_HEAT_EXPLICIT_SCHEMES_CUDA
+#if !defined(_LSS_1D_HEAT_EXPLICIT_SCHEMES_CUDA)
+#define _LSS_1D_HEAT_EXPLICIT_SCHEMES_CUDA
 
 #include <tuple>
 
@@ -282,4 +282,4 @@ void euler_heat_equation_scheme<double, container, alloc>::operator()(
 
 }  // namespace lss_one_dim_heat_explicit_schemes_cuda
 
-#endif  ///_LSS_HEAT_EXPLICIT_SCHEMES_CUDA
+#endif  ///_LSS_1D_HEAT_EXPLICIT_SCHEMES_CUDA

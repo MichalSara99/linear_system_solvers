@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_BASE_EXPLICIT_SCHEMES)
-#define _LSS_BASE_EXPLICIT_SCHEMES
+#if !defined(_LSS_1D_BASE_EXPLICIT_SCHEMES)
+#define _LSS_1D_BASE_EXPLICIT_SCHEMES
 
 #pragma warning(disable : 4244)
 
@@ -65,4 +65,4 @@ class heat_scheme_base {
 
 }  // namespace lss_one_dim_base_explicit_schemes
 
-#endif  //_LSS_BASE_EXPLICIT_SCHEMES
+#endif  //_LSS_1D_BASE_EXPLICIT_SCHEMES

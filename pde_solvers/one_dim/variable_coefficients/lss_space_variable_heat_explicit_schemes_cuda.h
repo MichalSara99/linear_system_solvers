@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA)
-#define _LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA
+#if !defined(_LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA)
+#define _LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA
 
 #include <tuple>
 
@@ -178,4 +178,4 @@ operator()(robin_boundary<fp_type> const &robin_boundary,
 
 }  // namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda
 
-#endif  ///_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA
+#endif  ///_LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES_CUDA

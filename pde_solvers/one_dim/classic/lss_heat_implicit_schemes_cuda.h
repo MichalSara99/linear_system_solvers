@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_HEAT_IMPLICIT_SCHEMES_CUDA)
-#define _LSS_HEAT_IMPLICIT_SCHEMES_CUDA
+#if !defined(_LSS_1D_HEAT_IMPLICIT_SCHEMES_CUDA)
+#define _LSS_1D_HEAT_IMPLICIT_SCHEMES_CUDA
 
 #pragma warning(disable : 4244)
 
@@ -238,4 +238,4 @@ class heat_equation_schemes {
 
 }  // namespace lss_one_dim_heat_implicit_schemes_cuda
 
-#endif  //_LSS_HEAT_IMPLICIT_SCHEMES_CUDA
+#endif  //_LSS_1D_HEAT_IMPLICIT_SCHEMES_CUDA

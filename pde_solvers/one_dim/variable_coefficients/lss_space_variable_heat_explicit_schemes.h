@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES)
-#define _LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES
+#if !defined(_LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES)
+#define _LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES
 
 #pragma warning(disable : 4244)
 
@@ -288,4 +288,4 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ade_heat_saulyev_scheme<
   throw new std::exception("Not available.");
 }
 
-#endif  //_LSS_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES
+#endif  //_LSS_1D_SPACE_VARIABLE_HEAT_EXPLICIT_SCHEMES

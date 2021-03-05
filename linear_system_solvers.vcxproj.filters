@@ -25,6 +25,12 @@
     <Filter Include="common">
       <UniqueIdentifier>{efd4a1a2-c2ae-487f-9011-6dab976d05ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pde_solvers\two_dim">
+      <UniqueIdentifier>{1b7fbefa-2aaf-4897-88a0-c4f398d9af20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\two_dim\classic">
+      <UniqueIdentifier>{e5f1a033-b0ed-4104-8353-aff1dd1f18ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.h">
@@ -185,6 +191,12 @@
     </ClInclude>
     <ClInclude Include="sparse_solvers\lss_sor_solver_traits.h">
       <Filter>sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_solvers.h">
+      <Filter>pde_solvers\two_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dim\lss_pde_utility.h">
+      <Filter>pde_solvers\two_dim</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

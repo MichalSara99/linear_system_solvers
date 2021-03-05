@@ -236,7 +236,7 @@ int main(int argc, char const *argv[]) {
   // ========= lss_one_dim_black_scholes_equation_cuda_t.h ==============
   // ====================================================================
 
-  // testImplEuropeanBlackScholesCallDirichletBCDeviceCUDA();
+  testImplEuropeanBlackScholesCallDirichletBCDeviceCUDA();
   // testImplEuropeanBlackScholesPutDirichletBCDeviceCUDA();
   // testExplEuropeanBlackScholesCallDirichletBCDeviceCUDA();
   // testExplEuropeanBlackScholesPutDirichletBCDeviceCUDA();

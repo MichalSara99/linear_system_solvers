@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_1D_PDE_UTILITY)
-#define _LSS_1D_PDE_UTILITY
+#if !defined(_LSS_2D_PDE_UTILITY)
+#define _LSS_2D_PDE_UTILITY
 
 #include <functional>
 #include <tuple>
@@ -8,67 +8,75 @@
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
 
-namespace lss_one_dim_pde_utility {
+namespace lss_two_dim_pde_utility {
 
 using lss_utility::coefficient_holder;
 using lss_utility::range;
 
-// One-dim PDE coefficient holder
+// Two-dim PDE coefficient holder
 template <typename type>
-using one_dim_coefficient_holder = coefficient_holder<type, type, type>;
+using two_dim_coefficient_holder =
+    coefficient_holder<type, type, type, type, type, type>;
 
-// One-dim PDE coefficients (a,b,c)
+// Two-dim PDE coefficients (a,b,c,d,e,f)
 template <typename fp_type>
-using pde_coefficient_holder_const = one_dim_coefficient_holder<fp_type>;
+using pde_coefficient_holder_const = two_dim_coefficient_holder<fp_type>;
 
-// One-dim PDE coefficients (a(x),b(x),c(x))
+// Two-dim PDE coefficients (a(x,y),b(x,y),c(x,y),d(x,y),e(x,y),f(x,y))
 template <typename fp_type>
-using pde_coefficient_holder_fun_1_arg =
-    one_dim_coefficient_holder<std::function<fp_type(fp_type)>>;
+using pde_coefficient_holder_fun_2_arg =
+    two_dim_coefficient_holder<std::function<fp_type(fp_type, fp_type)>>;
 
-// One-dim Dirichlet boundary:
+// Two-dim Dirichlet boundary:
 template <typename fp_type>
-using dirichlet_boundary =
-    std::pair<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
+using dirichlet_boundary_2d =
+    std::tuple<std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>>;
+
+// TO BE CONSIDERED LATER:
 
 // One-dim Robin boundary:
-template <typename fp_type>
-struct robin_boundary {
-  std::pair<fp_type, fp_type> left;
-  std::pair<fp_type, fp_type> right;
+// template <typename fp_type>
+// struct robin_boundary {
+//  std::pair<fp_type, fp_type> left;
+//  std::pair<fp_type, fp_type> right;
+//
+//  robin_boundary() {}
+//  explicit robin_boundary(std::pair<fp_type, fp_type> const &left_boundary,
+//                          std::pair<fp_type, fp_type> const &right_boundary)
+//      : left{left_boundary}, right{right_boundary} {}
+//};
 
-  robin_boundary() {}
-  explicit robin_boundary(std::pair<fp_type, fp_type> const &left_boundary,
-                          std::pair<fp_type, fp_type> const &right_boundary)
-      : left{left_boundary}, right{right_boundary} {}
-};
-
 template <typename fp_type>
-struct heat_data {
-  // range for space variable
-  range<fp_type> space_range;
+struct heat_data_2d {
+  // range for first and second space variable
+  std::pair<range<fp_type>, range<fp_type>> space_range;
   // range for time variable
   range<fp_type> time_range;
   // Number of time subdivisions
   std::size_t time_division;
   // Number of space subdivisions
-  std::size_t space_division;
+  std::pair<std::size_t, std::size_t> space_division;
   // Initial condition
-  std::function<fp_type(fp_type)> initial_condition;
+  std::function<fp_type(fp_type, fp_type)> initial_condition;
   // terminal condition
-  std::function<fp_type(fp_type)> terminal_condition;
+  std::function<fp_type(fp_type, fp_type)> terminal_condition;
   // Independent source function
-  std::function<fp_type(fp_type, fp_type)> source_function;
+  std::function<fp_type(fp_type, fp_type, fp_type)> source_function;
   // Flag on source function
   bool is_source_function_set;
 
-  explicit heat_data(range<fp_type> const &space, range<fp_type> const &time,
-                     std::size_t const &space_subdivision,
-                     std::size_t const &time_subdivision,
-                     std::function<fp_type(fp_type)> const &initial_condition,
-                     std::function<fp_type(fp_type)> const &terminal_condition,
-                     std::function<fp_type(fp_type, fp_type)> const &source,
-                     bool is_source_set)
+  explicit heat_data_2d(
+      std::pair<range<fp_type>, range<fp_type>> const &space,
+      range<fp_type> const &time,
+      std::pair<std::size_t, std::size_t> const &space_subdivision,
+      std::size_t const &time_subdivision,
+      std::function<fp_type(fp_type, fp_type)> const &initial_condition,
+      std::function<fp_type(fp_type, fp_type)> const &terminal_condition,
+      std::function<fp_type(fp_type, fp_type, fp_type)> const &source,
+      bool is_source_set)
       : space_range{space},
         time_range{time},
         space_division{space_subdivision},
@@ -79,7 +87,7 @@ struct heat_data {
         is_source_function_set{is_source_set} {}
 
  protected:
-  heat_data() {}
+  heat_data_2d() {}
 };
 
 template <typename fp_type, template <typename, typename> typename container,
@@ -139,6 +147,6 @@ template <typename fp_type>
 using v_discretization =
     discretization<fp_type, std::vector, std::allocator<fp_type>>;
 
-}  // namespace lss_one_dim_pde_utility
+}  // namespace lss_two_dim_pde_utility
 
-#endif  ///_LSS_1D_PDE_UTILITY
+#endif  ///_LSS_2D_PDE_UTILITY

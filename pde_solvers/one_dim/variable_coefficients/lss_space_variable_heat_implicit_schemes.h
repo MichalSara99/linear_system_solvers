@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES)
-#define _LSS_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES
+#if !defined(_LSS_1D_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES)
+#define _LSS_1D_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES
 
 #pragma warning(disable : 4244)
 
@@ -100,4 +100,4 @@ class heat_equation_schemes {
 
 }  // namespace lss_one_dim_space_variable_heat_implicit_schemes
 
-#endif  //_LSS_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES
+#endif  //_LSS_1D_SPACE_VARIABLE_HEAT_IMPLICIT_SCHEMES

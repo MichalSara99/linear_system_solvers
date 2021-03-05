@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_LSS_GENERAL_HEAT_EQUATION_SOLVERS_CUDA)
-#define _LSS_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
+#if !defined(_LSS_1D_GENERAL_HEAT_EQUATION_SOLVERS_CUDA)
+#define _LSS_1D_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
@@ -823,4 +823,4 @@ void explicit_solvers::general_heat_equation_cuda<
 
 }  // namespace lss_one_dim_classic_pde_solvers
 
-#endif  ///_LSS_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
+#endif  ///_LSS_1D_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
