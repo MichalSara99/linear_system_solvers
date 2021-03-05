@@ -173,20 +173,31 @@ void implicit_solvers::general_heat_equation<
   // fp_type const theta =
   //    lss_one_dim_heat_implicit_schemes::heat_equation_schemes<
   //        fp_type>::get_theta(scheme);
-  //// get space step:
-  // fp_type const h = space_step();
-  //// get time step:
-  // fp_type const k = time_step();
-  //// get space range:
-  // auto const &space_range = dataPtr_->space_range;
-  //// get source heat function:
-  // auto const &heat_source = dataPtr_->source_function;
-  //// space divisions:
-  // std::size_t const space_size = dataPtr_->space_division;
-  //// calculate scheme const coefficients:
-  // fp_type const lambda = (std::get<0>(coeffs_) * k) / (h * h);
-  // fp_type const gamma = (std::get<1>(coeffs_) * k) / (2.0 * h);
-  // fp_type const delta = (std::get<2>(coeffs_) * k);
+  // get space steps:
+  auto const &h = space_step();
+  fp_type const h_1 = h.first;
+  fp_type const h_2 = h.second;
+  // get time step:
+  fp_type const k = time_step();
+  // get space ranges:
+  auto const &space_range = dataPtr_->space_range;
+  // get source heat function:
+  auto const &heat_source = dataPtr_->source_function;
+  // space divisions:
+  auto const &space_divison = dataPtr_->space_division;
+  std::size_t const space_size_1 = space_divison.first;
+  std::size_t const space_size_2 = space_divison.second;
+  // calculate scheme const coefficients:
+  fp_type const alpha = (std::get<0>(coeffs_) * k) / (h_1 * h_1);
+  fp_type const beta = (std::get<1>(coeffs_) * k) / (h_2 * h_2);
+  fp_type const gamma =
+      (std::get<2>(coeffs_) * k / (static_cast<fp_type>(4.0) * h_1 * h_2));
+  fp_type const delta =
+      (std::get<3>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1));
+  fp_type const ni =
+      (std::get<4>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_2));
+  fp_type const rho = (std::get<5>(coeffs_) * k);
+
   //// create container to carry mesh in space and then previous solution:
   // container<fp_type, alloc> prev_sol(space_size + 1, fp_type{});
   //// populate the container with mesh in space

@@ -17,7 +17,35 @@ namespace lss_utility {
 // =========================================================================
 template <template <typename, typename> typename container, typename fp_type,
           typename alloc>
-using container_2d = std::vector<container<fp_type, alloc>>;
+class container_2d {
+ private:
+  std::size_t rows_;
+  std::size_t columns_;
+  std::vector<container<fp_type, alloc>> data_;
+
+ protected:
+  explicit container_2d() {}
+
+ public:
+  typedef fp_type value_type;
+  typedef container<fp_type, alloc> element_type;
+
+  explicit container_2d(std::size_t rows, std::size_t columns)
+      : rows_{rows}, columns_{columns} {
+    for (std::size_t r = 0; r < rows; ++r) {
+      data_.emplace_back(
+          container<fp_type, alloc>(static_cast<std::size_t>(columns)));
+    }
+  }
+
+  explicit container_2d(std::size_t rows, std::size_t columns, fp_type value)
+      : rows_{rows}, columns_{columns} {
+    for (std::size_t r = 0; r < rows; ++r) {
+      data_.emplace_back(
+          container<fp_type, alloc>(static_cast<std::size_t>(columns), value));
+    }
+  }
+};
 // =========================================================================
 // ===================== PDE coefficient holder ============================
 // =========================================================================
