@@ -45,6 +45,75 @@ class container_2d {
           container<fp_type, alloc>(static_cast<std::size_t>(columns), value));
     }
   }
+
+  ~container_2d() {}
+
+  container_2d(container_2d const& copy)
+      : rows_{copy.rows_}, columns_{copy.columns_}, data_{copy.data_} {}
+
+  container_2d(container_2d&& other) noexcept
+      : rows_{std::move(other.rows_)},
+        columns_{std::move(other.columns_)},
+        data_{std::move(other.data_)} {}
+
+  container_2d& operator=(container_2d const& copy) {
+    if (this != &copy) {
+      rows_ = copy.rows_;
+      columns_ = copy.columns_;
+      data_ = copy.data_;
+    }
+    return *this;
+  }
+
+  container_2d& operator=(container_2d&& other) noexcept {
+    if (this != &other) {
+      rows_ = std::move(other.rows_);
+      columns_ = std::move(other.columns_);
+      data_ = std::move(other.data_);
+    }
+    return *this;
+  }
+
+  std::size_t rows() const { return rows_; }
+  std::size_t columns() const { return columns_; }
+
+  // return value from container_2d at potision (row_idx,col_idx)
+  fp_type operator()(std::size_t row_idx, std::size_t col_idx) const {
+    LSS_ASSERT(row_idx < rows_, "Outside of row range");
+    LSS_ASSERT(col_idx < columns_, "Outside of column range");
+    return data_[row_idx][col_idx];
+  }
+
+  // return row container from container_2d at potision (row_idx)
+  container<fp_type, alloc> operator()(std::size_t row_idx) const {
+    LSS_ASSERT(row_idx < rows_, "Outside of row range");
+    return data_[row_idx];
+  }
+
+  // return value from container_2d at potision (row_idx,col_idx)
+  fp_type at(std::size_t row_idx, std::size_t col_idx) const {
+    return operator()(row_idx, col_idx);
+  }
+
+  // return row container from container_2d at potision (row_idx)
+  container<fp_type, alloc> at(std::size_t row_idx) const {
+    return operator()(row_idx);
+  }
+
+  // place row_container at row position (row_idx)
+  void operator()(std::size_t row_idx,
+                  container<fp_type, alloc> const& row_container) {
+    LSS_ASSERT(row_idx < rows_, "Outside of row range");
+    LSS_ASSERT(row_container.size() == columns_, "Outside of column range");
+    data_[row_idx] = std::move(row_container);
+  }
+
+  // place value at position (row_idx,col_idx)
+  void operator()(std::size_t row_idx, std::size_t col_idx, fp_type value) {
+    LSS_ASSERT(row_idx < rows_, "Outside of row range");
+    LSS_ASSERT(col_idx < columns_, "Outside of column range");
+    data_[row_idx][col_idx] = value;
+  }
 };
 // =========================================================================
 // ===================== PDE coefficient holder ============================

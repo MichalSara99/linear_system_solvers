@@ -141,6 +141,7 @@
     <ClInclude Include="unit_tests\lss_sor_solver_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_sor_solver_t.h" />
     <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_utility_t.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

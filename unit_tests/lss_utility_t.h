@@ -1,0 +1,122 @@
+#pragma once
+#if !defined(_LSS_UTILITY_T)
+#define _LSS_UTILITY_T
+
+#include "common/lss_enumerations.h"
+#include "common/lss_utility.h"
+
+template <typename T>
+void testContainer2d1() {
+  using lss_utility::container_2d;
+  using lss_utility::sptr_t;
+
+  std::cout << "===================================\n";
+  std::cout << "Creating following container:\n";
+  std::cout << "     [10, -1, 2, 0] \n";
+  std::cout << " A = [-1, 11, -1, 3] \n";
+  std::cout << "     [2, -1, 10, -1] \n";
+  std::cout << "	 [0, 3, -1, 8]\n";
+  std::cout << "\n";
+
+  container_2d<std::vector, T, std::allocator<T>> cont_2d(4, 4);
+
+  cont_2d(0, 0, 10.0);
+  cont_2d(0, 1, -1.0);
+  cont_2d(0, 2, 2.0);
+  cont_2d(0, 3, 0.0);
+
+  cont_2d(1, 0, -1.0);
+  cont_2d(1, 1, 11.0);
+  cont_2d(1, 2, -1.0);
+  cont_2d(1, 3, 3.0);
+
+  cont_2d(2, 0, 2.0);
+  cont_2d(2, 1, -1.0);
+  cont_2d(2, 2, 10.0);
+  cont_2d(2, 3, -1.0);
+
+  cont_2d(3, 0, 0.0);
+  cont_2d(3, 1, 3.0);
+  cont_2d(3, 2, -1.0);
+  cont_2d(3, 3, 8.0);
+
+  for (std::size_t r = 0; r < cont_2d.rows(); ++r) {
+    for (std::size_t c = 0; c < cont_2d.columns(); ++c) {
+      std::cout << cont_2d(r, c) << " ";
+    }
+    std::cout << "\n";
+  }
+}
+
+template <typename T>
+void testContainer2d2() {
+  using lss_utility::container_2d;
+  using lss_utility::sptr_t;
+
+  std::cout << "===================================\n";
+  std::cout << "Creating following container:\n";
+  std::cout << "     [10, -1, 2, 0] \n";
+  std::cout << " A = [-1, 11, -1, 3] \n";
+  std::cout << "     [2, -1, 10, -1] \n";
+  std::cout << "	 [0, 3, -1, 8]\n";
+  std::cout << "\n";
+
+  container_2d<std::vector, T, std::allocator<T>> cont_2d(4, 4);
+
+  cont_2d(0, {10, -1, 2, 0});
+  cont_2d(1, {-1, 11, -1, 3.0});
+  cont_2d(2, {2.0, -1.0, 10.0, -1.0});
+  cont_2d(3, {0.0, 3.0, -1.0, 8.0});
+
+  for (std::size_t r = 0; r < cont_2d.rows(); ++r) {
+    for (std::size_t c = 0; c < cont_2d.columns(); ++c) {
+      std::cout << cont_2d(r, c) << " ";
+    }
+    std::cout << "\n";
+  }
+}
+
+template <typename T>
+void testContainer2d3() {
+  using lss_utility::container_2d;
+  using lss_utility::sptr_t;
+
+  std::cout << "===================================\n";
+  std::cout << "Creating following container:\n";
+  std::cout << "     [10, -1, 2, 0] \n";
+  std::cout << " A = [-1, 11, -1, 3] \n";
+  std::cout << "     [2, -1, 10, -1] \n";
+  std::cout << "	 [0, 3, -1, 8]\n";
+  std::cout << "\n";
+
+  container_2d<std::vector, T, std::allocator<T>> cont_2d(4, 4);
+
+  cont_2d(0, {10, -1, 2, 0});
+  cont_2d(1, {-1, 11, -1, 3.0});
+  cont_2d(2, {2.0, -1.0, 10.0, -1.0});
+  cont_2d(3, {0.0, 3.0, -1.0, 8.0});
+
+  auto const &fourth = cont_2d(3);
+
+  for (std::size_t c = 0; c < cont_2d.columns(); ++c) {
+    std::cout << fourth[c] << " ";
+  }
+  std::cout << "\n";
+}
+
+void testContainer2d() {
+  std::cout << "============================================================\n";
+  std::cout << "=================== Testing Container2d ====================\n";
+  std::cout << "============================================================\n";
+
+  testContainer2d1<float>();
+  testContainer2d1<double>();
+  testContainer2d2<float>();
+  testContainer2d2<double>();
+  testContainer2d3<float>();
+  testContainer2d3<double>();
+
+  std::cout << "============================================================\n";
+}
+
+#endif  ///_LSS_UTILITY_T
