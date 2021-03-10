@@ -201,6 +201,9 @@
     <ClInclude Include="unit_tests\lss_utility_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_implicit_schemes.h">
+      <Filter>pde_solvers\two_dim\classic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
