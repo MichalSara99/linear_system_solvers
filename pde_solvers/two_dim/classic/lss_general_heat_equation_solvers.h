@@ -9,6 +9,7 @@
 #include "common/lss_utility.h"
 //#include "lss_heat_explicit_schemes.h"
 #include "lss_heat_implicit_schemes.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 #include "pde_solvers/two_dim/lss_pde_utility.h"
 
 namespace lss_two_dim_classic_pde_solvers {
@@ -16,6 +17,7 @@ namespace lss_two_dim_classic_pde_solvers {
 using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::explicit_pde_schemes_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
+using lss_one_dim_pde_utility::discretization;
 using lss_two_dim_pde_utility::discretization_2d;
 using lss_two_dim_pde_utility::heat_data_2d;
 using lss_two_dim_pde_utility::pde_coefficient_holder_const;
@@ -84,9 +86,9 @@ class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
       std::pair<std::size_t, std::size_t> const &space_discretization,
       std::size_t const &time_discretization)
       : solver_fst_ptr_{std::make_unique<fdm_solver_t>(
-            space_discretization.first + 1)},
+            space_discretization.second + 1)},
         solver_sec_ptr_{
-            std::make_unique<fdm_solver_t>(space_discretization.second + 1)},
+            std::make_unique<fdm_solver_t>(space_discretization.first + 1)},
         dataPtr_{std::make_unique<heat_data_2d_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
@@ -166,8 +168,12 @@ void implicit_solvers::general_heat_equation<
     alloc>::solve(container_2d<container, fp_type, alloc> &solution,
                   implicit_pde_schemes_enum scheme) {
   LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
-  LSS_ASSERT(solution.size() > 0,
+  LSS_ASSERT(solution.rows() > 0,
              "The input solution container must be initialized.");
+  LSS_ASSERT(solution.columns() > 0,
+             "The input solution container must be initialized.");
+  // convinient typedefs:
+  typedef container_2d<container, fp_type, alloc> matrix_t;
 
   // get correct theta according to the scheme:
   fp_type const theta =
@@ -215,8 +221,7 @@ void implicit_solvers::general_heat_equation<
   auto const y_init = y_range.lower();
 
   // create container to carry mesh in space and then previous solution:
-  container_2d<container, fp_type, alloc> prev_sol(space_size_2 + 1,
-                                                   space_size_1 + 1, fp_type{});
+  matrix_t prev_sol(space_size_2 + 1, space_size_1 + 1, fp_type{});
   // use the mesh in space to get values of initial condition
   discretization_2d<fp_type, container, alloc>::discretize_initial_condition(
       std::make_pair(x_init, y_init), h, dataPtr_->initial_condition, prev_sol);
@@ -230,6 +235,8 @@ void implicit_solvers::general_heat_equation<
                                    -1.0 * (alpha + delta) * theta);
 
   container<fp_type, alloc> rhs_fst(space_size_2 + 1, fp_type{});
+  container<fp_type, alloc> intermed_lower(space_size_2 + 1, fp_type{});
+  container<fp_type, alloc> intermed_upper(space_size_2 + 1, fp_type{});
   // prepare containers for diagonal vectors for solver_sec_ptr_:
   container<fp_type, alloc> low_sec(space_size_1 + 1,
                                     -1.0 * (beta - ni) * theta);
@@ -240,11 +247,9 @@ void implicit_solvers::general_heat_equation<
 
   container<fp_type, alloc> rhs_sec(space_size_1 + 1, fp_type{});
   //// create container to carry intermediate solution (Y matrix):
-  container_2d<container, fp_type, alloc> intermed_sol(
-      space_size_1 + 1, space_size_2 + 1, fp_type{});
+  matrix_t intermed_sol(space_size_1 + 1, space_size_2 + 1, fp_type{});
   //// create container to carry final solution (U matrix):
-  container_2d<container, fp_type, alloc> next_sol(space_size_2 + 1,
-                                                   space_size_1 + 1, fp_type{});
+  matrix_t next_sol(space_size_2 + 1, space_size_1 + 1, fp_type{});
   // create first time point:
   fp_type time = k;
   // store terminal time:
@@ -261,8 +266,11 @@ void implicit_solvers::general_heat_equation<
     const auto scheme_coeffs =
         std::make_tuple(alpha, beta, gamma, delta, ni, rho, k);
     // get the correct scheme:
-    auto scheme_fun = lss_two_dim_heat_implicit_schemes::heat_equation_schemes<
-        fp_type, container, alloc>::get_inhom_scheme(scheme);
+    auto scheme_funcs =
+        lss_two_dim_heat_implicit_schemes::heat_equation_schemes<
+            fp_type, container, alloc>::get_scheme(scheme);
+    auto scheme_fun_0 = scheme_funcs.first;
+    auto scheme_fun_1 = scheme_funcs.second;
     //  // create a container to carry discretized source heat
     //  container<fp_type, alloc> source_curr(space_size + 1, fp_type{});
     //  container<fp_type, alloc> source_next(space_size + 1, fp_type{});
@@ -289,16 +297,28 @@ void implicit_solvers::general_heat_equation<
     const auto scheme_coeffs =
         std::make_tuple(alpha, beta, gamma, delta, ni, rho, fp_type{});
     //  get the correct scheme:
-    auto scheme_fun = lss_two_dim_heat_implicit_schemes::heat_equation_schemes<
-        fp_type, container, alloc>::get_scheme(scheme);
+    auto scheme_funcs =
+        lss_two_dim_heat_implicit_schemes::heat_equation_schemes<
+            fp_type, container, alloc>::get_scheme(scheme);
+    auto scheme_fun_0 = scheme_funcs.first;
+    auto scheme_fun_1 = scheme_funcs.second;
     // save y_init for dirichlet boundaries:
-    auto const y_val = fp_type{};
+    auto y_val = fp_type{};
     // loop for stepping in time:
     while (time <= last_time) {
-      for (std::size_t sol_idx = 0; sol_idx < space_size_1 + 1; ++sol_idx) {
+      // lower Y axis Dirichlet boundary:
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h_1, x_init, time, second_dir_start, intermed_lower);
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h_1, x_init, time, second_dir_end, intermed_upper);
+
+      intermed_sol(0, intermed_lower);
+      intermed_sol(space_size_1, intermed_upper);
+
+      for (std::size_t sol_idx = 1; sol_idx < space_size_1; ++sol_idx) {
         y_val = y_init + static_cast<fp_type>(sol_idx) * h_2;
-        scheme_fun(scheme_coeffs, prev_sol, container<fp_type, alloc>(),
-                   container<fp_type, alloc>(), rhs_fst, sol_idx);
+        scheme_fun_0(scheme_coeffs, prev_sol, intermed_sol, intermed_sol,
+                     rhs_fst, sol_idx);
         solver_fst_ptr_->set_boundary_condition(std::make_pair(
             first_dir_start(y_val, time), first_dir_end(y_val, time)));
         solver_fst_ptr_->set_rhs(rhs_fst);

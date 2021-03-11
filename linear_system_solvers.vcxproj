@@ -142,6 +142,7 @@
     <ClInclude Include="unit_tests\lss_sor_solver_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_sor_solver_t.h" />
     <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_two_dim_pure_heat_equation_t.h" />
     <ClInclude Include="unit_tests\lss_utility_t.h" />
   </ItemGroup>
   <ItemGroup>

@@ -21,11 +21,14 @@ template <typename type>
 using scheme_coefficient_holder =
     std::tuple<type, type, type, type, type, type, type>;
 
-template <typename type>
-using scheme_function = std::function<void(
-    scheme_coefficient_holder<type> const&, std::vector<type> const&,
-    std::vector<type> const&, std::vector<type> const&, std::vector<type>&,
-    std::size_t const&)>;
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+using scheme_function =
+    std::function<void(scheme_coefficient_holder<fp_type> const&,
+                       container_2d<container, fp_type, alloc> const&,
+                       container_2d<container, fp_type, alloc> const&,
+                       container_2d<container, fp_type, alloc> const&,
+                       container<fp_type, alloc>&, std::size_t const&)>;
 
 // ============================================================================
 // ======================== heat_equation_schemes  ============================
@@ -44,14 +47,15 @@ class heat_equation_schemes {
     return theta;
   }
 
-  static scheme_function<fp_type> const get_scheme(
-      implicit_pde_schemes_enum scheme) {
+  static std::pair<scheme_function<fp_type, container, alloc>,
+                   scheme_function<fp_type, container, alloc>> const
+  get_scheme(implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
     else
       theta = 0.5;
-    auto scheme_fun =
+    auto scheme_fun_0 =
         [=](scheme_coefficient_holder<fp_type> const& coeffs,
             container_2d<container, fp_type, alloc> const& input,
             container_2d<container, fp_type, alloc> const& inhom_input,
@@ -61,46 +65,110 @@ class heat_equation_schemes {
           // inhom_input not used
           // inhom_input_next not used
 
-          fp_type const lambda = std::get<0>(coeffs);
-          fp_type const gamma = std::get<1>(coeffs);
-          fp_type const delta = std::get<2>(coeffs);
+          fp_type const alpha = std::get<0>(coeffs);
+          fp_type const beta = std::get<1>(coeffs);
+          fp_type const gamma = std::get<2>(coeffs);
+          fp_type const delta = std::get<3>(coeffs);
+          fp_type const ni = std::get<4>(coeffs);
+          fp_type const rho = std::get<5>(coeffs);
 
           for (std::size_t t = 1; t < solution.size() - 1; ++t) {
             solution[t] =
-                ((lambda + gamma) * (1.0 - theta) * input[t + 1]) +
-                ((1.0 - (2.0 * lambda - delta) * (1.0 - theta)) * input[t]) +
-                ((lambda - gamma) * (1.0 - theta) * input[t - 1]);
+                gamma * input(t - 1, solution_idx - 1) +
+                (1.0 - theta) * (alpha - delta) * input(t - 1, solution_idx) -
+                gamma * input(t - 1, solution_idx + 1) +
+                (beta - ni) * input(t, solution_idx - 1) +
+                (1.0 - (2.0 * beta - 0.5 * rho) -
+                 (1.0 - theta) * (2.0 * alpha - 0.5 * rho)) *
+                    input(t, solution_idx) +
+                (beta + ni) * input(t, solution_idx + 1) -
+                gamma * input(t + 1, solution_idx - 1) +
+                (1.0 - theta) * (alpha + delta) * input(t + 1, solution_idx) +
+                gamma * input(t + 1, solution_idx + 1);
           }
         };
-    return scheme_fun;
+
+    auto scheme_fun_1 =
+        [=](scheme_coefficient_holder<fp_type> const& coeffs,
+            container_2d<container, fp_type, alloc> const& input,
+            container_2d<container, fp_type, alloc> const& inhom_input,
+            container_2d<container, fp_type, alloc> const& inhom_input_next,
+            container<fp_type, alloc>& solution,
+            std::size_t const& solution_idx) {
+          // inhom_input not used
+          // inhom_input_next not used
+
+          fp_type const alpha = std::get<0>(coeffs);
+          fp_type const beta = std::get<1>(coeffs);
+          fp_type const gamma = std::get<2>(coeffs);
+          fp_type const delta = std::get<3>(coeffs);
+          fp_type const ni = std::get<4>(coeffs);
+          fp_type const rho = std::get<5>(coeffs);
+
+          for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+            solution[t] =
+                gamma * input(t - 1, solution_idx - 1) +
+                (1.0 - theta) * (alpha - delta) * input(t - 1, solution_idx) -
+                gamma * input(t - 1, solution_idx + 1) +
+                (beta - ni) * input(t, solution_idx - 1) +
+                (1.0 - (2.0 * beta - 0.5 * rho) -
+                 (1.0 - theta) * (2.0 * alpha - 0.5 * rho)) *
+                    input(t, solution_idx) +
+                (beta + ni) * input(t, solution_idx + 1) -
+                gamma * input(t + 1, solution_idx - 1) +
+                (1.0 - theta) * (alpha + delta) * input(t + 1, solution_idx) +
+                gamma * input(t + 1, solution_idx + 1);
+          }
+        };
+    return std::make_pair(scheme_fun_0, scheme_fun_1);
   }
 
-  static scheme_function<fp_type> const get_inhom_scheme(
-      implicit_pde_schemes_enum scheme) {
+  static std::pair<scheme_function<fp_type, container, alloc>,
+                   scheme_function<fp_type, container, alloc>> const
+  get_inhom_scheme(implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
     else
       theta = 0.5;
-    auto scheme_fun = [=](scheme_coefficient_holder<fp_type> const& coeffs,
-                          std::vector<fp_type> const& input,
-                          std::vector<fp_type> const& inhom_input,
-                          std::vector<fp_type> const& inhom_input_next,
-                          std::vector<fp_type>& solution) {
-      fp_type const lambda = std::get<0>(coeffs);
-      fp_type const gamma = std::get<1>(coeffs);
-      fp_type const delta = std::get<2>(coeffs);
-      fp_type const k = std::get<3>(coeffs);
+    auto scheme_fun_0 =
+        [=](scheme_coefficient_holder<fp_type> const& coeffs,
+            container_2d<container, fp_type, alloc> const& input,
+            container_2d<container, fp_type, alloc> const& inhom_input,
+            container_2d<container, fp_type, alloc> const& inhom_input_next,
+            container_2d<container, fp_type, alloc>& solution) {
+          fp_type const alpha = std::get<0>(coeffs);
+          fp_type const beta = std::get<1>(coeffs);
+          fp_type const gamma = std::get<2>(coeffs);
+          fp_type const delta = std::get<3>(coeffs);
+          fp_type const ni = std::get<4>(coeffs);
+          fp_type const rho = std::get<5>(coeffs);
+          fp_type const k = std::get<6>(coeffs);
 
-      for (std::size_t t = 1; t < solution.size() - 1; ++t) {
-        solution[t] =
-            ((lambda + gamma) * (1.0 - theta) * input[t + 1]) +
-            (1.0 - ((2.0 * lambda - delta) * (1.0 - theta))) * input[t] +
-            ((lambda - gamma) * (1.0 - theta) * input[t - 1]) +
-            k * (theta * inhom_input_next[t] + (1.0 - theta) * inhom_input[t]);
-      }
-    };
-    return scheme_fun;
+          for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+            solution[t];
+          }
+        };
+
+    auto scheme_fun_1 =
+        [=](scheme_coefficient_holder<fp_type> const& coeffs,
+            container_2d<container, fp_type, alloc> const& input,
+            container_2d<container, fp_type, alloc> const& inhom_input,
+            container_2d<container, fp_type, alloc> const& inhom_input_next,
+            container_2d<container, fp_type, alloc>& solution) {
+          fp_type const alpha = std::get<0>(coeffs);
+          fp_type const beta = std::get<1>(coeffs);
+          fp_type const gamma = std::get<2>(coeffs);
+          fp_type const delta = std::get<3>(coeffs);
+          fp_type const ni = std::get<4>(coeffs);
+          fp_type const rho = std::get<5>(coeffs);
+          fp_type const k = std::get<6>(coeffs);
+
+          for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+            solution[t];
+          }
+        };
+    return std::make_pair(scheme_fun_0, scheme_fun_1);
   }
 };
 

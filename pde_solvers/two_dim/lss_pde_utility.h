@@ -31,16 +31,14 @@ using pde_coefficient_holder_fun_2_arg =
 // Two-dim Dirichlet boundary:
 template <typename fp_type>
 struct dirichlet_boundary_2d {
- protected:
-  dirichlet_boundary_2d() {}
-
  public:
   typedef std::function<fp_type(fp_type, fp_type)> fun_2d;
   std::pair<fun_2d, fun_2d> first_dim;
   std::pair<fun_2d, fun_2d> second_dim;
 
-  explicit dirichlet_boundary_2d(fun_2d const &first_pair,
-                                 fun_2d const &second_pair)
+  explicit dirichlet_boundary_2d() {}
+  explicit dirichlet_boundary_2d(std::pair<fun_2d, fun_2d> const &first_pair,
+                                 std::pair<fun_2d, fun_2d> const &second_pair)
       : first_dim{first_pair}, second_dim{second_pair} {}
 };
 
