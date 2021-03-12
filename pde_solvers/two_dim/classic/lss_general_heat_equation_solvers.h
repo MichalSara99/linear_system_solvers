@@ -86,9 +86,9 @@ class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
       std::pair<std::size_t, std::size_t> const &space_discretization,
       std::size_t const &time_discretization)
       : solver_fst_ptr_{std::make_unique<fdm_solver_t>(
-            space_discretization.second + 1)},
+            space_discretization.first + 1)},
         solver_sec_ptr_{
-            std::make_unique<fdm_solver_t>(space_discretization.first + 1)},
+            std::make_unique<fdm_solver_t>(space_discretization.second + 1)},
         dataPtr_{std::make_unique<heat_data_2d_t>(
             space_range, range<fp_type>(fp_type{}, terminal_time),
             space_discretization, time_discretization, nullptr, nullptr,
@@ -198,8 +198,10 @@ void implicit_solvers::general_heat_equation<
   auto const &second_dir_start = boundary_.second_dim.first;
   auto const &second_dir_end = boundary_.second_dim.second;
 
-  std::size_t const space_size_1 = space_divison.first;   // columns = x axis
-  std::size_t const space_size_2 = space_divison.second;  // rows = y axis
+  std::size_t const space_size_1 =
+      space_divison.first;  // columns = x axis -> rows
+  std::size_t const space_size_2 =
+      space_divison.second;  // rows = y axis -> columns
   // calculate scheme const coefficients:
   fp_type const alpha = (std::get<0>(coeffs_) * k) / (h_1 * h_1);
   fp_type const beta = (std::get<1>(coeffs_) * k) / (h_2 * h_2);
@@ -221,35 +223,36 @@ void implicit_solvers::general_heat_equation<
   auto const y_init = y_range.lower();
 
   // create container to carry mesh in space and then previous solution:
-  matrix_t prev_sol(space_size_2 + 1, space_size_1 + 1, fp_type{});
+  matrix_t prev_sol(solution);
   // use the mesh in space to get values of initial condition
   discretization_2d<fp_type, container, alloc>::discretize_initial_condition(
       std::make_pair(x_init, y_init), h, dataPtr_->initial_condition, prev_sol);
 
   // prepare containers for diagonal vectors for solver_fst_ptr_:
-  container<fp_type, alloc> low_fst(space_size_2 + 1,
+  container<fp_type, alloc> low_fst(space_size_1 + 1,
                                     -1.0 * (alpha - delta) * theta);
-  container<fp_type, alloc> diag_fst(space_size_2 + 1,
+  container<fp_type, alloc> diag_fst(space_size_1 + 1,
                                      (1.0 + (2.0 * alpha - 0.5 * rho) * theta));
-  container<fp_type, alloc> up_fst(space_size_2 + 1,
+  container<fp_type, alloc> up_fst(space_size_1 + 1,
                                    -1.0 * (alpha + delta) * theta);
 
-  container<fp_type, alloc> rhs_fst(space_size_2 + 1, fp_type{});
-  container<fp_type, alloc> intermed_lower(space_size_2 + 1, fp_type{});
-  container<fp_type, alloc> intermed_upper(space_size_2 + 1, fp_type{});
+  container<fp_type, alloc> rhs_fst(space_size_1 + 1, fp_type{});
+  container<fp_type, alloc> intermed_lower(space_size_1 + 1, fp_type{});
+  container<fp_type, alloc> intermed_upper(space_size_1 + 1, fp_type{});
   // prepare containers for diagonal vectors for solver_sec_ptr_:
-  container<fp_type, alloc> low_sec(space_size_1 + 1,
+  container<fp_type, alloc> low_sec(space_size_2 + 1,
                                     -1.0 * (beta - ni) * theta);
-  container<fp_type, alloc> diag_sec(space_size_1 + 1,
+  container<fp_type, alloc> diag_sec(space_size_2 + 1,
                                      (1.0 + (2.0 * beta - 0.5 * rho) * theta));
-  container<fp_type, alloc> up_sec(space_size_1 + 1,
+  container<fp_type, alloc> up_sec(space_size_2 + 1,
                                    -1.0 * (beta + ni) * theta);
-
-  container<fp_type, alloc> rhs_sec(space_size_1 + 1, fp_type{});
+  container<fp_type, alloc> rhs_sec(space_size_2 + 1, fp_type{});
+  container<fp_type, alloc> next_lower(space_size_2 + 1, fp_type{});
+  container<fp_type, alloc> next_upper(space_size_2 + 1, fp_type{});
   //// create container to carry intermediate solution (Y matrix):
-  matrix_t intermed_sol(space_size_1 + 1, space_size_2 + 1, fp_type{});
+  matrix_t intermed_sol(space_size_2 + 1, space_size_1 + 1, fp_type{});
   //// create container to carry final solution (U matrix):
-  matrix_t next_sol(space_size_2 + 1, space_size_1 + 1, fp_type{});
+  matrix_t next_sol(solution);
   // create first time point:
   fp_type time = k;
   // store terminal time:
@@ -304,6 +307,7 @@ void implicit_solvers::general_heat_equation<
     auto scheme_fun_1 = scheme_funcs.second;
     // save y_init for dirichlet boundaries:
     auto y_val = fp_type{};
+    auto x_val = fp_type{};
     // loop for stepping in time:
     while (time <= last_time) {
       // lower Y axis Dirichlet boundary:
@@ -313,9 +317,9 @@ void implicit_solvers::general_heat_equation<
           h_1, x_init, time, second_dir_end, intermed_upper);
 
       intermed_sol(0, intermed_lower);
-      intermed_sol(space_size_1, intermed_upper);
+      intermed_sol(space_size_2, intermed_upper);
 
-      for (std::size_t sol_idx = 1; sol_idx < space_size_1; ++sol_idx) {
+      for (std::size_t sol_idx = 1; sol_idx < space_size_2; ++sol_idx) {
         y_val = y_init + static_cast<fp_type>(sol_idx) * h_2;
         scheme_fun_0(scheme_coeffs, prev_sol, intermed_sol, intermed_sol,
                      rhs_fst, sol_idx);
@@ -327,10 +331,29 @@ void implicit_solvers::general_heat_equation<
         intermed_sol(sol_idx, rhs_fst);
       }
       // here follows loop accross space_size_2 using intermed_sol:
-
+      // lower Y axis Dirichlet boundary:
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h_2, y_init, time, first_dir_start, next_lower);
+      discretization<fp_type, container, alloc>::discretize_in_space(
+          h_2, y_init, time, first_dir_end, next_upper);
+      next_sol(0, next_lower);
+      next_sol(space_size_1, next_upper);
+      for (std::size_t sol_idx = 1; sol_idx < space_size_1; ++sol_idx) {
+        x_val = x_init + static_cast<fp_type>(sol_idx) * h_1;
+        scheme_fun_1(scheme_coeffs, prev_sol, intermed_sol, intermed_sol,
+                     rhs_sec, sol_idx);
+        solver_sec_ptr_->set_boundary_condition(std::make_pair(
+            second_dir_start(x_val, time), second_dir_end(x_val, time)));
+        solver_sec_ptr_->set_rhs(rhs_sec);
+        // just trying to reuse rhs_sec here inm solve:
+        solver_sec_ptr_->solve(rhs_sec);
+        next_sol(sol_idx, rhs_sec);
+      }
+      prev_sol = next_sol;
       time += k;
     }
   }
+  solution = prev_sol;
   //// copy into solution vector
   // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
 }

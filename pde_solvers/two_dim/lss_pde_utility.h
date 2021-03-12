@@ -146,9 +146,9 @@ void discretization_2d<fp_type, container, alloc>::discretize_initial_condition(
 
   auto const rows = container.rows();
   auto const cols = container.columns();
-  for (std::size_t y_idx = 0; y_idx < rows; ++y_idx) {
-    for (std::size_t x_idx = 0; x_idx < cols; ++x_idx) {
-      container(y_idx, x_idx,
+  for (std::size_t x_idx = 0; x_idx < rows; ++x_idx) {
+    for (std::size_t y_idx = 0; y_idx < cols; ++y_idx) {
+      container(x_idx, y_idx,
                 fun(x_init + static_cast<fp_type>(x_idx) * x_step,
                     y_init + static_cast<fp_type>(y_idx) * y_step));
     }
