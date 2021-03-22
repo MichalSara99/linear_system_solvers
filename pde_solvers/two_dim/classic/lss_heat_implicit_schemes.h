@@ -128,7 +128,8 @@ class heat_equation_schemes {
             container_2d<container, fp_type, alloc> const& input,
             container_2d<container, fp_type, alloc> const& inhom_input,
             container_2d<container, fp_type, alloc> const& inhom_input_next,
-            container_2d<container, fp_type, alloc>& solution) {
+            container<fp_type, alloc>& solution,
+            std::size_t const& solution_idx) {
           fp_type const alpha = std::get<0>(coeffs);
           fp_type const beta = std::get<1>(coeffs);
           fp_type const gamma = std::get<2>(coeffs);
@@ -138,16 +139,30 @@ class heat_equation_schemes {
           fp_type const k = std::get<6>(coeffs);
 
           for (std::size_t t = 1; t < solution.size() - 1; ++t) {
-            solution[t];
+            solution[t] =
+                gamma * input(t - 1, solution_idx - 1) +
+                (1.0 - theta) * (alpha - delta) * input(t - 1, solution_idx) -
+                gamma * input(t - 1, solution_idx + 1) +
+                (beta - ni) * input(t, solution_idx - 1) +
+                (1.0 - (2.0 * beta - 0.5 * rho) -
+                 (1.0 - theta) * (2.0 * alpha - 0.5 * rho)) *
+                    input(t, solution_idx) +
+                (beta + ni) * input(t, solution_idx + 1) -
+                gamma * input(t + 1, solution_idx - 1) +
+                (1.0 - theta) * (alpha + delta) * input(t + 1, solution_idx) +
+                gamma * input(t + 1, solution_idx + 1) +
+                (1.0 - theta) * k * inhom_input(t, solution_idx) +
+                theta * k * inhom_input_next(t, solution_idx);
           }
         };
 
     auto scheme_fun_1 =
         [=](scheme_coefficient_holder<fp_type> const& coeffs,
             container_2d<container, fp_type, alloc> const& input,
-            container_2d<container, fp_type, alloc> const& inhom_input,
-            container_2d<container, fp_type, alloc> const& inhom_input_next,
-            container_2d<container, fp_type, alloc>& solution) {
+            container_2d<container, fp_type, alloc> const& intermed_sol,
+            container_2d<container, fp_type, alloc> const& not_used,
+            container<fp_type, alloc>& solution,
+            std::size_t const& solution_idx) {
           fp_type const alpha = std::get<0>(coeffs);
           fp_type const beta = std::get<1>(coeffs);
           fp_type const gamma = std::get<2>(coeffs);
@@ -157,7 +172,11 @@ class heat_equation_schemes {
           fp_type const k = std::get<6>(coeffs);
 
           for (std::size_t t = 1; t < solution.size() - 1; ++t) {
-            solution[t];
+            solution[t] =
+                -1.0 * (beta - ni) * theta * input(solution_idx, t - 1) +
+                theta * (2.0 * beta - 0.5 * rho) * input(solution_idx, t) -
+                (beta + ni) * theta * input(solution_idx, t + 1) +
+                intermed_sol(t, solution_idx);
           }
         };
     return std::make_pair(scheme_fun_0, scheme_fun_1);

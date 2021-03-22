@@ -115,6 +115,19 @@ class container_2d {
     data_[row_idx][col_idx] = value;
   }
 };
+
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
+void copy(container_2d<container, fp_type, alloc>& dest,
+          container_2d<container, fp_type, alloc> const& src) {
+  LSS_ASSERT(dest.columns() == src.columns(),
+             "dest and src must have same dimensions");
+  LSS_ASSERT(dest.rows() == src.rows(),
+             "dest and src must have same dimensions");
+  for (std::size_t r = 0; r < dest.rows(); ++r) {
+    dest(r, src.at(r));
+  }
+}
 // =========================================================================
 // ===================== PDE coefficient holder ============================
 // =========================================================================

@@ -14,29 +14,45 @@ using lss_utility::coefficient_holder;
 using lss_utility::container_2d;
 using lss_utility::range;
 
-// Two-dim PDE coefficient holder
+/// <summary>
+/// Two-dim PDE coefficient holder
+/// </summary>
 template <typename type>
 using two_dim_coefficient_holder =
     coefficient_holder<type, type, type, type, type, type>;
 
-// Two-dim PDE coefficients (a,b,c,d,e,f)
+/// <summary>
+/// Two-dim PDE coefficients (a,b,c,d,e,f)
+/// </summary>
 template <typename fp_type>
 using pde_coefficient_holder_const = two_dim_coefficient_holder<fp_type>;
 
-// Two-dim PDE coefficients (a(x,y),b(x,y),c(x,y),d(x,y),e(x,y),f(x,y))
+/// <summary>
+/// Two-dim PDE coefficients (a(x,y),b(x,y),c(x,y),d(x,y),e(x,y),f(x,y))
+/// </summary>
 template <typename fp_type>
 using pde_coefficient_holder_fun_2_arg =
     two_dim_coefficient_holder<std::function<fp_type(fp_type, fp_type)>>;
 
-// Two-dim Dirichlet boundary:
+/// <summary>
+/// Represents 2D Dirichlet boundary
+/// </summary>
 template <typename fp_type>
 struct dirichlet_boundary_2d {
+ protected:
+  explicit dirichlet_boundary_2d() {}
+
  public:
   typedef std::function<fp_type(fp_type, fp_type)> fun_2d;
   std::pair<fun_2d, fun_2d> first_dim;
   std::pair<fun_2d, fun_2d> second_dim;
 
-  explicit dirichlet_boundary_2d() {}
+  /// <summary>
+  /// first_pair: (u(x_1,y,t) = A_1(y,t),u(x_2,y,t) = A_2(y,t))
+  /// second_pair: (u(x,y_1,t) = B_1(x,t),u(x,y_2,t) = B_2(x,t))
+  /// </summary>
+  /// <param name="first_pair"> </param>
+  /// <param name="second_pair"></param>
   explicit dirichlet_boundary_2d(std::pair<fun_2d, fun_2d> const &first_pair,
                                  std::pair<fun_2d, fun_2d> const &second_pair)
       : first_dim{first_pair}, second_dim{second_pair} {}
@@ -56,6 +72,9 @@ struct dirichlet_boundary_2d {
 //      : left{left_boundary}, right{right_boundary} {}
 //};
 
+/// <summary>
+/// Represents 2D heat data container
+/// </summary>
 template <typename fp_type>
 struct heat_data_2d {
   // range for first and second space variable
@@ -97,6 +116,9 @@ struct heat_data_2d {
   heat_data_2d() {}
 };
 
+/// <summary>
+/// Represents discretization in 2D
+/// </summary>
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 class discretization_2d {
@@ -181,7 +203,9 @@ void discretization_2d<fp_type, container, alloc>::discretize_in_space(
   }
 }
 
-// vector discretization:
+/// <summary>
+/// vector 2D discretization:
+/// </summary>
 template <typename fp_type>
 using v_discretization_2d =
     discretization_2d<fp_type, std::vector, std::allocator<fp_type>>;

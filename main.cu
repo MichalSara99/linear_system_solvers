@@ -24,6 +24,7 @@ int main(int argc, char const *argv[]) {
   // ====================================================================
 
   // testContainer2d();
+  // testCopyContainer2d();
 
   // ====================================================================
 
@@ -257,7 +258,9 @@ int main(int argc, char const *argv[]) {
   // ================ lss_two_dim_pure_heat_equation_t.h ================
   // ====================================================================
 
-  test2DImplPureHeatEquationDirichletBCDoubleSweep();
+  // test2DImplPureHeatEquationDirichletBCDoubleSweep();
+  // test2DImplPureHeatEquationNonHomDirichletBCDoubleSweep();
+  // test2DImplNonHomPureHeatEquationDirichletBCDoubleSweep();
 
   // ====================================================================
 
