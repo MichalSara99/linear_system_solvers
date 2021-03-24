@@ -58,19 +58,17 @@ struct dirichlet_boundary_2d {
       : first_dim{first_pair}, second_dim{second_pair} {}
 };
 
-// TO BE CONSIDERED LATER:
-
-// One-dim Robin boundary:
-// template <typename fp_type>
-// struct robin_boundary {
-//  std::pair<fp_type, fp_type> left;
-//  std::pair<fp_type, fp_type> right;
-//
-//  robin_boundary() {}
-//  explicit robin_boundary(std::pair<fp_type, fp_type> const &left_boundary,
-//                          std::pair<fp_type, fp_type> const &right_boundary)
-//      : left{left_boundary}, right{right_boundary} {}
-//};
+// TO BE COMPLETED LATER:
+template <typename fp_type>
+struct robin_boundary_2d {
+  //  std::pair<fp_type, fp_type> left;
+  //  std::pair<fp_type, fp_type> right;
+  //
+  //  robin_boundary() {}
+  //  explicit robin_boundary(std::pair<fp_type, fp_type> const &left_boundary,
+  //                          std::pair<fp_type, fp_type> const &right_boundary)
+  //      : left{left_boundary}, right{right_boundary} {}
+};
 
 /// <summary>
 /// Represents 2D heat data container

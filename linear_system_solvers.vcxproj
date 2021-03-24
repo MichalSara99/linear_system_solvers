@@ -117,7 +117,9 @@
     <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_dirichlet_solvers.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_solvers.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_solvers_base.h" />
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_explicit_schemes.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_implicit_schemes.h" />
+    <ClInclude Include="pde_solvers\two_dim\lss_base_explicit_schemes.h" />
     <ClInclude Include="pde_solvers\two_dim\lss_pde_utility.h" />
     <ClInclude Include="sparse_solvers\lss_fdm_double_sweep_solver.h" />
     <ClInclude Include="sparse_solvers\lss_fdm_thomas_lu_solver.h" />

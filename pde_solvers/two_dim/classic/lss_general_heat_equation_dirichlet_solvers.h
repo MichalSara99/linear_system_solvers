@@ -7,8 +7,8 @@
 #include "common/lss_enumerations.h"
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
-//#include "lss_heat_explicit_schemes.h"
 #include "lss_general_heat_equation_solvers_base.h"
+#include "lss_heat_explicit_schemes.h"
 #include "lss_heat_implicit_schemes.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 #include "pde_solvers/two_dim/lss_pde_utility.h"
@@ -19,11 +19,10 @@ using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::explicit_pde_schemes_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
 using lss_one_dim_pde_utility::discretization;
+using lss_two_dim_pde_utility::dirichlet_boundary_2d;
 using lss_two_dim_pde_utility::discretization_2d;
 using lss_two_dim_pde_utility::heat_data_2d;
 using lss_two_dim_pde_utility::pde_coefficient_holder_const;
-// using lss_one_dim_pde_utility::robin_boundary;
-using lss_two_dim_pde_utility::dirichlet_boundary_2d;
 using lss_utility::container_2d;
 using lss_utility::copy;
 using lss_utility::range;
@@ -38,7 +37,7 @@ namespace implicit_solvers {
 
 /*!
    ============================================================================
-        Represents solver for general Dirichlet 2D heat equation
+        Represents implicit solver for general Dirichlet 2D heat equation
 
         u_t = a*u_xx + b*u_yy + c*u_xy + d*u_x + e*u_y + f*u + F(x,y,t),
         t > 0, x_1 < x < x_2, y_1 < y < y_2
@@ -216,6 +215,178 @@ class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
                  implicit_pde_schemes_enum::CrankNicolson);
 };
 }  // namespace implicit_solvers
+
+namespace explicit_solvers {
+
+/*!
+============================================================================
+        Represents explicit solver for general Dirichlet 2D heat equation
+
+        u_t = a*u_xx + b*u_yy + c*u_xy + d*u_x + e*u_y + f*u + F(x,y,t),
+        t > 0, x_1 < x < x_2, y_1 < y < y_2
+
+        with initial condition:
+
+        u(x,y,0) = f(x,y)
+
+        and Dirichlet boundaries:
+
+        u(x_1,y,t) = A_1(y,t)
+        u(x_2,y,t) = A_2(y,t)
+        u(x,y_1,t) = B_1(x,t)
+        u(x,y_2,t) = B_2(x,t)
+
+============================================================================
+*/
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+class general_heat_equation<fp_type, boundary_condition_enum::Dirichlet,
+                            container, alloc> {
+ private:
+  typedef heat_data_2d<fp_type> heat_data_2d_t;
+
+  // unique ptrs to solvers may be dropped if threads are used
+  uptr_t<heat_data_2d_t> dataPtr_;                   // heat data
+  sptr_t<dirichlet_boundary_2d<fp_type>> boundary_;  // boundaries
+  pde_coefficient_holder_const<fp_type> coeffs_;  // coefficients a, b, c in PDE
+
+ public:
+  typedef fp_type value_type;
+  explicit general_heat_equation() = delete;
+
+  /*!
+  Constructor for general Dirichlet 2D heat equation
+
+  \param space_range
+  \param terminal_time
+  \param space_discretization
+  \param time_discretization
+  */
+  explicit general_heat_equation(
+      std::pair<range<fp_type>, range<fp_type>> const &space_range,
+      fp_type terminal_time,
+      std::pair<std::size_t, std::size_t> const &space_discretization,
+      std::size_t const &time_discretization)
+      : dataPtr_{std::make_unique<heat_data_2d_t>(
+            space_range, range<fp_type>(fp_type{}, terminal_time),
+            space_discretization, time_discretization, nullptr, nullptr,
+            nullptr, false)} {}
+
+  ~general_heat_equation() {}
+
+  general_heat_equation(general_heat_equation const &) = delete;
+  general_heat_equation(general_heat_equation &&) = delete;
+  general_heat_equation &operator=(general_heat_equation const &) = delete;
+  general_heat_equation &operator=(general_heat_equation &&) = delete;
+
+  /*!
+  Represents spacial steps
+
+  \returns Pair of spacial steps
+  */
+  inline std::pair<fp_type, fp_type> space_step() const {
+    return std::make_pair<fp_type, fp_type>(
+        (dataPtr_->space_range.first.spread()) /
+            static_cast<fp_type>(dataPtr_->space_division.first),
+        (dataPtr_->space_range.second.spread()) /
+            static_cast<fp_type>(dataPtr_->space_division.second));
+  }
+
+  /*!
+  Represents temporal step
+
+  \returns Time step
+  */
+  inline fp_type time_step() const {
+    return ((dataPtr_->time_range.upper()) /
+            static_cast<fp_type>(dataPtr_->time_division));
+  }
+
+  /*!
+  Sets Dirichlet boundaries
+  first_pair: (u(x_1,y,t) = A_1(y,t),u(x_2,y,t) = A_2(y,t))
+  second_pair: (u(x,y_1,t) = B_1(x,t),u(x,y_2,t) = B_2(x,t))
+
+  \param dirichlet_boundary
+  */
+  inline void set_boundary_condition(
+      sptr_t<dirichlet_boundary_2d<fp_type>> const &dirichlet_boundary) {
+    boundary_ = dirichlet_boundary;
+  }
+
+  /*!
+  Sets initial condition:
+  u(x,y,0) = f(x,y)
+
+  \param initial_condition
+  */
+  inline void set_initial_condition(
+      std::function<fp_type(fp_type, fp_type)> const &initial_condition) {
+    dataPtr_->initial_condition = initial_condition;
+  }
+
+  /*!
+  Sets heat source: F(x,y,t)
+
+  \param heat_source
+  */
+  inline void set_heat_source(
+      std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source) {
+    dataPtr_->is_source_function_set = true;
+    dataPtr_->source_function = heat_source;
+  }
+
+  /*!
+  Sets pair of 2.nd order coefficients: a,b
+
+  \param values
+  */
+  inline void set_2_order_coefficients(
+      std::pair<fp_type, fp_type> const &values) {
+    std::get<0>(coeffs_) = values.first;   // a
+    std::get<1>(coeffs_) = values.second;  // b
+  }
+
+  /*!
+  Sets mixed order coefficient: c
+
+  \param value
+  */
+  inline void set_mixed_order_coefficient(fp_type value) {
+    std::get<2>(coeffs_) = value;  // c
+  }
+
+  /*!
+  Sets pair of 1.st order coefficients: d,e
+
+  \param values
+  */
+  inline void set_1_order_coefficients(
+      std::pair<fp_type, fp_type> const &values) {
+    std::get<3>(coeffs_) = values.first;   // d
+    std::get<4>(coeffs_) = values.second;  // e
+  }
+
+  /*!
+  Sets pair of 0th order coefficient: f
+
+  \param value
+  */
+  inline void set_0_order_coefficient(fp_type value) {
+    std::get<5>(coeffs_) = value;  // f
+  }
+
+  /*!
+  Solves the corresponding equation
+  \param solution
+  \param scheme
+  */
+  void solve(container_2d<container, fp_type, alloc> &solution,
+             explicit_pde_schemes_enum scheme =
+                 explicit_pde_schemes_enum::ADEBarakatClark);
+};
+
+}  // namespace explicit_solvers
 
 // ========================= IMPLEMENTATIONS ==================================
 
@@ -460,6 +631,127 @@ void implicit_solvers::general_heat_equation<
     }
   }
   copy(solution, prev_sol);
+}
+
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+void explicit_solvers::general_heat_equation<
+    fp_type, boundary_condition_enum::Dirichlet, container,
+    alloc>::solve(container_2d<container, fp_type, alloc> &solution,
+                  explicit_pde_schemes_enum scheme) {
+  LSS_VERIFY(boundary_, "Dirichlet Boundary must not be null");
+  LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
+  LSS_ASSERT(solution.rows() > 0,
+             "The input solution container must be initialized.");
+  LSS_ASSERT(solution.columns() > 0,
+             "The input solution container must be initialized.");
+  // convinient typedefs:
+  typedef container_2d<container, fp_type, alloc> matrix_t;
+  typedef container<fp_type, alloc> vector_t;
+  typedef discretization<fp_type, container, alloc> d1d_t;
+  typedef discretization_2d<fp_type, container, alloc> d2d_t;
+
+  // get correct theta according to the scheme:
+  fp_type const theta =
+      lss_two_dim_heat_implicit_schemes::heat_equation_schemes<
+          fp_type, container, alloc>::get_theta(scheme);
+  // get space steps:
+  auto const &h = space_step();
+  fp_type const h_1 = h.first;   // x step
+  fp_type const h_2 = h.second;  // y step
+                                 // get time step:
+  fp_type const k = time_step();
+  // get space ranges:
+  auto const &space_range = dataPtr_->space_range;
+  // get time range:
+  auto const &time_range = dataPtr_->time_range;
+  // get source heat function:
+  auto const &heat_source = dataPtr_->source_function;
+  // space divisions:
+  auto const &space_divison = dataPtr_->space_division;
+  // dirichlet boundary functions for x axis:
+  // u(a,y,t) = F_1(y,t)
+  // u(b,y,t) = F_2(y,t)
+  auto const &first_dir_start = boundary_->first_dim.first;
+  auto const &first_dir_end = boundary_->first_dim.second;
+  // dirichlet boundary functions for y axis:
+  // u(x,c,t) = G_1(x,t)
+  // u(x,d,t) = G_2(x,t)
+  auto const &second_dir_start = boundary_->second_dim.first;
+  auto const &second_dir_end = boundary_->second_dim.second;
+
+  std::size_t const space_size_1 =
+      space_divison.first;  // columns = x axis -> rows
+  std::size_t const space_size_2 =
+      space_divison.second;  // rows = y axis -> columns
+                             // calculate scheme const coefficients:
+  fp_type const alpha = (std::get<0>(coeffs_) * k) / (h_1 * h_1);
+  fp_type const beta = (std::get<1>(coeffs_) * k) / (h_2 * h_2);
+  fp_type const gamma =
+      (std::get<2>(coeffs_) * k / (static_cast<fp_type>(4.0) * h_1 * h_2));
+  fp_type const delta =
+      (std::get<3>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1));
+  fp_type const ni =
+      (std::get<4>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_2));
+  fp_type const rho = (std::get<5>(coeffs_) * k);
+  // make scheme coeffs:
+  auto const &scheme_coeffs = make_tuple(alpha, beta, gamma, delta, ni, rho);
+
+  // x space range
+  auto const x_range = space_range.first;
+  // y space range
+  auto const y_range = space_range.second;
+  // x init:
+  auto const x_init = x_range.lower();
+  // y init:
+  auto const y_init = y_range.lower();
+  // inits pair:
+  auto const inits = std::make_pair(x_init, y_init);
+
+  // create container to carry mesh in space and then previous solution:
+  auto init_condition = std::make_shared<matrix_t>(solution);
+  // use the mesh in space to get values of initial condition
+  d2d_t::discretize_initial_condition(inits, h, dataPtr_->initial_condition,
+                                      *init_condition);
+  // get correct scheme:
+  if (scheme == explicit_pde_schemes_enum::Euler) {
+    lss_two_dim_heat_explicit_schemes::heat_euler_scheme<container, fp_type,
+                                                         alloc>
+        euler{time_range.upper(),
+              k,
+              inits,
+              h,
+              scheme_coeffs,
+              init_condition,
+              heat_source,
+              dataPtr_->is_source_function_set};
+    euler(boundary_, solution);
+  } else if (scheme == explicit_pde_schemes_enum::ADEBarakatClark) {
+    lss_two_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
+        container, fp_type, alloc>
+        adebc{time_range.upper(),
+              k,
+              inits,
+              h,
+              scheme_coeffs,
+              init_condition,
+              heat_source,
+              dataPtr_->is_source_function_set};
+    adebc(boundary_, solution);
+
+  } else {
+    lss_two_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<container,
+                                                               fp_type, alloc>
+        ades{time_range.upper(),
+             k,
+             inits,
+             h,
+             scheme_coeffs,
+             init_condition,
+             heat_source,
+             dataPtr_->is_source_function_set};
+    ades(boundary_, solution);
+  }
 }
 
 }  // namespace lss_two_dim_classic_pde_solvers
