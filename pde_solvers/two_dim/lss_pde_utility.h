@@ -7,9 +7,11 @@
 
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
+#include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_two_dim_pde_utility {
 
+using lss_one_dim_pde_utility::discretization;
 using lss_utility::coefficient_holder;
 using lss_utility::container_2d;
 using lss_utility::range;
@@ -56,6 +58,38 @@ struct dirichlet_boundary_2d {
   explicit dirichlet_boundary_2d(std::pair<fun_2d, fun_2d> const &first_pair,
                                  std::pair<fun_2d, fun_2d> const &second_pair)
       : first_dim{first_pair}, second_dim{second_pair} {}
+
+  template <template <typename, typename> typename container, typename alloc>
+  void fill(std::pair<fp_type, fp_type> const &inits,
+            std::pair<fp_type, fp_type> const &deltas, fp_type const &time,
+            container_2d<container, fp_type, alloc> &solution) {
+    typedef discretization<fp_type, container, alloc> d_1d;
+    typedef container<fp_type, alloc> vector_t;
+
+    std::size_t const row_size = solution.rows();
+    std::size_t const column_size = solution.columns();
+    auto const init_x = std::get<0>(inits);
+    auto const init_y = std::get<1>(inits);
+    auto const step_x = std::get<0>(deltas);
+    auto const step_y = std::get<1>(deltas);
+    auto const &A_1 = first_dim.first;
+    auto const &A_2 = first_dim.second;
+    auto const &B_1 = second_dim.first;
+    auto const &B_2 = second_dim.second;
+
+    vector_t x_1(column_size, fp_type{});
+    vector_t x_2(column_size, fp_type{});
+    d_1d::discretize_in_space(step_y, init_y, time, A_1, x_1);
+    d_1d::discretize_in_space(step_y, init_y, time, A_2, x_2);
+    solution(0, x_1);
+    solution(row_size - 1, x_2);
+    fp_type val{};
+    for (std::size_t r = 1; r < row_size - 1; ++r) {
+      val = init_x + static_cast<fp_type>(r) * step_x;
+      solution(r, 0, B_1(val, time));
+      solution(r, column_size - 1, B_2(val, time));
+    }
+  }
 };
 
 // TO BE COMPLETED LATER:

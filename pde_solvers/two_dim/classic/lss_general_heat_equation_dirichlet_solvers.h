@@ -651,10 +651,6 @@ void explicit_solvers::general_heat_equation<
   typedef discretization<fp_type, container, alloc> d1d_t;
   typedef discretization_2d<fp_type, container, alloc> d2d_t;
 
-  // get correct theta according to the scheme:
-  fp_type const theta =
-      lss_two_dim_heat_implicit_schemes::heat_equation_schemes<
-          fp_type, container, alloc>::get_theta(scheme);
   // get space steps:
   auto const &h = space_step();
   fp_type const h_1 = h.first;   // x step
@@ -667,35 +663,20 @@ void explicit_solvers::general_heat_equation<
   auto const &time_range = dataPtr_->time_range;
   // get source heat function:
   auto const &heat_source = dataPtr_->source_function;
-  // space divisions:
-  auto const &space_divison = dataPtr_->space_division;
-  // dirichlet boundary functions for x axis:
-  // u(a,y,t) = F_1(y,t)
-  // u(b,y,t) = F_2(y,t)
-  auto const &first_dir_start = boundary_->first_dim.first;
-  auto const &first_dir_end = boundary_->first_dim.second;
-  // dirichlet boundary functions for y axis:
-  // u(x,c,t) = G_1(x,t)
-  // u(x,d,t) = G_2(x,t)
-  auto const &second_dir_start = boundary_->second_dim.first;
-  auto const &second_dir_end = boundary_->second_dim.second;
 
-  std::size_t const space_size_1 =
-      space_divison.first;  // columns = x axis -> rows
-  std::size_t const space_size_2 =
-      space_divison.second;  // rows = y axis -> columns
-                             // calculate scheme const coefficients:
+  // calculate scheme const coefficients:
   fp_type const alpha = (std::get<0>(coeffs_) * k) / (h_1 * h_1);
   fp_type const beta = (std::get<1>(coeffs_) * k) / (h_2 * h_2);
   fp_type const gamma =
-      (std::get<2>(coeffs_) * k / (static_cast<fp_type>(4.0) * h_1 * h_2));
+      (std::get<2>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1 * h_2));
   fp_type const delta =
       (std::get<3>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1));
   fp_type const ni =
       (std::get<4>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_2));
-  fp_type const rho = (std::get<5>(coeffs_) * k);
+  fp_type const rho = (std::get<5>(coeffs_) * k) / static_cast<fp_type>(2.0);
   // make scheme coeffs:
-  auto const &scheme_coeffs = make_tuple(alpha, beta, gamma, delta, ni, rho);
+  auto const &scheme_coeffs =
+      std::make_tuple(alpha, beta, gamma, delta, ni, rho);
 
   // x space range
   auto const x_range = space_range.first;

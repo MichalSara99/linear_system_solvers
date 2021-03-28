@@ -32,7 +32,7 @@ class heat_scheme_base {
   fp_type time_delta_;
   std::pair<fp_type, fp_type> spatial_inits_;
   std::pair<fp_type, fp_type> spatial_deltas_;
-  sptr_t<scheme_coefficient_holder> coeffs_;  // scheme coefficients of PDE
+  scheme_coefficient_holder coeffs_;  // scheme coefficients of PDE
   sptr_t<matrix_t> initial_condition_;
   std::function<fp_type(fp_type, fp_type, fp_type)> source_;
   bool is_source_set_;
@@ -44,7 +44,7 @@ class heat_scheme_base {
       fp_type time, fp_type time_delta,
       std::pair<fp_type, fp_type> const &spatial_inits,
       std::pair<fp_type, fp_type> const &spatial_deltas,
-      sptr_t<scheme_coefficient_holder> const &coeffs,
+      scheme_coefficient_holder const &coeffs,
       sptr_t<matrix_t> const &initial_condition,
       std::function<fp_type(fp_type, fp_type, fp_type)> const &source = nullptr,
       bool is_source_set = false)
