@@ -27,8 +27,8 @@ void euler_loop_sp::operator()(
   cudaMemcpy(d_prev, input, size * sizeof(float),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threads_per_block = THREADS_PER_BLOCK;
-  unsigned int const blocks_per_grid =
+  unsigned long long const threads_per_block = THREADS_PER_BLOCK;
+  unsigned long long const blocks_per_grid =
       (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   float const k = std::get<0>(deltas_);
@@ -108,8 +108,8 @@ void euler_loop_dp::operator()(
   cudaMemcpy(d_prev, input, size * sizeof(double),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threads_per_block = THREADS_PER_BLOCK;
-  unsigned int const blocks_per_grid =
+  unsigned long long const threads_per_block = THREADS_PER_BLOCK;
+  unsigned long long const blocks_per_grid =
       (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   double const k = std::get<0>(deltas_);
@@ -189,8 +189,8 @@ void euler_loop_sp::operator()(float const *input,
   cudaMemcpy(d_prev, input, size * sizeof(float),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threads_per_block = THREADS_PER_BLOCK;
-  unsigned int const blocks_per_grid =
+  unsigned long long const threads_per_block = THREADS_PER_BLOCK;
+  unsigned long long const blocks_per_grid =
       (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   float const k = std::get<0>(deltas_);
@@ -274,8 +274,8 @@ void euler_loop_dp::operator()(double const *input,
   cudaMemcpy(d_prev, input, size * sizeof(double),
              cudaMemcpyKind::cudaMemcpyHostToDevice);
 
-  unsigned int const threads_per_block = THREADS_PER_BLOCK;
-  unsigned int const blocks_per_grid =
+  unsigned long long const threads_per_block = THREADS_PER_BLOCK;
+  unsigned long long const blocks_per_grid =
       (size + threads_per_block - 1) / threads_per_block;
   // unpack the deltas and PDE coefficients:
   double const k = std::get<0>(deltas_);

@@ -4,7 +4,7 @@
 
 #pragma warning(disable : 4244)
 
-#include <thread>
+#include <future>
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
@@ -168,11 +168,21 @@ class ade_heat_saulyev_scheme
 // ============================================================================
 // =========================== IMPLEMENTATIONS ================================
 
+// TODO: this needs to be checked for first and mixed derivatives !!!
 template <template <typename, typename> typename container, typename fp_type,
           typename alloc>
 bool lss_two_dim_heat_explicit_schemes::heat_euler_scheme<
     container, fp_type, alloc>::is_stable() const {
-  throw std::exception("Not yet implemented. TODO");
+  fp_type const alpha = std::get<0>(coeffs_);
+  fp_type const beta = std::get<1>(coeffs_);
+  fp_type const gamma = std::get<2>(coeffs_);
+  fp_type const delta = std::get<3>(coeffs_);
+  fp_type const ni = std::get<4>(coeffs_);
+
+  fp_type const secon_ord = 2.0 * (alpha + beta);
+  fp_type const first_ord = 2.0 * (delta + ni);
+
+  return ((secon_ord <= 1.0) && (first_ord <= 1.0) && ((2.0 * gamma) <= 1.0));
 }
 
 template <template <typename, typename> typename container, typename fp_type,
@@ -181,7 +191,103 @@ void lss_two_dim_heat_explicit_schemes::
     heat_euler_scheme<container, fp_type, alloc>::operator()(
         sptr_t<dirichlet_boundary_2d<fp_type>> const &dirichlet_boundary,
         matrix_t &solution) const {
-  throw std::exception("Not yet implemented. TODO");
+  LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
+  LSS_ASSERT(((solution.rows() > 0) && (solution.columns() > 0)),
+             "The input solution container must be initialized.");
+  LSS_ASSERT(
+      ((solution.rows() == initial_condition_->rows()) &&
+       (solution.columns() == initial_condition_->columns())),
+      "Entered solution vector size differs from initialCondition vector.");
+  typedef discretization_2d<fp_type, container, alloc> d_2d;
+
+  // get delta time:
+  fp_type const k = time_delta_;
+  // spacial deltas:
+  auto const &h = spatial_deltas_;
+  // spacial inits:
+  auto const &inits = spatial_inits_;
+  // create first time point:
+  fp_type time = k;
+  // calculate scheme coefficients:
+  fp_type two = static_cast<fp_type>(2.0);
+  fp_type const alpha = std::get<0>(coeffs_);
+  fp_type const beta = std::get<1>(coeffs_);
+  fp_type const gamma = std::get<2>(coeffs_);
+  fp_type const delta = std::get<3>(coeffs_);
+  fp_type const ni = std::get<4>(coeffs_);
+  fp_type const rho = std::get<5>(coeffs_) * two;
+  // intermediate constants:
+  fp_type const A =
+      static_cast<fp_type>(1.0) - two * alpha - two * beta + two * gamma + rho;
+  fp_type const B_P = alpha + delta - gamma;
+  fp_type const B_M = alpha - delta - gamma;
+  fp_type const C_P = beta + ni - gamma;
+  fp_type const C_M = beta - ni - gamma;
+  // conmponents of the solution:
+  // copy initial condition to solution:
+  copy(solution, *initial_condition_);
+  matrix_t next_solution(*initial_condition_);
+  // size of the space vector:
+  std::size_t const row_size = initial_condition_->rows();
+  std::size_t const column_size = initial_condition_->columns();
+  // create a container to carry discretized source heat
+  matrix_t source_curr(*initial_condition_);
+  // create kernel anonymous function:
+  auto kernel = [=](matrix_t &next_sol, const matrix_t &prev_sol,
+                    std::size_t row_idx, matrix_t const &rhs,
+                    fp_type rhs_coeff) {
+    fp_type val{};
+    for (std::size_t c = 1; c < column_size - 1; ++c) {
+      val = A * prev_sol(row_idx, c) + B_P * prev_sol(row_idx + 1, c) +
+            B_M * prev_sol(row_idx - 1, c) + C_P * prev_sol(row_idx, c + 1) +
+            C_M * prev_sol(row_idx, c - 1) +
+            gamma * prev_sol(row_idx + 1, c + 1) +
+            gamma * prev_sol(row_idx - 1, c - 1) +
+            k * rhs_coeff * rhs(row_idx, c);
+      next_sol(row_idx, c, val);
+    }
+  };
+
+  std::vector<std::future<void>> futures;
+  if (!is_source_set_) {
+    // loop for stepping in time:
+    while (time <= time_) {
+      dirichlet_boundary->fill(inits, h, time, solution);
+      dirichlet_boundary->fill(inits, h, time, next_solution);
+      for (std::size_t r = 1; r < row_size - 1; ++r) {
+        futures.emplace_back(std::async(std::launch::async, kernel,
+                                        std::ref(next_solution), solution, r,
+                                        source_curr, 0.0));
+      }
+
+      for (auto &future : futures) {
+        future.get();
+      }
+      futures.clear();
+      copy(solution, next_solution);
+      time += k;
+    }
+  } else {
+    d_2d::discretize_in_space(inits, h, 0.0, source_, source_curr);
+    // loop for stepping in time:
+    while (time <= time_) {
+      dirichlet_boundary->fill(inits, h, time, solution);
+      dirichlet_boundary->fill(inits, h, time, next_solution);
+      for (std::size_t r = 1; r < row_size - 1; ++r) {
+        futures.emplace_back(std::async(std::launch::async, kernel,
+                                        std::ref(next_solution), solution, r,
+                                        source_curr, 1.0));
+      }
+
+      for (auto &future : futures) {
+        future.get();
+      }
+      futures.clear();
+      copy(solution, next_solution);
+      d_2d::discretize_in_space(inits, h, time, source_, source_curr);
+      time += k;
+    }
+  }
 }
 
 template <template <typename, typename> typename container, typename fp_type,
@@ -407,7 +513,6 @@ void lss_two_dim_heat_explicit_schemes::
     std::size_t t = 1;
     while (time <= time_) {
       dirichlet_boundary->fill(inits, h, time, solution);
-      dirichlet_boundary->fill(inits, h, time, solution);
       if (t % 2 == 0)
         down_sweep(solution, source_curr, 0.0);
       else
@@ -421,7 +526,6 @@ void lss_two_dim_heat_explicit_schemes::
     // loop for stepping in time:
     std::size_t t = 1;
     while (time <= time_) {
-      dirichlet_boundary->fill(inits, h, time, solution);
       dirichlet_boundary->fill(inits, h, time, solution);
       if (t % 2 == 0)
         down_sweep(solution, source_curr, 1.0);

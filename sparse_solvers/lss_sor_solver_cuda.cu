@@ -8,8 +8,8 @@ void sor_solver_core<double>::operator()(
     thrust::device_vector<double>& solution,
     thrust::device_vector<double>& next_solution,
     thrust::device_vector<double>& errors, double omega) {
-  unsigned int const threads_per_block = THREADS_PER_BLOCK;
-  unsigned int const blocks_per_grid =
+  unsigned long long const threads_per_block = THREADS_PER_BLOCK;
+  unsigned long long const blocks_per_grid =
       (nrows_ + threads_per_block - 1) / threads_per_block;
 
   double const* mat_data_ptr = thrust::raw_pointer_cast(&matrix_vals_[0]);
@@ -36,8 +36,8 @@ void sor_solver_core<float>::operator()(
     thrust::device_vector<float>& solution,
     thrust::device_vector<float>& next_solution,
     thrust::device_vector<float>& errors, float omega) {
-  unsigned int const threads_per_block = THREADS_PER_BLOCK;
-  unsigned int const blocks_per_grid =
+  unsigned long long const threads_per_block = THREADS_PER_BLOCK;
+  unsigned long long const blocks_per_grid =
       (nrows_ + threads_per_block - 1) / threads_per_block;
 
   float const* mat_data_ptr = thrust::raw_pointer_cast(&matrix_vals_[0]);

@@ -261,7 +261,8 @@ int main(int argc, char const *argv[]) {
   // test2DImplPureHeatEquationDirichletBCDoubleSweep();
   // test2DImplPureHeatEquationNonHomDirichletBCDoubleSweep();
   // test2DImplNonHomPureHeatEquationDirichletBCDoubleSweep();
-  test2DExplPureHeatEquationDirichletBCADE();
+  // test2DExplPureHeatEquationDirichletBCADE();
+  test2DExplPureHeatEquationNonHomDirichletBCADE();
 
   // ====================================================================
 

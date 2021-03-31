@@ -76,6 +76,7 @@ class container_2d {
 
   std::size_t rows() const { return rows_; }
   std::size_t columns() const { return columns_; }
+  std::size_t total_size() const { return rows_ * columns_; }
 
   // return value from container_2d at potision (row_idx,col_idx)
   fp_type operator()(std::size_t row_idx, std::size_t col_idx) const {
