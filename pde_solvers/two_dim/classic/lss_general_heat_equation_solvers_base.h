@@ -7,6 +7,7 @@
 namespace lss_two_dim_classic_pde_solvers {
 
 using lss_enumerations::boundary_condition_enum;
+using lss_enumerations::memory_space_enum;
 
 namespace implicit_solvers {
 // ============================================================================
@@ -20,6 +21,17 @@ template <typename fp_type, boundary_condition_enum b_type,
           template <typename, typename> typename container, typename alloc>
 class general_heat_equation {};
 
+// ============================================================================
+// ============= general_heat_equation_cuda General Template ==================
+// ============================================================================
+
+template <typename fp_type, boundary_condition_enum b_type,
+          memory_space_enum memory_space,
+          template <memory_space_enum, typename>
+          typename real_sparse_policy_cuda,
+          template <typename, typename> typename container, typename alloc>
+class general_heat_equation_cuda {};
+
 }  // namespace implicit_solvers
 
 namespace explicit_solvers {
@@ -30,6 +42,14 @@ namespace explicit_solvers {
 template <typename fp_type, boundary_condition_enum b_type,
           template <typename, typename> typename container, typename alloc>
 class general_heat_equation {};
+
+// ============================================================================
+// ================= general_heat_equation_cuda General Template ==============
+// ============================================================================
+
+template <typename fp_type, boundary_condition_enum b_type,
+          template <typename, typename> typename container, typename alloc>
+class general_heat_equation_cuda {};
 
 }  // namespace explicit_solvers
 

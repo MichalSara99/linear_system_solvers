@@ -15,6 +15,7 @@
 #include "unit_tests/lss_sor_solver_cuda_t.h"
 #include "unit_tests/lss_sor_solver_t.h"
 #include "unit_tests/lss_sparse_solvers_cuda_t.h"
+#include "unit_tests/lss_two_dim_pure_heat_equation_cuda_t.h"
 #include "unit_tests/lss_two_dim_pure_heat_equation_t.h"
 #include "unit_tests/lss_utility_t.h"
 
@@ -25,6 +26,7 @@ int main(int argc, char const *argv[]) {
 
   // testContainer2d();
   // testCopyContainer2d();
+  // testPartialCopyRowContainer2d();
 
   // ====================================================================
 
@@ -262,7 +264,16 @@ int main(int argc, char const *argv[]) {
   // test2DImplPureHeatEquationNonHomDirichletBCDoubleSweep();
   // test2DImplNonHomPureHeatEquationDirichletBCDoubleSweep();
   // test2DExplPureHeatEquationDirichletBCADE();
-  test2DExplPureHeatEquationNonHomDirichletBCADE();
+  // test2DExplPureHeatEquationNonHomDirichletBCADE();
+
+  // ====================================================================
+
+  // ====================================================================
+  // ============= lss_two_dim_pure_heat_equation_cuda_t.h ==============
+  // ====================================================================
+
+  test2DImplPureHeatEquationDirichletBCDeviceCuda();
+  test2DImplPureHeatEquationNonHomDirichletBCDeviceCuda();
 
   // ====================================================================
 

@@ -61,7 +61,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>D:\my_c_files\linear_system_solvers\linear_system_solvers\pde_solvers\one_dim\classic;D:\my_c_files\linear_system_solvers\linear_system_solvers\pde_solvers\one_dim\variable_coefficients;%(Include)</Include>
-      <AdditionalCompilerOptions>/bigobj</AdditionalCompilerOptions>
+      <AdditionalCompilerOptions>/bigobj /Zm1000</AdditionalCompilerOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -82,7 +82,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>D:\my_c_files\linear_system_solvers\linear_system_solvers\pde_solvers\one_dim\classic;D:\my_c_files\linear_system_solvers\linear_system_solvers\pde_solvers\one_dim\variable_coefficients;%(Include)</Include>
-      <AdditionalCompilerOptions>/bigobj</AdditionalCompilerOptions>
+      <AdditionalCompilerOptions>/bigobj /Zm1000</AdditionalCompilerOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -115,10 +115,13 @@
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_implicit_schemes.h" />
     <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_heat_implicit_schemes_cuda.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_dirichlet_solvers.h" />
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_dirichlet_solvers_cuda.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_solvers.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_solvers_base.h" />
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_general_heat_equation_solvers_cuda.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_explicit_schemes.h" />
     <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_implicit_schemes.h" />
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_implicit_schemes_cuda.h" />
     <ClInclude Include="pde_solvers\two_dim\lss_base_explicit_schemes.h" />
     <ClInclude Include="pde_solvers\two_dim\lss_pde_utility.h" />
     <ClInclude Include="sparse_solvers\lss_fdm_double_sweep_solver.h" />
@@ -146,6 +149,7 @@
     <ClInclude Include="unit_tests\lss_sor_solver_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_sor_solver_t.h" />
     <ClInclude Include="unit_tests\lss_sparse_solvers_cuda_t.h" />
+    <ClInclude Include="unit_tests\lss_two_dim_pure_heat_equation_cuda_t.h" />
     <ClInclude Include="unit_tests\lss_two_dim_pure_heat_equation_t.h" />
     <ClInclude Include="unit_tests\lss_utility_t.h" />
   </ItemGroup>

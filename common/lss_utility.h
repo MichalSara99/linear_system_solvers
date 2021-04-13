@@ -23,7 +23,6 @@ class container_2d {
   std::size_t columns_;
   std::vector<container<fp_type, alloc>> data_;
 
- protected:
   explicit container_2d() {}
 
  public:
@@ -107,6 +106,29 @@ class container_2d {
     LSS_ASSERT(row_idx < rows_, "Outside of row range");
     LSS_ASSERT(row_container.size() == columns_, "Outside of column range");
     data_[row_idx] = std::move(row_container);
+  }
+
+  // place ro_container at row position starting at col_start_idx and ending at
+  // col_end_idx
+  void operator()(std::size_t row_idx,
+                  container<fp_type, alloc> const& row_container,
+                  std::size_t col_start_idx, std::size_t col_end_idx) {
+    LSS_ASSERT(col_start_idx <= col_end_idx,
+               "col_start_idx must be smaller or equal then col_end_idx");
+    LSS_ASSERT(row_idx < rows_, "Outside of row range");
+    LSS_ASSERT(col_start_idx < columns_,
+               "col_start_idx is outside of column range");
+    LSS_ASSERT(col_end_idx < columns_,
+               "col_end_idx is outside of column range");
+    const std::size_t len = col_end_idx - col_start_idx + 1;
+    LSS_ASSERT(len <= row_container.size(),
+               "Inserted length is bigger then the row_container");
+    container<fp_type, alloc> cont = this->at(row_idx);
+    std::size_t c = 0;
+    for (std::size_t t = col_start_idx; t <= col_end_idx; ++t, ++c) {
+      cont[t] = row_container[c];
+    }
+    this->operator()(row_idx, std::move(cont));
   }
 
   // place value at position (row_idx,col_idx)
