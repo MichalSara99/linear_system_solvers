@@ -272,8 +272,9 @@ int main(int argc, char const *argv[]) {
   // ============= lss_two_dim_pure_heat_equation_cuda_t.h ==============
   // ====================================================================
 
-  test2DImplPureHeatEquationDirichletBCDeviceCuda();
-  test2DImplPureHeatEquationNonHomDirichletBCDeviceCuda();
+  // test2DImplPureHeatEquationDirichletBCDeviceCuda();
+  // test2DImplPureHeatEquationNonHomDirichletBCDeviceCuda();
+  // test2DImplNonHomPureHeatEquationDirichletBCDeviceCuda();
 
   // ====================================================================
 

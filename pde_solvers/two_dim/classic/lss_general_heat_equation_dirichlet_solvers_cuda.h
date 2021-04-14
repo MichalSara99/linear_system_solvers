@@ -545,64 +545,64 @@ void implicit_solvers::general_heat_equation_cuda<
 
   // differentiate between inhomogeneous and homogeneous PDE:
   if ((dataPtr_->is_source_function_set)) {
-    //// wrap the scheme coefficients:
-    // const auto scheme_coeffs =
-    //    std::make_tuple(alpha, beta, gamma, delta, ni, rho, k);
-    //// get the correct scheme:
-    // auto scheme_funcs =
-    //    lss_two_dim_heat_implicit_schemes::heat_equation_schemes<
-    //        fp_type, container, alloc>::get_inhom_scheme(scheme);
-    // auto scheme_fun_0 = scheme_funcs.first;
-    // auto scheme_fun_1 = scheme_funcs.second;
-    //// create a container to carry discretized source heat
-    // matrix_t source_curr(solution.rows(), solution.columns(), fp_type{});
-    // matrix_t source_next(solution.rows(), solution.columns(), fp_type{});
-    //// discretize current source and next source:
-    // d2d_t::discretize_in_space(inits, h, 0.0, heat_source, source_curr);
-    // d2d_t::discretize_in_space(inits, h, time, heat_source, source_next);
-    //// loop for stepping in time:
-    // while (time <= last_time) {
-    //  // lower Y axis Dirichlet boundary:
-    //  d1d_t::discretize_in_space(h_1, x_init, time, second_dir_start,
-    //                             intermed_lower);
-    //  d1d_t::discretize_in_space(h_1, x_init, time, second_dir_end,
-    //                             intermed_upper);
+    // wrap the scheme coefficients:
+    const auto scheme_coeffs =
+        std::make_tuple(alpha, beta, gamma, delta, ni, rho, k);
+    // get the correct scheme:
+    auto scheme_funcs =
+        lss_two_dim_heat_implicit_schemes_cuda::heat_equation_schemes<
+            fp_type, container, alloc>::get_inhom_scheme(scheme);
+    auto scheme_fun_0 = scheme_funcs.first;
+    auto scheme_fun_1 = scheme_funcs.second;
+    // create a container to carry discretized source heat
+    matrix_t source_curr(solution.rows(), solution.columns(), fp_type{});
+    matrix_t source_next(solution.rows(), solution.columns(), fp_type{});
+    // discretize current source and next source:
+    d2d_t::discretize_in_space(inits, h, 0.0, heat_source, source_curr);
+    d2d_t::discretize_in_space(inits, h, time, heat_source, source_next);
+    // loop for stepping in time:
+    while (time <= last_time) {
+      //  lower Y axis Dirichlet boundary:
+      d1d_t::discretize_in_space(h_1, x_init, time, second_dir_start,
+                                 intermed_lower);
+      d1d_t::discretize_in_space(h_1, x_init, time, second_dir_end,
+                                 intermed_upper);
 
-    //  intermed_sol(0, intermed_lower);
-    //  intermed_sol(space_size_2, intermed_upper);
-    //  for (std::size_t sol_idx = 1; sol_idx < space_size_2; ++sol_idx) {
-    //    scheme_fun_0(scheme_coeffs, prev_sol, source_curr, source_next,
-    //    rhs_fst,
-    //                 sol_idx, time, std::make_pair(dir_1_start, dir_1_end));
-    //    solver_fst_ptr_->set_rhs(rhs_fst);
-    //    // just trying to reuse rhs_fst here inm solve:
-    //    solver_fst_ptr_->solve(rhs_fst);
-    //    intermed_sol(sol_idx, rhs_fst, 1, space_size_1 - 1);
-    //  }
-    //  // here follows loop accross space_size_2 using intermed_sol:
-    //  // lower Y axis Dirichlet boundary:
-    //  d1d_t::discretize_in_space(h_2, y_init, time, first_dir_start,
-    //                             next_lower);
-    //  d1d_t::discretize_in_space(h_2, y_init, time, first_dir_end,
-    //  next_upper); next_sol(0, next_lower); next_sol(space_size_1,
-    //  next_upper); for (std::size_t sol_idx = 1; sol_idx < space_size_1;
-    //  ++sol_idx) {
-    //    scheme_fun_1(scheme_coeffs, prev_sol, intermed_sol, intermed_sol,
-    //                 rhs_sec, sol_idx, time,
-    //                 std::make_pair(dir_2_start, dir_2_end));
-    //    solver_sec_ptr_->set_rhs(rhs_sec);
-    //    // just trying to reuse rhs_sec here inm solve:
-    //    solver_sec_ptr_->solve(rhs_sec);
-    //    next_sol(sol_idx, rhs_sec, 1, space_size_2 - 1);
-    //  }
-    //  prev_sol = next_sol;
+      intermed_sol(0, intermed_lower);
+      intermed_sol(space_size_2, intermed_upper);
+      for (std::size_t sol_idx = 1; sol_idx < space_size_2; ++sol_idx) {
+        scheme_fun_0(scheme_coeffs, prev_sol, source_curr, source_next, rhs_fst,
+                     sol_idx, time, std::make_pair(dir_1_start, dir_1_end));
+        solver_fst_ptr_->set_rhs(rhs_fst);
+        // just trying to reuse rhs_fst here inm solve:
+        solver_fst_ptr_->solve(rhs_fst);
+        intermed_sol(sol_idx, rhs_fst, 1, space_size_1 - 1);
+      }
+      // here follows loop accross space_size_2 using intermed_sol:
+      // lower Y axis Dirichlet boundary:
+      d1d_t::discretize_in_space(h_2, y_init, time, first_dir_start,
+                                 next_lower);
+      d1d_t::discretize_in_space(h_2, y_init, time, first_dir_end, next_upper);
+      next_sol(0, next_lower);
+      next_sol(space_size_1, next_upper);
+      for (std::size_t sol_idx = 1; sol_idx < space_size_1; ++sol_idx) {
+        scheme_fun_1(scheme_coeffs, prev_sol, intermed_sol, intermed_sol,
+                     rhs_sec, sol_idx, time,
+                     std::make_pair(dir_2_start, dir_2_end));
+        solver_sec_ptr_->set_rhs(rhs_sec);
+        // just trying to reuse rhs_sec here inm solve:
+        solver_sec_ptr_->solve(rhs_sec);
+        next_sol(sol_idx, rhs_sec, 1, space_size_2 - 1);
+      }
 
-    //  d2d_t::discretize_in_space(inits, h, time, heat_source, source_curr);
-    //  d2d_t::discretize_in_space(inits, h, 2.0 * time, heat_source,
-    //                             source_next);
+      boundary_->fill(inits, h, time, next_sol);
+      prev_sol = next_sol;
+      d2d_t::discretize_in_space(inits, h, time, heat_source, source_curr);
+      d2d_t::discretize_in_space(inits, h, 2.0 * time, heat_source,
+                                 source_next);
 
-    //  time += k;
-    //}
+      time += k;
+    }
   } else {
     // wrap the scheme coefficients:
     const auto scheme_coeffs =
