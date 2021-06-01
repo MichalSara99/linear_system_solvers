@@ -2,6 +2,7 @@
 #if !defined(_LSS_1D_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA)
 #define _LSS_1D_SPACE_VARIABLE_GENERAL_HEAT_EQUATION_SOLVERS_CUDA
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "lss_space_variable_heat_explicit_schemes_cuda.h"
@@ -11,6 +12,7 @@
 
 namespace lss_one_dim_space_variable_pde_solvers_cuda {
 
+using lss_containers::flat_matrix;
 using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
 using lss_enumerations::memory_space_enum;
@@ -20,7 +22,6 @@ using lss_one_dim_pde_utility::heat_data;
 using lss_one_dim_pde_utility::pde_coefficient_holder_fun_1_arg;
 using lss_one_dim_pde_utility::robin_boundary;
 using lss_sparse_solvers::real_sparse_solver_cuda;
-using lss_utility::flat_matrix;
 using lss_utility::range;
 using lss_utility::uptr_t;
 

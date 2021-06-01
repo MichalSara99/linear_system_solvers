@@ -4,6 +4,7 @@
 
 #pragma warning(disable : 4305)
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "pde_solvers/two_dim/classic/lss_general_heat_equation_solvers.h"
@@ -26,13 +27,13 @@
 
 template <typename T>
 void test2DImplPureHeatEquationDirichletBCDoubleSweepEuler() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_two_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -139,13 +140,13 @@ void test2DImplPureHeatEquationDirichletBCDoubleSweepEuler() {
 
 template <typename T>
 void test2DImplPureHeatEquationDirichletBCDoubleSweepCN() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_two_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -268,13 +269,13 @@ void test2DImplPureHeatEquationDirichletBCDoubleSweep() {
 
 template <typename T>
 void test2DImplPureHeatEquationNonHomDirichletBCDoubleSweepEuler() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_two_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -397,13 +398,13 @@ void test2DImplPureHeatEquationNonHomDirichletBCDoubleSweepEuler() {
 
 template <typename T>
 void test2DImplPureHeatEquationNonHomDirichletBCDoubleSweepCN() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_two_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -543,13 +544,13 @@ void test2DImplPureHeatEquationNonHomDirichletBCDoubleSweep() {
 
 template <typename T>
 void test2DImplNonHomPureHeatEquationDirichletBCDoubleSweepEuler() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_two_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -659,13 +660,13 @@ void test2DImplNonHomPureHeatEquationDirichletBCDoubleSweepEuler() {
 
 template <typename T>
 void test2DImplNonHomPureHeatEquationDirichletBCDoubleSweepCN() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_two_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -795,12 +796,12 @@ void test2DImplNonHomPureHeatEquationDirichletBCDoubleSweep() {
 
 template <typename T>
 void test2DExplPureHeatEquationDirichletBCEuler() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_two_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -830,7 +831,7 @@ void test2DExplPureHeatEquationDirichletBCEuler() {
   // number of space X subdivisions:
   std::size_t const Sxd = 100;
   // number of space y subdivisions:
-  std::size_t const Syd = 100;
+  std::size_t const Syd = 70;
   // number of time subdivisions:
   std::size_t const Td = 500;
   // initial condition:
@@ -906,12 +907,12 @@ void test2DExplPureHeatEquationDirichletBCEuler() {
 
 template <typename T>
 void test2DExplPureHeatEquationDirichletBCADEBarakatClark() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_two_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -1017,12 +1018,12 @@ void test2DExplPureHeatEquationDirichletBCADEBarakatClark() {
 
 template <typename T>
 void test2DExplPureHeatEquationDirichletBCADESaulyev() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_two_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -1146,12 +1147,12 @@ void test2DExplPureHeatEquationDirichletBCADE() {
 
 template <typename T>
 void test2DExplPureHeatEquationNonHomDirichletBCEuler() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_two_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -1177,7 +1178,7 @@ void test2DExplPureHeatEquationNonHomDirichletBCEuler() {
   // number of space X subdivisions:
   std::size_t const Sxd = 100;
   // number of space y subdivisions:
-  std::size_t const Syd = 100;
+  std::size_t const Syd = 70;
   // number of time subdivisions:
   std::size_t const Td = 8100;
   // initial condition:
@@ -1273,12 +1274,12 @@ void test2DExplPureHeatEquationNonHomDirichletBCEuler() {
 
 template <typename T>
 void test2DExplPureHeatEquationNonHomDirichletBCADEBarakatClark() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_two_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 
@@ -1400,12 +1401,12 @@ void test2DExplPureHeatEquationNonHomDirichletBCADEBarakatClark() {
 
 template <typename T>
 void test2DExplPureHeatEquationNonHomDirichletBCADESaulyev() {
+  using lss_containers::container_2d;
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_two_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
   using lss_two_dim_pde_utility::dirichlet_boundary_2d;
-  using lss_utility::container_2d;
   using lss_utility::range;
   using lss_utility::sptr_t;
 

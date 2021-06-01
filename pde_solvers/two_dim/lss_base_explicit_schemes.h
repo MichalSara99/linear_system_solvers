@@ -6,16 +6,17 @@
 
 #include <thread>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "pde_solvers/two_dim/lss_pde_utility.h"
 
 namespace lss_two_dim_base_explicit_schemes {
 
+using lss_containers::container_2d;
 using lss_two_dim_pde_utility::dirichlet_boundary_2d;
 using lss_two_dim_pde_utility::discretization_2d;
 using lss_two_dim_pde_utility::robin_boundary_2d;
-using lss_utility::container_2d;
 using lss_utility::sptr_t;
 
 // ============================================================================

@@ -4,6 +4,7 @@
 
 #include <functional>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
@@ -15,6 +16,8 @@
 
 namespace lss_two_dim_classic_pde_solvers {
 
+using lss_containers::container_2d;
+using lss_containers::copy;
 using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::explicit_pde_schemes_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
@@ -23,8 +26,6 @@ using lss_two_dim_pde_utility::dirichlet_boundary_2d;
 using lss_two_dim_pde_utility::discretization_2d;
 using lss_two_dim_pde_utility::heat_data_2d;
 using lss_two_dim_pde_utility::pde_coefficient_holder_const;
-using lss_utility::container_2d;
-using lss_utility::copy;
 using lss_utility::range;
 using lss_utility::sptr_t;
 using lss_utility::uptr_t;

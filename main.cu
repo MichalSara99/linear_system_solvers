@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "unit_tests/lss_containers_t.h"
 #include "unit_tests/lss_dense_solvers_cuda_t.h"
 #include "unit_tests/lss_fdm_tridiagonal_solvers_t.h"
 #include "unit_tests/lss_one_dim_advection_diffusion_equation_cuda_t.h"
@@ -17,11 +18,10 @@
 #include "unit_tests/lss_sparse_solvers_cuda_t.h"
 #include "unit_tests/lss_two_dim_pure_heat_equation_cuda_t.h"
 #include "unit_tests/lss_two_dim_pure_heat_equation_t.h"
-#include "unit_tests/lss_utility_t.h"
 
 int main(int argc, char const *argv[]) {
   // ====================================================================
-  // ========================= lss_utility_t.h ==========================
+  // ====================== lss_containers_t.h ==========================
   // ====================================================================
 
   // testContainer2d();
@@ -275,6 +275,8 @@ int main(int argc, char const *argv[]) {
   // test2DImplPureHeatEquationDirichletBCDeviceCuda();
   // test2DImplPureHeatEquationNonHomDirichletBCDeviceCuda();
   // test2DImplNonHomPureHeatEquationDirichletBCDeviceCuda();
+  // test2DExplPureHeatEquationDirichletBCDeviceCuda();
+  // test2DExplPureHeatEquationNonHomDirichletBCDeviceCuda();
 
   // ====================================================================
 

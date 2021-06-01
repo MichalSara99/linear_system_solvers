@@ -4,11 +4,12 @@
 
 #include <functional>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
 #include "lss_general_heat_equation_solvers_base.h"
-#include "lss_heat_explicit_schemes.h"  //this will be replaced with cuda header
+#include "lss_heat_explicit_schemes_cuda.h"
 #include "lss_heat_implicit_schemes_cuda.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 #include "pde_solvers/two_dim/lss_pde_utility.h"
@@ -16,6 +17,9 @@
 
 namespace lss_two_dim_classic_pde_solvers {
 
+using lss_containers::container_2d;
+using lss_containers::copy;
+using lss_containers::flat_matrix;
 using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::explicit_pde_schemes_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
@@ -25,9 +29,6 @@ using lss_two_dim_pde_utility::dirichlet_boundary_2d;
 using lss_two_dim_pde_utility::discretization_2d;
 using lss_two_dim_pde_utility::heat_data_2d;
 using lss_two_dim_pde_utility::pde_coefficient_holder_const;
-using lss_utility::container_2d;
-using lss_utility::copy;
-using lss_utility::flat_matrix;
 using lss_utility::range;
 using lss_utility::sptr_t;
 using lss_utility::uptr_t;
@@ -380,13 +381,17 @@ class general_heat_equation_cuda<fp_type, boundary_condition_enum::Dirichlet,
   }
 
   /*!
-  Solves the corresponding equation
-  \param solution
-  \param scheme
-  */
-  void solve(container_2d<container, fp_type, alloc> &solution,
-             explicit_pde_schemes_enum scheme =
-                 explicit_pde_schemes_enum::ADEBarakatClark);
+   * Stability check
+   *
+   * \return boolean indicating success or failure
+   */
+  bool is_stable() const;
+
+  /*!
+   * Solves the corresponding equation
+   * \param solution
+   */
+  void solve(container_2d<container, fp_type, alloc> &solution);
 };
 
 }  // namespace explicit_solvers
@@ -659,18 +664,103 @@ void implicit_solvers::general_heat_equation_cuda<
   copy(solution, prev_sol);
 }
 
+// ============================================================================
+// =========== general_heat_equation_cuda (Dirichlet BC) implementation =======
+// ============================================================================
+
+// TODO: this needs to be checked for first and mixed derivatives !!!
+template <typename fp_type, template <typename, typename> typename container,
+          typename alloc>
+bool explicit_solvers::general_heat_equation_cuda<
+    fp_type, boundary_condition_enum::Dirichlet, container, alloc>::is_stable()
+    const {
+  auto const &h = space_step();
+  fp_type const h_1 = h.first;   // x step
+  fp_type const h_2 = h.second;  // y step
+  fp_type const k = time_step();
+  // calculate scheme const coefficients:
+  fp_type const alpha = (std::get<0>(coeffs_) * k) / (h_1 * h_1);
+  fp_type const beta = (std::get<1>(coeffs_) * k) / (h_2 * h_2);
+  fp_type const gamma =
+      (std::get<2>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1 * h_2));
+  fp_type const delta =
+      (std::get<3>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1));
+  fp_type const ni =
+      (std::get<4>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_2));
+
+  fp_type const secon_ord = static_cast<fp_type>(2.0) * (alpha + beta);
+  fp_type const first_ord = static_cast<fp_type>(2.0) * (delta + ni);
+
+  return ((secon_ord <= 1.0) && (first_ord <= 1.0) && ((2.0 * gamma) <= 1.0));
+}
+
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc>
 void explicit_solvers::general_heat_equation_cuda<
     fp_type, boundary_condition_enum::Dirichlet, container,
-    alloc>::solve(container_2d<container, fp_type, alloc> &solution,
-                  explicit_pde_schemes_enum scheme) {
+    alloc>::solve(container_2d<container, fp_type, alloc> &solution) {
   LSS_VERIFY(boundary_, "Dirichlet Boundary must not be null");
   LSS_VERIFY(dataPtr_->initial_condition, "Initial condition must be set.");
+  LSS_VERIFY(is_stable() == true, "Scheme must be stable.");
   LSS_ASSERT(solution.rows() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(solution.columns() > 0,
              "The input solution container must be initialized.");
+  // convinient typedefs:
+  typedef container_2d<container, fp_type, alloc> matrix_t;
+  typedef container<fp_type, alloc> vector_t;
+  typedef discretization<fp_type, container, alloc> d1d_t;
+  typedef discretization_2d<fp_type, container, alloc> d2d_t;
+
+  // get space steps:
+  auto const &h = space_step();
+  fp_type const h_1 = h.first;   // x step
+  fp_type const h_2 = h.second;  // y step
+  // get time step:
+  fp_type const k = time_step();
+  // get space ranges:
+  auto const &space_range = dataPtr_->space_range;
+  // get source heat function:
+  auto const &heat_source = dataPtr_->source_function;
+  // space divisions:
+  auto const &space_divison = dataPtr_->space_division;
+  // get time range:
+  auto const &time_range = dataPtr_->time_range;
+
+  // calculate scheme const coefficients:
+  fp_type const alpha = (std::get<0>(coeffs_) * k) / (h_1 * h_1);
+  fp_type const beta = (std::get<1>(coeffs_) * k) / (h_2 * h_2);
+  fp_type const gamma =
+      (std::get<2>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1 * h_2));
+  fp_type const delta =
+      (std::get<3>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_1));
+  fp_type const ni =
+      (std::get<4>(coeffs_) * k / (static_cast<fp_type>(2.0) * h_2));
+  fp_type const rho = (std::get<5>(coeffs_) * k);
+  // make scheme coeffs:
+  auto const &scheme_coeffs =
+      std::make_tuple(alpha, beta, gamma, delta, ni, rho);
+
+  // x space range
+  auto const x_range = space_range.first;
+  // y space range
+  auto const y_range = space_range.second;
+  // x init:
+  auto const x_init = x_range.lower();
+  // y init:
+  auto const y_init = y_range.lower();
+  // inits pair:
+  auto const inits = std::make_pair(x_init, y_init);
+  // create container to carry mesh in space and then previous solution:
+  matrix_t prev_sol(solution);
+  d2d_t::discretize_initial_condition(inits, h, dataPtr_->initial_condition,
+                                      prev_sol);
+  auto const &prev_sol_ptr = std::make_shared<matrix_t>(prev_sol);
+  lss_two_dim_heat_explicit_schemes_cuda::euler_heat_equation_scheme<
+      fp_type, container, alloc>
+      euler_scheme(time_range.upper(), k, inits, h, scheme_coeffs, prev_sol_ptr,
+                   heat_source, dataPtr_->is_source_function_set);
+  euler_scheme(boundary_, solution);
 }
 
 }  // namespace lss_two_dim_classic_pde_solvers

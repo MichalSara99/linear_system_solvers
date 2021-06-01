@@ -6,15 +6,16 @@
 
 #include <thread>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "pde_solvers/two_dim/lss_pde_utility.h"
 
 namespace lss_two_dim_heat_implicit_schemes {
 
+using lss_containers::container_2d;
 using lss_enumerations::boundary_condition_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
-using lss_utility::container_2d;
 
 // Alias for Scheme coefficients (A(x),B(x),D(x),h,k)
 template <typename type>

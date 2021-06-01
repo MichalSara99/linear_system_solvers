@@ -7,6 +7,7 @@
 
 #include <numeric>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
@@ -14,9 +15,9 @@
 
 namespace lss_sor_solver {
 
+using lss_containers::flat_matrix;
+using lss_containers::flat_matrix_sort_enum;
 using lss_sor_solver_traits::sor_solver_cuda_traits;
-using lss_utility::flat_matrix;
-using lss_utility::flat_matrix_sort_enum;
 using lss_utility::NaN;
 using lss_utility::uptr_t;
 

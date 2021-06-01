@@ -6,6 +6,7 @@
 
 #include <future>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 #include "pde_solvers/two_dim/lss_base_explicit_schemes.h"
@@ -13,14 +14,14 @@
 
 namespace lss_two_dim_heat_explicit_schemes {
 
+using lss_containers::container_2d;
+using lss_containers::copy;
 using lss_enumerations::boundary_condition_enum;
 using lss_two_dim_base_explicit_schemes::heat_scheme_base;
 using lss_two_dim_pde_utility::dirichlet_boundary_2d;
 using lss_two_dim_pde_utility::discretization_2d;
 using lss_two_dim_pde_utility::pde_coefficient_holder_const;
 using lss_two_dim_pde_utility::robin_boundary_2d;
-using lss_utility::container_2d;
-using lss_utility::copy;
 using lss_utility::sptr_t;
 
 // ============================================================================
@@ -32,7 +33,7 @@ template <template <typename, typename> typename container, typename fp_type,
 class heat_euler_scheme
     : public heat_scheme_base<container, fp_type, alloc,
                               pde_coefficient_holder_const<fp_type>> {
- protected:
+ private:
   typedef container_2d<container, fp_type, alloc> matrix_t;
   heat_euler_scheme() = default;
 
@@ -78,7 +79,7 @@ template <template <typename, typename> typename container, typename fp_type,
 class ade_heat_bakarat_clark_scheme
     : public heat_scheme_base<container, fp_type, alloc,
                               pde_coefficient_holder_const<fp_type>> {
- protected:
+ private:
   typedef container_2d<container, fp_type, alloc> matrix_t;
   ade_heat_bakarat_clark_scheme() = default;
 
@@ -126,7 +127,7 @@ template <template <typename, typename> typename container, typename fp_type,
 class ade_heat_saulyev_scheme
     : public heat_scheme_base<container, fp_type, alloc,
                               pde_coefficient_holder_const<fp_type>> {
- protected:
+ private:
   typedef container_2d<container, fp_type, alloc> matrix_t;
   ade_heat_saulyev_scheme() = default;
 
@@ -179,8 +180,8 @@ bool lss_two_dim_heat_explicit_schemes::heat_euler_scheme<
   fp_type const delta = std::get<3>(coeffs_);
   fp_type const ni = std::get<4>(coeffs_);
 
-  fp_type const secon_ord = 2.0 * (alpha + beta);
-  fp_type const first_ord = 2.0 * (delta + ni);
+  fp_type const secon_ord = static_cast<fp_type>(2.0) * (alpha + beta);
+  fp_type const first_ord = static_cast<fp_type>(2.0) * (delta + ni);
 
   return ((secon_ord <= 1.0) && (first_ord <= 1.0) && ((2.0 * gamma) <= 1.0));
 }

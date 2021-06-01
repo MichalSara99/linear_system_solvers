@@ -39,6 +39,12 @@ enum class implicit_pde_schemes_enum { Euler, CrankNicolson };
 
 enum class explicit_pde_schemes_enum { Euler, ADEBarakatClark, ADESaulyev };
 
+// ==========================================================================
+// ============================ dirichlet_side_enum =========================
+// ==========================================================================
+
+enum class dirichlet_side_enum { Left, Up, Right, Bottom };
+
 }  // namespace lss_enumerations
 
 #endif  ///_LSS_ENUMERATIONS

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <type_traits>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_helpers.h"
 #include "common/lss_macros.h"
@@ -17,11 +18,11 @@
 
 namespace lss_dense_solvers {
 
+using lss_containers::flat_matrix;
 using lss_dense_solvers_policy::dense_solver_device;
 using lss_dense_solvers_policy::dense_solver_qr;
 using lss_enumerations::flat_matrix_sort_enum;
 using lss_helpers::real_dense_solver_cuda_helpers;
-using lss_utility::flat_matrix;
 using lss_utility::uptr_t;
 
 template <typename T,

@@ -12,6 +12,7 @@
 
 #include <type_traits>
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_helpers.h"
 #include "common/lss_utility.h"
@@ -19,6 +20,7 @@
 
 namespace lss_sparse_solvers {
 
+using lss_containers::flat_matrix;
 using lss_enumerations::flat_matrix_sort_enum;
 using lss_enumerations::memory_space_enum;
 using lss_helpers::real_sparse_solver_cuda_helpers;
@@ -29,7 +31,6 @@ using lss_sparse_solvers_policy::sparse_solver_host;
 using lss_sparse_solvers_policy::sparse_solver_host_cholesky;
 using lss_sparse_solvers_policy::sparse_solver_host_lu;
 using lss_sparse_solvers_policy::sparse_solver_host_qr;
-using lss_utility::flat_matrix;
 using lss_utility::uptr_t;
 
 template <memory_space_enum memory_space, typename T>

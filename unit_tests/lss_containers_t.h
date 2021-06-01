@@ -1,13 +1,14 @@
 #pragma once
-#if !defined(_LSS_UTILITY_T)
-#define _LSS_UTILITY_T
+#if !defined(_LSS_CONTAINERS_T)
+#define _LSS_CONTAINERS_T
 
+#include "common/lss_containers.h"
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
 
 template <typename T>
 void testContainer2d1() {
-  using lss_utility::container_2d;
+  using lss_containers::container_2d;
   using lss_utility::sptr_t;
 
   std::cout << "===================================\n";
@@ -46,11 +47,27 @@ void testContainer2d1() {
     }
     std::cout << "\n";
   }
+
+  std::cout << "flat data: \n";
+  auto const data = cont_2d.data();
+  for (auto const t : data) {
+    std::cout << t << ", ";
+  }
+  std::cout << "\n";
+  std::cout << "set_data: \n";
+  cont_2d.set_data(data.begin(), data.end());
+  for (std::size_t r = 0; r < cont_2d.rows(); ++r) {
+    for (std::size_t c = 0; c < cont_2d.columns(); ++c) {
+      std::cout << cont_2d(r, c) << " ";
+    }
+    std::cout << "\n";
+  }
+  std::cout << "\n";
 }
 
 template <typename T>
 void testContainer2d2() {
-  using lss_utility::container_2d;
+  using lss_containers::container_2d;
   using lss_utility::sptr_t;
 
   std::cout << "===================================\n";
@@ -74,11 +91,27 @@ void testContainer2d2() {
     }
     std::cout << "\n";
   }
+
+  std::cout << "flat data: \n";
+  auto const data = cont_2d.data();
+  for (auto const t : data) {
+    std::cout << t << ", ";
+  }
+  std::cout << "\n";
+  std::cout << "set_data: \n";
+  cont_2d.set_data(data.begin(), data.end());
+  for (std::size_t r = 0; r < cont_2d.rows(); ++r) {
+    for (std::size_t c = 0; c < cont_2d.columns(); ++c) {
+      std::cout << cont_2d(r, c) << " ";
+    }
+    std::cout << "\n";
+  }
+  std::cout << "\n";
 }
 
 template <typename T>
 void testContainer2d3() {
-  using lss_utility::container_2d;
+  using lss_containers::container_2d;
   using lss_utility::sptr_t;
 
   std::cout << "===================================\n";
@@ -102,6 +135,23 @@ void testContainer2d3() {
     std::cout << fourth[c] << " ";
   }
   std::cout << "\n";
+  std::cout << "flat data: \n";
+  auto data = cont_2d.data();
+  for (auto const t : data) {
+    std::cout << t << ", ";
+  }
+  std::cout << "\n";
+
+  std::cout << "\n";
+  std::cout << "set_data: \n";
+  cont_2d.set_data(data.begin(), data.end());
+  for (std::size_t r = 0; r < cont_2d.rows(); ++r) {
+    for (std::size_t c = 0; c < cont_2d.columns(); ++c) {
+      std::cout << cont_2d(r, c) << " ";
+    }
+    std::cout << "\n";
+  }
+  std::cout << "\n";
 }
 
 void testContainer2d() {
@@ -121,7 +171,7 @@ void testContainer2d() {
 
 template <typename T>
 void testContainer2dCopy() {
-  using lss_utility::container_2d;
+  using lss_containers::container_2d;
   using lss_utility::sptr_t;
 
   std::cout << "===================================\n";
@@ -171,6 +221,23 @@ void testContainer2dCopy() {
     }
     std::cout << "\n";
   }
+  std::cout << "\n";
+  std::cout << "flat data: \n";
+  auto const data = cont_2d.data();
+  for (auto const t : data) {
+    std::cout << t << ", ";
+  }
+  std::cout << "\n";
+  std::cout << "set_data: \n";
+  auto raw_data = data.data();
+  cont_2d.set_data(raw_data, raw_data + cont_2d.total_size());
+  for (std::size_t r = 0; r < cont_2d.rows(); ++r) {
+    for (std::size_t c = 0; c < cont_2d.columns(); ++c) {
+      std::cout << cont_2d(r, c) << " ";
+    }
+    std::cout << "\n";
+  }
+  std::cout << "\n";
 }
 
 void testCopyContainer2d() {
@@ -186,7 +253,7 @@ void testCopyContainer2d() {
 
 template <typename T>
 void testContainer2dPartialCopyRow() {
-  using lss_utility::container_2d;
+  using lss_containers::container_2d;
   using lss_utility::sptr_t;
 
   std::cout << "===================================\n";
@@ -231,6 +298,13 @@ void testContainer2dPartialCopyRow() {
     }
     std::cout << "\n";
   }
+  std::cout << "\n";
+  std::cout << "flat data: \n";
+  auto const data = cont_2d.data();
+  for (auto const t : data) {
+    std::cout << t << ", ";
+  }
+  std::cout << "\n";
 }
 
 void testPartialCopyRowContainer2d() {
@@ -244,4 +318,4 @@ void testPartialCopyRowContainer2d() {
   std::cout << "============================================================\n";
 }
 
-#endif  ///_LSS_UTILITY_T
+#endif  ///_LSS_CONTAINERS_T

@@ -195,9 +195,6 @@
     <ClInclude Include="pde_solvers\two_dim\lss_pde_utility.h">
       <Filter>pde_solvers\two_dim</Filter>
     </ClInclude>
-    <ClInclude Include="unit_tests\lss_utility_t.h">
-      <Filter>unit_tests</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_implicit_schemes.h">
       <Filter>pde_solvers\two_dim\classic</Filter>
     </ClInclude>
@@ -231,6 +228,18 @@
     <ClInclude Include="unit_tests\lss_two_dim_pure_heat_equation_cuda_t.h">
       <Filter>unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_explicit_schemes_cuda.h">
+      <Filter>pde_solvers\two_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_containers.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\lss_containers_t.h">
+      <Filter>unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_cuda_kernels.h">
+      <Filter>pde_solvers\two_dim\classic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
@@ -242,6 +251,9 @@
     </CudaCompile>
     <CudaCompile Include="sparse_solvers\lss_sor_solver_cuda.cu">
       <Filter>sparse_solvers</Filter>
+    </CudaCompile>
+    <CudaCompile Include="pde_solvers\two_dim\classic\lss_2d_heat_explicit_schemes_cuda.cu">
+      <Filter>pde_solvers\two_dim\classic</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

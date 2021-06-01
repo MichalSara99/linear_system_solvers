@@ -5,15 +5,17 @@
 #include <functional>
 #include <tuple>
 
+#include "common/lss_containers.h"
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_two_dim_pde_utility {
 
+using lss_containers::container_2d;
+using lss_enumerations::dirichlet_side_enum;
 using lss_one_dim_pde_utility::discretization;
 using lss_utility::coefficient_holder;
-using lss_utility::container_2d;
 using lss_utility::range;
 
 /// <summary>
@@ -59,6 +61,43 @@ struct dirichlet_boundary_2d {
                                  std::pair<fun_2d, fun_2d> const &second_pair)
       : first_dim{first_pair}, second_dim{second_pair} {}
 
+  template <template <typename, typename> typename container, typename alloc>
+  void fill(fp_type init, fp_type delta, fp_type time,
+            container<fp_type, alloc> &buffer,
+            dirichlet_side_enum dirichlet_side) {
+    LSS_ASSERT(!buffer.empty(), "Buffer must not be empty.");
+
+    typedef container<fp_type, alloc> vector_t;
+    std::function<fp_type(fp_type, fp_type)> dirichlet_fun;
+    switch (dirichlet_side) {
+      case dirichlet_side_enum::Up:
+        dirichlet_fun = first_dim.first;
+        break;
+      case dirichlet_side_enum::Left:
+        dirichlet_fun = second_dim.first;
+        break;
+      case dirichlet_side_enum::Bottom:
+        dirichlet_fun = first_dim.second;
+        break;
+      case dirichlet_side_enum::Right:
+        dirichlet_fun = second_dim.second;
+        break;
+    }
+    fp_type val{};
+    for (std::size_t t = 0; t < buffer.size(); ++t) {
+      val = init + static_cast<fp_type>(t) * delta;
+      buffer[t] = dirichlet_fun(val, time);
+    }
+  }
+
+  /*!
+   * Populate solution with Dirichlet boundary
+   *
+   * \param inits
+   * \param deltas
+   * \param time
+   * \param solution
+   */
   template <template <typename, typename> typename container, typename alloc>
   void fill(std::pair<fp_type, fp_type> const &inits,
             std::pair<fp_type, fp_type> const &deltas, fp_type const &time,

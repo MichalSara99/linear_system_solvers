@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <tuple>
+#include <vector>
 
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
