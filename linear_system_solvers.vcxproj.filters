@@ -240,6 +240,21 @@
     <ClInclude Include="pde_solvers\two_dim\classic\lss_heat_cuda_kernels.h">
       <Filter>pde_solvers\two_dim\classic</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_dirichlet_solvers.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_dirichlet_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_robin_solvers.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_robin_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_solvers_base.h">
+      <Filter>pde_solvers\one_dim\classic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

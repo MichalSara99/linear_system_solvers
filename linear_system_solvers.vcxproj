@@ -94,7 +94,12 @@
     <ClInclude Include="dense_solvers\lss_dense_solvers.h" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.h" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_policy.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_dirichlet_solvers.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_dirichlet_solvers_cuda.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_robin_solvers.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_robin_solvers_cuda.h" />
     <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_solvers.h" />
+    <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_solvers_base.h" />
     <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_solvers_cuda.h" />
     <ClInclude Include="pde_solvers\one_dim\classic\lss_heat_cuda_kernels.h" />
     <ClInclude Include="pde_solvers\one_dim\classic\lss_heat_explicit_schemes.h" />
