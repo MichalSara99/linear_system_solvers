@@ -6,16 +6,19 @@
 
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
+#include "pde_solvers/one_dim/lss_pde_boundary.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 #include "pde_solvers/one_dim/variable_coefficients/lss_space_variable_heat_explicit_schemes_cuda_policy.h"
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes_cuda {
 
+using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::pde_coefficient_holder_fun_1_arg;
 using lss_one_dim_pde_utility::robin_boundary;
 using lss_one_dim_space_variable_heat_explicit_schemes_cuda_policy::
     heat_euler_scheme_forward_policy;
+using lss_utility::sptr_t;
 
 template <typename fp_type,
           typename scheme_policy = heat_euler_scheme_forward_policy<
@@ -45,9 +48,10 @@ class euler_loop {
         source_{source},
         is_source_set_{is_source_set} {}
 
-  void operator()(fp_type const *input,
-                  dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  unsigned long long const size, fp_type *solution) const {
+  void operator()(
+      fp_type const *input,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      unsigned long long const size, fp_type *solution) const {
     if (!is_source_set_) {
       scheme_policy::traverse(solution, input, size, dirichlet_boundary,
                               deltas_, coeffs_, terminal_t_, space_start_);
@@ -115,8 +119,9 @@ class euler_heat_equation_scheme {
       delete;
   euler_heat_equation_scheme &operator=(euler_heat_equation_scheme &&) = delete;
 
-  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  container<fp_type, alloc> &solution) const;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      container<fp_type, alloc> &solution) const;
   void operator()(robin_boundary<fp_type> const &robin_boundary,
                   container<fp_type, alloc> &solution) const;
 };
@@ -131,7 +136,7 @@ class euler_heat_equation_scheme {
 template <typename fp_type, template <typename, typename> typename container,
           typename alloc, typename scheme_policy>
 void euler_heat_equation_scheme<fp_type, container, alloc, scheme_policy>::
-operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
+operator()(sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
            container<fp_type, alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");

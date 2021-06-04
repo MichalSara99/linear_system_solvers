@@ -15,7 +15,8 @@ using lss_utility::NaN;
 using lss_utility::swap;
 
 void euler_loop_sp::operator()(
-    float const *input, dirichlet_boundary<float> const &dirichlet_boundary,
+    float const *input,
+    sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
     unsigned long long const size, float *solution) const {
   // prepare pointers on device:
   float *d_prev = NULL;
@@ -41,8 +42,8 @@ void euler_loop_sp::operator()(
   float const gamma = (B * k) / (2.0f * h);
   float const delta = (C * k);
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   float time = k;
 
@@ -96,7 +97,8 @@ void euler_loop_sp::operator()(
 }
 
 void euler_loop_dp::operator()(
-    double const *input, dirichlet_boundary<double> const &dirichlet_boundary,
+    double const *input,
+    sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
     unsigned long long const size, double *solution) const {
   // prepare pointers on device:
   double *d_prev = NULL;
@@ -122,8 +124,8 @@ void euler_loop_dp::operator()(
   double const gamma = (B * k) / (2.0f * h);
   double const delta = (C * k);
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   double time = k;
 

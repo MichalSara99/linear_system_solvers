@@ -6,12 +6,14 @@
 
 #include "common/lss_macros.h"
 #include "common/lss_utility.h"
+#include "pde_solvers/one_dim/lss_pde_boundary.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_heat_explicit_schemes_cuda {
 
-using lss_one_dim_pde_utility::dirichlet_boundary;
+using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
 using lss_one_dim_pde_utility::robin_boundary;
+using lss_utility::sptr_t;
 
 class euler_loop_sp {
  private:
@@ -37,9 +39,10 @@ class euler_loop_sp {
         source_{source},
         is_source_set_{is_source_set} {}
 
-  void operator()(float const *input,
-                  dirichlet_boundary<float> const &dirichlet_boundary,
-                  unsigned long long const size, float *solution) const;
+  void operator()(
+      float const *input,
+      sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
+      unsigned long long const size, float *solution) const;
   void operator()(float const *input,
                   robin_boundary<float> const &robin_boundary,
                   unsigned long long const size, float *solution) const;
@@ -70,9 +73,10 @@ class euler_loop_dp {
         source_{source},
         is_source_set_{is_source_set} {}
 
-  void operator()(double const *input,
-                  dirichlet_boundary<double> const &dirichlet_boundary,
-                  unsigned long long const size, double *solution) const;
+  void operator()(
+      double const *input,
+      sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
+      unsigned long long const size, double *solution) const;
   void operator()(double const *input,
                   robin_boundary<double> const &robin_boundary,
                   unsigned long long const size, double *solution) const;
@@ -127,8 +131,9 @@ class euler_heat_equation_scheme<float, container, alloc> {
       delete;
   euler_heat_equation_scheme &operator=(euler_heat_equation_scheme &&) = delete;
 
-  void operator()(dirichlet_boundary<float> const &dirichlet_boundary,
-                  container<float, alloc> &solution) const;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
+      container<float, alloc> &solution) const;
   void operator()(robin_boundary<float> const &robin_boundary,
                   container<float, alloc> &solution) const;
 };
@@ -175,8 +180,9 @@ class euler_heat_equation_scheme<double, container, alloc> {
       delete;
   euler_heat_equation_scheme &operator=(euler_heat_equation_scheme &&) = delete;
 
-  void operator()(dirichlet_boundary<double> const &dirichlet_boundary,
-                  container<double, alloc> &solution) const;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
+      container<double, alloc> &solution) const;
   void operator()(robin_boundary<double> const &robin_boundary,
                   container<double, alloc> &solution) const;
 };
@@ -190,7 +196,7 @@ class euler_heat_equation_scheme<double, container, alloc> {
 
 template <template <typename, typename> typename container, typename alloc>
 void euler_heat_equation_scheme<float, container, alloc>::operator()(
-    dirichlet_boundary<float> const &dirichlet_boundary,
+    sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
     container<float, alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");
@@ -213,7 +219,7 @@ void euler_heat_equation_scheme<float, container, alloc>::operator()(
 
 template <template <typename, typename> typename container, typename alloc>
 void euler_heat_equation_scheme<double, container, alloc>::operator()(
-    dirichlet_boundary<double> const &dirichlet_boundary,
+    sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
     container<double, alloc> &solution) const {
   LSS_ASSERT(init_.size() == solution.size(),
              "Initial and final solution must have the same size");

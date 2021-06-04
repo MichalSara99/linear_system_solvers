@@ -255,6 +255,39 @@
     <ClInclude Include="pde_solvers\one_dim\classic\lss_general_heat_equation_solvers_base.h">
       <Filter>pde_solvers\one_dim\classic</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\lss_pde_boundary.h">
+      <Filter>pde_solvers\one_dim</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_black_scholes_equation_dirichlet_solvers.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_black_scholes_equation_robin_solvers.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_black_scholes_equation_solvers_base.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_black_scholes_equation_dirichlet_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_black_scholes_equation_robin_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_general_heat_equation_dirichlet_solvers.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_general_heat_equation_robin_solvers.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_general_heat_equation_solvers_base.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_general_heat_equation_dirichlet_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dim\variable_coefficients\lss_space_variable_general_heat_equation_robin_solvers_cuda.h">
+      <Filter>pde_solvers\one_dim\variable_coefficients</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

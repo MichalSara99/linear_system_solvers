@@ -38,9 +38,9 @@ template <typename fp_type>
 using pde_coefficient_holder_fun_2_arg =
     two_dim_coefficient_holder<std::function<fp_type(fp_type, fp_type)>>;
 
-/// <summary>
-/// Represents 2D Dirichlet boundary
-/// </summary>
+/*!
+ Represents 2D Dirichlet boundary
+ */
 template <typename fp_type>
 struct dirichlet_boundary_2d {
  protected:
@@ -51,12 +51,15 @@ struct dirichlet_boundary_2d {
   std::pair<fun_2d, fun_2d> first_dim;
   std::pair<fun_2d, fun_2d> second_dim;
 
-  /// <summary>
-  /// first_pair: (u(x_1,y,t) = A_1(y,t),u(x_2,y,t) = A_2(y,t))
-  /// second_pair: (u(x,y_1,t) = B_1(x,t),u(x,y_2,t) = B_2(x,t))
-  /// </summary>
-  /// <param name="first_pair"> </param>
-  /// <param name="second_pair"></param>
+  /*!
+  first_pair:
+
+  (u(x_1,y,t) = A_1(y,t),u(x_2,y,t) = A_2(y,t))
+
+  second_pair:
+
+  (u(x,y_1,t) = B_1(x,t),u(x,y_2,t) = B_2(x,t))
+  */
   explicit dirichlet_boundary_2d(std::pair<fun_2d, fun_2d> const &first_pair,
                                  std::pair<fun_2d, fun_2d> const &second_pair)
       : first_dim{first_pair}, second_dim{second_pair} {}
@@ -91,12 +94,12 @@ struct dirichlet_boundary_2d {
   }
 
   /*!
-   * Populate solution with Dirichlet boundary
-   *
-   * \param inits
-   * \param deltas
-   * \param time
-   * \param solution
+    Populate solution with Dirichlet boundary
+
+    \param inits
+    \param deltas
+    \param time
+    \param solution
    */
   template <template <typename, typename> typename container, typename alloc>
   void fill(std::pair<fp_type, fp_type> const &inits,

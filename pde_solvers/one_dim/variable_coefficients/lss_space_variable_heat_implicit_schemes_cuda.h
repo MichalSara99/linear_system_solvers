@@ -20,18 +20,24 @@ using scheme_coefficient_holder =
     std::tuple<std::function<type(type)>, std::function<type(type)>,
                std::function<type(type)>, type, type>;
 
-template <typename type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 using scheme_function = std::function<void(
-    scheme_coefficient_holder<type> const &, std::vector<type> const &,
-    std::vector<type> const &, std::vector<type> const &, std::vector<type> &,
-    std::pair<type, type> const &, std::pair<type, type> const &)>;
+    scheme_coefficient_holder<fp_type> const &,
+    container<fp_type, alloc> const &, container<fp_type, alloc> const &,
+    container<fp_type, alloc> const &, container<fp_type, alloc> &,
+    std::pair<fp_type, fp_type> const &, std::pair<fp_type, fp_type> const &)>;
 
 // ============================================================================
 // =========================== heat_equation_schemes  =========================
 // ============================================================================
 
-template <typename fp_type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 class heat_equation_schemes {
+  typedef container<fp_type, alloc> container_t;
+  typedef scheme_function<container, fp_type, alloc> scheme_function_t;
+
  public:
   static fp_type const get_theta(implicit_pde_schemes_enum scheme) {
     fp_type theta{};
@@ -42,8 +48,8 @@ class heat_equation_schemes {
     return theta;
   }
 
-  static scheme_function<fp_type> const get_scheme(
-      boundary_condition_enum bc_type, implicit_pde_schemes_enum scheme) {
+  static scheme_function_t const get_scheme(boundary_condition_enum bc_type,
+                                            implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
@@ -52,10 +58,8 @@ class heat_equation_schemes {
 
     auto scheme_fun_dirichlet =
         [=](scheme_coefficient_holder<fp_type> const &coeffs,
-            std::vector<fp_type> const &input,
-            std::vector<fp_type> const &inhom_input,
-            std::vector<fp_type> const &inhom_input_next,
-            std::vector<fp_type> &solution,
+            container_t const &input, container_t const &inhom_input,
+            container_t const &inhom_input_next, container_t &solution,
             std::pair<fp_type, fp_type> const &boundary_pair_0,
             std::pair<fp_type, fp_type> const &boundary_pair_1) {
           // inhom_input			= not used here
@@ -91,10 +95,8 @@ class heat_equation_schemes {
 
     auto scheme_fun_robin =
         [=](scheme_coefficient_holder<fp_type> const &coeffs,
-            std::vector<fp_type> const &input,
-            std::vector<fp_type> const &inhom_input,
-            std::vector<fp_type> const &inhom_input_next,
-            std::vector<fp_type> &solution,
+            container_t const &input, container_t const &inhom_input,
+            container_t const &inhom_input_next, container_t &solution,
             std::pair<fp_type, fp_type> const &boundary_pair_0,
             std::pair<fp_type, fp_type> const &boundary_pair_1) {
           // inhom_input			= not used here
@@ -137,7 +139,7 @@ class heat_equation_schemes {
       return scheme_fun_robin;
   }
 
-  static scheme_function<fp_type> const get_inhom_scheme(
+  static scheme_function_t const get_inhom_scheme(
       boundary_condition_enum bc_type, implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
@@ -147,10 +149,8 @@ class heat_equation_schemes {
 
     auto scheme_fun_dirichlet =
         [=](scheme_coefficient_holder<fp_type> const &coeffs,
-            std::vector<fp_type> const &input,
-            std::vector<fp_type> const &inhom_input,
-            std::vector<fp_type> const &inhom_input_next,
-            std::vector<fp_type> &solution,
+            container_t const &input, container_t const &inhom_input,
+            container_t const &inhom_input_next, container_t &solution,
             std::pair<fp_type, fp_type> const &boundary_pair_0,
             std::pair<fp_type, fp_type> const &boundary_pair_1) {
           // boundary_pair_1		= not used here
@@ -191,10 +191,8 @@ class heat_equation_schemes {
 
     auto scheme_fun_robin =
         [=](scheme_coefficient_holder<fp_type> const &coeffs,
-            std::vector<fp_type> const &input,
-            std::vector<fp_type> const &inhom_input,
-            std::vector<fp_type> const &inhom_input_next,
-            std::vector<fp_type> &solution,
+            container_t const &input, container_t const &inhom_input,
+            container_t const &inhom_input_next, container_t &solution,
             std::pair<fp_type, fp_type> const &boundary_pair_0,
             std::pair<fp_type, fp_type> const &boundary_pair_1) {
           fp_type const left_linear = boundary_pair_0.first;

@@ -7,14 +7,17 @@
 #include <thread>
 
 #include "common/lss_enumerations.h"
+#include "common/lss_utility.h"
 #include "lss_space_variable_heat_explicit_schemes_policy.h"
 #include "pde_solvers/one_dim/lss_base_explicit_schemes.h"
+#include "pde_solvers/one_dim/lss_pde_boundary.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes {
 
 using lss_enumerations::boundary_condition_enum;
 using lss_one_dim_base_explicit_schemes::heat_scheme_base;
+using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::pde_coefficient_holder_fun_1_arg;
 using lss_one_dim_pde_utility::robin_boundary;
@@ -25,18 +28,22 @@ using lss_one_dim_space_variable_heat_explicit_schemes_policy::
     ade_heat_saulyev_scheme_forward_policy;
 using lss_one_dim_space_variable_heat_explicit_schemes_policy::
     heat_euler_scheme_forward_policy;
+using lss_utility::sptr_t;
 
 // ============================================================================
 // ============================= heat_euler_scheme ============================
 // ============================================================================
 
-template <typename fp_type,
-          typename scheme_policy = heat_euler_scheme_forward_policy<
-              fp_type, pde_coefficient_holder_fun_1_arg<fp_type>, std::vector,
-              std::allocator<fp_type>>>
+template <
+    template <typename, typename> typename container, typename fp_type,
+    typename alloc,
+    typename scheme_policy = heat_euler_scheme_forward_policy<
+        fp_type, pde_coefficient_holder_fun_1_arg<fp_type>, container, alloc>>
 class heat_euler_scheme
-    : public heat_scheme_base<fp_type,
+    : public heat_scheme_base<container, fp_type, alloc,
                               pde_coefficient_holder_fun_1_arg<fp_type>> {
+  typedef container<fp_type, alloc> container_t;
+
  private:
   pde_coefficient_holder_fun_1_arg<fp_type> pde_coeffs_;
 
@@ -47,10 +54,11 @@ class heat_euler_scheme
       std::pair<fp_type, fp_type> const &deltas,
       pde_coefficient_holder_fun_1_arg<fp_type> const &pde_coeffs,
       pde_coefficient_holder_fun_1_arg<fp_type> const &coeffs,
-      std::vector<fp_type> const &initial_condition,
+      container_t const &initial_condition,
       std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
       bool is_source_set = false)
-      : heat_scheme_base<fp_type, pde_coefficient_holder_fun_1_arg<fp_type>>(
+      : heat_scheme_base<container, fp_type, alloc,
+                         pde_coefficient_holder_fun_1_arg<fp_type>>(
             space_start, terminal_time, deltas, coeffs, initial_condition,
             source, is_source_set),
         pde_coeffs_{pde_coeffs} {}
@@ -66,34 +74,39 @@ class heat_euler_scheme
   bool is_stable() const override;
 
   // for Dirichlet BC
-  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  std::vector<fp_type> &solution) const override;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      container_t &solution) const override;
   // for Robin BC
   void operator()(robin_boundary<fp_type> const &robin_boundary,
-                  std::vector<fp_type> &solution) const override;
+                  container_t &solution) const override;
 };
 
 // ============================================================================
 // ================== ade_heat_bakarat_clark_scheme ===========================
 // ============================================================================
 
-template <typename fp_type,
-          typename scheme_policy = ade_heat_bakarat_clark_scheme_forward_policy<
-              fp_type, pde_coefficient_holder_fun_1_arg<fp_type>, std::vector,
-              std::allocator<fp_type>>>
+template <
+    template <typename, typename> typename container, typename fp_type,
+    typename alloc,
+    typename scheme_policy = ade_heat_bakarat_clark_scheme_forward_policy<
+        fp_type, pde_coefficient_holder_fun_1_arg<fp_type>, container, alloc>>
 class ade_heat_bakarat_clark_scheme
-    : public heat_scheme_base<fp_type,
+    : public heat_scheme_base<container, fp_type, alloc,
                               pde_coefficient_holder_fun_1_arg<fp_type>> {
+  typedef container<fp_type, alloc> container_t;
+
  public:
   explicit ade_heat_bakarat_clark_scheme() = delete;
   explicit ade_heat_bakarat_clark_scheme(
       fp_type space_start, fp_type terminal_time,
       std::pair<fp_type, fp_type> const &deltas,
       pde_coefficient_holder_fun_1_arg<fp_type> const &coeffs,
-      std::vector<fp_type> const &initial_condition,
+      container_t const &initial_condition,
       std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
       bool is_source_set = false)
-      : heat_scheme_base<fp_type, pde_coefficient_holder_fun_1_arg<fp_type>>(
+      : heat_scheme_base<container, fp_type, alloc,
+                         pde_coefficient_holder_fun_1_arg<fp_type>>(
             space_start, terminal_time, deltas, coeffs, initial_condition,
             source, is_source_set) {}
 
@@ -110,34 +123,39 @@ class ade_heat_bakarat_clark_scheme
   bool is_stable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  std::vector<fp_type> &solution) const override;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      container_t &solution) const override;
   // for Robin BC
   void operator()(robin_boundary<fp_type> const &robin_boundary,
-                  std::vector<fp_type> &solution) const override;
+                  container_t &solution) const override;
 };
 
 // ============================================================================
 // ======================= ade_heat_saulyev_scheme ============================
 // ============================================================================
 
-template <typename fp_type,
-          typename scheme_policy = ade_heat_saulyev_scheme_forward_policy<
-              fp_type, pde_coefficient_holder_fun_1_arg<fp_type>, std::vector,
-              std::allocator<fp_type>>>
+template <
+    template <typename, typename> typename container, typename fp_type,
+    typename alloc,
+    typename scheme_policy = ade_heat_saulyev_scheme_forward_policy<
+        fp_type, pde_coefficient_holder_fun_1_arg<fp_type>, container, alloc>>
 class ade_heat_saulyev_scheme
-    : public heat_scheme_base<fp_type,
+    : public heat_scheme_base<container, fp_type, alloc,
                               pde_coefficient_holder_fun_1_arg<fp_type>> {
+  typedef container<fp_type, alloc> container_t;
+
  public:
   explicit ade_heat_saulyev_scheme() = delete;
   explicit ade_heat_saulyev_scheme(
       fp_type space_start, fp_type terminal_time,
       std::pair<fp_type, fp_type> const &deltas,
       pde_coefficient_holder_fun_1_arg<fp_type> const &coeffs,
-      std::vector<fp_type> const &initial_condition,
+      container_t const &initial_condition,
       std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
       bool is_source_set = false)
-      : heat_scheme_base<fp_type, pde_coefficient_holder_fun_1_arg<fp_type>>(
+      : heat_scheme_base<container, fp_type, alloc,
+                         pde_coefficient_holder_fun_1_arg<fp_type>>(
             space_start, terminal_time, deltas, coeffs, initial_condition,
             source, is_source_set) {}
 
@@ -152,11 +170,12 @@ class ade_heat_saulyev_scheme
   bool is_stable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  std::vector<fp_type> &solution) const override;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      container_t &solution) const override;
   // for Robin BC
   void operator()(robin_boundary<fp_type> const &robin_boundary,
-                  std::vector<fp_type> &solution) const override;
+                  container_t &solution) const override;
 };
 
 }  // namespace lss_one_dim_space_variable_heat_explicit_schemes
@@ -164,9 +183,10 @@ class ade_heat_saulyev_scheme
 // ============================================================================
 // ======================== IMPLEMENTATIONS ===================================
 
-template <typename fp_type, typename scheme_policy>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc, typename scheme_policy>
 bool lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
-    fp_type, scheme_policy>::is_stable() const {
+    container, fp_type, alloc, scheme_policy>::is_stable() const {
   auto const &a = std::get<0>(pde_coeffs_);
   auto const &b = std::get<1>(pde_coeffs_);
   auto const &c = std::get<2>(pde_coeffs_);
@@ -186,11 +206,12 @@ bool lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
   return true;
 }
 
-template <typename fp_type, typename scheme_policy>
-void lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
-    fp_type, scheme_policy>::operator()(dirichlet_boundary<fp_type> const
-                                            &dirichlet_boundary,
-                                        std::vector<fp_type> &solution) const {
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc, typename scheme_policy>
+void lss_one_dim_space_variable_heat_explicit_schemes::
+    heat_euler_scheme<container, fp_type, alloc, scheme_policy>::operator()(
+        sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+        container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -208,11 +229,12 @@ void lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
   }
 }
 
-template <typename fp_type, typename scheme_policy>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc, typename scheme_policy>
 void lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
-    fp_type, scheme_policy>::operator()(robin_boundary<fp_type> const
-                                            &robin_boundary,
-                                        std::vector<fp_type> &solution) const {
+    container, fp_type, alloc,
+    scheme_policy>::operator()(robin_boundary<fp_type> const &robin_boundary,
+                               container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -230,11 +252,12 @@ void lss_one_dim_space_variable_heat_explicit_schemes::heat_euler_scheme<
   }
 }
 
-template <typename fp_type, typename scheme_policy>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc, typename scheme_policy>
 void lss_one_dim_space_variable_heat_explicit_schemes::
-    ade_heat_bakarat_clark_scheme<fp_type, scheme_policy>::operator()(
-        dirichlet_boundary<fp_type> const &dirichlet_boundary,
-        std::vector<fp_type> &solution) const {
+    ade_heat_bakarat_clark_scheme<container, fp_type, alloc, scheme_policy>::
+    operator()(sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+               container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -251,19 +274,22 @@ void lss_one_dim_space_variable_heat_explicit_schemes::
   }
 }
 
-template <typename fp_type, typename scheme_policy>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc, typename scheme_policy>
 void lss_one_dim_space_variable_heat_explicit_schemes::
-    ade_heat_bakarat_clark_scheme<fp_type, scheme_policy>::operator()(
-        robin_boundary<fp_type> const &robin_boundary,
-        std::vector<fp_type> &solution) const {
+    ade_heat_bakarat_clark_scheme<container, fp_type, alloc, scheme_policy>::
+    operator()(robin_boundary<fp_type> const &robin_boundary,
+               container_t &solution) const {
   throw new std::exception("Not available.");
 }
 
-template <typename fp_type, typename scheme_policy>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc, typename scheme_policy>
 void lss_one_dim_space_variable_heat_explicit_schemes::ade_heat_saulyev_scheme<
-    fp_type, scheme_policy>::operator()(dirichlet_boundary<fp_type> const
-                                            &dirichlet_boundary,
-                                        std::vector<fp_type> &solution) const {
+    container, fp_type, alloc,
+    scheme_policy>::operator()(sptr_t<dirichlet_boundary_1d<fp_type>> const
+                                   &dirichlet_boundary,
+                               container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
@@ -280,11 +306,12 @@ void lss_one_dim_space_variable_heat_explicit_schemes::ade_heat_saulyev_scheme<
   }
 }
 
-template <typename fp_type, typename scheme_policy>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc, typename scheme_policy>
 void lss_one_dim_space_variable_heat_explicit_schemes::ade_heat_saulyev_scheme<
-    fp_type, scheme_policy>::operator()(robin_boundary<fp_type> const
-                                            &robin_boundary,
-                                        std::vector<fp_type> &solution) const {
+    container, fp_type, alloc,
+    scheme_policy>::operator()(robin_boundary<fp_type> const &robin_boundary,
+                               container_t &solution) const {
   throw new std::exception("Not available.");
 }
 

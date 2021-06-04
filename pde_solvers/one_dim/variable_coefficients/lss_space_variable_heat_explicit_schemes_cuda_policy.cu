@@ -24,7 +24,7 @@ void heat_euler_scheme_forward_policy<float,
                                       pde_coefficient_holder_fun_1_arg<float>>::
     traverse(float *solution, float const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<float> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
              std::pair<float, float> const &deltas,
              pde_coefficient_holder_fun_1_arg<float> const &holder,
              float const &terminal_time, float const &space_start) {
@@ -63,8 +63,8 @@ void heat_euler_scheme_forward_policy<float,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   float time = k;
 
@@ -121,7 +121,7 @@ void heat_euler_scheme_forward_policy<
     double, pde_coefficient_holder_fun_1_arg<double>>::
     traverse(double *solution, double const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<double> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
              std::pair<double, double> const &deltas,
              pde_coefficient_holder_fun_1_arg<double> const &holder,
              double const &terminal_time, double const &space_start) {
@@ -160,8 +160,8 @@ void heat_euler_scheme_forward_policy<
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   float time = k;
 
@@ -218,7 +218,7 @@ void heat_euler_scheme_forward_policy<float,
                                       pde_coefficient_holder_fun_1_arg<float>>::
     traverse(float *solution, float const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<float> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
              std::pair<float, float> const &deltas,
              pde_coefficient_holder_fun_1_arg<float> const &holder,
              float const &terminal_time, float const &space_start,
@@ -258,8 +258,8 @@ void heat_euler_scheme_forward_policy<float,
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   float time = k;
 
@@ -329,7 +329,7 @@ void heat_euler_scheme_forward_policy<
     double, pde_coefficient_holder_fun_1_arg<double>>::
     traverse(double *solution, double const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<double> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
              std::pair<double, double> const &deltas,
              pde_coefficient_holder_fun_1_arg<double> const &holder,
              double const &terminal_time, double const &space_start,
@@ -369,8 +369,8 @@ void heat_euler_scheme_forward_policy<
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   double time = k;
 
@@ -866,7 +866,7 @@ void heat_euler_scheme_backward_policy<
     float, pde_coefficient_holder_fun_1_arg<float>>::
     traverse(float *solution, float const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<float> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
              std::pair<float, float> const &deltas,
              pde_coefficient_holder_fun_1_arg<float> const &holder,
              float const &terminal_time, float const &space_start) {
@@ -905,8 +905,8 @@ void heat_euler_scheme_backward_policy<
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   float time = terminal_time - k;
 
@@ -963,7 +963,7 @@ void heat_euler_scheme_backward_policy<
     double, pde_coefficient_holder_fun_1_arg<double>>::
     traverse(double *solution, double const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<double> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
              std::pair<double, double> const &deltas,
              pde_coefficient_holder_fun_1_arg<double> const &holder,
              double const &terminal_time, double const &space_start) {
@@ -1002,8 +1002,8 @@ void heat_euler_scheme_backward_policy<
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   double time = terminal_time - k;
 
@@ -1060,7 +1060,7 @@ void heat_euler_scheme_backward_policy<
     float, pde_coefficient_holder_fun_1_arg<float>>::
     traverse(float *solution, float const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<float> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<float>> const &dirichlet_boundary,
              std::pair<float, float> const &deltas,
              pde_coefficient_holder_fun_1_arg<float> const &holder,
              float const &terminal_time, float const &space_start,
@@ -1100,8 +1100,8 @@ void heat_euler_scheme_backward_policy<
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   float time = terminal_time - k;
 
@@ -1171,7 +1171,7 @@ void heat_euler_scheme_backward_policy<
     double, pde_coefficient_holder_fun_1_arg<double>>::
     traverse(double *solution, double const *init_solution,
              unsigned long long size,
-             dirichlet_boundary<double> const &dirichlet_boundary,
+             sptr_t<dirichlet_boundary_1d<double>> const &dirichlet_boundary,
              std::pair<double, double> const &deltas,
              pde_coefficient_holder_fun_1_arg<double> const &holder,
              double const &terminal_time, double const &space_start,
@@ -1211,8 +1211,8 @@ void heat_euler_scheme_backward_policy<
     return (lambda * a(x) + gamma * b(x));
   };
   // store bc:
-  auto const &left = dirichlet_boundary.first;
-  auto const &right = dirichlet_boundary.second;
+  auto const &left = dirichlet_boundary->first;
+  auto const &right = dirichlet_boundary->second;
 
   double time = terminal_time - k;
 

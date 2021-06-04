@@ -7,35 +7,44 @@
 #include <thread>
 
 #include "common/lss_enumerations.h"
+#include "common/lss_utility.h"
 #include "pde_solvers/one_dim/lss_base_explicit_schemes.h"
+#include "pde_solvers/one_dim/lss_pde_boundary.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_heat_explicit_schemes {
 
 using lss_enumerations::boundary_condition_enum;
 using lss_one_dim_base_explicit_schemes::heat_scheme_base;
-using lss_one_dim_pde_utility::dirichlet_boundary;
+using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
+using lss_one_dim_pde_utility::discretization;
 using lss_one_dim_pde_utility::pde_coefficient_holder_const;
 using lss_one_dim_pde_utility::robin_boundary;
-using lss_one_dim_pde_utility::v_discretization;
+using lss_utility::sptr_t;
 
 // ============================================================================
 // ======================= heat_euler_scheme ==================================
 // ============================================================================
 
-template <typename fp_type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 class heat_euler_scheme
-    : public heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>> {
+    : public heat_scheme_base<container, fp_type, alloc,
+                              pde_coefficient_holder_const<fp_type>> {
+ private:
+  typedef container<fp_type, alloc> container_t;
+  explicit heat_euler_scheme() = default;
+
  public:
-  explicit heat_euler_scheme() = delete;
   explicit heat_euler_scheme(
       fp_type space_start, fp_type terminal_time,
       std::pair<fp_type, fp_type> const &deltas,
       pde_coefficient_holder_const<fp_type> const &coeffs,
-      std::vector<fp_type> const &initial_condition,
+      container_t const &initial_condition,
       std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
       bool is_source_set = false)
-      : heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>>(
+      : heat_scheme_base<container, fp_type, alloc,
+                         pde_coefficient_holder_const<fp_type>>(
             space_start, terminal_time, deltas, coeffs, initial_condition,
             source, is_source_set) {}
 
@@ -50,30 +59,37 @@ class heat_euler_scheme
   bool is_stable() const override;
 
   // for Dirichlet BC
-  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  std::vector<fp_type> &solution) const override;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      container_t &solution) const override;
   // for Robin BC
   void operator()(robin_boundary<fp_type> const &robin_boundary,
-                  std::vector<fp_type> &solution) const override;
+                  container_t &solution) const override;
 };
 
 // ============================================================================
 // ================== ade_heat_bakarat_clark_scheme  ==========================
 // ============================================================================
 
-template <typename fp_type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 class ade_heat_bakarat_clark_scheme
-    : public heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>> {
+    : public heat_scheme_base<container, fp_type, alloc,
+                              pde_coefficient_holder_const<fp_type>> {
+ private:
+  typedef container<fp_type, alloc> container_t;
+  explicit ade_heat_bakarat_clark_scheme() = default;
+
  public:
-  explicit ade_heat_bakarat_clark_scheme() = delete;
   explicit ade_heat_bakarat_clark_scheme(
       fp_type space_start, fp_type terminal_time,
       std::pair<fp_type, fp_type> const &deltas,
       pde_coefficient_holder_const<fp_type> const &coeffs,
-      std::vector<fp_type> const &initial_condition,
+      container_t const &initial_condition,
       std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
       bool is_source_set = false)
-      : heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>>(
+      : heat_scheme_base<container, fp_type, alloc,
+                         pde_coefficient_holder_const<fp_type>>(
             space_start, terminal_time, deltas, coeffs, initial_condition,
             source, is_source_set) {}
 
@@ -90,30 +106,37 @@ class ade_heat_bakarat_clark_scheme
   bool is_stable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  std::vector<fp_type> &solution) const override;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      container_t &solution) const override;
   // for Robin BC
   void operator()(robin_boundary<fp_type> const &robin_boundary,
-                  std::vector<fp_type> &solution) const override;
+                  container_t &solution) const override;
 };
 
 // ============================================================================
 // ==================== ade_heat_saulyev_scheme ===============================
 // ============================================================================
 
-template <typename fp_type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 class ade_heat_saulyev_scheme
-    : public heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>> {
+    : public heat_scheme_base<container, fp_type, alloc,
+                              pde_coefficient_holder_const<fp_type>> {
+ private:
+  typedef container<fp_type, alloc> container_t;
+  explicit ade_heat_saulyev_scheme() = default;
+
  public:
-  explicit ade_heat_saulyev_scheme() = delete;
   explicit ade_heat_saulyev_scheme(
       fp_type space_start, fp_type terminal_time,
       std::pair<fp_type, fp_type> const &deltas,
       pde_coefficient_holder_const<fp_type> const &coeffs,
-      std::vector<fp_type> const &initial_condition,
+      container_t const &initial_condition,
       std::function<fp_type(fp_type, fp_type)> const &source = nullptr,
       bool is_source_set = false)
-      : heat_scheme_base<fp_type, pde_coefficient_holder_const<fp_type>>(
+      : heat_scheme_base<container, fp_type, alloc,
+                         pde_coefficient_holder_const<fp_type>>(
             space_start, terminal_time, deltas, coeffs, initial_condition,
             source, is_source_set) {}
 
@@ -128,11 +151,12 @@ class ade_heat_saulyev_scheme
   bool is_stable() const override { return true; };
 
   // for Dirichlet BC
-  void operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                  std::vector<fp_type> &solution) const override;
+  void operator()(
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      container_t &solution) const override;
   // for Robin BC
   void operator()(robin_boundary<fp_type> const &robin_boundary,
-                  std::vector<fp_type> &solution) const override;
+                  container_t &solution) const override;
 };
 
 }  // namespace lss_one_dim_heat_explicit_schemes
@@ -140,9 +164,10 @@ class ade_heat_saulyev_scheme
 // ============================================================================
 // =========================== IMPLEMENTATIONS ================================
 
-template <typename fp_type>
-bool lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::is_stable()
-    const {
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
+bool lss_one_dim_heat_explicit_schemes::heat_euler_scheme<
+    container, fp_type, alloc>::is_stable() const {
   fp_type const A = std::get<0>(coeffs_);
   fp_type const B = std::get<1>(coeffs_);
   fp_type const k = std::get<0>(deltas_);
@@ -151,16 +176,19 @@ bool lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::is_stable()
   return (((2.0 * A * k / (h * h)) <= 1.0) && (B * (k / h) <= 1.0));
 }
 
-template <typename fp_type>
-void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
-    dirichlet_boundary<fp_type> const &dirichlet_boundary,
-    std::vector<fp_type> &solution) const {
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
+void lss_one_dim_heat_explicit_schemes::
+    heat_euler_scheme<container, fp_type, alloc>::operator()(
+        sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+        container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
       solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
   LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
+  typedef discretization<fp_type, container, alloc> d_1d;
   // get delta time:
   fp_type const k = std::get<0>(deltas_);
   // get delta space:
@@ -180,18 +208,13 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
   fp_type const b = lambda + gamma;
   fp_type const c = lambda - gamma;
   // previous solution:
-  std::vector<fp_type> prev_sol = initial_condition_;
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  container_t prev_sol = initial_condition_;
   // size of the space vector:
   std::size_t const space_size = solution.size();
   if (!is_source_set_) {
     // loop for stepping in time:
     while (time <= terminal_time_) {
-      solution[0] = left(time);
-      solution[solution.size() - 1] = right(time);
+      dirichlet_boundary->fill(time, solution);
       for (std::size_t t = 1; t < space_size - 1; ++t) {
         solution[t] =
             a * prev_sol[t] + b * prev_sol[t + 1] + c * prev_sol[t - 1];
@@ -201,35 +224,35 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
     }
   } else {
     // create a container to carry discretized source heat
-    std::vector<fp_type> source_curr(solution.size(), fp_type{});
-    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
-                                                   source_, source_curr);
+    container_t source_curr(solution.size(), fp_type{});
+    d_1d::discretize_in_space(h, space_start_, 0.0, source_, source_curr);
     // loop for stepping in time:
     while (time <= terminal_time_) {
-      solution[0] = left(time);
-      solution[solution.size() - 1] = right(time);
+      dirichlet_boundary->fill(time, solution);
       for (std::size_t t = 1; t < space_size - 1; ++t) {
         solution[t] = a * prev_sol[t] + b * prev_sol[t + 1] +
                       c * prev_sol[t - 1] + k * source_curr[t];
       }
-      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
-                                                     source_, source_curr);
+      d_1d::discretize_in_space(h, space_start_, time, source_, source_curr);
       prev_sol = solution;
       time += k;
     }
   }
 }
 
-template <typename fp_type>
-void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
-    robin_boundary<fp_type> const &robin_boundary,
-    std::vector<fp_type> &solution) const {
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
+void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<
+    container, fp_type, alloc>::operator()(robin_boundary<fp_type> const
+                                               &robin_boundary,
+                                           container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
       solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
   LSS_ASSERT(is_stable() == true, "This discretization is not stable.");
+  typedef discretization<fp_type, container, alloc> d_1d;
   // get delta time:
   fp_type const k = std::get<0>(deltas_);
   // get delta space:
@@ -258,7 +281,7 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
   fp_type const b = lambda + gamma;
   fp_type const c = lambda - gamma;
   // previous solution:
-  std::vector<fp_type> prev_sol = initial_condition_;
+  container_t prev_sol = initial_condition_;
   // size of the space vector:
   std::size_t const space_size = solution.size();
   if (!is_source_set_) {
@@ -278,9 +301,8 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
     }
   } else {
     // create a container to carry discretized source heat
-    std::vector<fp_type> source_curr(solution.size(), fp_type{});
-    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
-                                                   source_, source_curr);
+    container_t source_curr(solution.size(), fp_type{});
+    d_1d::discretize_in_space(h, space_start_, 0.0, source_, source_curr);
     // loop for stepping in time:
     while (time <= terminal_time_) {
       solution[0] =
@@ -292,23 +314,25 @@ void lss_one_dim_heat_explicit_schemes::heat_euler_scheme<fp_type>::operator()(
         solution[t] = a * prev_sol[t] + b * prev_sol[t + 1] +
                       c * prev_sol[t - 1] + k * source_curr[t];
       }
-      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
-                                                     source_, source_curr);
+      d_1d::discretize_in_space(h, space_start_, time, source_, source_curr);
       prev_sol = solution;
       time += k;
     }
   }
 }
 
-template <typename fp_type>
-void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
-    fp_type>::operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                         std::vector<fp_type> &solution) const {
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
+void lss_one_dim_heat_explicit_schemes::
+    ade_heat_bakarat_clark_scheme<container, fp_type, alloc>::operator()(
+        sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+        container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
       solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
+  typedef discretization<fp_type, container, alloc> d_1d;
   // get delta time:
   fp_type const k = std::get<0>(deltas_);
   // get delta space:
@@ -330,28 +354,28 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
   fp_type const c = (lambda - gamma) / divisor;
   fp_type const d = k / divisor;
   // left space boundary:
-  auto const &left = dirichlet_boundary.first;
+  auto const &left = dirichlet_boundary->first;
   // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  auto const &right = dirichlet_boundary->second;
   // conmponents of the solution:
-  std::vector<fp_type> com_1(initial_condition_);
-  std::vector<fp_type> com_2(initial_condition_);
+  container_t com_1(initial_condition_);
+  container_t com_2(initial_condition_);
   // size of the space vector:
   std::size_t const space_size = solution.size();
   // create a container to carry discretized source heat
-  std::vector<fp_type> source_curr(space_size, fp_type{});
-  std::vector<fp_type> source_next(space_size, fp_type{});
+  container_t source_curr(space_size, fp_type{});
+  container_t source_next(space_size, fp_type{});
   // create upsweep anonymous function:
-  auto up_sweep = [=](std::vector<fp_type> &up_component,
-                      std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+  auto up_sweep = [=](container_t &up_component, container_t const &rhs,
+                      fp_type rhs_coeff) {
     for (std::size_t t = 1; t < space_size - 1; ++t) {
       up_component[t] = a * up_component[t] + b * up_component[t + 1] +
                         c * up_component[t - 1] + d * rhs_coeff * rhs[t];
     }
   };
   // create downsweep anonymous function:
-  auto down_sweep = [=](std::vector<fp_type> &down_component,
-                        std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+  auto down_sweep = [=](container_t &down_component, container_t const &rhs,
+                        fp_type rhs_coeff) {
     for (std::size_t t = space_size - 2; t >= 1; --t) {
       down_component[t] = a * down_component[t] + b * down_component[t + 1] +
                           c * down_component[t - 1] + d * rhs_coeff * rhs[t];
@@ -361,8 +385,8 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
   if (!is_source_set_) {
     // loop for stepping in time:
     while (time <= terminal_time_) {
-      com_1[0] = com_2[0] = left(time);
-      com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+      dirichlet_boundary->fill(time, com_1);
+      dirichlet_boundary->fill(time, com_2);
       std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_curr,
                               0.0);
       std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
@@ -375,14 +399,12 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
       time += k;
     }
   } else {
-    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
-                                                   source_, source_curr);
-    v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
-                                                   source_, source_next);
+    d_1d::discretize_in_space(h, space_start_, 0.0, source_, source_curr);
+    d_1d::discretize_in_space(h, space_start_, time, source_, source_next);
     // loop for stepping in time:
     while (time <= terminal_time_) {
-      com_1[0] = com_2[0] = left(time);
-      com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+      dirichlet_boundary->fill(time, com_1);
+      dirichlet_boundary->fill(time, com_2);
       std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_next,
                               1.0);
       std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
@@ -392,31 +414,35 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
       for (std::size_t t = 0; t < space_size; ++t) {
         solution[t] = 0.5 * (com_1[t] + com_2[t]);
       }
-      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
-                                                     source_, source_curr);
-      v_discretization<fp_type>::discretize_in_space(
-          h, space_start_, 2.0 * time, source_, source_next);
+      d_1d::discretize_in_space(h, space_start_, time, source_, source_curr);
+      d_1d::discretize_in_space(h, space_start_, 2.0 * time, source_,
+                                source_next);
       time += k;
     }
   }
 }
 
-template <typename fp_type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 void lss_one_dim_heat_explicit_schemes::ade_heat_bakarat_clark_scheme<
-    fp_type>::operator()(robin_boundary<fp_type> const &robin_boundary,
-                         std::vector<fp_type> &solution) const {
+    container, fp_type, alloc>::operator()(robin_boundary<fp_type> const
+                                               &robin_boundary,
+                                           container_t &solution) const {
   throw new std::exception("Not available.");
 }
 
-template <typename fp_type>
-void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
-    fp_type>::operator()(dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                         std::vector<fp_type> &solution) const {
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
+void lss_one_dim_heat_explicit_schemes::
+    ade_heat_saulyev_scheme<container, fp_type, alloc>::operator()(
+        sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+        container_t &solution) const {
   LSS_ASSERT(solution.size() > 0,
              "The input solution container must be initialized.");
   LSS_ASSERT(
       solution.size() == initial_condition_.size(),
       "Entered solution vector size differs from initialCondition vector.");
+  typedef discretization<fp_type, container, alloc> d_1d;
   // get delta time:
   fp_type const k = std::get<0>(deltas_);
   // get delta space:
@@ -437,28 +463,25 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
   fp_type const b = (lambda + gamma) / divisor;
   fp_type const c = (lambda - gamma) / divisor;
   fp_type const d = k / divisor;
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+
   // get the initial condition :
   solution = initial_condition_;
   // size of the space vector:
   std::size_t const space_size = solution.size();
   // create a container to carry discretized source heat
-  std::vector<fp_type> source_curr(space_size, fp_type{});
-  std::vector<fp_type> source_next(space_size, fp_type{});
+  container_t source_curr(space_size, fp_type{});
+  container_t source_next(space_size, fp_type{});
   // create upsweep anonymous function:
-  auto up_sweep = [=](std::vector<fp_type> &up_component,
-                      std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+  auto up_sweep = [=](container_t &up_component, container_t const &rhs,
+                      fp_type rhs_coeff) {
     for (std::size_t t = 1; t < space_size - 1; ++t) {
       up_component[t] = a * up_component[t] + b * up_component[t + 1] +
                         c * up_component[t - 1] + d * rhs_coeff * rhs[t];
     }
   };
   // create downsweep anonymous function:
-  auto down_sweep = [=](std::vector<fp_type> &down_component,
-                        std::vector<fp_type> const &rhs, fp_type rhs_coeff) {
+  auto down_sweep = [=](container_t &down_component, container_t const &rhs,
+                        fp_type rhs_coeff) {
     for (std::size_t t = space_size - 2; t >= 1; --t) {
       down_component[t] = a * down_component[t] + b * down_component[t + 1] +
                           c * down_component[t - 1] + d * rhs_coeff * rhs[t];
@@ -469,8 +492,7 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
     // loop for stepping in time:
     std::size_t t = 1;
     while (time <= terminal_time_) {
-      solution[0] = left(time);
-      solution[solution.size() - 1] = right(time);
+      dirichlet_boundary->fill(time, solution);
       if (t % 2 == 0)
         down_sweep(solution, source_curr, 0.0);
       else
@@ -479,33 +501,31 @@ void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
       time += k;
     }
   } else {
-    v_discretization<fp_type>::discretize_in_space(h, space_start_, 0.0,
-                                                   source_, source_curr);
-    v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
-                                                   source_, source_next);
+    d_1d::discretize_in_space(h, space_start_, 0.0, source_, source_curr);
+    d_1d::discretize_in_space(h, space_start_, time, source_, source_next);
     // loop for stepping in time:
     std::size_t t = 1;
     while (time <= terminal_time_) {
-      solution[0] = left(time);
-      solution[solution.size() - 1] = right(time);
+      dirichlet_boundary->fill(time, solution);
       if (t % 2 == 0)
         down_sweep(solution, source_curr, 1.0);
       else
         up_sweep(solution, source_next, 1.0);
       ++t;
-      v_discretization<fp_type>::discretize_in_space(h, space_start_, time,
-                                                     source_, source_curr);
-      v_discretization<fp_type>::discretize_in_space(
-          h, space_start_, 2.0 * time, source_, source_next);
+      d_1d::discretize_in_space(h, space_start_, time, source_, source_curr);
+      d_1d::discretize_in_space(h, space_start_, 2.0 * time, source_,
+                                source_next);
       time += k;
     }
   }
 }
 
-template <typename fp_type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 void lss_one_dim_heat_explicit_schemes::ade_heat_saulyev_scheme<
-    fp_type>::operator()(robin_boundary<fp_type> const &robin_boundary,
-                         std::vector<fp_type> &solution) const {
+    container, fp_type, alloc>::operator()(robin_boundary<fp_type> const
+                                               &robin_boundary,
+                                           container_t &solution) const {
   throw new std::exception("Not available.");
 }
 

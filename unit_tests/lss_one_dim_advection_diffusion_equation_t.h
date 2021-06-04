@@ -31,6 +31,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -58,7 +59,8 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepEuler() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -112,6 +114,7 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -140,7 +143,8 @@ void testImplAdvDiffEquationDirichletBCDoubleSweepCN() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -212,6 +216,7 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -240,7 +245,8 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepEuler() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -273,6 +279,7 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -302,7 +309,8 @@ void testImplAdvDiffEquationSourceDirichletBCDoubleSweepCN() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -349,6 +357,7 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -377,7 +386,8 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUEuler() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -410,6 +420,7 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
   using lss_one_dim_classic_pde_solvers::implicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -439,7 +450,8 @@ void testImplAdvDiffEquationSourceDirichletBCThomasLUCN() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T t) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -930,6 +942,7 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -956,7 +969,8 @@ void testExplAdvDiffEquationDirichletBCEuler() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T x) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1009,6 +1023,7 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -1035,7 +1050,8 @@ void testExplAdvDiffEquationDirichletBCADEBC() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T x) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1088,6 +1104,7 @@ void testExplAdvDiffEquationDirichletBCADES() {
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -1114,7 +1131,8 @@ void testExplAdvDiffEquationDirichletBCADES() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T x) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1187,6 +1205,7 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -1214,7 +1233,8 @@ void testExplAdvDiffEquationSourceDirichletBCEuler() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T x) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1246,6 +1266,7 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -1273,7 +1294,8 @@ void testExplAdvDiffEquationSourceDirichletBCADEBC() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T x) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1304,6 +1326,7 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
   using lss_enumerations::explicit_pde_schemes_enum;
   using lss_one_dim_classic_pde_solvers::explicit_solvers::
       general_heat_equation;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_utility::range;
 
   std::cout << "============================================================\n";
@@ -1331,7 +1354,8 @@ void testExplAdvDiffEquationSourceDirichletBCADES() {
   auto initial_condition = [](T x) { return 1.0; };
   // boundary conditions:
   auto const &dirichlet = [](T x) { return 0.0; };
-  auto boundary = std::make_pair(dirichlet, dirichlet);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichlet, dirichlet);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});

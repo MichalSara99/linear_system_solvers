@@ -27,6 +27,7 @@ template <typename fp_type>
 using pde_coefficient_holder_fun_1_arg =
     one_dim_coefficient_holder<std::function<fp_type(fp_type)>>;
 
+// TO BE DELETED!!
 // One-dim Dirichlet boundary:
 template <typename fp_type>
 using dirichlet_boundary =

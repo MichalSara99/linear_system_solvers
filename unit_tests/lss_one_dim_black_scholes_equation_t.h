@@ -6,6 +6,7 @@
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
+#include "pde_solvers/one_dim/lss_pde_boundary.h"
 #include "pde_solvers/one_dim/variable_coefficients/lss_black_scholes_equation_solvers.h"
 #include "sparse_solvers/lss_fdm_double_sweep_solver.h"
 #include "sparse_solvers/lss_fdm_thomas_lu_solver.h"
@@ -23,6 +24,7 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleSweepEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -61,7 +63,8 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleSweepEuler() {
   auto const &dirichletRight = [&](T t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -73,11 +76,11 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleSweepEuler() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -98,6 +101,7 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleSweepCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -138,7 +142,8 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleSweepCN() {
   auto const &dirichletRight = [&](T t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -150,11 +155,11 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleSweepCN() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::CrankNicolson);
   // get exact solution:
@@ -188,6 +193,7 @@ void testImplEuropeanBlackScholesCallOptionBCThomasLUEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -227,7 +233,8 @@ void testImplEuropeanBlackScholesCallOptionBCThomasLUEuler() {
   auto const &dirichletRight = [&](T t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -239,11 +246,11 @@ void testImplEuropeanBlackScholesCallOptionBCThomasLUEuler() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -264,6 +271,7 @@ void testImplEuropeanBlackScholesCallOptionBCThomasLUCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -303,7 +311,8 @@ void testImplEuropeanBlackScholesCallOptionBCThomasLUCN() {
   auto const &dirichletRight = [&](T t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -315,11 +324,11 @@ void testImplEuropeanBlackScholesCallOptionBCThomasLUCN() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -353,6 +362,7 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleSweepEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -391,7 +401,8 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleSweepEuler() {
   auto const &dirichletLeft = [&](T t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -403,11 +414,11 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleSweepEuler() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -428,6 +439,7 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleSweepCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_double_sweep_solver::fdm_double_sweep_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -468,7 +480,8 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleSweepCN() {
   auto const &dirichletLeft = [&](T t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -480,11 +493,11 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleSweepCN() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::CrankNicolson);
   // get exact solution:
@@ -518,6 +531,7 @@ void testImplEuropeanBlackScholesPutOptionBCThomasLUEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -557,7 +571,8 @@ void testImplEuropeanBlackScholesPutOptionBCThomasLUEuler() {
   auto const &dirichletLeft = [&](T t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -569,11 +584,11 @@ void testImplEuropeanBlackScholesPutOptionBCThomasLUEuler() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -594,6 +609,7 @@ void testImplEuropeanBlackScholesPutOptionBCThomasLUCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_fdm_thomas_lu_solver::fdm_thomas_lu_solver;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::implicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -633,7 +649,8 @@ void testImplEuropeanBlackScholesPutOptionBCThomasLUCN() {
   auto const &dirichletLeft = [&](T t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -645,11 +662,11 @@ void testImplEuropeanBlackScholesPutOptionBCThomasLUCN() {
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  impl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  impl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -686,6 +703,7 @@ template <typename T>
 void testExplEuropeanBlackScholesCallOptionDirichletBCEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -724,7 +742,8 @@ void testExplEuropeanBlackScholesCallOptionDirichletBCEuler() {
   auto const &dirichletRight = [&](T t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -736,11 +755,11 @@ void testExplEuropeanBlackScholesCallOptionDirichletBCEuler() {
   expl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   expl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  expl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  expl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  expl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  expl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   expl_solver.solve(solution, explicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -760,6 +779,7 @@ template <typename T>
 void testExplEuropeanBlackScholesCallOptionDirichletBCADEBC() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -798,7 +818,8 @@ void testExplEuropeanBlackScholesCallOptionDirichletBCADEBC() {
   auto const &dirichletRight = [&](T t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -810,11 +831,11 @@ void testExplEuropeanBlackScholesCallOptionDirichletBCADEBC() {
   expl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   expl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  expl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  expl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  expl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  expl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   expl_solver.solve(solution, explicit_pde_schemes_enum::ADEBarakatClark);
   // get exact solution:
@@ -834,6 +855,7 @@ template <typename T>
 void testExplEuropeanBlackScholesCallOptionDirichletBCADES() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -872,7 +894,8 @@ void testExplEuropeanBlackScholesCallOptionDirichletBCADES() {
   auto const &dirichletRight = [&](T t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -884,11 +907,11 @@ void testExplEuropeanBlackScholesCallOptionDirichletBCADES() {
   expl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   expl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  expl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  expl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  expl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  expl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   expl_solver.solve(solution, explicit_pde_schemes_enum::ADESaulyev);
   // get exact solution:
@@ -923,6 +946,7 @@ template <typename T>
 void testExplEuropeanBlackScholesPutOptionDirichletBCEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -961,7 +985,8 @@ void testExplEuropeanBlackScholesPutOptionDirichletBCEuler() {
   auto const &dirichletLeft = [&](T t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -973,11 +998,11 @@ void testExplEuropeanBlackScholesPutOptionDirichletBCEuler() {
   expl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   expl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  expl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  expl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  expl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  expl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   expl_solver.solve(solution, explicit_pde_schemes_enum::Euler);
   // get exact solution:
@@ -997,6 +1022,7 @@ template <typename T>
 void testExplEuropeanBlackScholesPutOptionDirichletBCADEBC() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -1035,7 +1061,8 @@ void testExplEuropeanBlackScholesPutOptionDirichletBCADEBC() {
   auto const &dirichletLeft = [&](T t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});
@@ -1047,11 +1074,11 @@ void testExplEuropeanBlackScholesPutOptionDirichletBCADEBC() {
   expl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   expl_solver.set_2_order_coefficient(
-      [&](double x) { return (0.5 * x * x * sig * sig); });
+      [&](T x) { return (0.5 * x * x * sig * sig); });
   // set first order coefficient:
-  expl_solver.set_1_order_coefficient([&](double x) { return (rate * x); });
+  expl_solver.set_1_order_coefficient([&](T x) { return (rate * x); });
   // set zero order coefficient:
-  expl_solver.set_0_order_coefficient([&](double x) { return (-1.0 * rate); });
+  expl_solver.set_0_order_coefficient([&](T x) { return (-1.0 * rate); });
   // get the solution:
   expl_solver.solve(solution, explicit_pde_schemes_enum::ADEBarakatClark);
   // get exact solution:
@@ -1071,6 +1098,7 @@ template <typename T>
 void testExplEuropeanBlackScholesPutOptionDirichletBCADES() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::explicit_pde_schemes_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers::explicit_solvers::
       black_scholes_equation;
   using lss_utility::black_scholes_exact;
@@ -1109,7 +1137,8 @@ void testExplEuropeanBlackScholesPutOptionDirichletBCADES() {
   auto const &dirichletLeft = [&](T t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary =
+      std::make_shared<dirichlet_boundary_1d<T>>(dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<T> solution(Sd + 1, T{});

@@ -6,6 +6,7 @@
 
 #include "common/lss_enumerations.h"
 #include "common/lss_utility.h"
+#include "pde_solvers/one_dim/lss_pde_boundary.h"
 #include "pde_solvers/one_dim/variable_coefficients/lss_black_scholes_equation_solvers_cuda.h"
 #include "sparse_solvers/lss_fdm_double_sweep_solver.h"
 #include "sparse_solvers/lss_fdm_thomas_lu_solver.h"
@@ -22,6 +23,7 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleDeviceEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -64,7 +66,8 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleDeviceEuler() {
   auto const &dirichletRight = [&](double t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<double>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, double{});
@@ -100,6 +103,7 @@ void testImplEuropeanBlackScholesCallOptionBCFloatDeviceEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -125,44 +129,45 @@ void testImplEuropeanBlackScholesCallOptionBCFloatDeviceEuler() {
       implicit_solver;
 
   // parameters of the call option:
-  auto const &strike = 10;
-  auto const &maturity = 1.0;
-  auto const &rate = 0.2;
-  auto const &sig = 0.25;
+  auto const &strike = 10.0f;
+  auto const &maturity = 1.0f;
+  auto const &rate = 0.2f;
+  auto const &sig = 0.25f;
   // number of space subdivisions:
   std::size_t const Sd = 160;
   // number of time subdivisions:
   std::size_t const Td = 160;
   // initial condition:
   auto terminal_condition = [&](float x) {
-    return std::max<float>(0.0, x - strike);
+    return std::max<float>(0.0f, x - strike);
   };
   // boundary conditions:
-  auto const &dirichletLeft = [](float t) { return 0.0; };
+  auto const &dirichletLeft = [](float t) { return 0.0f; };
   auto const &dirichletRight = [&](float t) {
-    return (20.0 - strike * std::exp(-rate * (maturity - t)));
+    return (20.0f - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<float>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, float{});
   // initialize solver
-  implicit_solver impl_solver(range<float>(0.0, 20.0), maturity, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0f, 20.0f), maturity, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](float x) { return (0.5 * x * x * sig * sig); });
+      [&](float x) { return (0.5f * x * x * sig * sig); });
   // set first order coefficient:
   impl_solver.set_1_order_coefficient([&](float x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0f * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
-  black_scholes_exact<float> bs_exact(0.0, strike, rate, sig, maturity);
+  black_scholes_exact<float> bs_exact(0.0f, strike, rate, sig, maturity);
 
   float const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
@@ -178,6 +183,7 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleDeviceCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -221,7 +227,8 @@ void testImplEuropeanBlackScholesCallOptionBCDoubleDeviceCN() {
   auto const &dirichletRight = [&](double t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<double>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, double{});
@@ -257,6 +264,7 @@ void testImplEuropeanBlackScholesCallOptionBCFloatDeviceCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -283,40 +291,41 @@ void testImplEuropeanBlackScholesCallOptionBCFloatDeviceCN() {
       implicit_solver;
 
   // parameters of the call option:
-  auto const &strike = 10;
-  auto const &maturity = 1.0;
-  auto const &rate = 0.2;
-  auto const &sig = 0.25;
+  auto const &strike = 10.0f;
+  auto const &maturity = 1.0f;
+  auto const &rate = 0.2f;
+  auto const &sig = 0.25f;
   // number of space subdivisions:
   std::size_t const Sd = 160;
   // number of time subdivisions:
   std::size_t const Td = 160;
   // initial condition:
   auto terminal_condition = [&](float x) {
-    return std::max<float>(0.0, x - strike);
+    return std::max<float>(0.0f, x - strike);
   };
   // boundary conditions:
-  auto const &dirichletLeft = [](float t) { return 0.0; };
+  auto const &dirichletLeft = [](float t) { return 0.0f; };
   auto const &dirichletRight = [&](float t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<float>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, float{});
   // initialize solver
-  implicit_solver impl_solver(range<float>(0.0, 20.0), maturity, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0f, 20.0f), maturity, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](float x) { return (0.5 * x * x * sig * sig); });
+      [&](float x) { return (0.5f * x * x * sig * sig); });
   // set first order coefficient:
   impl_solver.set_1_order_coefficient([&](float x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0f * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::CrankNicolson);
   // get exact solution:
@@ -349,6 +358,7 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleDeviceEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -391,7 +401,8 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleDeviceEuler() {
   auto const &dirichletLeft = [&](double t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<double>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, double{});
@@ -427,6 +438,7 @@ void testImplEuropeanBlackScholesPutOptionBCFloatDeviceEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -452,44 +464,45 @@ void testImplEuropeanBlackScholesPutOptionBCFloatDeviceEuler() {
       implicit_solver;
 
   // parameters of the call option:
-  auto const &strike = 10;
-  auto const &maturity = 1.0;
-  auto const &rate = 0.2;
-  auto const &sig = 0.25;
+  auto const &strike = 10.0f;
+  auto const &maturity = 1.0f;
+  auto const &rate = 0.2f;
+  auto const &sig = 0.25f;
   // number of space subdivisions:
   std::size_t const Sd = 160;
   // number of time subdivisions:
   std::size_t const Td = 160;
   // initial condition:
   auto terminal_condition = [&](float x) {
-    return std::max<float>(0.0, strike - x);
+    return std::max<float>(0.0f, strike - x);
   };
   // boundary conditions:
-  auto const &dirichletRight = [](float t) { return 0.0; };
+  auto const &dirichletRight = [](float t) { return 0.0f; };
   auto const &dirichletLeft = [&](float t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<float>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, float{});
   // initialize solver
-  implicit_solver impl_solver(range<float>(0.0, 20.0), maturity, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0f, 20.0f), maturity, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](float x) { return (0.5 * x * x * sig * sig); });
+      [&](float x) { return (0.5f * x * x * sig * sig); });
   // set first order coefficient:
   impl_solver.set_1_order_coefficient([&](float x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0f * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
-  black_scholes_exact<float> bs_exact(0.0, strike, rate, sig, maturity);
+  black_scholes_exact<float> bs_exact(0.0f, strike, rate, sig, maturity);
 
   float const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
@@ -505,6 +518,7 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -547,7 +561,8 @@ void testImplEuropeanBlackScholesPutOptionBCDoubleCN() {
   auto const &dirichletLeft = [&](double t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<double>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, double{});
@@ -583,6 +598,7 @@ void testImplEuropeanBlackScholesPutOptionBCFloatCN() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::implicit_solvers::
       black_sholes_equation_cuda;
   using lss_sparse_solvers::real_sparse_solver_cuda;
@@ -608,44 +624,45 @@ void testImplEuropeanBlackScholesPutOptionBCFloatCN() {
       implicit_solver;
 
   // parameters of the call option:
-  auto const &strike = 10;
-  auto const &maturity = 1.0;
-  auto const &rate = 0.2;
-  auto const &sig = 0.25;
+  auto const &strike = 10.0f;
+  auto const &maturity = 1.0f;
+  auto const &rate = 0.2f;
+  auto const &sig = 0.25f;
   // number of space subdivisions:
   std::size_t const Sd = 160;
   // number of time subdivisions:
   std::size_t const Td = 160;
   // initial condition:
   auto terminal_condition = [&](float x) {
-    return std::max<float>(0.0, strike - x);
+    return std::max<float>(0.0f, strike - x);
   };
   // boundary conditions:
-  auto const &dirichletRight = [](float t) { return 0.0; };
+  auto const &dirichletRight = [](float t) { return 0.0f; };
   auto const &dirichletLeft = [&](float t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<float>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, float{});
   // initialize solver
-  implicit_solver impl_solver(range<float>(0.0, 20.0), maturity, Sd, Td);
+  implicit_solver impl_solver(range<float>(0.0f, 20.0f), maturity, Sd, Td);
   // set boundary conditions:
   impl_solver.set_boundary_condition(boundary);
   // set initial condition:
   impl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   impl_solver.set_2_order_coefficient(
-      [&](float x) { return (0.5 * x * x * sig * sig); });
+      [&](float x) { return (0.5f * x * x * sig * sig); });
   // set first order coefficient:
   impl_solver.set_1_order_coefficient([&](float x) { return (rate * x); });
   // set zero order coefficient:
-  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0 * rate); });
+  impl_solver.set_0_order_coefficient([&](float x) { return (-1.0f * rate); });
   // get the solution:
   impl_solver.solve(solution, implicit_pde_schemes_enum::Euler);
   // get exact solution:
-  black_scholes_exact<float> bs_exact(0.0, strike, rate, sig, maturity);
+  black_scholes_exact<float> bs_exact(0.0f, strike, rate, sig, maturity);
 
   float const h = impl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";
@@ -678,6 +695,7 @@ void testExplEuropeanBlackScholesCallOptionBCDoubleEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::explicit_solvers::
       black_sholes_equation_cuda;
   using lss_utility::black_scholes_exact;
@@ -717,7 +735,8 @@ void testExplEuropeanBlackScholesCallOptionBCDoubleEuler() {
   auto const &dirichletRight = [&](double t) {
     return (20.0 - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<double>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, double{});
@@ -753,6 +772,7 @@ void testExplEuropeanBlackScholesCallOptionBCFloatEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::explicit_solvers::
       black_sholes_equation_cuda;
   using lss_utility::black_scholes_exact;
@@ -775,40 +795,41 @@ void testExplEuropeanBlackScholesCallOptionBCFloatEuler() {
                                      std::vector, std::allocator<float>>
       explicit_solver;
   // parameters of the call option:
-  auto const &strike = 10;
-  auto const &maturity = 1.0;
-  auto const &rate = 0.2;
-  auto const &sig = 0.25;
+  auto const &strike = 10.0f;
+  auto const &maturity = 1.0f;
+  auto const &rate = 0.2f;
+  auto const &sig = 0.25f;
   // number of space subdivisions:
   std::size_t const Sd = 100;
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
   auto terminal_condition = [&](float x) {
-    return std::max<float>(0.0, x - strike);
+    return std::max<float>(0.0f, x - strike);
   };
   // boundary conditions:
-  auto const &dirichletLeft = [](float t) { return 0.0; };
+  auto const &dirichletLeft = [](float t) { return 0.0f; };
   auto const &dirichletRight = [&](float t) {
-    return (20.0 - strike * std::exp(-rate * (maturity - t)));
+    return (20.0f - strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<float>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, float{});
   // initialize solver
-  explicit_solver expl_solver(range<float>(0.0, 20.0), maturity, Sd, Td);
+  explicit_solver expl_solver(range<float>(0.0f, 20.0f), maturity, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
   expl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   expl_solver.set_2_order_coefficient(
-      [&](float x) { return (0.5 * x * x * sig * sig); });
+      [&](float x) { return (0.5f * x * x * sig * sig); });
   // set first order coefficient:
   expl_solver.set_1_order_coefficient([&](float x) { return (rate * x); });
   // set zero order coefficient:
-  expl_solver.set_0_order_coefficient([&](float x) { return (-1.0 * rate); });
+  expl_solver.set_0_order_coefficient([&](float x) { return (-1.0f * rate); });
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
@@ -839,6 +860,7 @@ void testExplEuropeanBlackScholesPutOptionBCDoubleEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::explicit_solvers::
       black_sholes_equation_cuda;
   using lss_utility::black_scholes_exact;
@@ -878,7 +900,8 @@ void testExplEuropeanBlackScholesPutOptionBCDoubleEuler() {
   auto const &dirichletLeft = [&](double t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<double>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<double> solution(Sd + 1, double{});
@@ -914,6 +937,7 @@ void testExplEuropeanBlackScholesPutOptionBCFloatEuler() {
   using lss_enumerations::boundary_condition_enum;
   using lss_enumerations::implicit_pde_schemes_enum;
   using lss_enumerations::memory_space_enum;
+  using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
   using lss_one_dim_space_variable_pde_solvers_cuda::explicit_solvers::
       black_sholes_equation_cuda;
   using lss_utility::black_scholes_exact;
@@ -936,44 +960,45 @@ void testExplEuropeanBlackScholesPutOptionBCFloatEuler() {
                                      std::vector, std::allocator<float>>
       explicit_solver;
   // parameters of the call option:
-  auto const &strike = 10;
-  auto const &maturity = 1.0;
-  auto const &rate = 0.2;
-  auto const &sig = 0.25;
+  auto const &strike = 10.0f;
+  auto const &maturity = 1.0f;
+  auto const &rate = 0.2f;
+  auto const &sig = 0.25f;
   // number of space subdivisions:
   std::size_t const Sd = 100;
   // number of time subdivisions:
   std::size_t const Td = 10000;
   // initial condition:
   auto terminal_condition = [&](float x) {
-    return std::max<float>(0.0, strike - x);
+    return std::max<float>(0.0f, strike - x);
   };
   // boundary conditions:
-  auto const &dirichletRight = [](float t) { return 0.0; };
+  auto const &dirichletRight = [](float t) { return 0.0f; };
   auto const &dirichletLeft = [&](float t) {
     return (strike * std::exp(-rate * (maturity - t)));
   };
-  auto boundary = std::make_pair(dirichletLeft, dirichletRight);
+  auto boundary = std::make_shared<dirichlet_boundary_1d<float>>(
+      dirichletLeft, dirichletRight);
   // prepare container for solution:
   // note: size is Sd+1 since we must include space point at x = 0
   std::vector<float> solution(Sd + 1, float{});
   // initialize solver
-  explicit_solver expl_solver(range<float>(0.0, 20.0), maturity, Sd, Td);
+  explicit_solver expl_solver(range<float>(0.0f, 20.0f), maturity, Sd, Td);
   // set boundary conditions:
   expl_solver.set_boundary_condition(boundary);
   // set initial condition:
   expl_solver.set_terminal_condition(terminal_condition);
   // set second order coefficient:
   expl_solver.set_2_order_coefficient(
-      [&](float x) { return (0.5 * x * x * sig * sig); });
+      [&](float x) { return (0.5f * x * x * sig * sig); });
   // set first order coefficient:
   expl_solver.set_1_order_coefficient([&](float x) { return (rate * x); });
   // set zero order coefficient:
-  expl_solver.set_0_order_coefficient([&](float x) { return (-1.0 * rate); });
+  expl_solver.set_0_order_coefficient([&](float x) { return (-1.0f * rate); });
   // get the solution:
   expl_solver.solve(solution);
   // get exact solution:
-  black_scholes_exact<float> bs_exact(0.0, strike, rate, sig, maturity);
+  black_scholes_exact<float> bs_exact(0.0f, strike, rate, sig, maturity);
 
   float const h = expl_solver.space_step();
   std::cout << "tp : FDM | Exact | Abs Diff\n";

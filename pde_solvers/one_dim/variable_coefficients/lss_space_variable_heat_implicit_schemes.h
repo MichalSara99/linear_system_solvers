@@ -18,17 +18,23 @@ using scheme_coefficient_holder =
     std::tuple<std::function<type(type)>, std::function<type(type)>,
                std::function<type(type)>, type, type>;
 
-template <typename type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 using scheme_function = std::function<void(
-    scheme_coefficient_holder<type> const &, std::vector<type> const &,
-    std::vector<type> const &, std::vector<type> const &, std::vector<type> &)>;
+    scheme_coefficient_holder<fp_type> const &,
+    container<fp_type, alloc> const &, container<fp_type, alloc> const &,
+    container<fp_type, alloc> const &, container<fp_type, alloc> &)>;
 
 // ============================================================================
 // ========================= heat_equation_schemes ============================
 // ============================================================================
 
-template <typename fp_type>
+template <template <typename, typename> typename container, typename fp_type,
+          typename alloc>
 class heat_equation_schemes {
+  typedef container<fp_type, alloc> container_t;
+  typedef scheme_function<container, fp_type, alloc> scheme_function_t;
+
  public:
   static fp_type const get_theta(implicit_pde_schemes_enum scheme) {
     fp_type theta{};
@@ -39,36 +45,34 @@ class heat_equation_schemes {
     return theta;
   }
 
-  static scheme_function<fp_type> const get_scheme(
-      implicit_pde_schemes_enum scheme) {
+  static scheme_function_t const get_scheme(implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
       theta = 1.0;
     else
       theta = 0.5;
-    auto scheme_fun = [=](scheme_coefficient_holder<fp_type> const &coeffs,
-                          std::vector<fp_type> const &input,
-                          std::vector<fp_type> const &inhom_input,
-                          std::vector<fp_type> const &inhom_input_next,
-                          std::vector<fp_type> &solution) {
-      // inhom_input  = not used
-      // inhom_input_next  = not used
+    auto scheme_fun =
+        [=](scheme_coefficient_holder<fp_type> const &coeffs,
+            container_t const &input, container_t const &inhom_input,
+            container_t const &inhom_input_next, container_t &solution) {
+          // inhom_input  = not used
+          // inhom_input_next  = not used
 
-      auto const &A = std::get<0>(coeffs);
-      auto const &B = std::get<1>(coeffs);
-      auto const &D = std::get<2>(coeffs);
-      auto const h = std::get<3>(coeffs);
+          auto const &A = std::get<0>(coeffs);
+          auto const &B = std::get<1>(coeffs);
+          auto const &D = std::get<2>(coeffs);
+          auto const h = std::get<3>(coeffs);
 
-      for (std::size_t t = 1; t < solution.size() - 1; ++t) {
-        solution[t] = (D(t * h) * (1.0 - theta) * input[t + 1]) +
-                      ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
-                      (A(t * h) * (1.0 - theta) * input[t - 1]);
-      }
-    };
+          for (std::size_t t = 1; t < solution.size() - 1; ++t) {
+            solution[t] = (D(t * h) * (1.0 - theta) * input[t + 1]) +
+                          ((1.0 - 2.0 * B(t * h) * (1.0 - theta)) * input[t]) +
+                          (A(t * h) * (1.0 - theta) * input[t - 1]);
+          }
+        };
     return scheme_fun;
   }
 
-  static scheme_function<fp_type> const get_inhom_scheme(
+  static scheme_function_t const get_inhom_scheme(
       implicit_pde_schemes_enum scheme) {
     fp_type theta{};
     if (scheme == implicit_pde_schemes_enum::Euler)
@@ -76,10 +80,10 @@ class heat_equation_schemes {
     else
       theta = 0.5;
     auto scheme_fun = [=](scheme_coefficient_holder<fp_type> const &coeffs,
-                          std::vector<fp_type> const &input,
-                          std::vector<fp_type> const &inhom_input,
-                          std::vector<fp_type> const &inhom_input_next,
-                          std::vector<fp_type> &solution) {
+                          container_t const &input,
+                          container_t const &inhom_input,
+                          container_t const &inhom_input_next,
+                          container_t &solution) {
       auto const &A = std::get<0>(coeffs);
       auto const &B = std::get<1>(coeffs);
       auto const &D = std::get<2>(coeffs);

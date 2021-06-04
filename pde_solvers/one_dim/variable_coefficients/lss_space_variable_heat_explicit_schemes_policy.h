@@ -7,17 +7,21 @@
 #include <thread>
 
 #include "common/lss_enumerations.h"
+#include "common/lss_utility.h"
 #include "pde_solvers/one_dim/lss_base_explicit_schemes.h"
+#include "pde_solvers/one_dim/lss_pde_boundary.h"
 #include "pde_solvers/one_dim/lss_pde_utility.h"
 
 namespace lss_one_dim_space_variable_heat_explicit_schemes_policy {
 
 using lss_enumerations::boundary_condition_enum;
 using lss_one_dim_base_explicit_schemes::heat_scheme_base;
+using lss_one_dim_pde_boundary::dirichlet_boundary_1d;
 using lss_one_dim_pde_utility::dirichlet_boundary;
 using lss_one_dim_pde_utility::discretization;
 using lss_one_dim_pde_utility::pde_coefficient_holder_fun_1_arg;
 using lss_one_dim_pde_utility::robin_boundary;
+using lss_utility::sptr_t;
 
 // ============================================================================
 // ========================= heat_euler_scheme_policy =========================
@@ -27,20 +31,21 @@ template <typename fp_type, typename coefficient_holder,
           template <typename, typename> typename container, typename alloc>
 struct heat_euler_scheme_forward_policy {
   // Dirichlet boundary without source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time);
   // Dirichlet boundary with source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time, fp_type const &space_start,
-                       std::function<fp_type(fp_type, fp_type)> const &source);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time,
+      fp_type const &space_start,
+      std::function<fp_type(fp_type, fp_type)> const &source);
   // Robin boundary without source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
@@ -62,20 +67,21 @@ template <typename fp_type, typename coefficient_holder,
           template <typename, typename> typename container, typename alloc>
 struct heat_euler_scheme_backward_policy {
   // Dirichlet boundary without source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time);
   // Dirichlet boundary with source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time, fp_type const &space_start,
-                       std::function<fp_type(fp_type, fp_type)> const &source);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time,
+      fp_type const &space_start,
+      std::function<fp_type(fp_type, fp_type)> const &source);
   // Robin boundary without source:
   static void traverse(container<fp_type, alloc> &solution,
                        container<fp_type, alloc> const &init_solution,
@@ -101,40 +107,42 @@ template <typename fp_type, typename coefficient_holder,
           template <typename, typename> typename container, typename alloc>
 struct ade_heat_bakarat_clark_scheme_forward_policy {
   // Dirichlet boundary without source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time);
   // Dirichlet boundary with source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time, fp_type const &space_start,
-                       std::function<fp_type(fp_type, fp_type)> const &source);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time,
+      fp_type const &space_start,
+      std::function<fp_type(fp_type, fp_type)> const &source);
 };
 
 template <typename fp_type, typename coefficient_holder,
           template <typename, typename> typename container, typename alloc>
 struct ade_heat_bakarat_clark_scheme_backward_policy {
   // Dirichlet boundary without source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time);
   // Dirichlet boundary with source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time, fp_type const &space_start,
-                       std::function<fp_type(fp_type, fp_type)> const &source);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time,
+      fp_type const &space_start,
+      std::function<fp_type(fp_type, fp_type)> const &source);
 };
 
 // ============================================================================
@@ -145,40 +153,42 @@ template <typename fp_type, typename coefficient_holder,
           template <typename, typename> typename container, typename alloc>
 struct ade_heat_saulyev_scheme_forward_policy {
   // Dirichlet boundary without source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time);
   // Dirichlet boundary with source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time, fp_type const &space_start,
-                       std::function<fp_type(fp_type, fp_type)> const &source);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time,
+      fp_type const &space_start,
+      std::function<fp_type(fp_type, fp_type)> const &source);
 };
 
 template <typename fp_type, typename coefficient_holder,
           template <typename, typename> typename container, typename alloc>
 struct ade_heat_saulyev_scheme_backward_policy {
   // Dirichlet boundary without source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time);
   // Dirichlet boundary with source:
-  static void traverse(container<fp_type, alloc> &solution,
-                       container<fp_type, alloc> const &init_solution,
-                       dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                       std::pair<fp_type, fp_type> const &deltas,
-                       coefficient_holder const &holder,
-                       fp_type const &terminal_time, fp_type const &space_start,
-                       std::function<fp_type(fp_type, fp_type)> const &source);
+  static void traverse(
+      container<fp_type, alloc> &solution,
+      container<fp_type, alloc> const &init_solution,
+      sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+      std::pair<fp_type, fp_type> const &deltas,
+      coefficient_holder const &holder, fp_type const &terminal_time,
+      fp_type const &space_start,
+      std::function<fp_type(fp_type, fp_type)> const &source);
 };
 
 }  // namespace lss_one_dim_space_variable_heat_explicit_schemes_policy
@@ -197,7 +207,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
         fp_type, coefficient_holder, container,
         alloc>::traverse(container<fp_type, alloc> &solution,
                          container<fp_type, alloc> const &init_solution,
-                         dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         sptr_t<dirichlet_boundary_1d<fp_type>> const
+                             &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
                          coefficient_holder const &holder,
                          fp_type const &terminal_time) {
@@ -207,10 +218,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   fp_type const h = std::get<1>(deltas);
   // create first time point:
   fp_type time = k;
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // previous solution:
   container<fp_type, alloc> prev_sol(init_solution);
   // get coefficients:
@@ -221,8 +232,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   std::size_t const space_size = solution.size();
 
   while (time <= terminal_time) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     for (std::size_t t = 1; t < space_size - 1; ++t) {
       solution[t] = (1.0 - 2.0 * B(t * h)) * prev_sol[t] +
                     D(t * h) * prev_sol[t + 1] + A(t * h) * prev_sol[t - 1];
@@ -237,23 +249,24 @@ template <typename fp_type, typename coefficient_holder,
 void lss_one_dim_space_variable_heat_explicit_schemes_policy::
     heat_euler_scheme_forward_policy<fp_type, coefficient_holder, container,
                                      alloc>::
-        traverse(container<fp_type, alloc> &solution,
-                 container<fp_type, alloc> const &init_solution,
-                 dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                 std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const &holder, fp_type const &terminal_time,
-                 fp_type const &space_start,
-                 std::function<fp_type(fp_type, fp_type)> const &source) {
+        traverse(
+            container<fp_type, alloc> &solution,
+            container<fp_type, alloc> const &init_solution,
+            sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+            std::pair<fp_type, fp_type> const &deltas,
+            coefficient_holder const &holder, fp_type const &terminal_time,
+            fp_type const &space_start,
+            std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
   // get delta space:
   fp_type const h = std::get<1>(deltas);
   // create first time point:
   fp_type time = k;
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // previous solution:
   container<fp_type, alloc> prev_sol(init_solution);
   // get coefficients:
@@ -270,8 +283,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
 
   // loop for stepping in time:
   while (time <= terminal_time) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     for (std::size_t t = 1; t < space_size - 1; ++t) {
       solution[t] = solution[t] =
           (1.0 - 2.0 * B(t * h)) * prev_sol[t] + D(t * h) * prev_sol[t + 1] +
@@ -410,7 +424,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
         fp_type, coefficient_holder, container,
         alloc>::traverse(container<fp_type, alloc> &solution,
                          container<fp_type, alloc> const &init_solution,
-                         dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         sptr_t<dirichlet_boundary_1d<fp_type>> const
+                             &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
                          coefficient_holder const &holder,
                          fp_type const &terminal_time) {
@@ -420,10 +435,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   fp_type const h = std::get<1>(deltas);
   // create last but one time point:
   fp_type time = terminal_time - k;
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // previous solution:
   container<fp_type, alloc> prev_sol(init_solution);
   // get coefficients:
@@ -434,8 +449,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   std::size_t const space_size = solution.size();
 
   while (time >= 0.0) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     for (std::size_t t = 1; t < space_size - 1; ++t) {
       solution[t] = (1.0 - 2.0 * B(t * h)) * prev_sol[t] +
                     D(t * h) * prev_sol[t + 1] + A(t * h) * prev_sol[t - 1];
@@ -450,23 +466,24 @@ template <typename fp_type, typename coefficient_holder,
 void lss_one_dim_space_variable_heat_explicit_schemes_policy::
     heat_euler_scheme_backward_policy<fp_type, coefficient_holder, container,
                                       alloc>::
-        traverse(container<fp_type, alloc> &solution,
-                 container<fp_type, alloc> const &init_solution,
-                 dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                 std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const &holder, fp_type const &terminal_time,
-                 fp_type const &space_start,
-                 std::function<fp_type(fp_type, fp_type)> const &source) {
+        traverse(
+            container<fp_type, alloc> &solution,
+            container<fp_type, alloc> const &init_solution,
+            sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+            std::pair<fp_type, fp_type> const &deltas,
+            coefficient_holder const &holder, fp_type const &terminal_time,
+            fp_type const &space_start,
+            std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
   // get delta space:
   fp_type const h = std::get<1>(deltas);
   // create last but one time point:
   fp_type time = terminal_time - k;
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // previous solution:
   container<fp_type, alloc> prev_sol(init_solution);
   // get coefficients:
@@ -483,8 +500,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
 
   // loop for stepping in time:
   while (time >= 0.0) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     for (std::size_t t = 1; t < space_size - 1; ++t) {
       solution[t] = solution[t] =
           (1.0 - 2.0 * B(t * h)) * prev_sol[t] + D(t * h) * prev_sol[t + 1] +
@@ -623,7 +641,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
         fp_type, coefficient_holder, container,
         alloc>::traverse(container<fp_type, alloc> &solution,
                          container<fp_type, alloc> const &init_solution,
-                         dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         sptr_t<dirichlet_boundary_1d<fp_type>> const
+                             &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
                          coefficient_holder const &holder,
                          fp_type const &terminal_time) {
@@ -642,10 +661,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // conmponents of the solution:
   container<fp_type, alloc> com_1(init_solution);
   container<fp_type, alloc> com_2(init_solution);
@@ -675,8 +694,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   };
 
   while (time <= terminal_time) {
-    com_1[0] = com_2[0] = left(time);
-    com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, com_1);
+    dirichlet_boundary->fill(time, com_2);
+    // com_1[0] = com_2[0] = left(time);
+    // com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
     std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_curr,
                             0.0);
     std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
@@ -695,13 +716,14 @@ template <typename fp_type, typename coefficient_holder,
 void lss_one_dim_space_variable_heat_explicit_schemes_policy::
     ade_heat_bakarat_clark_scheme_forward_policy<fp_type, coefficient_holder,
                                                  container, alloc>::
-        traverse(container<fp_type, alloc> &solution,
-                 container<fp_type, alloc> const &init_solution,
-                 dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                 std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const &holder, fp_type const &terminal_time,
-                 fp_type const &space_start,
-                 std::function<fp_type(fp_type, fp_type)> const &source) {
+        traverse(
+            container<fp_type, alloc> &solution,
+            container<fp_type, alloc> const &init_solution,
+            sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+            std::pair<fp_type, fp_type> const &deltas,
+            coefficient_holder const &holder, fp_type const &terminal_time,
+            fp_type const &space_start,
+            std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
   // get delta space:
@@ -717,10 +739,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // conmponents of the solution:
   std::vector<fp_type> com_1(init_solution);
   std::vector<fp_type> com_2(init_solution);
@@ -754,8 +776,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
       h, space_start, time, source, source_next);
   // loop for stepping in time:
   while (time <= terminal_time) {
-    com_1[0] = com_2[0] = left(time);
-    com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, com_1);
+    dirichlet_boundary->fill(time, com_2);
+    // com_1[0] = com_2[0] = left(time);
+    // com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
     std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_next,
                             1.0);
     std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
@@ -784,7 +808,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
         fp_type, coefficient_holder, container,
         alloc>::traverse(container<fp_type, alloc> &solution,
                          container<fp_type, alloc> const &init_solution,
-                         dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         sptr_t<dirichlet_boundary_1d<fp_type>> const
+                             &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
                          coefficient_holder const &holder,
                          fp_type const &terminal_time) {
@@ -803,10 +828,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // conmponents of the solution:
   container<fp_type, alloc> com_1(init_solution);
   container<fp_type, alloc> com_2(init_solution);
@@ -836,8 +861,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   };
 
   while (time >= 0.0) {
-    com_1[0] = com_2[0] = left(time);
-    com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, com_1);
+    dirichlet_boundary->fill(time, com_2);
+    // com_1[0] = com_2[0] = left(time);
+    // com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
     std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_curr,
                             0.0);
     std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
@@ -856,13 +883,14 @@ template <typename fp_type, typename coefficient_holder,
 void lss_one_dim_space_variable_heat_explicit_schemes_policy::
     ade_heat_bakarat_clark_scheme_backward_policy<fp_type, coefficient_holder,
                                                   container, alloc>::
-        traverse(container<fp_type, alloc> &solution,
-                 container<fp_type, alloc> const &init_solution,
-                 dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                 std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const &holder, fp_type const &terminal_time,
-                 fp_type const &space_start,
-                 std::function<fp_type(fp_type, fp_type)> const &source) {
+        traverse(
+            container<fp_type, alloc> &solution,
+            container<fp_type, alloc> const &init_solution,
+            sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+            std::pair<fp_type, fp_type> const &deltas,
+            coefficient_holder const &holder, fp_type const &terminal_time,
+            fp_type const &space_start,
+            std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
   // get delta space:
@@ -878,10 +906,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // conmponents of the solution:
   std::vector<fp_type> com_1(init_solution);
   std::vector<fp_type> com_2(init_solution);
@@ -915,8 +943,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
       h, space_start, time, source, source_next);
   // loop for stepping in time:
   while (time >= 0.0) {
-    com_1[0] = com_2[0] = left(time);
-    com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, com_1);
+    dirichlet_boundary->fill(time, com_2);
+    // com_1[0] = com_2[0] = left(time);
+    // com_1[solution.size() - 1] = com_2[solution.size() - 1] = right(time);
     std::thread up_sweep_tr(std::move(up_sweep), std::ref(com_1), source_next,
                             1.0);
     std::thread down_sweep_tr(std::move(down_sweep), std::ref(com_2),
@@ -945,7 +975,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
         fp_type, coefficient_holder, container,
         alloc>::traverse(container<fp_type, alloc> &solution,
                          container<fp_type, alloc> const &init_solution,
-                         dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         sptr_t<dirichlet_boundary_1d<fp_type>> const
+                             &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
                          coefficient_holder const &holder,
                          fp_type const &terminal_time) {
@@ -964,10 +995,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // get the initial condition :
   solution = init_solution;
   // size of the space vector:
@@ -997,8 +1028,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
 
   std::size_t t = 1;
   while (time <= terminal_time) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     if (t % 2 == 0)
       down_sweep(solution, source_curr, 0.0);
     else
@@ -1013,13 +1045,14 @@ template <typename fp_type, typename coefficient_holder,
 void lss_one_dim_space_variable_heat_explicit_schemes_policy::
     ade_heat_saulyev_scheme_forward_policy<fp_type, coefficient_holder,
                                            container, alloc>::
-        traverse(container<fp_type, alloc> &solution,
-                 container<fp_type, alloc> const &init_solution,
-                 dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                 std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const &holder, fp_type const &terminal_time,
-                 fp_type const &space_start,
-                 std::function<fp_type(fp_type, fp_type)> const &source) {
+        traverse(
+            container<fp_type, alloc> &solution,
+            container<fp_type, alloc> const &init_solution,
+            sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+            std::pair<fp_type, fp_type> const &deltas,
+            coefficient_holder const &holder, fp_type const &terminal_time,
+            fp_type const &space_start,
+            std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
   // get delta space:
@@ -1035,10 +1068,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // get the initial condition :
   solution = init_solution;
   // size of the space vector:
@@ -1072,8 +1105,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   // loop for stepping in time:
   std::size_t t = 1;
   while (time <= terminal_time) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     if (t % 2 == 0)
       down_sweep(solution, source_curr, 1.0);
     else
@@ -1098,7 +1132,8 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
         fp_type, coefficient_holder, container,
         alloc>::traverse(container<fp_type, alloc> &solution,
                          container<fp_type, alloc> const &init_solution,
-                         dirichlet_boundary<fp_type> const &dirichlet_boundary,
+                         sptr_t<dirichlet_boundary_1d<fp_type>> const
+                             &dirichlet_boundary,
                          std::pair<fp_type, fp_type> const &deltas,
                          coefficient_holder const &holder,
                          fp_type const &terminal_time) {
@@ -1117,10 +1152,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // get the initial condition :
   solution = init_solution;
   // size of the space vector:
@@ -1150,8 +1185,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
 
   std::size_t t = 1;
   while (time >= 0.0) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     if (t % 2 == 0)
       down_sweep(solution, source_curr, 0.0);
     else
@@ -1166,13 +1202,14 @@ template <typename fp_type, typename coefficient_holder,
 void lss_one_dim_space_variable_heat_explicit_schemes_policy::
     ade_heat_saulyev_scheme_backward_policy<fp_type, coefficient_holder,
                                             container, alloc>::
-        traverse(container<fp_type, alloc> &solution,
-                 container<fp_type, alloc> const &init_solution,
-                 dirichlet_boundary<fp_type> const &dirichlet_boundary,
-                 std::pair<fp_type, fp_type> const &deltas,
-                 coefficient_holder const &holder, fp_type const &terminal_time,
-                 fp_type const &space_start,
-                 std::function<fp_type(fp_type, fp_type)> const &source) {
+        traverse(
+            container<fp_type, alloc> &solution,
+            container<fp_type, alloc> const &init_solution,
+            sptr_t<dirichlet_boundary_1d<fp_type>> const &dirichlet_boundary,
+            std::pair<fp_type, fp_type> const &deltas,
+            coefficient_holder const &holder, fp_type const &terminal_time,
+            fp_type const &space_start,
+            std::function<fp_type(fp_type, fp_type)> const &source) {
   // get delta time:
   fp_type const k = std::get<0>(deltas);
   // get delta space:
@@ -1188,10 +1225,10 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   auto const &b = [&](fp_type x) { return ((1.0 - B(x)) / (1.0 + B(x))); };
   auto const &d = [&](fp_type x) { return (D(x) / (1.0 + B(x))); };
   auto const &f = [&](fp_type x) { return (k / (1.0 + B(x))); };
-  // left space boundary:
-  auto const &left = dirichlet_boundary.first;
-  // right space boundary:
-  auto const &right = dirichlet_boundary.second;
+  //// left space boundary:
+  // auto const &left = dirichlet_boundary.first;
+  //// right space boundary:
+  // auto const &right = dirichlet_boundary.second;
   // get the initial condition :
   solution = init_solution;
   // size of the space vector:
@@ -1225,8 +1262,9 @@ void lss_one_dim_space_variable_heat_explicit_schemes_policy::
   // loop for stepping in time:
   std::size_t t = 1;
   while (time >= 0.0) {
-    solution[0] = left(time);
-    solution[solution.size() - 1] = right(time);
+    dirichlet_boundary->fill(time, solution);
+    // solution[0] = left(time);
+    // solution[solution.size() - 1] = right(time);
     if (t % 2 == 0)
       down_sweep(solution, source_curr, 1.0);
     else
