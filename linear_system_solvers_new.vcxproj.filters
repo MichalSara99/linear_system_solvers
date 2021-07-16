@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="sparse_solvers">
+      <UniqueIdentifier>{453b773c-8f3b-46af-9140-fea2f70d817d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dense_solvers">
+      <UniqueIdentifier>{80a4a47c-0de4-4a92-bf06-2772b203e19a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{56623cd7-79bd-460e-832f-fe856d207f57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests">
+      <UniqueIdentifier>{2e0a33f9-2669-4191-a537-c7dce095ffcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="boundaries">
+      <UniqueIdentifier>{6d14d05d-c71c-44f3-bdc6-2a776e0b9818}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests\sparse_solvers">
+      <UniqueIdentifier>{e4983abc-744f-4314-b662-213cfb88a2df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\tridiagonal">
+      <UniqueIdentifier>{06892171-4be7-4e86-9fb3-be4e64ef43bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\tridiagonal\double_sweep_solver">
+      <UniqueIdentifier>{d361b3c8-e172-43b5-a20f-9cfa0ae1128f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\tridiagonal\thomas_lu_solver">
+      <UniqueIdentifier>{e30004ca-8892-467e-98b4-24b0d350c9f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\general">
+      <UniqueIdentifier>{57f67327-fa3d-4a9c-b85d-6189b0db489d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\general\sor_solver_traits">
+      <UniqueIdentifier>{d625d083-e6d4-459e-9cd4-97e344dc3a7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\general\core_cuda_solver">
+      <UniqueIdentifier>{d9e84a02-594e-407d-8be1-f26481508403}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\general\core_sor_solver">
+      <UniqueIdentifier>{2d2b3113-6f16-4f67-93d2-808b08a32e12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\general\core_sor_solver_cuda">
+      <UniqueIdentifier>{31e2e68e-31f9-4317-a1f8-ba4e936e05fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\tridiagonal\cuda_solver">
+      <UniqueIdentifier>{d9ffa8d6-ceaf-4c5c-ab75-c38d33531807}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\tridiagonal\sor_solver">
+      <UniqueIdentifier>{c2bf4965-c2ab-4886-8e91-69207092c51d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\tridiagonal\sor_solver_cuda">
+      <UniqueIdentifier>{d9866977-0c29-4550-8bd0-33e2bb591cfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests\dense_solvers">
+      <UniqueIdentifier>{d2b3df94-a148-453e-b27e-e31076b18b90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers">
+      <UniqueIdentifier>{90c901f4-60d1-469a-8bae-5cdc03eeeeda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dimensional">
+      <UniqueIdentifier>{b036916d-51d1-4271-bd15-8f60bc750ba0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\two_dimensional">
+      <UniqueIdentifier>{3cf77966-da98-4796-a725-421663c5e7ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dimensional\heat_type">
+      <UniqueIdentifier>{09122488-37a9-4151-ab7d-0884891d4516}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\two_dimensional\heat_type">
+      <UniqueIdentifier>{cb8df02f-5f78-4260-9d57-78c2fe03e241}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="containers">
+      <UniqueIdentifier>{f3e23862-b509-4dd0-a9a9-0cdb1028fbb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests\containers">
+      <UniqueIdentifier>{f2b5ed12-110e-4049-8914-6e4325d1ed91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests\pde_solvers">
+      <UniqueIdentifier>{fdd8b701-188b-4046-98fa-b09df67bb7be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests\pde_solvers\one_dimensional">
+      <UniqueIdentifier>{8afaac17-3e0d-4bec-9309-48ca28983242}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
+      <Filter>dense_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.hpp">
+      <Filter>dense_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="dense_solvers\lss_dense_solvers_policy.hpp">
+      <Filter>dense_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_enumerations.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_helpers.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_macros.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_utility.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_boundary_1d.hpp">
+      <Filter>boundaries</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_dirichlet_boundary_1d.hpp">
+      <Filter>boundaries</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_neumann_boundary_1d.hpp">
+      <Filter>boundaries</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_robin_boundary_1d.hpp">
+      <Filter>boundaries</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_double_sweep_solver_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_thomas_lu_solver_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\general\core_sor_solver\lss_core_sor_solver.hpp">
+      <Filter>sparse_solvers\general\core_sor_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\general\core_sor_solver_cuda\lss_core_sor_solver_cuda.hpp">
+      <Filter>sparse_solvers\general\core_sor_solver_cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\general\core_sor_solver_cuda\lss_core_sor_solver_kernels.hpp">
+      <Filter>sparse_solvers\general\core_sor_solver_cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\general\sor_solver_traits\lss_sor_solver_traits.hpp">
+      <Filter>sparse_solvers\general\sor_solver_traits</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_core_sor_solver_cuda_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_core_sor_solver_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\sor_solver\lss_sor_solver.hpp">
+      <Filter>sparse_solvers\tridiagonal\sor_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\double_sweep_solver\lss_double_sweep_boundary.hpp">
+      <Filter>sparse_solvers\tridiagonal\double_sweep_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\double_sweep_solver\lss_double_sweep_solver.hpp">
+      <Filter>sparse_solvers\tridiagonal\double_sweep_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\thomas_lu_solver\lss_thomas_lu_boundary.hpp">
+      <Filter>sparse_solvers\tridiagonal\thomas_lu_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\thomas_lu_solver\lss_thomas_lu_solver.hpp">
+      <Filter>sparse_solvers\tridiagonal\thomas_lu_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\sor_solver\lss_sor_boundary.hpp">
+      <Filter>sparse_solvers\tridiagonal\sor_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_sor_solver_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver.hpp">
+      <Filter>sparse_solvers\general\core_cuda_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_core_cuda_solver_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver_policy.hpp">
+      <Filter>sparse_solvers\general\core_cuda_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\cuda_solver\lss_cuda_solver.hpp">
+      <Filter>sparse_solvers\tridiagonal\cuda_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\cuda_solver\lss_cuda_boundary.hpp">
+      <Filter>sparse_solvers\tridiagonal\cuda_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_cuda_solver_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\sor_solver_cuda\lss_sor_cuda_boundary.hpp">
+      <Filter>sparse_solvers\tridiagonal\sor_solver_cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\tridiagonal\sor_solver_cuda\lss_sor_solver_cuda.hpp">
+      <Filter>sparse_solvers\tridiagonal\sor_solver_cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_sor_solver_cuda_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\dense_solvers\lss_dense_solvers_cuda_t.hpp">
+      <Filter>unit_tests\dense_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="containers\lss_container_2d.hpp">
+      <Filter>containers</Filter>
+    </ClInclude>
+    <ClInclude Include="containers\lss_flat_matrix.hpp">
+      <Filter>containers</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\containers\lss_container_2d_t.hpp">
+      <Filter>unit_tests\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\lss_discretization_config.hpp">
+      <Filter>pde_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\lss_solver_config.hpp">
+      <Filter>pde_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\lss_heat_data_config.hpp">
+      <Filter>pde_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_implicit_kernel.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\lss_discretization.hpp">
+      <Filter>pde_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_general_svc_heat_equation_t.hpp">
+      <Filter>unit_tests\pde_solvers\one_dimensional</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="main.cu" />
+    <CudaCompile Include="sparse_solvers\general\core_sor_solver_cuda\lss_core_sor_solver_cuda.cu">
+      <Filter>sparse_solvers\general\core_sor_solver_cuda</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>
