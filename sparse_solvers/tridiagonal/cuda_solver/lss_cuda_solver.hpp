@@ -26,7 +26,6 @@ template <memory_space_enum memory_space, typename fp_type,
           template <typename, typename> typename container = std::vector, typename allocator = std::allocator<fp_type>>
 class cuda_solver
 {
-
   private:
     factorization_enum factorization_;
     boundary_1d_ptr<fp_type> low_;
