@@ -61,12 +61,12 @@ template <typename fp_type> struct discretization_config<dimension_enum::One, fp
 
     inline fp_type space_step() const
     {
-        return ((space_range_.spread()) / static_cast<fp_type>(number_of_space_points_));
+        return ((space_range_.spread()) / static_cast<fp_type>(number_of_space_points_ - 1));
     }
 
     inline fp_type time_step() const
     {
-        return ((time_range_.spread()) / static_cast<fp_type>(number_of_time_points_));
+        return ((time_range_.spread()) / static_cast<fp_type>(number_of_time_points_ - 1));
     }
 };
 
@@ -121,13 +121,13 @@ template <typename fp_type> struct discretization_config<dimension_enum::Two, fp
 
     inline std::pair<fp_type, fp_type> space_step() const
     {
-        return std::make_pair(((space_range_1_.spread()) / static_cast<fp_type>(number_of_space_points_1_)),
-                              ((space_range_2_.spread()) / static_cast<fp_type>(number_of_space_points_2_)));
+        return std::make_pair(((space_range_1_.spread()) / static_cast<fp_type>(number_of_space_points_1_ - 1)),
+                              ((space_range_2_.spread()) / static_cast<fp_type>(number_of_space_points_2_ - 1)));
     }
 
     inline fp_type time_step() const
     {
-        return ((time_range_.spread()) / static_cast<fp_type>(number_of_time_points_));
+        return ((time_range_.spread()) / static_cast<fp_type>(number_of_time_points_ - 1));
     }
 };
 

@@ -310,7 +310,7 @@ template <typename T> void testContainer2dPartialCopyRow()
     cont_2d(3, 3, 8.0);
 
     std::vector<T> small_row(2, T(3.1415));
-    std::vector<T> another_small_row(12, std::exp(1.0));
+    std::vector<T> another_small_row(12, std::exp(static_cast<T>(1.0)));
 
     cont_2d(1, small_row, 1, 2);
     cont_2d(2, another_small_row, 1, 3);

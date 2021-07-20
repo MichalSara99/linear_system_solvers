@@ -169,7 +169,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
     }
     template <typename in_itr> void set_data(in_itr first, in_itr last)
     {
-        const int dist = std::distance(first, last);
+        const std::size_t dist = std::distance(first, last);
         LSS_ASSERT((rows_ * columns_) == dist, "Source data is either too long or too short");
         for (std::size_t r = 0; r < rows_; ++r)
         {

@@ -1,10 +1,10 @@
-#if !defined(_LSS_GENERAL_SVC_HEAT_EQUATION_T_HPP_)
-#define _LSS_GENERAL_SVC_HEAT_EQUATION_T_HPP_
+#if !defined(_LSS_PURE_HEAT_EQUATION_T_HPP_)
+#define _LSS_PURE_HEAT_EQUATION_T_HPP_
 
 #include "pde_solvers/one_dimensional/heat_type/lss_general_svc_heat_equation.hpp"
 #include <map>
 
-#define PI 3.14159
+#define PI 3.14159265359
 
 // ///////////////////////////////////////////////////////////////////////////
 //							PURE HEAT PROBLEMS
@@ -17,6 +17,8 @@
 // ===========================================================================
 // =========== Heat problem with homogeneous boundary conditions =============
 // ===========================================================================
+
+// Dirichlet boundaries:
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQREuler()
 {
@@ -33,16 +35,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+    std::cout << " Using CUDA solver with QR (DEVICE) and implicit Euler method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -53,9 +52,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -75,12 +74,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -119,16 +118,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA solver algorithm with implicit CN method\n\n";
+    std::cout << " Using CUDA solver with QR (DEVICE) and implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -139,9 +135,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -161,12 +157,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -193,7 +189,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR()
 {
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << " Implicit Pure Heat (CUDA QR DEVICE) Equation (Dirichlet BC)\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationDirichletBCCUDASolverDeviceQREuler<double>();
@@ -219,16 +215,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceEul
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA SORsolver algorithm with implicit Euler method\n\n";
+    std::cout << " Using CUDA SOR solver (DEVICE) with implicit Euler method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -239,9 +232,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceEul
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -265,12 +258,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceEul
                          details);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -309,16 +302,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceCra
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA SOR solver algorithm with implicit CN method\n\n";
+    std::cout << " Using CUDA SOR solver (DEVICE) with implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -329,9 +319,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceCra
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -355,12 +345,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceCra
                          details);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -387,7 +377,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceCra
 void testImplPureHeatEquationDirichletBCSORSolverDevice()
 {
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << " Implicit Pure Heat (SOR QR DEVICE) Equation (Dirichlet BC)\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationDirichletBCSORSolverDeviceEuler<double>();
@@ -413,16 +403,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostEuler
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA SORsolver algorithm with implicit Euler method\n\n";
+    std::cout << " Using SOR solver with implicit Euler method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -433,9 +420,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostEuler
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -458,13 +445,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostEuler
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_sorsolver_euler_solver_config_ptr,
                          details);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -503,16 +489,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostCrank
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA SOR solver algorithm with implicit CN method\n\n";
+    std::cout << " Using SOR solver with implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -523,9 +506,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostCrank
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -549,12 +532,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostCrank
                          details);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -580,8 +563,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostCrank
 
 void testImplPureHeatEquationDirichletBCSORSolverHost()
 {
+
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << "= Implicit Pure Heat (SOR QR HOST) Equation (Dirichlet BC) =\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationDirichletBCSORSolverHostEuler<double>();
@@ -607,16 +591,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQREu
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+    std::cout << " Using CUDA Solver on HOST with QR and implicit Euler method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -627,9 +608,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQREu
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -650,12 +631,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQREu
                          host_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -694,16 +675,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQRCr
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA solver algorithm with implicit CN method\n\n";
+    std::cout << " Using CUDA Solver on HOST with QR and implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -714,9 +692,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQRCr
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -735,13 +713,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQRCr
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -767,8 +744,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQRCr
 
 void testImplPureHeatEquationDirichletBCCUDASolverHostQR()
 {
+
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << "= Implicit Pure Heat(CUDA QR HOST) Equation (Dirichlet BC) =\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationDirichletBCCUDASolverHostQREuler<double>();
@@ -794,16 +772,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverE
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+    std::cout << " Using Double Sweep on HOST with implicit Euler method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -814,9 +789,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverE
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -835,13 +810,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverE
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_euler_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -880,16 +854,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverC
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA solver algorithm with implicit CN method\n\n";
+    std::cout << " Using Double Sweep on HOST with implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -900,9 +871,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverC
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -922,12 +893,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverC
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_cn_solver_config_ptr);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -953,8 +924,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverC
 
 void testImplPureHeatEquationDirichletBCDoubleSweepSolver()
 {
+
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << "= Implicit Pure Heat(Double Sweep) Equation (Dirichlet BC) =\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationDirichletBCDoubleSweepSolverEuler<double>();
@@ -980,16 +952,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverEule
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using Double Sweep algorithm with implicit Euler method\n\n";
+    std::cout << " Using Thomas LU algorithm with implicit Euler method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -1000,9 +969,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverEule
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1022,12 +991,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverEule
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_euler_solver_config_ptr);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -1066,16 +1035,13 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverCran
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA solver algorithm with implicit CN method\n\n";
+    std::cout << " Using Thomas LU algorithm with implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
     std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
@@ -1086,9 +1052,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverCran
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1108,12 +1074,12 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverCran
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const first = static_cast<T>(2.0) / PI;
+        T const first = static_cast<T>(2.0 / PI);
         T sum{};
         T var1{};
         T var2{};
@@ -1139,8 +1105,9 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverCran
 
 void testImplPureHeatEquationDirichletBCThomasLUSolver()
 {
+
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << "== Implicit Pure Heat (Thomas LU) Equation (Dirichlet BC) ==\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationDirichletBCThomasLUSolverEuler<double>();
@@ -1150,6 +1117,8 @@ void testImplPureHeatEquationDirichletBCThomasLUSolver()
 
     std::cout << "============================================================\n";
 }
+
+// Neuman-Dirichlet Boundaries:
 
 template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQREuler()
 {
@@ -1167,7 +1136,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQREu
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA Solver algorithm with implicit Euler method\n\n";
+    std::cout << " Using CUDA Solver on DEVICE with QR with implicit Euler\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
@@ -1184,9 +1153,9 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQREu
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1194,7 +1163,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQREu
     auto other = [](T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, other, other);
     // initial condition:
-    auto initial_condition = [](T x) { return std::cos(x * PI / static_cast<T>(2.0)); };
+    auto initial_condition = [](T x) { return std::cos(x * PI * static_cast<T>(0.5)); };
     auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
     // heat data config:
     auto const heat_data_ptr = std::make_shared<heat_data_config_1d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
@@ -1207,16 +1176,15 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQREu
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     // get exact solution:
     auto exact = [](T x, T t) {
-        T const pipi = PI * PI;
-        T const expon = (-pipi / static_cast<T>(4.0));
-        T res = std::exp(expon * t) * std::cos(x * PI / static_cast<T>(2.0));
+        T const pipi = static_cast<T>(PI * PI);
+        T const expon = (-pipi * static_cast<T>(0.25));
+        T res = std::exp(expon * t) * std::cos(x * PI * static_cast<T>(0.5));
         return res;
     };
 
@@ -1247,7 +1215,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQRCr
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA solver algorithm with implicit CN method\n\n";
+    std::cout << " Using CUDA Solver on DEVICE with QR with implicit CN\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
@@ -1264,9 +1232,9 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQRCr
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1274,29 +1242,27 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQRCr
     auto other = [](T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, other, other);
     // initial condition:
-    auto initial_condition = [](T x) { return std::cos(x * PI / static_cast<T>(2.0)); };
+    auto initial_condition = [](T x) { return std::cos(x * PI * static_cast<T>(0.5)); };
     auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
     // heat data config:
     auto const heat_data_ptr = std::make_shared<heat_data_config_1d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
     // boundary conditions:
     auto const &neumann = [](T t) { return 0.0; };
     auto const &dirichlet = [](T t) { return 0.0; };
-    auto const &boundary_left_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
-    auto const &boundary_right_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
-    auto const &boundary_pair = std::make_pair(boundary_left_ptr, boundary_right_ptr);
+    auto const &boundary_lower_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
+    auto const &boundary_upper_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
+    auto const &boundary_pair = std::make_pair(boundary_lower_ptr, boundary_upper_ptr);
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
-    // get exact solution:
     auto exact = [](T x, T t) {
-        T const pipi = PI * PI;
-        T const expon = (-pipi / static_cast<T>(4.0));
-        T res = std::exp(expon * t) * std::cos(x * PI / static_cast<T>(2.0));
+        T const pipi = static_cast<T>(PI * PI);
+        T const expon = (-pipi * static_cast<T>(0.25));
+        T res = std::exp(expon * t) * std::cos(x * PI * static_cast<T>(0.5));
         return res;
     };
 
@@ -1314,7 +1280,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQRCr
 void testImplPureHeatEquationNeumannBCCUDASolverDeviceQR()
 {
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << "== Implicit Pure Heat (CUDA DEV QR) Equation (Neu-Dir BC) ==\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationNeumannBCCUDASolverDeviceQREuler<double>();
@@ -1325,6 +1291,7 @@ void testImplPureHeatEquationNeumannBCCUDASolverDeviceQR()
     std::cout << "============================================================\n";
 }
 
+// Neumann-Neumann Boundaries:
 template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverEuler()
 {
     using lss_boundary_1d::neumann_boundary_1d;
@@ -1357,9 +1324,9 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverEuler(
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1379,13 +1346,13 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverEuler(
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_euler_solver_config_ptr);
     // prepare container for solution:
     // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const pipi = PI * PI;
+        T const pipi = static_cast<T>(PI * PI);
         T const first = static_cast<T>(4.0) / pipi;
         T sum{};
         T var0{};
@@ -1427,7 +1394,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverCrankN
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using Thomas LU solver algorithm with implicit CN method\n\n";
+    std::cout << " Using Thomas LU solver with implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
@@ -1444,9 +1411,9 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverCrankN
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.3));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1465,13 +1432,12 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverCrankN
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const pipi = PI * PI;
+        T const pipi = static_cast<T>(PI * PI);
         T const first = static_cast<T>(4.0) / pipi;
         T sum{};
         T var0{};
@@ -1501,7 +1467,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverCrankN
 void testImplPureHeatEquationNeumannBCThomasLUSolver()
 {
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Neumann BC) ========\n";
+    std::cout << "=== Implicit Pure Heat (Thomas LU) Equation (Neu-Neu BC) ===\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationNeumannBCThomasLUSolverEuler<double>();
@@ -1532,24 +1498,21 @@ template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverEul
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
-    std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+    std::cout << " U_x(0,t) = U_x(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
-    std::size_t const Sd = 1000;
+    std::size_t const Sd = 100;
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1568,13 +1531,12 @@ template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverEul
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_euler_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const pipi = PI * PI;
+        T const pipi = static_cast<T>(PI * PI);
         T const first = static_cast<T>(4.0) / pipi;
         T sum{};
         T var0{};
@@ -1616,29 +1578,26 @@ template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverCra
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heat equation: \n\n";
-    std::cout << " Using CUDA solver algorithm with implicit CN method\n\n";
+    std::cout << " Using Double Sweep algorithm with implicit CN method\n\n";
     std::cout << " Value type: " << typeid(T).name() << "\n\n";
     std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
     std::cout << " where\n\n";
     std::cout << " x in <0,1> and t > 0,\n";
-    std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+    std::cout << " U_x(0,t) = U_x(1,t) = 0, t > 0 \n\n";
     std::cout << " U(x,0) = x, x in <0,1> \n\n";
-    std::cout << " Exact solution: \n";
-    std::cout << " U(x,t) = (2/pi)*sum_0^infty{ (-1)^(n+1)*exp(-(n*pi)^2*t) "
-                 "*sin(n*pi*x)/n}\n\n";
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
-    std::size_t const Sd = 1000;
+    std::size_t const Sd = 100;
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(0.0, 1.0);
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
-    range<T> time_range(0.0, 0.1);
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
     auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
@@ -1657,13 +1616,12 @@ template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverCra
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_cn_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
-    std::vector<T> solution(Sd + 1, T{});
+    std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
     // get exact solution:
     auto exact = [](T x, T t, std::size_t n) {
-        T const pipi = PI * PI;
+        T const pipi = static_cast<T>(PI * PI);
         T const first = static_cast<T>(4.0) / pipi;
         T sum{};
         T var0{};
@@ -1693,7 +1651,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverCra
 void testImplPureHeatEquationNeumannBCDoubleSweepSolver()
 {
     std::cout << "============================================================\n";
-    std::cout << "======== Implicit Pure Heat Equation (Dirichlet BC) ========\n";
+    std::cout << "= Implicit Pure Heat (Double Sweep) Equation (Neu-Neu BC) ==\n";
     std::cout << "============================================================\n";
 
     testImplPureHeatEquationNeumannBCDoubleSweepSolverEuler<double>();

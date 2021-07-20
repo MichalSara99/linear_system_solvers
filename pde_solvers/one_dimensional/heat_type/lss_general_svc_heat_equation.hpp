@@ -113,13 +113,13 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     const fp_type gamma = k / (two * h);
     const fp_type delta = half * k;
     // create container to carry previous solution:
-    container_t prev_sol(space_size + 1, fp_type{});
+    container_t prev_sol(space_size, fp_type{});
     // discretize initial condition
     d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
     // since coefficients are different in space :
-    container_t low(space_size + 1, fp_type{});
-    container_t diag(space_size + 1, fp_type{});
-    container_t up(space_size + 1, fp_type{});
+    container_t low(space_size, fp_type{});
+    container_t diag(space_size, fp_type{});
+    container_t up(space_size, fp_type{});
     // save coefficients:
     auto const &a = heat_data_cfg_->a_coefficient();
     auto const &b = heat_data_cfg_->b_coefficient();
@@ -154,9 +154,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     }
     // wrap up the diagonals into tuple:
     auto const &diag_triplet = std::make_tuple(low, diag, up);
-    container_t rhs(space_size + 1, fp_type{});
+    container_t rhs(space_size, fp_type{});
     // create container to carry new solution:
-    container_t next_sol(space_size + 1, fp_type{});
+    container_t next_sol(space_size, fp_type{});
     // get heat_source:
     const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
     // get heat_source:

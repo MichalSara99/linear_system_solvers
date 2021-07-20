@@ -159,6 +159,98 @@ template <typename T> void testBVPSORRobinBC()
     }
 }
 
+template <typename T> void testBVPSORNeumannRobinBC()
+{
+    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary_1d::robin_boundary_1d;
+    using lss_enumerations::memory_space_enum;
+    using lss_pde_solvers::discretization_1d;
+    using lss_sor_solver::sor_solver;
+    using lss_utility::range;
+
+    typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
+
+    /*
+
+    Solve BVP:
+
+    u''(t) =  6 * t,
+
+    where
+
+    t \in (0, 2)
+
+    u'(0) = 0
+    u'(2) + 2 * u(2) = 0 ,
+
+
+    Exact solution is
+
+    u(t) = t*t*t - 14
+
+    */
+    std::cout << "=================================\n";
+    std::cout << "Solving Boundary-value problem: \n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " u''(t) = 6*t, \n\n";
+    std::cout << " where\n\n";
+    std::cout << " t in <0,2>,\n";
+    std::cout << " u'(0) = 0 \n";
+    std::cout << " u'(2) + 2*u(t) = 0\n\n";
+    std::cout << "Exact solution is:\n\n";
+    std::cout << " u(t) = t*t*t - 14\n";
+    std::cout << "=================================\n";
+
+    // discretization:
+    std::size_t N{100};
+    // constriuct space range:
+    range<T> space_range(0.0, 2.0);
+    // step size:
+    T h = space_range.spread() / static_cast<T>(N - 1);
+    // upper,mid, and lower diagonal:
+    std::vector<T> upper_diag(N, static_cast<T>(1.0));
+    std::vector<T> diagonal(N, static_cast<T>(-2.0));
+    std::vector<T> lower_diag(N, static_cast<T>(1.0));
+    // right-hand side:
+    auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
+    std::vector<T> rhs(N, T{});
+    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    // boundary conditions:
+    auto const &lower_ptr = std::make_shared<neumann_boundary_1d<T>>([](T t) { return 0.0; });
+    auto const &upper_ptr = std::make_shared<robin_boundary_1d<T>>([](T t) { return 2.0; }, [](T t) { return 0.0; });
+
+    auto dss = std::make_shared<sor_solver<T, std::vector, std::allocator<T>>>(space_range, N);
+    dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
+    dss->set_boundary(lower_ptr, upper_ptr);
+    dss->set_rhs(rhs);
+    dss->set_omega(static_cast<T>(1.65));
+    // get the solution:
+    auto solution = dss->solve();
+
+    // exact value:
+    auto exact = [](T x) { return (x * x * x - static_cast<T>(14.0)); };
+
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    for (std::size_t j = 0; j < solution.size(); ++j)
+    {
+        std::cout << "t_" << j << ": " << solution[j] << " |  " << exact(j * h) << " | " << (solution[j] - exact(j * h))
+                  << '\n';
+    }
+}
+
+void testSORNeumannRobinBC()
+{
+    std::cout << "==================================================\n";
+    std::cout << "============== SOR  solver (Neu-Rob BC) ==========\n";
+    std::cout << "==================================================\n";
+
+    testBVPSORNeumannRobinBC<double>();
+    testBVPSORNeumannRobinBC<float>();
+
+    std::cout << "==================================================\n";
+}
+
 void testSORRobinBC()
 {
     std::cout << "==================================================\n";
