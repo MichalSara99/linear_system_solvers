@@ -156,7 +156,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
@@ -257,7 +256,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceEul
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_sorsolver_euler_solver_config_ptr,
                          details);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
@@ -344,7 +342,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceCra
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_sorsolver_cn_solver_config_ptr,
                          details);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
@@ -531,7 +528,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostCrank
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_sorsolver_cn_solver_config_ptr,
                          details);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
@@ -630,7 +626,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQREu
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair,
                          host_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
@@ -892,7 +887,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverC
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_cn_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
@@ -990,7 +984,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverEule
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_euler_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
@@ -1345,7 +1338,6 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverEuler(
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_euler_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);

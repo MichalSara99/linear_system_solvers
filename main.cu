@@ -2,6 +2,7 @@
 
 #include "unit_tests/containers/lss_container_2d_t.hpp"
 #include "unit_tests/dense_solvers/lss_dense_solvers_cuda_t.hpp"
+#include "unit_tests/pde_solvers/one_dimensional/lss_black_scholes_equation_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_pure_heat_equation_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_cuda_solver_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_sor_solver_cuda_t.hpp"
@@ -147,6 +148,20 @@ int main(int argc, char const *argv[])
     // testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();
     // testImplPureHeatEquationNeumannBCThomasLUSolver();
     // testImplPureHeatEquationNeumannBCDoubleSweepSolver();
+
+    // ====================================================================
+
+    // ====================================================================
+    // ============== ONE_DIM: lss_black_scholes_equation_t.h =============
+    // ====================================================================
+
+    // testImplBlackScholesEquationDirichletBCCUDASolverDeviceQR();
+    // testImplBlackScholesEquationDirichletBCSORSolverDevice();
+    // testImplBlackScholesEquationDirichletBCSORSolverHost();
+    // testImplBlackScholesEquationDirichletBCDoubleSweepSolver();
+    // testImplBlackScholesEquationDirichletBCThomasLUSolver();
+
+    // testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQR();
 
     // ====================================================================
 

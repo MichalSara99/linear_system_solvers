@@ -20,7 +20,7 @@ template <typename... coeff_type> using coefficient_holder = std::tuple<coeff_ty
 // =========================================================================
 template <typename T> static T const pi()
 {
-    return (3.14159265358979);
+    return (static_cast<T>(3.14159265358979));
 }
 
 // ==========================================================================
