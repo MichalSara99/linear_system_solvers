@@ -149,6 +149,8 @@ int main(int argc, char const *argv[])
     // testImplPureHeatEquationNeumannBCThomasLUSolver();
     // testImplPureHeatEquationNeumannBCDoubleSweepSolver();
 
+    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRStepping();
+
     // ====================================================================
 
     // ====================================================================
@@ -162,6 +164,8 @@ int main(int argc, char const *argv[])
     // testImplBlackScholesEquationDirichletBCThomasLUSolver();
 
     // testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQR();
+
+    // testImplBlackScholesEquationDirichletBCThomasLUSolverStepping();
 
     // ====================================================================
 

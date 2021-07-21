@@ -1654,4 +1654,201 @@ void testImplPureHeatEquationNeumannBCDoubleSweepSolver()
     std::cout << "============================================================\n";
 }
 
+// get the whole surface with stepping:
+template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQREulerStepping()
+{
+    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_containers::container_2d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::dev_fwd_cusolver_qr_euler_solver_config_ptr;
+    using lss_pde_solvers::discretization_config_1d;
+    using lss_pde_solvers::heat_coefficient_data_config_1d;
+    using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_initial_data_config_1d;
+    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Heat equation: \n\n";
+    std::cout << " Using CUDA solver with QR (DEVICE) and implicit Euler method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " x in <0,1> and t > 0,\n";
+    std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+    std::cout << " U(x,0) = x, x in <0,1> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef 2D container
+    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+
+    // typedef the general_svc_heat_equation
+    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto a = [](T x) { return 1.0; };
+    auto other = [](T x) { return 0.0; };
+    auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, other, other);
+    // initial condition:
+    auto initial_condition = [](T x) { return x; };
+    auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
+    // heat data config:
+    auto const heat_data_ptr = std::make_shared<heat_data_config_1d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
+    // boundary conditions:
+    auto const &dirichlet = [](T t) { return 0.0; };
+    auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
+    auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_euler_solver_config_ptr);
+    // prepare container for solution:
+    container_2d_t solutions(Td, Sd);
+    // get the solution:
+    pdesolver.solve(solutions);
+    // get exact solution:
+    auto exact = [](T x, T t, std::size_t n) {
+        T const first = static_cast<T>(2.0 / PI);
+        T sum{};
+        T var1{};
+        T var2{};
+        for (std::size_t i = 1; i <= n; ++i)
+        {
+            var1 = std::pow(-1.0, i + 1) * std::exp(-1.0 * (i * PI) * (i * PI) * t);
+            var2 = std::sin(i * PI * x) / i;
+            sum += (var1 * var2);
+        }
+        return (first * sum);
+    };
+
+    T const h = discretization_ptr->space_step();
+    T const k = discretization_ptr->time_step();
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    T benchmark{};
+    for (std::size_t t = 0; t < solutions.rows(); ++t)
+    {
+        std::cout << "time: " << t * k << ":\n";
+        for (std::size_t j = 0; j < solutions.columns(); ++j)
+        {
+            benchmark = exact(j * h, t * k, 20);
+            std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
+                      << (solutions(t, j) - benchmark) << '\n';
+        }
+    }
+}
+
+template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQRCrankNicolsonStepping()
+{
+    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_containers::container_2d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::dev_fwd_cusolver_qr_cn_solver_config_ptr;
+    using lss_pde_solvers::discretization_config_1d;
+    using lss_pde_solvers::heat_coefficient_data_config_1d;
+    using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_initial_data_config_1d;
+    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Heat equation: \n\n";
+    std::cout << " Using CUDA solver with QR (DEVICE) and implicit CN method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_t(x,t) = U_xx(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " x in <0,1> and t > 0,\n";
+    std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+    std::cout << " U(x,0) = x, x in <0,1> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef 2D container
+    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    // typedef the general_svc_heat_equation
+    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto a = [](T x) { return 1.0; };
+    auto other = [](T x) { return 0.0; };
+    auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, other, other);
+    // initial condition:
+    auto initial_condition = [](T x) { return x; };
+    auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
+    // heat data config:
+    auto const heat_data_ptr = std::make_shared<heat_data_config_1d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
+    // boundary conditions:
+    auto const &dirichlet = [](T t) { return 0.0; };
+    auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
+    auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_cn_solver_config_ptr);
+    // prepare container for solution:
+    container_2d_t solutions(Td, Sd);
+    // get the solution:
+    pdesolver.solve(solutions);
+    // get exact solution:
+    auto exact = [](T x, T t, std::size_t n) {
+        T const first = static_cast<T>(2.0 / PI);
+        T sum{};
+        T var1{};
+        T var2{};
+        for (std::size_t i = 1; i <= n; ++i)
+        {
+            var1 = std::pow(-1.0, i + 1) * std::exp(-1.0 * (i * PI) * (i * PI) * t);
+            var2 = std::sin(i * PI * x) / i;
+            sum += (var1 * var2);
+        }
+        return (first * sum);
+    };
+
+    T const h = discretization_ptr->space_step();
+    T const k = discretization_ptr->time_step();
+
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    T benchmark{};
+    for (std::size_t t = 0; t < solutions.rows(); ++t)
+    {
+        std::cout << "time: " << t * k << ":\n";
+        for (std::size_t j = 0; j < solutions.columns(); ++j)
+        {
+            benchmark = exact(j * h, t * k, 20);
+            std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
+                      << (solutions(t, j) - benchmark) << '\n';
+        }
+    }
+}
+
+void testImplPureHeatEquationDirichletBCCUDASolverDeviceQRStepping()
+{
+    std::cout << "============================================================\n";
+    std::cout << " Implicit Pure Heat (CUDA QR DEVICE) Equation (Dirichlet BC)\n";
+    std::cout << "============================================================\n";
+
+    testImplPureHeatEquationDirichletBCCUDASolverDeviceQREulerStepping<double>();
+    testImplPureHeatEquationDirichletBCCUDASolverDeviceQREulerStepping<float>();
+    testImplPureHeatEquationDirichletBCCUDASolverDeviceQRCrankNicolsonStepping<double>();
+    testImplPureHeatEquationDirichletBCCUDASolverDeviceQRCrankNicolsonStepping<float>();
+
+    std::cout << "============================================================\n";
+}
+
 #endif //_LSS_GENERAL_SVC_HEAT_EQUATION_T_HPP_

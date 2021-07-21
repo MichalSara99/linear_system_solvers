@@ -6,6 +6,7 @@
 #include "boundaries/lss_boundary_1d.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
+#include "containers/lss_container_2d.hpp"
 #include "pde_solvers/lss_discretization.hpp"
 #include "pde_solvers/lss_discretization_config.hpp"
 #include "pde_solvers/lss_solver_config.hpp"
@@ -23,6 +24,7 @@ namespace one_dimensional
 using lss_boundary_1d::boundary_1d_pair;
 using lss_boundary_1d::neumann_boundary_1d;
 using lss_boundary_1d::robin_boundary_1d;
+using lss_containers::container_2d;
 using lss_cuda_solver::cuda_solver;
 using lss_double_sweep_solver::double_sweep_solver;
 using lss_enumerations::dimension_enum;
@@ -227,6 +229,24 @@ class time_loop
                     range<fp_type> const &space_range, range<fp_type> const &time_range,
                     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
                     container_t &prev_solution, container_t &next_solution, container_t &rhs);
+
+    template <typename solver_object, typename scheme_function>
+    static void run_with_stepping(solver_object &solver_obj, scheme_function &scheme_fun,
+                                  boundary_1d_pair<fp_type> const &boundary_pair,
+                                  function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range,
+                                  range<fp_type> const &time_range, std::pair<fp_type, fp_type> const &steps,
+                                  traverse_direction_enum const &traverse_dir, container_t &prev_solution,
+                                  container_t &next_solution, container_t &rhs,
+                                  std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
+                                  container_t &next_source, container_2d<fp_type, container, allocator> &solutions);
+    template <typename solver_object, typename scheme_function>
+    static void run_with_stepping(solver_object &solver_obj, scheme_function &scheme_fun,
+                                  boundary_1d_pair<fp_type> const &boundary_pair,
+                                  function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range,
+                                  range<fp_type> const &time_range, std::pair<fp_type, fp_type> const &steps,
+                                  traverse_direction_enum const &traverse_dir, container_t &prev_solution,
+                                  container_t &next_solution, container_t &rhs,
+                                  container_2d<fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -312,6 +332,104 @@ void time_loop<fp_type, container, allocator>::run(
     }
 }
 
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+template <typename solver_object, typename scheme_function>
+void time_loop<fp_type, container, allocator>::run_with_stepping(
+    solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
+    function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
+    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution,
+    container_t &next_solution, container_t &rhs, std::function<fp_type(fp_type, fp_type)> const &heat_source,
+    container_t &curr_source, container_t &next_source, container_2d<fp_type, container, allocator> &solutions)
+{
+    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
+    const fp_type start_time = time_range.lower();
+    const fp_type end_time = time_range.upper();
+    const fp_type start_x = space_range.lower();
+    const fp_type step_x = std::get<1>(steps);
+    const fp_type two = static_cast<fp_type>(2.0);
+    fp_type time = std::get<0>(steps);
+    fp_type k = time;
+    // store the initial solution:
+    solutions(0, prev_solution);
+    std::size_t time_idx = 1;
+    if (traverse_dir == traverse_direction_enum::Forward)
+    {
+        while (time <= end_time)
+        {
+            scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
+            solver_obj->set_rhs(rhs);
+            solver_obj->solve(next_solution, time);
+            solutions(time_idx, next_solution);
+            prev_solution = next_solution;
+            d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
+            d_1d::of_function(start_x, step_x, two * time, heat_source, next_source);
+            time += k;
+            time_idx++;
+        }
+    }
+    else
+    {
+        time = end_time - time;
+        while (time >= start_time)
+        {
+
+            scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
+            solver_obj->set_rhs(rhs);
+            solver_obj->solve(next_solution, time);
+            solutions(time_idx, next_solution);
+            prev_solution = next_solution;
+            d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
+            d_1d::of_function(start_x, step_x, two * time, heat_source, next_source);
+            time -= k;
+            time_idx++;
+        }
+    }
+}
+
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+template <typename solver_object, typename scheme_function>
+void time_loop<fp_type, container, allocator>::run_with_stepping(
+    solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
+    function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
+    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution,
+    container_t &next_solution, container_t &rhs, container_2d<fp_type, container, allocator> &solutions)
+{
+    const fp_type start_time = time_range.lower();
+    const fp_type end_time = time_range.upper();
+    fp_type time = std::get<0>(steps);
+    fp_type k = time;
+    // store the initial solution:
+    solutions(0, prev_solution);
+    std::size_t time_idx = 1;
+    if (traverse_dir == traverse_direction_enum::Forward)
+    {
+        while (time <= end_time)
+        {
+            scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
+            solver_obj->set_rhs(rhs);
+            solver_obj->solve(next_solution, time);
+            solutions(time_idx, next_solution);
+            prev_solution = next_solution;
+            time += k;
+            time_idx++;
+        }
+    }
+    else
+    {
+        time = end_time - time;
+        while (time >= start_time)
+        {
+            scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
+            solver_obj->set_rhs(rhs);
+            solver_obj->solve(next_solution, time);
+            solutions(time_idx, next_solution);
+            prev_solution = next_solution;
+            time -= k;
+            time_idx++;
+        }
+    }
+}
+
 template <memory_space_enum memory_enum, tridiagonal_method_enum tridiagonal_method, typename fp_type,
           template <typename, typename> typename container = std::vector, typename allocator = std::allocator<fp_type>>
 class general_svc_heat_equation_implicit_kernel
@@ -391,6 +509,52 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
                       prev_solution, next_solution, rhs);
         }
     }
+
+    void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
+                    std::function<fp_type(fp_type, fp_type)> const &heat_source,
+                    container_2d<fp_type, container, allocator> &solutions)
+    {
+        // get space range:
+        const range<fp_type> space = discretization_cfg_->space_range();
+        // get time range:
+        const range<fp_type> time = discretization_cfg_->time_range();
+        // get space step:
+        const fp_type h = discretization_cfg_->space_step();
+        // time step:
+        const fp_type k = discretization_cfg_->time_step();
+        // wrap up steps into pair:
+        const std::pair<fp_type, fp_type> steps = std::make_pair(k, h);
+        // size of space discretization:
+        const std::size_t space_size = discretization_cfg_->number_of_space_points();
+        // save traverse_direction
+        const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
+        // create and set up the solver:
+        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
+                              std::move(std::get<2>(diagonals_)));
+        solver->set_factorization(solver_cfg_->tridiagonal_factorization());
+        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        if (is_heat_sourse_set)
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+            // create a container to carry discretized source heat
+            container_t source_curr(space_size, NaN<fp_type>());
+            container_t source_next(space_size, NaN<fp_type>());
+            d_1d::of_function(space.lower(), h, static_cast<fp_type>(0.0), heat_source, source_curr);
+            d_1d::of_function(space.lower(), h, k, heat_source, source_next);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, heat_source, source_curr,
+                                    source_next, solutions);
+        }
+        else
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, solutions);
+        }
+    }
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -461,6 +625,52 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
                 implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps, traverse_dir,
                       prev_solution, next_solution, rhs);
+        }
+    }
+
+    void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
+                    std::function<fp_type(fp_type, fp_type)> const &heat_source, fp_type omega_value,
+                    container_2d<fp_type, container, allocator> &solutions)
+    {
+        // get space range:
+        const range<fp_type> space = discretization_cfg_->space_range();
+        // get time range:
+        const range<fp_type> time = discretization_cfg_->time_range();
+        // get space step:
+        const fp_type h = discretization_cfg_->space_step();
+        // time step:
+        const fp_type k = discretization_cfg_->time_step();
+        // wrap up steps into pair:
+        const std::pair<fp_type, fp_type> steps = std::make_pair(k, h);
+        // size of space discretization:
+        const std::size_t space_size = discretization_cfg_->number_of_space_points();
+        // save traverse_direction
+        const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
+        // create and set up the solver:
+        auto const &solver = std::make_shared<sorcusolver>(space, space_size);
+        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
+                              std::move(std::get<2>(diagonals_)));
+        solver->set_omega(omega_value);
+        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        if (is_heat_sourse_set)
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+            // create a container to carry discretized source heat
+            container_t source_curr(space_size, NaN<fp_type>());
+            container_t source_next(space_size, NaN<fp_type>());
+            d_1d::of_function(space.lower(), h, static_cast<fp_type>(0.0), heat_source, source_curr);
+            d_1d::of_function(space.lower(), h, k, heat_source, source_next);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, heat_source, source_curr,
+                                    source_next, solutions);
+        }
+        else
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
     }
 };
@@ -538,6 +748,52 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
                       prev_solution, next_solution, rhs);
         }
     }
+
+    void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
+                    std::function<fp_type(fp_type, fp_type)> const &heat_source,
+                    container_2d<fp_type, container, allocator> &solutions)
+    {
+        // get space range:
+        const range<fp_type> space = discretization_cfg_->space_range();
+        // get time range:
+        const range<fp_type> time = discretization_cfg_->time_range();
+        // get space step:
+        const fp_type h = discretization_cfg_->space_step();
+        // time step:
+        const fp_type k = discretization_cfg_->time_step();
+        // wrap up steps into pair:
+        const std::pair<fp_type, fp_type> steps = std::make_pair(k, h);
+        // size of space discretization:
+        const std::size_t space_size = discretization_cfg_->number_of_space_points();
+        // save traverse_direction
+        const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
+        // create and set up the solver:
+        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
+                              std::move(std::get<2>(diagonals_)));
+        solver->set_factorization(solver_cfg_->tridiagonal_factorization());
+        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        if (is_heat_sourse_set)
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+            // create a container to carry discretized source heat
+            container_t source_curr(space_size, NaN<fp_type>());
+            container_t source_next(space_size, NaN<fp_type>());
+            d_1d::of_function(space.lower(), h, static_cast<fp_type>(0.0), heat_source, source_curr);
+            d_1d::of_function(space.lower(), h, k, heat_source, source_next);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, heat_source, source_curr,
+                                    source_next, solutions);
+        }
+        else
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, solutions);
+        }
+    }
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -608,6 +864,52 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
                 implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps, traverse_dir,
                       prev_solution, next_solution, rhs);
+        }
+    }
+
+    void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
+                    std::function<fp_type(fp_type, fp_type)> const &heat_source, fp_type omega_value,
+                    container_2d<fp_type, container, allocator> &solutions)
+    {
+        // get space range:
+        const range<fp_type> space = discretization_cfg_->space_range();
+        // get time range:
+        const range<fp_type> time = discretization_cfg_->time_range();
+        // get space step:
+        const fp_type h = discretization_cfg_->space_step();
+        // time step:
+        const fp_type k = discretization_cfg_->time_step();
+        // wrap up steps into pair:
+        const std::pair<fp_type, fp_type> steps = std::make_pair(k, h);
+        // size of space discretization:
+        const std::size_t space_size = discretization_cfg_->number_of_space_points();
+        // save traverse_direction
+        const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
+        // create and set up the solver:
+        auto const &solver = std::make_shared<sorsolver>(space, space_size);
+        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
+                              std::move(std::get<2>(diagonals_)));
+        solver->set_omega(omega_value);
+        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        if (is_heat_sourse_set)
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+            // create a container to carry discretized source heat
+            container_t source_curr(space_size, NaN<fp_type>());
+            container_t source_next(space_size, NaN<fp_type>());
+            d_1d::of_function(space.lower(), h, static_cast<fp_type>(0.0), heat_source, source_curr);
+            d_1d::of_function(space.lower(), h, k, heat_source, source_next);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, heat_source, source_curr,
+                                    source_next, solutions);
+        }
+        else
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
     }
 };
@@ -681,6 +983,51 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
                       prev_solution, next_solution, rhs);
         }
     }
+
+    void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
+                    std::function<fp_type(fp_type, fp_type)> const &heat_source,
+                    container_2d<fp_type, container, allocator> &solutions)
+    {
+        // get space range:
+        const range<fp_type> space = discretization_cfg_->space_range();
+        // get time range:
+        const range<fp_type> time = discretization_cfg_->time_range();
+        // get space step:
+        const fp_type h = discretization_cfg_->space_step();
+        // time step:
+        const fp_type k = discretization_cfg_->time_step();
+        // wrap up steps into pair:
+        const std::pair<fp_type, fp_type> steps = std::make_pair(k, h);
+        // size of space discretization:
+        const std::size_t space_size = discretization_cfg_->number_of_space_points();
+        // save traverse_direction
+        const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
+        // create and set up the solver:
+        auto const &solver = std::make_shared<ds_solver>(space, space_size);
+        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
+                              std::move(std::get<2>(diagonals_)));
+        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        if (is_heat_sourse_set)
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+            // create a container to carry discretized source heat
+            container_t source_curr(space_size, NaN<fp_type>());
+            container_t source_next(space_size, NaN<fp_type>());
+            d_1d::of_function(space.lower(), h, static_cast<fp_type>(0.0), heat_source, source_curr);
+            d_1d::of_function(space.lower(), h, k, heat_source, source_next);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, heat_source, source_curr,
+                                    source_next, solutions);
+        }
+        else
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, solutions);
+        }
+    }
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -750,6 +1097,51 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
                 implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps, traverse_dir,
                       prev_solution, next_solution, rhs);
+        }
+    }
+
+    void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
+                    std::function<fp_type(fp_type, fp_type)> const &heat_source,
+                    container_2d<fp_type, container, allocator> &solutions)
+    {
+        // get space range:
+        const range<fp_type> space = discretization_cfg_->space_range();
+        // get time range:
+        const range<fp_type> time = discretization_cfg_->time_range();
+        // get space step:
+        const fp_type h = discretization_cfg_->space_step();
+        // time step:
+        const fp_type k = discretization_cfg_->time_step();
+        // wrap up steps into pair:
+        const std::pair<fp_type, fp_type> steps = std::make_pair(k, h);
+        // size of space discretization:
+        const std::size_t space_size = discretization_cfg_->number_of_space_points();
+        // save traverse_direction
+        const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
+        // create and set up the solver:
+        auto const &solver = std::make_shared<tlu_solver>(space, space_size);
+        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
+                              std::move(std::get<2>(diagonals_)));
+        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        if (is_heat_sourse_set)
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+            // create a container to carry discretized source heat
+            container_t source_curr(space_size, NaN<fp_type>());
+            container_t source_next(space_size, NaN<fp_type>());
+            d_1d::of_function(space.lower(), h, static_cast<fp_type>(0.0), heat_source, source_curr);
+            d_1d::of_function(space.lower(), h, k, heat_source, source_next);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, heat_source, source_curr,
+                                    source_next, solutions);
+        }
+        else
+        {
+            auto scheme_function =
+                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, steps,
+                                    traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
     }
 };

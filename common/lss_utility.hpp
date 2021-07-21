@@ -103,10 +103,27 @@ template <typename T> class black_scholes_exact
         return result;
     }
 
+    T call(T spot, T time_to_maturity) const
+    {
+        T const tau = time_to_maturity;
+        T const s_tau = std::sqrt(tau);
+        T const d_1 = (std::log(spot / strike_) + (rate_ + 0.5 * vol_ * vol_) * tau) / (vol_ * s_tau);
+        T const d_2 = d_1 - vol_ * s_tau;
+        T const result = norm_cdf(d_1) * spot - (norm_cdf(d_2) * strike_ * std::exp(-rate_ * tau));
+        return result;
+    }
+
     T put(T spot) const
     {
         T const call_p = call(spot);
         T const tau = maturity_ - time_;
+        return (strike_ * std::exp(-rate_ * tau) - spot + call_p);
+    }
+
+    T put(T spot, T time_to_maturity) const
+    {
+        T const call_p = call(spot, time_to_maturity);
+        T const tau = time_to_maturity;
         return (strike_ * std::exp(-rate_ * tau) - spot + call_p);
     }
 };

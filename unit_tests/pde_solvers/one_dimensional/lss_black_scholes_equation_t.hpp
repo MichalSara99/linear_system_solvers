@@ -1067,4 +1067,194 @@ void testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQR()
     std::cout << "============================================================\n";
 }
 
+// Uisng stepping = getting the whole surface
+template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverEulerStepping()
+{
+    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_containers::container_2d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::discretization_config_1d;
+    using lss_pde_solvers::heat_coefficient_data_config_1d;
+    using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_initial_data_config_1d;
+    using lss_pde_solvers::host_bwd_tlusolver_euler_solver_config_ptr;
+    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_utility::black_scholes_exact;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Black-Scholes Call equation: \n\n";
+    std::cout << " Using Thomas LU on HOST with implicit Euler method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_t(x,t) = 0.5*sig*sig*x*x*U_xx(x,t) + r*x*U_x(x,t) - "
+                 "r*U(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " 0 < x < 20 and 0 < t < 1,\n";
+    std::cout << " U(0,t) = 0 and  U(20,t) = 20-K*exp(-r*(1-t)),0 < t < 1 \n\n";
+    std::cout << " U(x,T) = max(0,x-K), x in <0,20> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef the constiner_2d:
+    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    // typedef the Implicit1DHeatEquation
+    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // set up call option parameters:
+    auto const &strike = 10;
+    auto const &maturity = 1.0;
+    auto const &rate = 0.2;
+    auto const &sig = 0.25;
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(20.0));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T x) { return rate * x; };
+    auto c = [=](T x) { return -rate; };
+    auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
+    // terminal condition:
+    auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
+    auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(terminal_condition);
+    // heat data config:
+    auto const heat_data_ptr = std::make_shared<heat_data_config_1d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
+    // boundary conditions:
+    auto const &dirichlet_low = [=](T t) { return 0.0; };
+    auto const &dirichlet_high = [=](T t) { return (20.0 - strike * std::exp(-rate * (maturity - t))); };
+    auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_low);
+    auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
+    auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_bwd_tlusolver_euler_solver_config_ptr);
+    // prepare container for solutions:
+    container_2d_t solutions(Td, Sd);
+    // get the solution:
+    pdesolver.solve(solutions);
+    // get exact solution:
+    black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
+
+    T const h = discretization_ptr->space_step();
+    T const k = discretization_ptr->time_step();
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    T benchmark{};
+    for (std::size_t t = 0; t < solutions.rows(); ++t)
+    {
+        std::cout << "time: " << t * k << ":\n";
+        for (std::size_t j = 0; j < solutions.columns(); ++j)
+        {
+            benchmark = bs_exact.call(j * h, t * k);
+            std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
+                      << (solutions(t, j) - benchmark) << '\n';
+        }
+    }
+}
+
+template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolsonStepping()
+{
+    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_containers::container_2d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::discretization_config_1d;
+    using lss_pde_solvers::heat_coefficient_data_config_1d;
+    using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_initial_data_config_1d;
+    using lss_pde_solvers::host_bwd_tlusolver_cn_solver_config_ptr;
+    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_utility::black_scholes_exact;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Black-Scholes Call equation: \n\n";
+    std::cout << " Using Thomas LU on HOST with implicit CN method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_t(x,t) = 0.5*sig*sig*x*x*U_xx(x,t) + r*x*U_x(x,t) - "
+                 "r*U(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " 0 < x < 20 and 0 < t < 1,\n";
+    std::cout << " U(0,t) = 0 and  U(20,t) = 20-K*exp(-r*(1-t)),0 < t < 1 \n\n";
+    std::cout << " U(x,T) = max(0,x-K), x in <0,20> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef the constiner_2d:
+    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+
+    // typedef the Implicit1DHeatEquation
+    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // set up call option parameters:
+    auto const &strike = 10;
+    auto const &maturity = 1.0;
+    auto const &rate = 0.2;
+    auto const &sig = 0.25;
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(20.0));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T x) { return rate * x; };
+    auto c = [=](T x) { return -rate; };
+    auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
+    // terminal condition:
+    auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
+    auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(terminal_condition);
+    // heat data config:
+    auto const heat_data_ptr = std::make_shared<heat_data_config_1d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
+    // boundary conditions:
+    auto const &dirichlet_low = [=](T t) { return 0.0; };
+    auto const &dirichlet_high = [=](T t) { return (20.0 - strike * std::exp(-rate * (maturity - t))); };
+    auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_low);
+    auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
+    auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_bwd_tlusolver_cn_solver_config_ptr);
+    // prepare container for solutions:
+    container_2d_t solutions(Td, Sd);
+    // get the solution:
+    pdesolver.solve(solutions);
+    // get exact solution:
+    black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
+
+    T const h = discretization_ptr->space_step();
+    T const k = discretization_ptr->time_step();
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    T benchmark{};
+    for (std::size_t t = 0; t < solutions.rows(); ++t)
+    {
+        std::cout << "time: " << t * k << ":\n";
+        for (std::size_t j = 0; j < solutions.columns(); ++j)
+        {
+            benchmark = bs_exact.call(j * h, t * k);
+            std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
+                      << (solutions(t, j) - benchmark) << '\n';
+        }
+    }
+}
+
+void testImplBlackScholesEquationDirichletBCThomasLUSolverStepping()
+{
+    std::cout << "============================================================\n";
+    std::cout << "== Implicit Black-Scholes (Thomas LU) Equation (Dir BC) ====\n";
+    std::cout << "============================================================\n";
+
+    testImplBlackScholesEquationDirichletBCThomasLUSolverEulerStepping<double>();
+    testImplBlackScholesEquationDirichletBCThomasLUSolverEulerStepping<float>();
+    testImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolsonStepping<double>();
+    testImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolsonStepping<float>();
+
+    std::cout << "============================================================\n";
+}
+
 #endif //_LSS_BLACK_SCHOLES_EQUATION_T_HPP_
