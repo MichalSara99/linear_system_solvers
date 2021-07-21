@@ -418,7 +418,112 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
 namespace explicit_solvers
 {
 
+template <typename fp_type, template <typename, typename> typename container = std::vector,
+          typename allocator = std::allocator<fp_type>>
+class general_svc_heat_equation
+{
+  private:
+    boundary_1d_pair<fp_type> boundary_pair_;
+    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    explicit_solver_config_1d_ptr solver_cfg_;
+
+    explicit general_svc_heat_equation() = delete;
+
+    void initialize()
+    {
+        LSS_VERIFY(heat_data_cfg_, "heat_data_config must not be null");
+        LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
+        LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
+        LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
+        LSS_VERIFY(solver_cfg_, "solver_config must not be null");
+    }
+
+  public:
+    explicit general_svc_heat_equation(
+        heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+        discretization_config_1d_ptr<fp_type> const &discretization_config,
+        boundary_1d_pair<fp_type> const &boundary_pair,
+        explicit_solver_config_1d_ptr const &solver_config = dev_expl_fwd_euler_solver_config_ptr)
+        : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
+          solver_cfg_{solver_config}
+    {
+        initialize();
+    }
+
+    ~general_svc_heat_equation()
+    {
+    }
+
+    general_svc_heat_equation(general_svc_heat_equation const &) = delete;
+    general_svc_heat_equation(general_svc_heat_equation &&) = delete;
+    general_svc_heat_equation &operator=(general_svc_heat_equation const &) = delete;
+    general_svc_heat_equation &operator=(general_svc_heat_equation &&) = delete;
+
+    /**
+     * Get the final solution of the PDE
+     *
+     * \param solution - container for solution
+     */
+    void solve(container<fp_type, allocator> &solution);
+
+    /**
+     * Get all solutions in time (surface) of the PDE
+     *
+     * \param solutions - 2D container for all the solutions in time
+     */
+    void solve(container_2d<fp_type, container, allocator> &solutions);
+};
+
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+void general_svc_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
+{
+    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
+    typedef container<fp_type, allocator> container_t;
+
+    LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized");
+    // get space range:
+    const range<fp_type> space = discretization_cfg_->space_range();
+    // get space step:
+    const fp_type h = discretization_cfg_->space_step();
+    // time step:
+    const fp_type k = discretization_cfg_->time_step();
+    // size of space discretization:
+    const std::size_t space_size = discretization_cfg_->number_of_space_points();
+    // This is the proper size of the container:
+    LSS_ASSERT((solution.size() == space_size), "The input solution container must have the correct size");
+
+    /// ..... to be continued
 }
+
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+void general_svc_heat_equation<fp_type, container, allocator>::solve(
+    container_2d<fp_type, container, allocator> &solutions)
+{
+    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
+    typedef container<fp_type, allocator> container_t;
+
+    LSS_ASSERT(((solutions.columns() > 0) && (solutions.rows() > 0)),
+               "The input solution 2D container must be initialized");
+
+    // get space range:
+    const range<fp_type> space = discretization_cfg_->space_range();
+    // get space step:
+    const fp_type h = discretization_cfg_->space_step();
+    // time step:
+    const fp_type k = discretization_cfg_->time_step();
+    // size of space discretization:
+    const std::size_t space_size = discretization_cfg_->number_of_space_points();
+    // size of time discretization:
+    const std::size_t time_size = discretization_cfg_->number_of_time_points();
+    // This is the proper size of the container:
+    LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
+               "The input solution 2D container must have the correct size");
+
+    /// ..... to be continued
+}
+
+} // namespace explicit_solvers
 
 } // namespace one_dimensional
 

@@ -201,7 +201,9 @@ using explicit_solver_config_1d_ptr = sptr_t<explicit_solver_config<dimension_en
 
 using explicit_solver_config_2d_ptr = sptr_t<explicit_solver_config<dimension_enum::Two>>;
 
-// some default solver configs:
+// =================================================
+// ===== some default implicit solver configs ======
+// =================================================
 // forward stepping:
 auto dev_fwd_cusolver_qr_euler_solver_config_ptr = std::make_shared<implicit_solver_config<dimension_enum::One>>(
     memory_space_enum::Device, traverse_direction_enum::Forward, tridiagonal_method_enum::CUDASolver,
@@ -346,6 +348,20 @@ auto host_bwd_tlusolver_euler_solver_config_ptr = std::make_shared<implicit_solv
 auto host_bwd_tlusolver_cn_solver_config_ptr = std::make_shared<implicit_solver_config<dimension_enum::One>>(
     memory_space_enum::Host, traverse_direction_enum::Backward, tridiagonal_method_enum::ThomasLUSolver,
     factorization_enum::None, implicit_pde_schemes_enum::CrankNicolson);
+
+// =================================================
+// ===== some default explicit solver configs ======
+// =================================================
+// forward stepping:
+auto dev_expl_fwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Device, traverse_direction_enum::Forward, explicit_pde_schemes_enum::Euler);
+auto host_expl_fwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Host, traverse_direction_enum::Forward, explicit_pde_schemes_enum::Euler);
+auto dev_expl_bwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Device, traverse_direction_enum::Backward, explicit_pde_schemes_enum::Euler);
+auto host_expl_bwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Host, traverse_direction_enum::Backward, explicit_pde_schemes_enum::Euler);
+
 } // namespace lss_pde_solvers
 
 #endif ///_LSS_SOLVER_CONFIG_HPP_
