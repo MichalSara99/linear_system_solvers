@@ -7,6 +7,7 @@
 #include "boundaries/lss_boundary_1d.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
+#include "lss_general_svc_heat_equation_explicit_kernel.hpp"
 #include "lss_general_svc_heat_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_discretization.hpp"
 #include "pde_solvers/lss_discretization_config.hpp"
@@ -492,8 +493,52 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     const std::size_t space_size = discretization_cfg_->number_of_space_points();
     // This is the proper size of the container:
     LSS_ASSERT((solution.size() == space_size), "The input solution container must have the correct size");
+    // calculate scheme coefficients:
+    const fp_type one = static_cast<fp_type>(1.0);
+    const fp_type two = static_cast<fp_type>(2.0);
+    const fp_type half = static_cast<fp_type>(0.5);
+    const fp_type lambda = k / (h * h);
+    const fp_type gamma = k / (two * h);
+    const fp_type delta = half * k;
+    // save coefficients:
+    auto const &a = heat_data_cfg_->a_coefficient();
+    auto const &b = heat_data_cfg_->b_coefficient();
+    auto const &c = heat_data_cfg_->c_coefficient();
+    // prepare space variable coefficients:
+    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
+    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
+    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+    // wrap up the functions into tuple:
+    auto const &fun_triplet = std::make_tuple(A, B, D);
+    // create container to carry previous solution:
+    container_t prev_sol(space_size, fp_type{});
+    // discretize initial condition
+    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    // get heat_source:
+    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    // get heat_source:
+    auto const &heat_source = heat_data_cfg_->heat_source();
 
-    /// ..... to be continued
+    if (solver_cfg_->memory_space() == memory_space_enum::Device)
+    {
+        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
+            device_solver;
+        device_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol, is_heat_source_set, heat_source);
+        std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+    }
+    else if (solver_cfg_->memory_space() == memory_space_enum::Host)
+    {
+        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
+            host_solver;
+        host_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol, is_heat_source_set, heat_source);
+        std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+    }
+    else
+    {
+        throw std::exception("Unreachable");
+    }
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -519,8 +564,50 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
     // This is the proper size of the container:
     LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
                "The input solution 2D container must have the correct size");
+    // calculate scheme coefficients:
+    const fp_type one = static_cast<fp_type>(1.0);
+    const fp_type two = static_cast<fp_type>(2.0);
+    const fp_type half = static_cast<fp_type>(0.5);
+    const fp_type lambda = k / (h * h);
+    const fp_type gamma = k / (two * h);
+    const fp_type delta = half * k;
+    // save coefficients:
+    auto const &a = heat_data_cfg_->a_coefficient();
+    auto const &b = heat_data_cfg_->b_coefficient();
+    auto const &c = heat_data_cfg_->c_coefficient();
+    // prepare space variable coefficients:
+    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
+    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
+    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+    // wrap up the functions into tuple:
+    auto const &fun_triplet = std::make_tuple(A, B, D);
+    // create container to carry previous solution:
+    container_t prev_sol(space_size, fp_type{});
+    // discretize initial condition
+    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    // get heat_source:
+    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    // get heat_source:
+    auto const &heat_source = heat_data_cfg_->heat_source();
 
-    /// ..... to be continued
+    if (solver_cfg_->memory_space() == memory_space_enum::Device)
+    {
+        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
+            device_solver;
+        device_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol, is_heat_source_set, heat_source, solutions);
+    }
+    else if (solver_cfg_->memory_space() == memory_space_enum::Host)
+    {
+        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
+            host_solver;
+        host_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol, is_heat_source_set, heat_source, solutions);
+    }
+    else
+    {
+        throw std::exception("Unreachable");
+    }
 }
 
 } // namespace explicit_solvers

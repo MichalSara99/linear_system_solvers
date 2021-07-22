@@ -1148,7 +1148,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
         std::cout << "time: " << t * k << ":\n";
         for (std::size_t j = 0; j < solutions.columns(); ++j)
         {
-            benchmark = bs_exact.call(j * h, t * k);
+            benchmark = bs_exact.call(j * h, maturity - t * k);
             std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
                       << (solutions(t, j) - benchmark) << '\n';
         }
@@ -1236,7 +1236,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
         std::cout << "time: " << t * k << ":\n";
         for (std::size_t j = 0; j < solutions.columns(); ++j)
         {
-            benchmark = bs_exact.call(j * h, t * k);
+            benchmark = bs_exact.call(j * h, maturity - t * k);
             std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
                       << (solutions(t, j) - benchmark) << '\n';
         }

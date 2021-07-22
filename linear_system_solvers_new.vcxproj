@@ -28,7 +28,10 @@
     <ClInclude Include="pde_solvers\lss_discretization_config.hpp" />
     <ClInclude Include="pde_solvers\lss_heat_data_config.hpp" />
     <ClInclude Include="pde_solvers\lss_solver_config.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_barakat_clark_scheme.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_saulyev_scheme.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_explicit_kernel.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_implicit_kernel.hpp" />
     <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver.hpp" />
     <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver_policy.hpp" />

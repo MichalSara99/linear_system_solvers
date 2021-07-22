@@ -82,6 +82,9 @@
     <Filter Include="unit_tests\pde_solvers\one_dimensional">
       <UniqueIdentifier>{8afaac17-3e0d-4bec-9309-48ca28983242}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pde_solvers\one_dimensional\heat_type\explicit_schemes">
+      <UniqueIdentifier>{0aaec500-c6ab-43b5-ad46-75c6ef1dcec7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -224,6 +227,15 @@
     </ClInclude>
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_black_scholes_equation_t.hpp">
       <Filter>unit_tests\pde_solvers\one_dimensional</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_explicit_kernel.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_barakat_clark_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_saulyev_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
