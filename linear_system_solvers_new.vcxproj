@@ -18,6 +18,7 @@
     <ClInclude Include="common\lss_enumerations.hpp" />
     <ClInclude Include="common\lss_helpers.hpp" />
     <ClInclude Include="common\lss_macros.hpp" />
+    <ClInclude Include="common\lss_print.hpp" />
     <ClInclude Include="common\lss_utility.hpp" />
     <ClInclude Include="containers\lss_container_2d.hpp" />
     <ClInclude Include="containers\lss_flat_matrix.hpp" />
@@ -49,6 +50,7 @@
     <ClInclude Include="sparse_solvers\tridiagonal\sor_solver_cuda\lss_sor_solver_cuda.hpp" />
     <ClInclude Include="sparse_solvers\tridiagonal\thomas_lu_solver\lss_thomas_lu_boundary.hpp" />
     <ClInclude Include="sparse_solvers\tridiagonal\thomas_lu_solver\lss_thomas_lu_solver.hpp" />
+    <ClInclude Include="unit_tests\common\lss_print_t.hpp" />
     <ClInclude Include="unit_tests\containers\lss_container_2d_t.hpp" />
     <ClInclude Include="unit_tests\dense_solvers\lss_dense_solvers_cuda_t.hpp" />
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_black_scholes_equation_t.hpp" />

@@ -352,15 +352,29 @@ auto host_bwd_tlusolver_cn_solver_config_ptr = std::make_shared<implicit_solver_
 // =================================================
 // ===== some default explicit solver configs ======
 // =================================================
-// forward stepping:
 auto dev_expl_fwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
     memory_space_enum::Device, traverse_direction_enum::Forward, explicit_pde_schemes_enum::Euler);
+
 auto host_expl_fwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
     memory_space_enum::Host, traverse_direction_enum::Forward, explicit_pde_schemes_enum::Euler);
+
 auto dev_expl_bwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
     memory_space_enum::Device, traverse_direction_enum::Backward, explicit_pde_schemes_enum::Euler);
+
 auto host_expl_bwd_euler_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
     memory_space_enum::Host, traverse_direction_enum::Backward, explicit_pde_schemes_enum::Euler);
+
+auto host_expl_fwd_bc_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Host, traverse_direction_enum::Forward, explicit_pde_schemes_enum::ADEBarakatClark);
+
+auto host_expl_bwd_bc_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Host, traverse_direction_enum::Backward, explicit_pde_schemes_enum::ADEBarakatClark);
+
+auto host_expl_fwd_s_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Host, traverse_direction_enum::Forward, explicit_pde_schemes_enum::ADESaulyev);
+
+auto host_expl_bwd_s_solver_config_ptr = std::make_shared<explicit_solver_config<dimension_enum::One>>(
+    memory_space_enum::Host, traverse_direction_enum::Backward, explicit_pde_schemes_enum::ADESaulyev);
 
 } // namespace lss_pde_solvers
 

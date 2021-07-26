@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 
+#include "unit_tests/common/lss_print_t.hpp"
 #include "unit_tests/containers/lss_container_2d_t.hpp"
 #include "unit_tests/dense_solvers/lss_dense_solvers_cuda_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_black_scholes_equation_t.hpp"
@@ -151,6 +152,9 @@ int main(int argc, char const *argv[])
 
     // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRStepping();
 
+    // explicit:
+    // testExplPureHeatEquationDirichletBCADE();
+
     // ====================================================================
 
     // ====================================================================
@@ -166,6 +170,19 @@ int main(int argc, char const *argv[])
     // testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQR();
 
     // testImplBlackScholesEquationDirichletBCThomasLUSolverStepping();
+
+    // explicit:
+    // testExplBlackScholesEquationDirichletBCADE();
+
+    // ====================================================================
+
+    // ====================================================================
+    // ============================= lss_print_t.hpp ======================
+    // ====================================================================
+
+    // testImplBlackScholesEquationDirichletBCThomasLUSolverPrint();
+    // testImplBlackScholesEquationDirichletBCThomasLUSolverPrintSurf();
+    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRPrintSurface();
 
     // ====================================================================
 

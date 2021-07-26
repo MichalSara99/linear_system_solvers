@@ -85,6 +85,9 @@
     <Filter Include="pde_solvers\one_dimensional\heat_type\explicit_schemes">
       <UniqueIdentifier>{0aaec500-c6ab-43b5-ad46-75c6ef1dcec7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="unit_tests\common">
+      <UniqueIdentifier>{21c37cbd-757b-475d-a307-c5f4e490e9b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -236,6 +239,12 @@
     </ClInclude>
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_saulyev_scheme.hpp">
       <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="common\lss_print.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\common\lss_print_t.hpp">
+      <Filter>unit_tests\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

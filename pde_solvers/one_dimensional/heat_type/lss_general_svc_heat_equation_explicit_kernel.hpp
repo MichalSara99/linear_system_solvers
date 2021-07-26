@@ -62,7 +62,7 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
     {
     }
 
-    void operator()(container_t &prev_solution, container_t &next_solution, bool is_heat_sourse_set,
+    void operator()(container_t &solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source)
     {
         // save traverse_direction
@@ -70,7 +70,8 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // Euler On DEVICE to be launched here:
+            // TODO: Euler on DEVICE:
+            throw std::exception("Euler On DEVICE to be launched here.");
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
@@ -86,7 +87,7 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
         }
     }
 
-    void operator()(container_t &prev_solution, container_t &next_solution, bool is_heat_sourse_set,
+    void operator()(container_t &solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source,
                     container_2d<fp_type, container, allocator> &solutions)
     {
@@ -95,7 +96,8 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // Euler On DEVICE to be launched here:
+            // TODO: Euler on DEVICE:
+            throw std::exception("Euler On DEVICE to be launched here.");
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
@@ -146,7 +148,8 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // Euler On HOST to be launched here:
+            // TODO: Euler on HOST:
+            throw std::exception("Euler On HOST to be launched here.");
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
@@ -175,7 +178,8 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // Euler On HOST to be launched here:
+            // TODO: Euler on HOST:
+            throw std::exception("Euler On HOST to be launched here.");
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
