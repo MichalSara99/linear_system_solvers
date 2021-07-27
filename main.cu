@@ -155,6 +155,7 @@ int main(int argc, char const *argv[])
     // explicit:
     // testExplPureHeatEquationDirichletBCADE();
     // testExplPureHeatEquationNeumannBCEuler();
+    testExplPureHeatEquationDirichletBCDevice();
 
     // ====================================================================
 

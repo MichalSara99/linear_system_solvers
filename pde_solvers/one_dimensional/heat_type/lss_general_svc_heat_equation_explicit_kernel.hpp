@@ -8,6 +8,7 @@
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "explicit_schemes/lss_barakat_clark_svc_scheme.hpp"
+#include "explicit_schemes/lss_euler_svc_cuda_scheme.hpp"
 #include "explicit_schemes/lss_euler_svc_scheme.hpp"
 #include "explicit_schemes/lss_saulyev_svc_scheme.hpp"
 #include "pde_solvers/lss_discretization.hpp"
@@ -68,8 +69,9 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // TODO: Euler on DEVICE:
-            throw std::exception("Euler On DEVICE to be launched here.");
+            typedef euler_svc_cuda_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
+            euler_cuda_scheme_t euler_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
+            euler_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir);
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
@@ -94,8 +96,9 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // TODO: Euler on DEVICE:
-            throw std::exception("Euler On DEVICE to be launched here.");
+            typedef euler_svc_cuda_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
+            euler_cuda_scheme_t euler_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
+            euler_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir, solutions);
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
