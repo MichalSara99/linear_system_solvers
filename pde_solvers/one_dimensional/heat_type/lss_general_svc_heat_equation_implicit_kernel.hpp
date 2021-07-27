@@ -35,29 +35,22 @@ using lss_enumerations::tridiagonal_method_enum;
 using lss_sor_solver::sor_solver;
 using lss_sor_solver_cuda::sor_solver_cuda;
 using lss_thomas_lu_solver::thomas_lu_solver;
+using lss_utility::diagonal_triplet_t;
+using lss_utility::function_triplet_t;
 using lss_utility::NaN;
+using lss_utility::pair_t;
 using lss_utility::range;
 
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-using diagonal_triplet =
-    std::tuple<container<fp_type, allocator>, container<fp_type, allocator>, container<fp_type, allocator>>;
-
-template <typename fp_type>
-using function_triplet =
-    std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
-
-template <typename fp_type> using pair_t = std::pair<fp_type, fp_type>;
-
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using scheme_function =
-    std::function<void(function_triplet<fp_type> const &, pair_t<fp_type> const &, container<fp_type, alloc> const &,
+using implicit_scheme_function_t =
+    std::function<void(function_triplet_t<fp_type> const &, pair_t<fp_type> const &, container<fp_type, alloc> const &,
                        container<fp_type, alloc> const &, container<fp_type, alloc> const &,
                        boundary_1d_pair<fp_type> const &, fp_type const &, container<fp_type, alloc> &)>;
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator> class implicit_scheme
 {
     typedef container<fp_type, allocator> container_t;
-    typedef scheme_function<container, fp_type, allocator> scheme_function_t;
+    typedef implicit_scheme_function_t<container, fp_type, allocator> scheme_function_t;
 
   private:
     static fp_type const get_scheme_theta(implicit_pde_schemes_enum scheme)
@@ -76,64 +69,64 @@ template <typename fp_type, template <typename, typename> typename container, ty
         const fp_type theta = get_scheme_theta(scheme);
         const fp_type two = static_cast<fp_type>(2.0);
         const fp_type one = static_cast<fp_type>(1.0);
-        auto scheme_fun_h = [=](function_triplet<fp_type> const &coefficients, std::pair<fp_type, fp_type> const &steps,
-                                container_t const &input, container_t const &inhom_input,
-                                container_t const &inhom_input_next, boundary_1d_pair<fp_type> const &boundary_pair,
-                                fp_type const &time, container_t &solution) {
-            auto const &first_bnd = boundary_pair.first;
-            auto const &second_bnd = boundary_pair.second;
-            auto const &A = std::get<0>(coefficients);
-            auto const &B = std::get<1>(coefficients);
-            auto const &D = std::get<2>(coefficients);
-            auto const h = steps.second;
-            fp_type m{};
+        auto scheme_fun_h =
+            [=](function_triplet_t<fp_type> const &coefficients, std::pair<fp_type, fp_type> const &steps,
+                container_t const &input, container_t const &inhom_input, container_t const &inhom_input_next,
+                boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time, container_t &solution) {
+                auto const &first_bnd = boundary_pair.first;
+                auto const &second_bnd = boundary_pair.second;
+                auto const &A = std::get<0>(coefficients);
+                auto const &B = std::get<1>(coefficients);
+                auto const &D = std::get<2>(coefficients);
+                auto const h = steps.second;
+                fp_type m{};
 
-            // for lower boundaries first:
-            if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
-            {
-                const fp_type beta = two * h * ptr->value(time);
-                m = static_cast<fp_type>(0);
-                solution[0] = (one - theta) * beta * A(m * h) + (one - two * (one - theta) * B(m * h)) * input[0] +
-                              (one - theta) * (A(m * h) + D(m * h)) * input[1];
-            }
-            else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
-            {
-                const fp_type beta = two * h * ptr->value(time);
-                const fp_type alpha = two * h * ptr->linear_value(time);
-                m = static_cast<fp_type>(0);
-                solution[0] = (one - theta) * beta * A(m * h) +
-                              (one - (one - theta) * (two * B(m * h) - alpha * A(m * h))) * input[0] +
-                              (one - theta) * (A(m * h) + D(m * h)) * input[1];
-            }
-            // for upper boundaries second:
-            const std::size_t N = solution.size() - 1;
-            if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
-            {
-                const fp_type delta = two * h * ptr->value(time);
-                m = static_cast<fp_type>(N);
-                solution[N] = (one - theta) * (A(m * h) + D(m * h)) * input[N - 1] +
-                              (one - two * (one - theta) * B(m * h)) * input[N] - (one - theta) * delta * D(m * h);
-            }
-            else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
-            {
-                const fp_type delta = two * h * ptr->value(time);
-                const fp_type gamma = two * h * ptr->linear_value(time);
-                m = static_cast<fp_type>(N);
-                solution[N] = (one - theta) * (A(m * h) + D(m * h)) * input[N - 1] +
-                              (one - (one - theta) * (two * B(m * h) + gamma * D(m * h))) * input[N] -
-                              (one - theta) * delta * D(m * h);
-            }
+                // for lower boundaries first:
+                if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
+                {
+                    const fp_type beta = two * h * ptr->value(time);
+                    m = static_cast<fp_type>(0);
+                    solution[0] = (one - theta) * beta * A(m * h) + (one - two * (one - theta) * B(m * h)) * input[0] +
+                                  (one - theta) * (A(m * h) + D(m * h)) * input[1];
+                }
+                else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
+                {
+                    const fp_type beta = two * h * ptr->value(time);
+                    const fp_type alpha = two * h * ptr->linear_value(time);
+                    m = static_cast<fp_type>(0);
+                    solution[0] = (one - theta) * beta * A(m * h) +
+                                  (one - (one - theta) * (two * B(m * h) - alpha * A(m * h))) * input[0] +
+                                  (one - theta) * (A(m * h) + D(m * h)) * input[1];
+                }
+                // for upper boundaries second:
+                const std::size_t N = solution.size() - 1;
+                if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
+                {
+                    const fp_type delta = two * h * ptr->value(time);
+                    m = static_cast<fp_type>(N);
+                    solution[N] = (one - theta) * (A(m * h) + D(m * h)) * input[N - 1] +
+                                  (one - two * (one - theta) * B(m * h)) * input[N] - (one - theta) * delta * D(m * h);
+                }
+                else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
+                {
+                    const fp_type delta = two * h * ptr->value(time);
+                    const fp_type gamma = two * h * ptr->linear_value(time);
+                    m = static_cast<fp_type>(N);
+                    solution[N] = (one - theta) * (A(m * h) + D(m * h)) * input[N - 1] +
+                                  (one - (one - theta) * (two * B(m * h) + gamma * D(m * h))) * input[N] -
+                                  (one - theta) * delta * D(m * h);
+                }
 
-            for (std::size_t t = 1; t < N; ++t)
-            {
-                m = static_cast<fp_type>(t);
-                solution[t] = (D(m * h) * (one - theta) * input[t + 1]) +
-                              ((one - two * B(m * h) * (one - theta)) * input[t]) +
-                              (A(m * h) * (one - theta) * input[t - 1]);
-            }
-        };
+                for (std::size_t t = 1; t < N; ++t)
+                {
+                    m = static_cast<fp_type>(t);
+                    solution[t] = (D(m * h) * (one - theta) * input[t + 1]) +
+                                  ((one - two * B(m * h) * (one - theta)) * input[t]) +
+                                  (A(m * h) * (one - theta) * input[t - 1]);
+                }
+            };
         auto scheme_fun_nh =
-            [=](function_triplet<fp_type> const &coefficients, std::pair<fp_type, fp_type> const &steps,
+            [=](function_triplet_t<fp_type> const &coefficients, std::pair<fp_type, fp_type> const &steps,
                 container_t const &input, container_t const &inhom_input, container_t const &inhom_input_next,
                 boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time, container_t &solution) {
                 auto const &first_bnd = boundary_pair.first;
@@ -217,7 +210,7 @@ class time_loop
   public:
     template <typename solver_object, typename scheme_function>
     static void run(solver_object &solver_obj, scheme_function &scheme_fun,
-                    boundary_1d_pair<fp_type> const &boundary_pair, function_triplet<fp_type> const &fun_triplet,
+                    boundary_1d_pair<fp_type> const &boundary_pair, function_triplet_t<fp_type> const &fun_triplet,
                     range<fp_type> const &space_range, range<fp_type> const &time_range,
                     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
                     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
@@ -225,7 +218,7 @@ class time_loop
                     container_t &curr_source, container_t &next_source);
     template <typename solver_object, typename scheme_function>
     static void run(solver_object &solver_obj, scheme_function &scheme_fun,
-                    boundary_1d_pair<fp_type> const &boundary_pair, function_triplet<fp_type> const &fun_triplet,
+                    boundary_1d_pair<fp_type> const &boundary_pair, function_triplet_t<fp_type> const &fun_triplet,
                     range<fp_type> const &space_range, range<fp_type> const &time_range,
                     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
                     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
@@ -234,7 +227,7 @@ class time_loop
     template <typename solver_object, typename scheme_function>
     static void run_with_stepping(solver_object &solver_obj, scheme_function &scheme_fun,
                                   boundary_1d_pair<fp_type> const &boundary_pair,
-                                  function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range,
+                                  function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
                                   container_t &prev_solution, container_t &next_solution, container_t &rhs,
@@ -243,7 +236,7 @@ class time_loop
     template <typename solver_object, typename scheme_function>
     static void run_with_stepping(solver_object &solver_obj, scheme_function &scheme_fun,
                                   boundary_1d_pair<fp_type> const &boundary_pair,
-                                  function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range,
+                                  function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
                                   container_t &prev_solution, container_t &next_solution, container_t &rhs,
@@ -254,7 +247,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver_object, typename scheme_function>
 void time_loop<fp_type, container, allocator>::run(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
+    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
     container_t &rhs, std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
@@ -310,7 +303,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver_object, typename scheme_function>
 void time_loop<fp_type, container, allocator>::run(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
+    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
     container_t &rhs)
@@ -354,7 +347,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver_object, typename scheme_function>
 void time_loop<fp_type, container, allocator>::run_with_stepping(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
+    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
     container_t &rhs, std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
@@ -416,7 +409,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver_object, typename scheme_function>
 void time_loop<fp_type, container, allocator>::run_with_stepping(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
+    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
     container_t &rhs, container_2d<fp_type, container, allocator> &solutions)
@@ -481,15 +474,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     typedef time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet<fp_type, container, allocator> diagonals_;
-    function_triplet<fp_type> fun_triplet_;
+    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(diagonal_triplet<fp_type, container, allocator> const &diagonals,
-                                              function_triplet<fp_type> const &fun_triplet,
+    general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+                                              function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               implicit_solver_config_1d_ptr const &solver_config)
@@ -599,15 +592,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     typedef time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet<fp_type, container, allocator> diagonals_;
-    function_triplet<fp_type> fun_triplet_;
+    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(diagonal_triplet<fp_type, container, allocator> const &diagonals,
-                                              function_triplet<fp_type> const &fun_triplet,
+    general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+                                              function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               implicit_solver_config_1d_ptr const &solver_config)
@@ -720,15 +713,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet<fp_type, container, allocator> diagonals_;
-    function_triplet<fp_type> fun_triplet_;
+    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(diagonal_triplet<fp_type, container, allocator> const &diagonals,
-                                              function_triplet<fp_type> const &fun_triplet,
+    general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+                                              function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               implicit_solver_config_1d_ptr const &solver_config)
@@ -838,15 +831,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet<fp_type, container, allocator> diagonals_;
-    function_triplet<fp_type> fun_triplet_;
+    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(diagonal_triplet<fp_type, container, allocator> const &diagonals,
-                                              function_triplet<fp_type> const &fun_triplet,
+    general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+                                              function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               implicit_solver_config_1d_ptr const &solver_config)
@@ -956,15 +949,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet<fp_type, container, allocator> diagonals_;
-    function_triplet<fp_type> fun_triplet_;
+    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(diagonal_triplet<fp_type, container, allocator> const &diagonals,
-                                              function_triplet<fp_type> const &fun_triplet,
+    general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+                                              function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               implicit_solver_config_1d_ptr const &solver_config)
@@ -1072,15 +1065,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet<fp_type, container, allocator> diagonals_;
-    function_triplet<fp_type> fun_triplet_;
+    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(diagonal_triplet<fp_type, container, allocator> const &diagonals,
-                                              function_triplet<fp_type> const &fun_triplet,
+    general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+                                              function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               implicit_solver_config_1d_ptr const &solver_config)

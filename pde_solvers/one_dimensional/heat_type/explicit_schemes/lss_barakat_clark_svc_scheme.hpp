@@ -1,5 +1,5 @@
-#if !defined(_LSS_BARAKAT_CLARK_SCHEME_HPP_)
-#define _LSS_BARAKAT_CLARK_SCHEME_HPP_
+#if !defined(_LSS_BARAKAT_CLARK_SVC_SCHEME_HPP_)
+#define _LSS_BARAKAT_CLARK_SVC_SCHEME_HPP_
 
 #include <thread>
 
@@ -26,44 +26,37 @@ using lss_boundary_1d::neumann_boundary_1d;
 using lss_boundary_1d::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::traverse_direction_enum;
+using lss_utility::function_quad_t;
+using lss_utility::function_triplet_t;
 using lss_utility::NaN;
 using lss_utility::range;
 
-template <typename fp_type>
-using function_quad = std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>,
-                                 std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
-
-template <typename fp_type>
-using function_triplet =
-    std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
-
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class barakat_clark_time_loop
+class barakat_clark_svc_time_loop
 {
     typedef container<fp_type, allocator> container_t;
     typedef container_2d<fp_type, container, allocator> container_2d_t;
-    typedef std::function<void(container_t, container_t, fp_type)> thread_core;
 
   public:
-    static void run(function_quad<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
+    static void run(function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
                     range<fp_type> const &space_range, range<fp_type> const &time_range,
                     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
                     traverse_direction_enum const &traverse_dir, container_t &solution);
 
-    static void run(function_quad<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
+    static void run(function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
                     range<fp_type> const &space_range, range<fp_type> const &time_range,
                     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
                     traverse_direction_enum const &traverse_dir, container_t &solution,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
                     container_t &next_source);
 
-    static void run_with_stepping(function_quad<fp_type> const &func_quad,
+    static void run_with_stepping(function_quad_t<fp_type> const &func_quad,
                                   boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
                                   container_t &solution, container_2d_t &solutions);
 
-    static void run_with_stepping(function_quad<fp_type> const &func_quad,
+    static void run_with_stepping(function_quad_t<fp_type> const &func_quad,
                                   boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
@@ -73,8 +66,8 @@ class barakat_clark_time_loop
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_time_loop<fp_type, container, allocator>::run(
-    function_quad<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
+void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
+    function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution)
 {
@@ -171,8 +164,8 @@ void barakat_clark_time_loop<fp_type, container, allocator>::run(
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_time_loop<fp_type, container, allocator>::run(
-    function_quad<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
+void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
+    function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution,
     std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source, container_t &next_source)
@@ -276,8 +269,8 @@ void barakat_clark_time_loop<fp_type, container, allocator>::run(
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_time_loop<fp_type, container, allocator>::run_with_stepping(
-    function_quad<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
+void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
+    function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution,
     container_2d_t &solutions)
@@ -379,8 +372,8 @@ void barakat_clark_time_loop<fp_type, container, allocator>::run_with_stepping(
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_time_loop<fp_type, container, allocator>::run_with_stepping(
-    function_quad<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
+void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
+    function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution,
     container_2d_t &solutions, std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
@@ -491,14 +484,14 @@ void barakat_clark_time_loop<fp_type, container, allocator>::run_with_stepping(
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class barakat_clark_scheme
+class barakat_clark_svc_scheme
 {
-    typedef barakat_clark_time_loop<fp_type, container, allocator> loop;
+    typedef barakat_clark_svc_time_loop<fp_type, container, allocator> loop;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
 
   private:
-    function_triplet<fp_type> fun_triplet_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
 
@@ -524,17 +517,18 @@ class barakat_clark_scheme
         }
     }
 
-    explicit barakat_clark_scheme() = delete;
+    explicit barakat_clark_svc_scheme() = delete;
 
   public:
-    barakat_clark_scheme(function_triplet<fp_type> const &fun_triplet, boundary_1d_pair<fp_type> const &boundary_pair,
-                         discretization_config_1d_ptr<fp_type> const &discretization_config)
+    barakat_clark_svc_scheme(function_triplet_t<fp_type> const &fun_triplet,
+                             boundary_1d_pair<fp_type> const &boundary_pair,
+                             discretization_config_1d_ptr<fp_type> const &discretization_config)
         : fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config}
     {
         initialize();
     }
 
-    ~barakat_clark_scheme()
+    ~barakat_clark_svc_scheme()
     {
     }
 
@@ -620,4 +614,4 @@ class barakat_clark_scheme
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_BARAKAT_CLARK_SCHEME_HPP_
+#endif ///_LSS_BARAKAT_CLARK_SVC_SCHEME_HPP_

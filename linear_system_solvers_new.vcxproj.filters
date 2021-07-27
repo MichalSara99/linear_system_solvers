@@ -234,17 +234,20 @@
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_explicit_kernel.hpp">
       <Filter>pde_solvers\one_dimensional\heat_type</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_barakat_clark_scheme.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_saulyev_scheme.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
-    </ClInclude>
     <ClInclude Include="common\lss_print.hpp">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="unit_tests\common\lss_print_t.hpp">
       <Filter>unit_tests\common</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_barakat_clark_svc_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_saulyev_svc_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

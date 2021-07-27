@@ -7,8 +7,9 @@
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
-#include "explicit_schemes/lss_barakat_clark_scheme.hpp"
-#include "explicit_schemes/lss_saulyev_scheme.hpp"
+#include "explicit_schemes/lss_barakat_clark_svc_scheme.hpp"
+#include "explicit_schemes/lss_euler_svc_scheme.hpp"
+#include "explicit_schemes/lss_saulyev_svc_scheme.hpp"
 #include "pde_solvers/lss_discretization.hpp"
 #include "pde_solvers/lss_discretization_config.hpp"
 #include "pde_solvers/lss_solver_config.hpp"
@@ -24,12 +25,9 @@ using lss_enumerations::dimension_enum;
 using lss_enumerations::explicit_pde_schemes_enum;
 using lss_enumerations::memory_space_enum;
 using lss_enumerations::traverse_direction_enum;
+using lss_utility::function_triplet_t;
 using lss_utility::NaN;
 using lss_utility::range;
-
-template <typename fp_type>
-using function_triplet =
-    std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
 
 template <memory_space_enum memory_enum, typename fp_type,
           template <typename, typename> typename container = std::vector, typename allocator = std::allocator<fp_type>>
@@ -47,13 +45,13 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
     typedef container<fp_type, allocator> container_t;
 
   private:
-    function_triplet<fp_type> fun_triplet_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     explicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    general_svc_heat_equation_explicit_kernel(function_triplet<fp_type> const &fun_triplet,
+    general_svc_heat_equation_explicit_kernel(function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               explicit_solver_config_1d_ptr const &solver_config)
@@ -125,13 +123,13 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
     typedef container<fp_type, allocator> container_t;
 
   private:
-    function_triplet<fp_type> fun_triplet_;
+    function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     discretization_config_1d_ptr<fp_type> discretization_cfg_;
     explicit_solver_config_1d_ptr solver_cfg_;
 
   public:
-    class general_svc_heat_equation_explicit_kernel(function_triplet<fp_type> const &fun_triplet,
+    class general_svc_heat_equation_explicit_kernel(function_triplet_t<fp_type> const &fun_triplet,
                                                     boundary_1d_pair<fp_type> const &boundary_pair,
                                                     discretization_config_1d_ptr<fp_type> const &discretization_config,
                                                     explicit_solver_config_1d_ptr const &solver_config)
@@ -148,18 +146,19 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // TODO: Euler on HOST:
-            throw std::exception("Euler On HOST to be launched here.");
+            typedef euler_svc_scheme<fp_type, container, allocator> euler_scheme_t;
+            euler_scheme_t euler_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
+            euler_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir);
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
-            typedef barakat_clark_scheme<fp_type, container, allocator> barakat_clark_scheme_t;
+            typedef barakat_clark_svc_scheme<fp_type, container, allocator> barakat_clark_scheme_t;
             barakat_clark_scheme_t bc_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
             bc_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir);
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADESaulyev)
         {
-            typedef saulyev_scheme<fp_type, container, allocator> saulyev_scheme_t;
+            typedef saulyev_svc_scheme<fp_type, container, allocator> saulyev_scheme_t;
             saulyev_scheme_t s_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
             s_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir);
         }
@@ -178,18 +177,19 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
         // Here make a dicision which explicit scheme to launch:
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
-            // TODO: Euler on HOST:
-            throw std::exception("Euler On HOST to be launched here.");
+            typedef euler_svc_scheme<fp_type, container, allocator> euler_scheme_t;
+            euler_scheme_t euler_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
+            euler_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir, solutions);
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
-            typedef barakat_clark_scheme<fp_type, container, allocator> barakat_clark_scheme_t;
+            typedef barakat_clark_svc_scheme<fp_type, container, allocator> barakat_clark_scheme_t;
             barakat_clark_scheme_t bc_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
             bc_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir, solutions);
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADESaulyev)
         {
-            typedef saulyev_scheme<fp_type, container, allocator> saulyev_scheme_t;
+            typedef saulyev_svc_scheme<fp_type, container, allocator> saulyev_scheme_t;
             saulyev_scheme_t s_scheme(fun_triplet_, boundary_pair_, discretization_cfg_);
             s_scheme(solution, is_heat_sourse_set, heat_source, traverse_dir, solutions);
         }

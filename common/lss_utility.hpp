@@ -3,12 +3,38 @@
 #define _LSS_UTILITY_HPP_
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <tuple>
 
 namespace lss_utility
 {
+/**
+ * diagonal_triplet_t alias type
+ */
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+using diagonal_triplet_t =
+    std::tuple<container<fp_type, allocator>, container<fp_type, allocator>, container<fp_type, allocator>>;
+
+/**
+ * function_triplet_t alias type
+ */
+template <typename fp_type>
+using function_triplet_t =
+    std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
+
+/**
+ * function_quad_t alias type
+ */
+template <typename fp_type>
+using function_quad_t = std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>,
+                                   std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
+
+/**
+ * pair_t alias type
+ */
+template <typename fp_type> using pair_t = std::pair<fp_type, fp_type>;
 
 // =========================================================================
 // ===================== PDE coefficient holder ============================
