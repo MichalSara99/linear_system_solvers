@@ -5,7 +5,7 @@
 
 #include "common/lss_print.hpp"
 #include "containers/lss_container_2d.hpp"
-#include "pde_solvers/one_dimensional/heat_type/lss_general_svc_heat_equation.hpp"
+#include "pde_solvers/one_dimensional/heat_type/lss_1d_general_svc_heat_equation.hpp"
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverEulerPrint()
 {

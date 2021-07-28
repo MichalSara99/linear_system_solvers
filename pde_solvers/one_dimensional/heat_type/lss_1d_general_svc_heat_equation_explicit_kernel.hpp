@@ -1,5 +1,5 @@
-#if !defined(_LSS_GENERAL_SVC_HEAT_EQUATION_EXPLICIT_KERNEL_HPP_)
-#define _LSS_GENERAL_SVC_HEAT_EQUATION_EXPLICIT_KERNEL_HPP_
+#if !defined(_LSS_1D_GENERAL_SVC_HEAT_EQUATION_EXPLICIT_KERNEL_HPP_)
+#define _LSS_1D_GENERAL_SVC_HEAT_EQUATION_EXPLICIT_KERNEL_HPP_
 
 #include <vector>
 
@@ -207,4 +207,4 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_GENERAL_SVC_HEAT_EQUATION_EXPLICIT_KERNEL_HPP_
+#endif ///_LSS_1D_GENERAL_SVC_HEAT_EQUATION_EXPLICIT_KERNEL_HPP_

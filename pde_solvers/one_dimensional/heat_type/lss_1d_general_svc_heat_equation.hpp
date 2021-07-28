@@ -1,5 +1,5 @@
-#if !defined(_LSS_GENERAL_SVC_HEAT_EQUATION_HPP_)
-#define _LSS_GENERAL_SVC_HEAT_EQUATION_HPP_
+#if !defined(_LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_)
+#define _LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_
 
 #include <functional>
 #include <map>
@@ -7,8 +7,8 @@
 #include "boundaries/lss_boundary_1d.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
-#include "lss_general_svc_heat_equation_explicit_kernel.hpp"
-#include "lss_general_svc_heat_equation_implicit_kernel.hpp"
+#include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
+#include "lss_1d_general_svc_heat_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_discretization.hpp"
 #include "pde_solvers/lss_discretization_config.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
@@ -614,4 +614,4 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_GENERAL_SVC_HEAT_EQUATION_HPP_
+#endif ///_LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_

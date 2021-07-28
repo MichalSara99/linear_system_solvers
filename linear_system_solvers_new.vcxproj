@@ -33,9 +33,10 @@
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_cuda_scheme.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_scheme.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_saulyev_svc_scheme.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_explicit_kernel.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_explicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heat_equation.hpp" />
     <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver.hpp" />
     <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver_policy.hpp" />
     <ClInclude Include="sparse_solvers\general\core_sor_solver\lss_core_sor_solver.hpp" />

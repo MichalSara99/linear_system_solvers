@@ -1,7 +1,7 @@
 #if !defined(_LSS_BLACK_SCHOLES_EQUATION_T_HPP_)
 #define _LSS_BLACK_SCHOLES_EQUATION_T_HPP_
 
-#include "pde_solvers/one_dimensional/heat_type/lss_general_svc_heat_equation.hpp"
+#include "pde_solvers/one_dimensional/heat_type/lss_1d_general_svc_heat_equation.hpp"
 #include <map>
 
 #define PI 3.14159265359

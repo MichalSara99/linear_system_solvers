@@ -207,9 +207,6 @@
     <ClInclude Include="unit_tests\containers\lss_container_2d_t.hpp">
       <Filter>unit_tests\containers</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\lss_discretization_config.hpp">
       <Filter>pde_solvers</Filter>
     </ClInclude>
@@ -219,9 +216,6 @@
     <ClInclude Include="pde_solvers\lss_heat_data_config.hpp">
       <Filter>pde_solvers</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_implicit_kernel.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\lss_discretization.hpp">
       <Filter>pde_solvers</Filter>
     </ClInclude>
@@ -230,9 +224,6 @@
     </ClInclude>
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_black_scholes_equation_t.hpp">
       <Filter>unit_tests\pde_solvers\one_dimensional</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_general_svc_heat_equation_explicit_kernel.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
     </ClInclude>
     <ClInclude Include="common\lss_print.hpp">
       <Filter>common</Filter>
@@ -251,6 +242,18 @@
     </ClInclude>
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_cuda_scheme.hpp">
       <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_explicit_kernel.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_implicit_kernel.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heat_equation.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
