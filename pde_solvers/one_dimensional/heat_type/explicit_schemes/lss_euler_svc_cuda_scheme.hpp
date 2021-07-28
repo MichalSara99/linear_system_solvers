@@ -1,6 +1,7 @@
 #if !defined(_LSS_EULER_SVC_CUDA_SCHEME_HPP_)
 #define _LSS_EULER_SVC_CUDA_SCHEME_HPP_
 
+#include <device_launch_parameters.h>
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 
@@ -34,6 +35,55 @@ using lss_utility::range;
 using lss_utility::sptr_t;
 
 /**
+ * core_kernel function
+ *
+ * \param a_coeff
+ * \param b_coeff
+ * \param d_coeff
+ * \param input
+ * \param solution
+ * \param size
+ * \return
+ */
+template <typename fp_type>
+__global__ void core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_type const *d_coeff,
+                            fp_type const *input, fp_type *solution, const std::size_t size)
+{
+    const std::size_t tid = blockDim.x * blockIdx.x + threadIdx.x;
+    if (tid == 0)
+        return;
+    if (tid >= (size - 1))
+        return;
+    solution[tid] = (d_coeff[tid] * input[tid + 1]) + (b_coeff[tid] * input[tid]) + (a_coeff[tid] * input[tid - 1]);
+}
+
+/**
+ * core_kernel function
+ *
+ * \param a_coeff
+ * \param b_coeff
+ * \param d_coeff
+ * \param time_step
+ * \param input
+ * \param source
+ * \param solution
+ * \param size
+ * \return
+ */
+template <typename fp_type>
+__global__ void core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_type const *d_coeff, fp_type time_step,
+                            fp_type const *input, fp_type const *source, fp_type *solution, const std::size_t size)
+{
+    const std::size_t tid = blockDim.x * blockIdx.x + threadIdx.x;
+    if (tid == 0)
+        return;
+    if (tid >= (size - 1))
+        return;
+    solution[tid] = (d_coeff[tid] * input[tid + 1]) + (b_coeff[tid] * input[tid]) + (a_coeff[tid] * input[tid - 1]) +
+                    (time_step * source[tid]);
+}
+
+/**
  * euler_svc_cuda_kernel object
  */
 template <typename fp_type> class euler_svc_cuda_kernel
@@ -44,9 +94,9 @@ template <typename fp_type> class euler_svc_cuda_kernel
     pair_t<fp_type> steps_;
     range<fp_type> spacer_;
     std::size_t space_size_;
-    thrust::host_vector<fp_type> a_;
-    thrust::host_vector<fp_type> b_;
-    thrust::host_vector<fp_type> d_;
+    thrust::device_vector<fp_type> d_a_;
+    thrust::device_vector<fp_type> d_b_;
+    thrust::device_vector<fp_type> d_d_;
 
     void initialize(function_triplet_t<fp_type> const &fun_triplet)
     {
@@ -55,13 +105,20 @@ template <typename fp_type> class euler_svc_cuda_kernel
         auto const &a = std::get<0>(fun_triplet);
         auto const &b = std::get<1>(fun_triplet);
         auto const &d = std::get<2>(fun_triplet);
-        a_.resize(space_size_);
-        b_.resize(space_size_);
-        d_.resize(space_size_);
-
-        d_1d::of_function(start_x, h, a, a_);
-        d_1d::of_function(start_x, h, b, b_);
-        d_1d::of_function(start_x, h, d, d_);
+        thrust::host_vector<fp_type> h_a(space_size_);
+        thrust::host_vector<fp_type> h_b(space_size_);
+        thrust::host_vector<fp_type> h_d(space_size_);
+        // discretize on host
+        d_1d::of_function(start_x, h, a, h_a);
+        d_1d::of_function(start_x, h, b, h_b);
+        d_1d::of_function(start_x, h, d, h_d);
+        // copy to device
+        d_a_.resize(space_size_);
+        d_b_.resize(space_size_);
+        d_d_.resize(space_size_);
+        thrust::copy(h_a.begin(), h_a.end(), d_a_.begin());
+        thrust::copy(h_b.begin(), h_b.end(), d_b_.begin());
+        thrust::copy(h_d.begin(), h_d.end(), d_d_.begin());
     }
 
   public:
@@ -74,28 +131,27 @@ template <typename fp_type> class euler_svc_cuda_kernel
     ~euler_svc_cuda_kernel()
     {
     }
-    void launch(thrust::host_vector<fp_type> const &input, thrust::host_vector<fp_type> &solution);
+    void launch(thrust::device_vector<fp_type> const &input, thrust::device_vector<fp_type> &solution);
 
-    void launch(thrust::host_vector<fp_type> const &input, thrust::host_vector<fp_type> const &source,
-                thrust::host_vector<fp_type> &solution);
+    void launch(thrust::device_vector<fp_type> const &input, thrust::device_vector<fp_type> const &source,
+                thrust::device_vector<fp_type> &solution);
 };
 
 template <typename fp_type> using euler_svc_cuda_kernel_ptr = sptr_t<euler_svc_cuda_kernel<fp_type>>;
 
-template <template <typename, typename> typename container, typename fp_type, typename alloc>
+template <typename fp_type>
 using explicit_svc_cuda_scheme_function =
     std::function<void(function_triplet_t<fp_type> const &, euler_svc_cuda_kernel_ptr<fp_type> const &,
-                       pair_t<fp_type> const &, container<fp_type, alloc> const &, container<fp_type, alloc> const &,
-                       boundary_1d_pair<fp_type> const &, fp_type const &, container<fp_type, alloc> &)>;
+                       pair_t<fp_type> const &, thrust::host_vector<fp_type> const &,
+                       thrust::host_vector<fp_type> const &, boundary_1d_pair<fp_type> const &, fp_type const &,
+                       thrust::host_vector<fp_type> &)>;
 
 /**
  * explicit_svc_cuda_scheme object
  */
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class explicit_svc_cuda_scheme
+template <typename fp_type> class explicit_svc_cuda_scheme
 {
-    typedef container<fp_type, allocator> container_t;
-    typedef explicit_svc_cuda_scheme_function<container, fp_type, allocator> scheme_function_t;
+    typedef explicit_svc_cuda_scheme_function<fp_type> scheme_function_t;
 
   public:
     static scheme_function_t const get(bool is_homogeneus)
@@ -103,8 +159,9 @@ class explicit_svc_cuda_scheme
         const fp_type two = static_cast<fp_type>(2.0);
         auto scheme_fun_h =
             [=](function_triplet_t<fp_type> const &coefficients, euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
-                std::pair<fp_type, fp_type> const &steps, container_t const &input, container_t const &inhom_input,
-                boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time, container_t &solution) {
+                std::pair<fp_type, fp_type> const &steps, thrust::host_vector<fp_type> const &input,
+                thrust::host_vector<fp_type> const &inhom_input, boundary_1d_pair<fp_type> const &boundary_pair,
+                fp_type const &time, thrust::host_vector<fp_type> &solution) {
                 auto const &first_bnd = boundary_pair.first;
                 auto const &second_bnd = boundary_pair.second;
                 auto const &a = std::get<0>(coefficients);
@@ -152,15 +209,16 @@ class explicit_svc_cuda_scheme
                                   delta * d(m * h);
                 }
                 // light-weight object with cuda kernel computing the solution:
-                thrust::host_vector<fp_type> h_input(input);
-                thrust::host_vector<fp_type> h_solution(solution);
-                kernel->launch(h_input, h_solution);
-                std::copy(h_solution.begin(), h_solution.end(), solution.begin());
+                thrust::device_vector<fp_type> d_input(input);
+                thrust::device_vector<fp_type> d_solution(solution);
+                kernel->launch(d_input, d_solution);
+                thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
             };
         auto scheme_fun_nh =
             [=](function_triplet_t<fp_type> const &coefficients, euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
-                std::pair<fp_type, fp_type> const &steps, container_t const &input, container_t const &inhom_input,
-                boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time, container_t &solution) {
+                std::pair<fp_type, fp_type> const &steps, thrust::host_vector<fp_type> const &input,
+                thrust::host_vector<fp_type> const &inhom_input, boundary_1d_pair<fp_type> const &boundary_pair,
+                fp_type const &time, thrust::host_vector<fp_type> &solution) {
                 auto const &first_bnd = boundary_pair.first;
                 auto const &second_bnd = boundary_pair.second;
                 auto const &a = std::get<0>(coefficients);
@@ -185,7 +243,6 @@ class explicit_svc_cuda_scheme
                     m = static_cast<fp_type>(0);
                     solution[0] = (b(m * h) + alpha * a(m * h)) * input[0] + (a(m * h) + d(m * h)) * input[1] +
                                   beta * a(m * h) + k * inhom_input[0];
-                    ;
                 }
                 // for upper boundaries second:
                 const std::size_t N = solution.size() - 1;
@@ -195,7 +252,6 @@ class explicit_svc_cuda_scheme
                     m = static_cast<fp_type>(N);
                     solution[N] = (a(m * h) + d(m * h)) * input[N - 1] + b(m * h) * input[N] - delta * d(m * h) +
                                   k * inhom_input[N];
-                    ;
                 }
                 else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
                 {
@@ -206,11 +262,11 @@ class explicit_svc_cuda_scheme
                                   delta * d(m * h) + k * inhom_input[N];
                 }
                 // light-weight object with cuda kernel computing the solution:
-                thrust::host_vector<fp_type> h_input(input);
-                thrust::host_vector<fp_type> h_inhom_input(inhom_input);
-                thrust::host_vector<fp_type> h_solution(solution);
-                kernel->launch(h_input, h_inhom_input, h_solution);
-                std::copy(h_solution.begin(), h_solution.end(), solution.begin());
+                thrust::device_vector<fp_type> d_input(input);
+                thrust::device_vector<fp_type> d_inhom_input(inhom_input);
+                thrust::device_vector<fp_type> d_solution(solution);
+                kernel->launch(d_input, d_inhom_input, d_solution);
+                thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
             };
         if (is_homogeneus)
         {
@@ -272,7 +328,6 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &solution)
 {
-    const fp_type zero = static_cast<fp_type>(0.0);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -280,14 +335,16 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // container for next solution:
-    container_t next_solution(sol_size, zero);
     // get function for sweeps:
     auto const &a = std::get<0>(func_triplet);
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
     auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    // create host vectors:
+    thrust::host_vector<fp_type> h_solution(sol_size);
+    thrust::copy(solution.begin(), solution.end(), h_solution.begin());
+    thrust::host_vector<fp_type> h_next_solution(sol_size);
 
     fp_type time{};
     std::size_t time_idx{};
@@ -297,8 +354,9 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(func_triplet, kernel, steps, solution, container_t(), boundary_pair, time, next_solution);
-            solution = next_solution;
+            scheme_fun(func_triplet, kernel, steps, h_solution, thrust::host_vector<fp_type>(), boundary_pair, time,
+                       h_next_solution);
+            h_solution = h_next_solution;
             time += k;
             time_idx++;
         }
@@ -310,8 +368,9 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
         do
         {
             time_idx--;
-            scheme_fun(func_triplet, kernel, steps, solution, container_t(), boundary_pair, time, next_solution);
-            solution = next_solution;
+            scheme_fun(func_triplet, kernel, steps, h_solution, thrust::host_vector<fp_type>(), boundary_pair, time,
+                       h_next_solution);
+            h_solution = h_next_solution;
             time -= k;
         } while (time_idx > 0);
     }
@@ -319,6 +378,7 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     {
         throw std::exception("Unreachable");
     }
+    thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -330,9 +390,8 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     traverse_direction_enum const &traverse_dir, container_t &solution,
     std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &source)
 {
-    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
+    typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
 
-    const fp_type zero = static_cast<fp_type>(0.0);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -340,42 +399,45 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // container for next solution:
-    container_t next_solution(sol_size, zero);
     // get function for sweeps:
     auto const &a = std::get<0>(func_triplet);
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
     auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    // create host vectors:
+    thrust::host_vector<fp_type> h_solution(sol_size);
+    thrust::host_vector<fp_type> h_next_solution(sol_size);
+    thrust::copy(solution.begin(), solution.end(), h_solution.begin());
+    thrust::host_vector<fp_type> h_source(sol_size);
 
     fp_type time{};
     std::size_t time_idx{};
     if (traverse_dir == traverse_direction_enum::Forward)
     {
-        d_1d::of_function(start_x, h, start_time, heat_source, source);
+        d_1d::of_function(start_x, h, start_time, heat_source, h_source);
         time = start_time + k;
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(func_triplet, kernel, steps, solution, source, boundary_pair, time, next_solution);
-            solution = next_solution;
-            d_1d::of_function(start_x, h, time, heat_source, source);
+            scheme_fun(func_triplet, kernel, steps, h_solution, h_source, boundary_pair, time, h_next_solution);
+            h_solution = h_next_solution;
+            d_1d::of_function(start_x, h, time, heat_source, h_source);
             time += k;
             time_idx++;
         }
     }
     else if (traverse_dir == traverse_direction_enum::Backward)
     {
-        d_1d::of_function(start_x, h, end_time, heat_source, source);
+        d_1d::of_function(start_x, h, end_time, heat_source, h_source);
         time = end_time - k;
         time_idx = last_time_idx;
         do
         {
             time_idx--;
-            scheme_fun(func_triplet, kernel, steps, solution, source, boundary_pair, time, next_solution);
-            solution = next_solution;
-            d_1d::of_function(start_x, h, time, heat_source, source);
+            scheme_fun(func_triplet, kernel, steps, h_solution, h_source, boundary_pair, time, h_next_solution);
+            h_solution = h_next_solution;
+            d_1d::of_function(start_x, h, time, heat_source, h_source);
             time -= k;
         } while (time_idx > 0);
     }
@@ -383,6 +445,7 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     {
         throw std::exception("Unreachable");
     }
+    thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -393,7 +456,6 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &solution, container_2d_t &solutions)
 {
-    const fp_type zero = static_cast<fp_type>(0.0);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -401,14 +463,16 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // container for next solution:
-    container_t next_solution(sol_size, zero);
     // get function for sweeps:
     auto const &a = std::get<0>(func_triplet);
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
     auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    // create host vectors:
+    thrust::host_vector<fp_type> h_solution(sol_size);
+    thrust::copy(solution.begin(), solution.end(), h_solution.begin());
+    thrust::host_vector<fp_type> h_next_solution(sol_size);
 
     fp_type time{};
     std::size_t time_idx{};
@@ -420,8 +484,10 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(func_triplet, kernel, steps, solution, container_t(), boundary_pair, time, next_solution);
-            solution = next_solution;
+            scheme_fun(func_triplet, kernel, steps, h_solution, thrust::host_vector<fp_type>(), boundary_pair, time,
+                       h_next_solution);
+            h_solution = h_next_solution;
+            thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
             solutions(time_idx, solution);
             time += k;
             time_idx++;
@@ -436,8 +502,10 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
         do
         {
             time_idx--;
-            scheme_fun(func_triplet, kernel, steps, solution, container_t(), boundary_pair, time, next_solution);
-            solution = next_solution;
+            scheme_fun(func_triplet, kernel, steps, h_solution, thrust::host_vector<fp_type>(), boundary_pair, time,
+                       h_next_solution);
+            h_solution = h_next_solution;
+            thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
             solutions(time_idx, solution);
             time -= k;
         } while (time_idx > 0);
@@ -457,9 +525,8 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     traverse_direction_enum const &traverse_dir, container_t &solution, container_2d_t &solutions,
     std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &source)
 {
-    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
+    typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
 
-    const fp_type zero = static_cast<fp_type>(0.0);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -467,14 +534,17 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // container for next_solution:
-    container_t next_solution(sol_size, zero);
     // get function for sweeps:
     auto const &a = std::get<0>(func_triplet);
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
     auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    // create host vectors:
+    thrust::host_vector<fp_type> h_solution(sol_size);
+    thrust::host_vector<fp_type> h_next_solution(sol_size);
+    thrust::copy(solution.begin(), solution.end(), h_solution.begin());
+    thrust::host_vector<fp_type> h_source(sol_size);
 
     fp_type time{};
     std::size_t time_idx{};
@@ -482,14 +552,15 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     {
         // store the initial solution:
         solutions(0, solution);
-        d_1d::of_function(start_x, h, start_time, heat_source, source);
+        d_1d::of_function(start_x, h, start_time, heat_source, h_source);
         time = start_time + k;
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(func_triplet, kernel, steps, solution, source, boundary_pair, time, next_solution);
-            solution = next_solution;
-            d_1d::of_function(start_x, h, time, heat_source, source);
+            scheme_fun(func_triplet, kernel, steps, h_solution, source, boundary_pair, time, h_next_solution);
+            h_solution = h_next_solution;
+            d_1d::of_function(start_x, h, time, heat_source, h_source);
+            thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
             solutions(time_idx, solution);
             time += k;
             time_idx++;
@@ -499,15 +570,16 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     {
         // store the initial solution:
         solutions(last_time_idx, solution);
-        d_1d::of_function(start_x, h, end_time, heat_source, source);
+        d_1d::of_function(start_x, h, end_time, heat_source, h_source);
         time = end_time - k;
         time_idx = last_time_idx;
         do
         {
             time_idx--;
-            scheme_fun(func_triplet, kernel, steps, solution, source, boundary_pair, time, next_solution);
-            solution = next_solution;
-            d_1d::of_function(start_x, h, time, heat_source, source);
+            scheme_fun(func_triplet, kernel, steps, h_solution, source, boundary_pair, time, h_next_solution);
+            h_solution = h_next_solution;
+            d_1d::of_function(start_x, h, time, heat_source, h_source);
+            thrust::copy(h_solution.begin(), h_solution.end(), solution.begin());
             solutions(time_idx, solution);
             time -= k;
         } while (time_idx > 0);
@@ -611,7 +683,7 @@ class euler_svc_cuda_scheme
         container_t source(sol_size, NaN<fp_type>());
         auto const &steps = std::make_pair(k, h);
         const bool is_homogeneous = !is_heat_sourse_set;
-        auto scheme_function = explicit_svc_cuda_scheme<fp_type, container, allocator>::get(is_homogeneous);
+        auto scheme_function = explicit_svc_cuda_scheme<fp_type>::get(is_homogeneous);
         if (is_heat_sourse_set)
         {
             loop::run(fun_trip, scheme_function, boundary_pair_, spacer, timer, last_time_idx, steps, traverse_dir,
@@ -651,7 +723,7 @@ class euler_svc_cuda_scheme
         container_t source(sol_size, NaN<fp_type>());
         auto const &steps = std::make_pair(k, h);
         const bool is_homogeneous = !is_heat_sourse_set;
-        auto scheme_function = explicit_svc_cuda_scheme<fp_type, container, allocator>::get(is_homogeneous);
+        auto scheme_function = explicit_svc_cuda_scheme<fp_type>::get(is_homogeneous);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(fun_trip, scheme_function, boundary_pair_, spacer, timer, last_time_idx, steps,

@@ -1457,7 +1457,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCEuler()
     // number of space subdivisions:
     std::size_t const Sd = 100;
     // number of time subdivisions:
-    std::size_t const Td = 10000;
+    std::size_t const Td = 6000;
     // space range:
     range<T> space_range(static_cast<T>(0.0), static_cast<T>(20.0));
     // time range

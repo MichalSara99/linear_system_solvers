@@ -564,7 +564,6 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
     LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
                "The input solution 2D container must have the correct size");
     // calculate scheme coefficients:
-    const fp_type one = static_cast<fp_type>(1.0);
     const fp_type two = static_cast<fp_type>(2.0);
     const fp_type half = static_cast<fp_type>(0.5);
     const fp_type lambda = k / (h * h);
