@@ -1,7 +1,7 @@
 #if !defined(_LSS_SAULYEV_SVC_SCHEME_HPP_)
 #define _LSS_SAULYEV_SVC_SCHEME_HPP_
 
-#include "boundaries/lss_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
@@ -14,11 +14,11 @@ namespace lss_pde_solvers
 namespace one_dimensional
 {
 
-using lss_boundary_1d::boundary_1d_pair;
-using lss_boundary_1d::boundary_1d_ptr;
-using lss_boundary_1d::dirichlet_boundary_1d;
-using lss_boundary_1d::neumann_boundary_1d;
-using lss_boundary_1d::robin_boundary_1d;
+using lss_boundary::boundary_1d_pair;
+using lss_boundary::boundary_1d_ptr;
+using lss_boundary::dirichlet_boundary_1d;
+using lss_boundary::neumann_boundary_1d;
+using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::traverse_direction_enum;
 using lss_utility::function_quad_t;

@@ -4,10 +4,10 @@
 
 #pragma warning(disable : 4244)
 
-#include "boundaries/lss_boundary_1d.hpp"
-#include "boundaries/lss_dirichlet_boundary_1d.hpp"
-#include "boundaries/lss_neumann_boundary_1d.hpp"
-#include "boundaries/lss_robin_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
+#include "boundaries/lss_dirichlet_boundary.hpp"
+#include "boundaries/lss_neumann_boundary.hpp"
+#include "boundaries/lss_robin_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_macros.hpp"
 #include "common/lss_utility.hpp"
@@ -15,19 +15,14 @@
 namespace lss_sor_solver
 {
 
-using lss_boundary_1d::boundary_1d_ptr;
-using lss_boundary_1d::dirichlet_boundary_1d;
-using lss_boundary_1d::dirichlet_boundary_1d_ptr;
-using lss_boundary_1d::neumann_boundary_1d;
-using lss_boundary_1d::neumann_boundary_1d_ptr;
-using lss_boundary_1d::robin_boundary_1d;
-using lss_boundary_1d::robin_boundary_1d_ptr;
+using lss_boundary::boundary_pair;
+using lss_boundary::dirichlet_boundary;
+using lss_boundary::neumann_boundary;
+using lss_boundary::robin_boundary;
 
 template <typename fp_type> class sor_boundary
 {
   private:
-    boundary_1d_ptr<fp_type> first_;
-    boundary_1d_ptr<fp_type> second_;
     std::tuple<fp_type, fp_type, fp_type, fp_type> lowest_quad_;
     std::tuple<fp_type, fp_type, fp_type, fp_type> lower_quad_;
     std::tuple<fp_type, fp_type, fp_type, fp_type> higher_quad_;
@@ -39,19 +34,24 @@ template <typename fp_type> class sor_boundary
     std::size_t discretization_size_;
 
     explicit sor_boundary() = delete;
-    void initialise(fp_type time);
-    void finalise(fp_type time);
+
+    template <typename... fp_space_types>
+    void initialise(boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time,
+                    fp_space_types... space_args);
+
+    template <typename... fp_space_types>
+    void finalise(boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time,
+                  fp_space_types... space_args);
 
   public:
     typedef fp_type value_type;
-    explicit sor_boundary(const boundary_1d_ptr<fp_type> &first, const boundary_1d_ptr<fp_type> &second,
-                          const std::tuple<fp_type, fp_type, fp_type, fp_type> &lowest_quad,
+    explicit sor_boundary(const std::tuple<fp_type, fp_type, fp_type, fp_type> &lowest_quad,
                           const std::tuple<fp_type, fp_type, fp_type, fp_type> &lower_quad,
                           const std::tuple<fp_type, fp_type, fp_type, fp_type> &higher_quad,
                           const std::tuple<fp_type, fp_type, fp_type, fp_type> &highest_quad,
                           const std::size_t discretization_size, const fp_type &space_step)
-        : first_{first}, second_{second}, lowest_quad_{lowest_quad}, lower_quad_{lower_quad}, higher_quad_{higher_quad},
-          highest_quad_{highest_quad}, discretization_size_{discretization_size}, space_step_{space_step}
+        : lowest_quad_{lowest_quad}, lower_quad_{lower_quad}, higher_quad_{higher_quad}, highest_quad_{highest_quad},
+          discretization_size_{discretization_size}, space_step_{space_step}
     {
     }
 
@@ -59,15 +59,19 @@ template <typename fp_type> class sor_boundary
     {
     }
 
-    const std::tuple<fp_type, fp_type, fp_type> init_coefficients(fp_type time)
+    template <typename... fp_space_types>
+    const std::tuple<fp_type, fp_type, fp_type> init_coefficients(
+        boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time, fp_space_types... space_args)
     {
-        initialise(time);
+        initialise(boundary, time, space_args...);
         return std::make_tuple(b_init_, c_init_, f_init_);
     }
 
-    const std::tuple<fp_type, fp_type, fp_type> final_coefficients(fp_type time)
+    template <typename... fp_space_types>
+    const std::tuple<fp_type, fp_type, fp_type> final_coefficients(
+        boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time, fp_space_types... space_args)
     {
-        finalise(time);
+        finalise(boundary, time, space_args...);
         return std::make_tuple(a_end_, b_end_, f_end_);
     }
 
@@ -81,11 +85,19 @@ template <typename fp_type> class sor_boundary
         return end_index_;
     }
 
-    const fp_type upper_boundary(fp_type time);
-    const fp_type lower_boundary(fp_type time);
+    template <typename... fp_space_types>
+    const fp_type upper_boundary(boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time,
+                                 fp_space_types... space_args);
+
+    template <typename... fp_space_types>
+    const fp_type lower_boundary(boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time,
+                                 fp_space_types... space_args);
 };
 
-template <typename fp_type> void sor_boundary<fp_type>::initialise(fp_type time)
+template <typename fp_type>
+template <typename... fp_space_types>
+void sor_boundary<fp_type>::initialise(boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time,
+                                       fp_space_types... space_args)
 {
     const auto a_0 = std::get<0>(lowest_quad_);
     const auto b_0 = std::get<1>(lowest_quad_);
@@ -96,26 +108,27 @@ template <typename fp_type> void sor_boundary<fp_type>::initialise(fp_type time)
     const auto c_1 = std::get<2>(lower_quad_);
     const auto f_1 = std::get<3>(lower_quad_);
     const fp_type two = static_cast<fp_type>(2.0);
-    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(first_))
+    auto const &first_bnd = boundary.first;
+    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary<fp_type, fp_space_types...>>(first_bnd))
     {
-        const auto cst_val = ptr->value(time);
+        const auto cst_val = ptr->value(time, space_args...);
         start_index_ = 1;
         b_init_ = b_1;
         c_init_ = c_1;
         f_init_ = f_1 - a_1 * cst_val;
     }
-    else if (auto ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_))
+    else if (auto ptr = std::dynamic_pointer_cast<neumann_boundary<fp_type, fp_space_types...>>(first_bnd))
     {
-        const auto cst_val = two * space_step_ * ptr->value(time);
+        const auto cst_val = two * space_step_ * ptr->value(time, space_args...);
         start_index_ = 0;
         b_init_ = b_0;
         c_init_ = a_0 + c_0;
         f_init_ = f_0 - a_0 * cst_val;
     }
-    else if (auto ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_))
+    else if (auto ptr = std::dynamic_pointer_cast<robin_boundary<fp_type, fp_space_types...>>(first_bnd))
     {
-        const auto lin_val = two * space_step_ * ptr->linear_value(time);
-        const auto cst_val = two * space_step_ * ptr->value(time);
+        const auto lin_val = two * space_step_ * ptr->linear_value(time, space_args...);
+        const auto cst_val = two * space_step_ * ptr->value(time, space_args...);
         start_index_ = 0;
         b_init_ = b_0 + a_0 * cst_val;
         c_init_ = a_0 + c_0;
@@ -127,7 +140,10 @@ template <typename fp_type> void sor_boundary<fp_type>::initialise(fp_type time)
     }
 }
 
-template <typename fp_type> void sor_boundary<fp_type>::finalise(fp_type time)
+template <typename fp_type>
+template <typename... fp_space_types>
+void sor_boundary<fp_type>::finalise(boundary_pair<fp_type, fp_space_types...> const &boundary, fp_type time,
+                                     fp_space_types... space_args)
 {
     const auto a = std::get<0>(higher_quad_);
     const auto b = std::get<1>(higher_quad_);
@@ -138,26 +154,27 @@ template <typename fp_type> void sor_boundary<fp_type>::finalise(fp_type time)
     const auto c_end = std::get<2>(highest_quad_);
     const auto f_end = std::get<3>(highest_quad_);
     const fp_type two = static_cast<fp_type>(2.0);
-    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(second_))
+    auto const &second_bnd = boundary.second;
+    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary<fp_type, fp_space_types...>>(second_bnd))
     {
-        const auto cst_val = ptr->value(time);
+        const auto cst_val = ptr->value(time, space_args...);
         end_index_ = discretization_size_ - 2;
         a_end_ = a;
         b_end_ = b;
         f_end_ = f - c * cst_val;
     }
-    else if (auto ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_))
+    else if (auto ptr = std::dynamic_pointer_cast<neumann_boundary<fp_type, fp_space_types...>>(second_bnd))
     {
-        const auto cst_val = two * space_step_ * ptr->value(time);
+        const auto cst_val = two * space_step_ * ptr->value(time, space_args...);
         end_index_ = discretization_size_ - 1;
         a_end_ = a_end + c_end;
         b_end_ = b_end;
         f_end_ = f_end + c_end * cst_val;
     }
-    else if (auto ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_))
+    else if (auto ptr = std::dynamic_pointer_cast<robin_boundary<fp_type, fp_space_types...>>(second_bnd))
     {
-        const auto lin_val = two * space_step_ * ptr->linear_value(time);
-        const auto cst_val = two * space_step_ * ptr->value(time);
+        const auto lin_val = two * space_step_ * ptr->linear_value(time, space_args...);
+        const auto cst_val = two * space_step_ * ptr->value(time, space_args...);
         end_index_ = discretization_size_ - 1;
         a_end_ = a_end + c_end;
         b_end_ = b_end - c_end * lin_val;
@@ -169,23 +186,29 @@ template <typename fp_type> void sor_boundary<fp_type>::finalise(fp_type time)
     }
 }
 
-template <typename fp_type> const fp_type sor_boundary<fp_type>::upper_boundary(fp_type time)
+template <typename fp_type>
+template <typename... fp_space_types>
+const fp_type sor_boundary<fp_type>::upper_boundary(boundary_pair<fp_type, fp_space_types...> const &boundary,
+                                                    fp_type time, fp_space_types... space_args)
 {
     fp_type ret{};
-    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(second_))
+    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary<fp_type, fp_space_types...>>(boundary.second))
     {
-        ret = ptr->value(time);
+        ret = ptr->value(time, space_args...);
     }
 
     return ret;
 }
 
-template <typename fp_type> const fp_type sor_boundary<fp_type>::lower_boundary(fp_type time)
+template <typename fp_type>
+template <typename... fp_space_types>
+const fp_type sor_boundary<fp_type>::lower_boundary(boundary_pair<fp_type, fp_space_types...> const &boundary,
+                                                    fp_type time, fp_space_types... space_args)
 {
     fp_type ret{};
-    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(first_))
+    if (auto ptr = std::dynamic_pointer_cast<dirichlet_boundary<fp_type, fp_space_types...>>(boundary.first))
     {
-        ret = ptr->value(time);
+        ret = ptr->value(time, space_args...);
     }
     return ret;
 }

@@ -9,7 +9,7 @@
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverEulerPrint()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -101,7 +101,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolsonPrint()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -207,7 +207,7 @@ void testImplBlackScholesEquationDirichletBCThomasLUSolverPrint()
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverEulerPrintSurf()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
@@ -307,7 +307,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolsonPrintSurf()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
@@ -421,7 +421,7 @@ void testImplBlackScholesEquationDirichletBCThomasLUSolverPrintSurf()
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQREulerPrintSurface()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_euler_solver_config_ptr;
@@ -526,7 +526,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQRCrankNicolsonPrintSurface()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_cn_solver_config_ptr;
@@ -644,7 +644,7 @@ void testImplPureHeatEquationDirichletBCCUDASolverDeviceQRPrintSurface()
 
 template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSurf()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::dev_expl_fwd_euler_solver_config_ptr;

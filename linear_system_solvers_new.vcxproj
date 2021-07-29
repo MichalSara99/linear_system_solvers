@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="boundaries\lss_boundary_1d.hpp" />
-    <ClInclude Include="boundaries\lss_dirichlet_boundary_1d.hpp" />
-    <ClInclude Include="boundaries\lss_neumann_boundary_1d.hpp" />
-    <ClInclude Include="boundaries\lss_robin_boundary_1d.hpp" />
+    <ClInclude Include="boundaries\lss_boundary.hpp" />
+    <ClInclude Include="boundaries\lss_dirichlet_boundary.hpp" />
+    <ClInclude Include="boundaries\lss_neumann_boundary.hpp" />
+    <ClInclude Include="boundaries\lss_robin_boundary.hpp" />
     <ClInclude Include="common\lss_enumerations.hpp" />
     <ClInclude Include="common\lss_helpers.hpp" />
     <ClInclude Include="common\lss_macros.hpp" />

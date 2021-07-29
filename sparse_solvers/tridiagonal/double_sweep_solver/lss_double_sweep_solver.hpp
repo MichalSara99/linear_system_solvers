@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "boundaries/lss_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_macros.hpp"
 #include "common/lss_utility.hpp"
@@ -17,7 +17,7 @@
 namespace lss_double_sweep_solver
 {
 
-using lss_boundary_1d::boundary_1d_ptr;
+using lss_boundary::boundary_pair;
 using lss_utility::range;
 using lss_utility::sptr_t;
 
@@ -29,14 +29,15 @@ template <typename fp_type, template <typename, typename> typename container = s
 class double_sweep_solver
 {
   private:
-    boundary_1d_ptr<fp_type> low_;
-    boundary_1d_ptr<fp_type> high_;
     std::size_t discretization_size_;
     range<fp_type> space_range_;
     container<fp_type, allocator> a_, b_, c_, f_;
     container<fp_type, allocator> L_, K_;
 
-    void kernel(container<fp_type, allocator> &solution, fp_type mtime);
+    template <typename... fp_space_types>
+    void kernel(boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution,
+                fp_type time, fp_space_types... space_args);
+
     explicit double_sweep_solver() = delete;
 
   public:
@@ -56,15 +57,24 @@ class double_sweep_solver
 
     void set_rhs(container<fp_type, allocator> const &rhs);
 
-    void set_boundary(const boundary_1d_ptr<fp_type> &low, const boundary_1d_ptr<fp_type> &high);
+    void solve(boundary_pair<fp_type> const &boundary, container<fp_type, allocator> &solution)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel(boundary, solution, fp_type{});
+    }
 
-    void solve(container<fp_type, allocator> &solution);
+    void solve(boundary_pair<fp_type> const &boundary, container<fp_type, allocator> &solution, fp_type at_time)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel(boundary, solution, at_time);
+    }
 
-    container<fp_type, allocator> const solve();
-
-    void solve(container<fp_type, allocator> &solution, fp_type at_time);
-
-    container<fp_type, allocator> const solve(fp_type at_time);
+    void solve(boundary_pair<fp_type, fp_type> const &boundary, container<fp_type, allocator> &solution,
+               fp_type at_time, fp_type space_arg)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel<fp_type>(boundary, solution, at_time, space_arg);
+    }
 };
 
 template <typename fp_type> using double_sweep_solver_ptr = sptr_t<double_sweep_solver<fp_type>>;
@@ -93,51 +103,10 @@ void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>::set_boundary(
-    const boundary_1d_ptr<fp_type> &low, const boundary_1d_ptr<fp_type> &high)
-{
-    LSS_VERIFY(low, "Low boundary must be set");
-    LSS_VERIFY(high, "High boundary must be set");
-    low_ = low;
-    high_ = high;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>::solve(
-    container<fp_type, allocator> &solution)
-{
-    LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
-    kernel(solution, fp_type{});
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-container<fp_type, allocator> const lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>::solve()
-{
-    container<fp_type, allocator> solution(discretization_size_);
-    kernel(solution, fp_type{});
-    return solution;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>::solve(
-    container<fp_type, allocator> &solution, fp_type at_time)
-{
-    LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
-    kernel(solution, at_time);
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-container<fp_type, allocator> const lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>::solve(
-    fp_type at_time)
-{
-    container<fp_type, allocator> solution(discretization_size_);
-    kernel(solution, at_time);
-    return solution;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
+template <typename... fp_space_types>
 void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>::kernel(
-    container<fp_type, allocator> &solution, fp_type time)
+    boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution, fp_type time,
+    fp_space_types... space_args)
 {
     // clear coefficients:
     K_.clear();
@@ -149,11 +118,11 @@ void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>
     const std::size_t N = discretization_size_ - 1;
     const auto &low_quad = std::make_tuple(a_[0], b_[0], c_[0], f_[0]);
     const fp_type step = space_range_.spread() / static_cast<fp_type>(N);
-    double_sweep_boundary<fp_type> boundary(low_, high_, low_quad, discretization_size_, step);
+    double_sweep_boundary<fp_type> solver_boundary(low_quad, discretization_size_, step);
     // init coefficients:
-    const auto pair = boundary.coefficients(time);
-    const std::size_t start_index = boundary.start_index();
-    const std::size_t end_index = boundary.end_index();
+    const auto pair = solver_boundary.coefficients(boundary, time, space_args...);
+    const std::size_t start_index = solver_boundary.start_index();
+    const std::size_t end_index = solver_boundary.end_index(boundary);
 
     L_[0] = std::get<1>(pair);
     K_[0] = std::get<0>(pair);
@@ -167,14 +136,14 @@ void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>
         K_[t] = (f_[t] - (a_[t] * K_[t - 1])) / tmp;
     }
 
-    f_[N] = boundary.upper_boundary(K_[N - 1], K_[N], L_[N - 1], L_[N], time);
+    f_[N] = solver_boundary.upper_boundary(boundary, K_[N - 1], K_[N], L_[N - 1], L_[N], time, space_args...);
 
     for (long long t = N - 1; t >= start_index && t >= 0; --t)
     {
         f_[t] = (L_[t] * f_[t + 1]) + K_[t];
     }
     if (start_index == 1)
-        f_[0] = boundary.lower_boundary(time);
+        f_[0] = solver_boundary.lower_boundary(boundary, time, space_args...);
 
     std::copy(f_.begin(), f_.end(), solution.begin());
 }

@@ -111,18 +111,6 @@
     <ClInclude Include="common\lss_utility.hpp">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="boundaries\lss_boundary_1d.hpp">
-      <Filter>boundaries</Filter>
-    </ClInclude>
-    <ClInclude Include="boundaries\lss_dirichlet_boundary_1d.hpp">
-      <Filter>boundaries</Filter>
-    </ClInclude>
-    <ClInclude Include="boundaries\lss_neumann_boundary_1d.hpp">
-      <Filter>boundaries</Filter>
-    </ClInclude>
-    <ClInclude Include="boundaries\lss_robin_boundary_1d.hpp">
-      <Filter>boundaries</Filter>
-    </ClInclude>
     <ClInclude Include="unit_tests\sparse_solvers\lss_double_sweep_solver_t.hpp">
       <Filter>unit_tests\sparse_solvers</Filter>
     </ClInclude>
@@ -254,6 +242,18 @@
     </ClInclude>
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heat_equation.hpp">
       <Filter>pde_solvers\two_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_boundary.hpp">
+      <Filter>boundaries</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_dirichlet_boundary.hpp">
+      <Filter>boundaries</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_neumann_boundary.hpp">
+      <Filter>boundaries</Filter>
+    </ClInclude>
+    <ClInclude Include="boundaries\lss_robin_boundary.hpp">
+      <Filter>boundaries</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 #if !defined(_LSS_SOR_SOLVER_HPP_)
 #define _LSS_SOR_SOLVER_HPP_
 
-#include "boundaries/lss_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_macros.hpp"
 #include "common/lss_utility.hpp"
@@ -14,7 +14,7 @@
 namespace lss_sor_solver
 {
 
-using lss_boundary_1d::boundary_1d_ptr;
+using lss_boundary::boundary_pair;
 using lss_core_sor_solver::core_sor_solver;
 using lss_core_sor_solver::flat_matrix;
 using lss_sor_solver_traits::sor_solver_traits;
@@ -26,15 +26,15 @@ template <typename fp_type, template <typename, typename> typename container = s
 class sor_solver
 {
   private:
-    boundary_1d_ptr<fp_type> low_;
-    boundary_1d_ptr<fp_type> high_;
     std::size_t discretization_size_;
     range<fp_type> space_range_;
     container<fp_type, allocator> a_, b_, c_, f_;
     fp_type omega_;
 
-    template <template <typename fp_type> typename traits = sor_solver_traits>
-    void kernel(container<fp_type, allocator> &solution, fp_type time);
+    template <typename... fp_space_types>
+    void kernel(boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution,
+                fp_type time, fp_space_types... space_args);
+
     explicit sor_solver() = delete;
 
   public:
@@ -58,24 +58,29 @@ class sor_solver
 
     void set_rhs(container<fp_type, allocator> const &rhs);
 
-    void set_boundary(const boundary_1d_ptr<fp_type> &low, const boundary_1d_ptr<fp_type> &high);
-
     void set_omega(fp_type value)
     {
         omega_ = value;
     }
 
-    template <template <typename fp_type> typename traits = sor_solver_traits>
-    void solve(container<fp_type, allocator> &solution);
+    void solve(boundary_pair<fp_type> const &boundary, container<fp_type, allocator> &solution)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel(boundary, solution, fp_type{});
+    }
 
-    template <template <typename fp_type> typename traits = sor_solver_traits>
-    container<fp_type, allocator> const solve();
+    void solve(boundary_pair<fp_type> const &boundary, container<fp_type, allocator> &solution, fp_type at_time)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel(boundary, solution, at_time);
+    }
 
-    template <template <typename fp_type> typename traits = sor_solver_traits>
-    void solve(container<fp_type, allocator> &solution, fp_type at_time);
-
-    template <template <typename fp_type> typename traits = sor_solver_traits>
-    container<fp_type, allocator> const solve(fp_type at_time);
+    void solve(boundary_pair<fp_type, fp_type> const &boundary, container<fp_type, allocator> &solution,
+               fp_type at_time, fp_type space_arg)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel<fp_type>(boundary, solution, at_time, space_arg);
+    }
 };
 
 template <typename fp_type> using sor_solver_ptr = sptr_t<sor_solver<fp_type>>;
@@ -103,54 +108,10 @@ void lss_sor_solver::sor_solver<fp_type, container, allocator>::set_rhs(containe
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void lss_sor_solver::sor_solver<fp_type, container, allocator>::set_boundary(const boundary_1d_ptr<fp_type> &low,
-                                                                             const boundary_1d_ptr<fp_type> &high)
-{
-    LSS_VERIFY(low, "Low boundary must be set");
-    LSS_VERIFY(high, "High boundary must be set");
-    low_ = low;
-    high_ = high;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <template <typename fp_type> typename traits>
-void lss_sor_solver::sor_solver<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
-{
-    LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
-    kernel(solution, fp_type{});
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <template <typename fp_type> typename traits>
-container<fp_type, allocator> const lss_sor_solver::sor_solver<fp_type, container, allocator>::solve()
-{
-    container<fp_type, allocator> solution(discretization_size_);
-    kernel(solution, fp_type{});
-    return solution;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <template <typename fp_type> typename traits>
-void lss_sor_solver::sor_solver<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution,
-                                                                      fp_type at_time)
-{
-    LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
-    kernel(solution, at_time);
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <template <typename fp_type> typename traits>
-container<fp_type, allocator> const lss_sor_solver::sor_solver<fp_type, container, allocator>::solve(fp_type at_time)
-{
-    container<fp_type, allocator> solution(discretization_size_);
-    kernel(solution, at_time);
-    return solution;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <template <typename fp_type> typename traits>
-void lss_sor_solver::sor_solver<fp_type, container, allocator>::kernel(container<fp_type, allocator> &solution,
-                                                                       fp_type time)
+template <typename... fp_space_types>
+void lss_sor_solver::sor_solver<fp_type, container, allocator>::kernel(
+    boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution, fp_type time,
+    fp_space_types... space_args)
 {
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
@@ -159,12 +120,12 @@ void lss_sor_solver::sor_solver<fp_type, container, allocator>::kernel(container
     const auto &higher_quad = std::make_tuple(a_[N - 1], b_[N - 1], c_[N - 1], f_[N - 1]);
     const auto &highest_quad = std::make_tuple(a_[N], b_[N], c_[N], f_[N]);
     const fp_type step = space_range_.spread() / static_cast<fp_type>(N);
-    sor_boundary<fp_type> boundary(low_, high_, lowest_quad, lower_quad, higher_quad, highest_quad,
-                                   discretization_size_, step);
-    const auto &init_coeffs = boundary.init_coefficients(time);
-    const std::size_t start_idx = boundary.start_index();
-    const auto &fin_coeffs = boundary.final_coefficients(time);
-    const std::size_t end_idx = boundary.end_index();
+    sor_boundary<fp_type> solver_boundary(lowest_quad, lower_quad, higher_quad, highest_quad, discretization_size_,
+                                          step);
+    const auto &init_coeffs = solver_boundary.init_coefficients(boundary, time, space_args...);
+    const std::size_t start_idx = solver_boundary.start_index();
+    const auto &fin_coeffs = solver_boundary.final_coefficients(boundary, time, space_args...);
+    const std::size_t end_idx = solver_boundary.end_index();
 
     const std::size_t system_size = end_idx - start_idx + 1;
     flat_matrix<fp_type> mat(system_size, system_size);
@@ -194,9 +155,9 @@ void lss_sor_solver::sor_solver<fp_type, container, allocator>::kernel(container
     std::copy(sub_solution.begin(), sub_solution.end(), std::next(solution.begin(), start_idx));
     // fill in the boundary values:
     if (start_idx == 1)
-        solution[0] = boundary.lower_boundary(time);
+        solution[0] = solver_boundary.lower_boundary(boundary, time, space_args...);
     if (end_idx == N - 1)
-        solution[N] = boundary.upper_boundary(time);
+        solution[N] = solver_boundary.upper_boundary(boundary, time, space_args...);
 }
 
 #endif ///_LSS_SOR_SOLVER_HPP_

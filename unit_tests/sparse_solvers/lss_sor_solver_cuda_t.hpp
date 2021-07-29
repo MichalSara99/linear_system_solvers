@@ -8,7 +8,7 @@
 
 template <typename T> void testBVPSORCUDADirichletBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
     using lss_utility::range;
 
@@ -59,11 +59,11 @@ template <typename T> void testBVPSORCUDADirichletBC()
     range<T> space_range(0.0, 1.0);
     auto dss = std::make_shared<sor_solver_cuda<T, std::vector, std::allocator<T>>>(space_range, N + 1);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     dss->set_omega(static_cast<T>(0.6));
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return x * (static_cast<T>(1.0) - x); };
@@ -89,8 +89,8 @@ void testSORCUDADirichletBC()
 
 template <typename T> void testBVPSORCUDARobinBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
     using lss_utility::range;
 
@@ -142,11 +142,11 @@ template <typename T> void testBVPSORCUDARobinBC()
     range<T> space_range(0.0, 1.0);
     auto dss = std::make_shared<sor_solver_cuda<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     dss->set_omega(static_cast<T>(1.65));
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(1.0)); };
@@ -173,8 +173,8 @@ void testSORCUDARobinBC()
 
 template <typename T> void testBVPSORCUDADirichletNeumannBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
@@ -232,11 +232,11 @@ template <typename T> void testBVPSORCUDADirichletNeumannBC()
 
     auto dss = std::make_shared<sor_solver_cuda<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     dss->set_omega(static_cast<T>(1.65));
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x - 12.0 * x + 1.0); };
@@ -263,8 +263,8 @@ void testSORCUDADirichletNeumannBC()
 
 template <typename T> void testBVPSORCUDANeumannDirichletBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
@@ -322,11 +322,11 @@ template <typename T> void testBVPSORCUDANeumannDirichletBC()
 
     auto dss = std::make_shared<sor_solver_cuda<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     dss->set_omega(static_cast<T>(1.65));
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x + x - 10.0); };
@@ -353,8 +353,8 @@ void testSORCUDANeumannDirichletBC()
 
 template <typename T> void testBVPSORCUDANeumannRobinBC()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
@@ -414,11 +414,11 @@ template <typename T> void testBVPSORCUDANeumannRobinBC()
 
     auto dss = std::make_shared<sor_solver_cuda<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     dss->set_omega(static_cast<T>(1.65));
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x - static_cast<T>(14.0)); };
@@ -445,8 +445,8 @@ void testSORCUDANeumannRobinBC()
 
 template <typename T> void testBVPSORCUDAMixBC()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
     using lss_utility::range;
 
@@ -498,11 +498,11 @@ template <typename T> void testBVPSORCUDAMixBC()
     range<T> space_range(0.0, 1.0);
     auto dss = std::make_shared<sor_solver_cuda<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     dss->set_omega(static_cast<T>(1.75));
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(0.5)); };

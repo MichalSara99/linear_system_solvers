@@ -10,7 +10,7 @@
 
 template <typename T> void testBVPCUDADirichletBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
     using lss_utility::range;
@@ -63,10 +63,10 @@ template <typename T> void testBVPCUDADirichletBC()
     auto dss =
         std::make_shared<cuda_solver<memory_space_enum::Device, T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return x * (static_cast<T>(1.0) - x); };
@@ -92,8 +92,8 @@ void testCUDADirichletBC()
 
 template <typename T> void testBVPCUDARobinBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
     using lss_utility::range;
@@ -147,10 +147,10 @@ template <typename T> void testBVPCUDARobinBC()
     auto dss =
         std::make_shared<cuda_solver<memory_space_enum::Device, T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(1.0)); };
@@ -177,8 +177,8 @@ void testCUDARobinBC()
 
 template <typename T> void testBVPCUDADirichletNeumannBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
@@ -237,10 +237,10 @@ template <typename T> void testBVPCUDADirichletNeumannBC()
     auto dss =
         std::make_shared<cuda_solver<memory_space_enum::Device, T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x - 12.0 * x + 1.0); };
@@ -267,8 +267,8 @@ void testCUDADirichletNeumannBC()
 
 template <typename T> void testBVPCUDANeumannDirichletBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
@@ -327,10 +327,10 @@ template <typename T> void testBVPCUDANeumannDirichletBC()
     auto dss =
         std::make_shared<cuda_solver<memory_space_enum::Device, T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x + x - 10.0); };
@@ -357,8 +357,8 @@ void testCUDANeumannDirichletBC()
 
 template <typename T> void testBVPCUDANeumannRobinBC()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
@@ -419,10 +419,10 @@ template <typename T> void testBVPCUDANeumannRobinBC()
     auto dss =
         std::make_shared<cuda_solver<memory_space_enum::Device, T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x - static_cast<T>(14.0)); };
@@ -449,8 +449,8 @@ void testCUDANeumannRobinBC()
 
 template <typename T> void testBVPCUDAMixBC()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
     using lss_utility::range;
@@ -504,10 +504,10 @@ template <typename T> void testBVPCUDAMixBC()
     auto dss =
         std::make_shared<cuda_solver<memory_space_enum::Device, T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(0.5)); };

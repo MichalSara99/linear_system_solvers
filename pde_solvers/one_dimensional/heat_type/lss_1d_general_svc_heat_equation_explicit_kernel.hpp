@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "boundaries/lss_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
@@ -20,7 +20,7 @@ namespace lss_pde_solvers
 namespace one_dimensional
 {
 
-using lss_boundary_1d::boundary_1d_pair;
+using lss_boundary::boundary_1d_pair;
 using lss_containers::container_2d;
 using lss_enumerations::dimension_enum;
 using lss_enumerations::explicit_pde_schemes_enum;

@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "boundaries/lss_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_macros.hpp"
 #include "common/lss_utility.hpp"
@@ -17,7 +17,7 @@
 namespace lss_thomas_lu_solver
 {
 
-using lss_boundary_1d::boundary_1d_ptr;
+using lss_boundary::boundary_pair;
 using lss_utility::range;
 using lss_utility::sptr_t;
 
@@ -25,15 +25,17 @@ template <typename fp_type, template <typename, typename> typename container = s
           typename allocator = std::allocator<fp_type>>
 class thomas_lu_solver
 {
+
   private:
-    boundary_1d_ptr<fp_type> low_;
-    boundary_1d_ptr<fp_type> high_;
     std::size_t discretization_size_;
     range<fp_type> space_range_;
     container<fp_type, allocator> a_, b_, c_, f_;
     container<fp_type, allocator> beta_, gamma_;
 
-    void kernel(container<fp_type, allocator> &solution, fp_type time);
+    template <typename... fp_space_types>
+    void kernel(boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution,
+                fp_type time, fp_space_types... space_args);
+
     explicit thomas_lu_solver() = delete;
     bool is_diagonally_dominant() const;
 
@@ -54,15 +56,24 @@ class thomas_lu_solver
 
     void set_rhs(container<fp_type, allocator> const &rhs);
 
-    void set_boundary(const boundary_1d_ptr<fp_type> &low, const boundary_1d_ptr<fp_type> &high);
+    void solve(boundary_pair<fp_type> const &boundary, container<fp_type, allocator> &solution)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel(boundary, solution, fp_type{});
+    }
 
-    void solve(container<fp_type, allocator> &solution);
+    void solve(boundary_pair<fp_type> const &boundary, container<fp_type, allocator> &solution, fp_type at_time)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel(boundary, solution, at_time);
+    }
 
-    container<fp_type, allocator> const solve();
-
-    void solve(container<fp_type, allocator> &solution, fp_type at_time);
-
-    container<fp_type, allocator> const solve(fp_type at_time);
+    void solve(boundary_pair<fp_type, fp_type> const &boundary, container<fp_type, allocator> &solution,
+               fp_type at_time, fp_type space_arg)
+    {
+        LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
+        kernel<fp_type>(boundary, solution, at_time, space_arg);
+    }
 };
 
 template <typename fp_type> using thomas_lu_solver_ptr = sptr_t<thomas_lu_solver<fp_type>>;
@@ -91,49 +102,6 @@ void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::set_
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::set_boundary(
-    const boundary_1d_ptr<fp_type> &low, const boundary_1d_ptr<fp_type> &high)
-{
-    LSS_VERIFY(low, "Low boundary must be set");
-    LSS_VERIFY(high, "High boundary must be set");
-    low_ = low;
-    high_ = high;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::solve(
-    container<fp_type, allocator> &solution)
-{
-    LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
-    kernel(solution, fp_type{});
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-container<fp_type, allocator> const lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::solve()
-{
-    container<fp_type, allocator> solution(discretization_size_);
-    kernel(solution, fp_type{});
-    return solution;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::solve(
-    container<fp_type, allocator> &solution, fp_type at_time)
-{
-    LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");
-    kernel(solution, at_time);
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
-container<fp_type, allocator> const lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::solve(
-    fp_type at_time)
-{
-    container<fp_type, allocator> solution(discretization_size_);
-    kernel(solution, at_time);
-    return solution;
-}
-
-template <typename fp_type, template <typename, typename> typename container, typename allocator>
 bool lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::is_diagonally_dominant() const
 {
     // if (std::abs(b_[0]) < std::abs(c_[0]))
@@ -148,8 +116,10 @@ bool lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::is_d
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
+template <typename... fp_space_types>
 void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::kernel(
-    container<fp_type, allocator> &solution, fp_type time)
+    boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution, fp_type time,
+    fp_space_types... space_args)
 {
     // check the diagonal dominance:
     LSS_ASSERT(is_diagonally_dominant() == true, "Tridiagonal matrix must be diagonally dominant.");
@@ -169,12 +139,12 @@ void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::kern
     const auto &higher_quad = std::make_tuple(a_[N - 1], b_[N - 1], c_[N - 1], f_[N - 1]);
     const auto &highest_quad = std::make_tuple(a_[N], b_[N], c_[N], f_[N]);
     const fp_type step = space_range_.spread() / static_cast<fp_type>(N);
-    thomas_lu_solver_boundary<fp_type> boundary(low_, high_, lowest_quad, lower_quad, higher_quad, highest_quad,
-                                                discretization_size_, step);
-    const auto &init_coeffs = boundary.init_coefficients(time);
-    const std::size_t start_idx = boundary.start_index();
-    const auto &fin_coeffs = boundary.final_coefficients(time);
-    const std::size_t end_idx = boundary.end_index();
+    thomas_lu_solver_boundary<fp_type> solver_boundary(lowest_quad, lower_quad, higher_quad, highest_quad,
+                                                       discretization_size_, step);
+    const auto &init_coeffs = solver_boundary.init_coefficients(boundary, time, space_args...);
+    const std::size_t start_idx = solver_boundary.start_index();
+    const auto &fin_coeffs = solver_boundary.final_coefficients(boundary, time, space_args...);
+    const std::size_t end_idx = solver_boundary.end_index();
     const fp_type a = std::get<0>(fin_coeffs);
     const fp_type b = std::get<1>(fin_coeffs);
     const fp_type r = std::get<2>(fin_coeffs);
@@ -206,9 +176,9 @@ void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::kern
     std::copy(f_.begin(), f_.end(), solution.begin());
     // fill in the boundary values:
     if (start_idx == 1)
-        solution[0] = boundary.lower_boundary(time);
+        solution[0] = solver_boundary.lower_boundary(boundary, time, space_args...);
     if (end_idx == N - 1)
-        solution[N] = boundary.upper_boundary(time);
+        solution[N] = solver_boundary.upper_boundary(boundary, time, space_args...);
 }
 
 #endif ///_LSS_THOMAS_LU_SOLVER_HPP_

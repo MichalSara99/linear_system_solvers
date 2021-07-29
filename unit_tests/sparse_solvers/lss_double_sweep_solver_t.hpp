@@ -4,14 +4,14 @@
 
 #include <vector>
 
-#include "boundaries/lss_dirichlet_boundary_1d.hpp"
+#include "boundaries/lss_dirichlet_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
 
 template <typename T> void testBVPDoubleSweepDirichletBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_utility::range;
 
@@ -62,10 +62,10 @@ template <typename T> void testBVPDoubleSweepDirichletBC()
     range<T> space_range(0.0, 1.0);
     auto dss = std::make_shared<double_sweep_solver<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return x * (static_cast<T>(1.0) - x); };
@@ -91,8 +91,8 @@ void testDoubleSweepDirichletBC()
 
 template <typename T> void testBVPDoubleSweepRobinBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_utility::range;
 
@@ -144,10 +144,10 @@ template <typename T> void testBVPDoubleSweepRobinBC()
     range<T> space_range(0.0, 1.0);
     auto dss = std::make_shared<double_sweep_solver<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(1.0)); };
@@ -174,8 +174,8 @@ void testDoubleSweepRobinBC()
 
 template <typename T> void testBVPDoubleSweepDirichletNeumannBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
@@ -233,10 +233,10 @@ template <typename T> void testBVPDoubleSweepDirichletNeumannBC()
 
     auto dss = std::make_shared<double_sweep_solver<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x - 12.0 * x + 1.0); };
@@ -263,8 +263,8 @@ void testDoubleSweepDirichletNeumannBC()
 
 template <typename T> void testBVPDoubleSweepNeumannDirichletBC()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
@@ -322,10 +322,10 @@ template <typename T> void testBVPDoubleSweepNeumannDirichletBC()
 
     auto dss = std::make_shared<double_sweep_solver<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x + x - 10.0); };
@@ -352,8 +352,8 @@ void testDoubleSweepNeumannDirichletBC()
 
 template <typename T> void testBVPDoubleSweepNeumannRobinBC()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
     using lss_pde_solvers::discretization_1d;
@@ -413,10 +413,10 @@ template <typename T> void testBVPDoubleSweepNeumannRobinBC()
 
     auto dss = std::make_shared<double_sweep_solver<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (x * x * x - static_cast<T>(14.0)); };
@@ -443,8 +443,8 @@ void testDoubleSweepNeumannRobinBC()
 
 template <typename T> void testBVPDoubleSweepMixBC()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
-    using lss_boundary_1d::robin_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_utility::range;
 
@@ -496,10 +496,10 @@ template <typename T> void testBVPDoubleSweepMixBC()
     range<T> space_range(0.0, 1.0);
     auto dss = std::make_shared<double_sweep_solver<T, std::vector, std::allocator<T>>>(space_range, N);
     dss->set_diagonals(std::move(lower_diag), std::move(diagonal), std::move(upper_diag));
-    dss->set_boundary(lower_ptr, upper_ptr);
     dss->set_rhs(rhs);
     // get the solution:
-    auto solution = dss->solve();
+    std::vector<T> solution(N);
+    dss->solve(std::make_pair(lower_ptr, upper_ptr), solution);
 
     // exact value:
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(0.5)); };

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "boundaries/lss_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
@@ -21,9 +21,9 @@ namespace lss_pde_solvers
 namespace one_dimensional
 {
 
-using lss_boundary_1d::boundary_1d_pair;
-using lss_boundary_1d::neumann_boundary_1d;
-using lss_boundary_1d::robin_boundary_1d;
+using lss_boundary::boundary_1d_pair;
+using lss_boundary::neumann_boundary_1d;
+using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_cuda_solver::cuda_solver;
 using lss_double_sweep_solver::double_sweep_solver;
@@ -271,7 +271,7 @@ void time_loop<fp_type, container, allocator>::run(
         {
             scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             prev_solution = next_solution;
             d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
             d_1d::of_function(start_x, step_x, time + k, heat_source, next_source);
@@ -290,7 +290,7 @@ void time_loop<fp_type, container, allocator>::run(
             time_idx--;
             scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             prev_solution = next_solution;
             d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
             d_1d::of_function(start_x, step_x, time - k, heat_source, next_source);
@@ -321,7 +321,7 @@ void time_loop<fp_type, container, allocator>::run(
         {
             scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             prev_solution = next_solution;
             time += k;
             time_idx++;
@@ -336,7 +336,7 @@ void time_loop<fp_type, container, allocator>::run(
             time_idx--;
             scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             prev_solution = next_solution;
             time -= k;
         } while (time_idx > 0);
@@ -373,7 +373,7 @@ void time_loop<fp_type, container, allocator>::run_with_stepping(
         {
             scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             solutions(time_idx, next_solution);
             prev_solution = next_solution;
             d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
@@ -395,7 +395,7 @@ void time_loop<fp_type, container, allocator>::run_with_stepping(
             time_idx--;
             scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             solutions(time_idx, next_solution);
             prev_solution = next_solution;
             d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
@@ -429,7 +429,7 @@ void time_loop<fp_type, container, allocator>::run_with_stepping(
         {
             scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             solutions(time_idx, next_solution);
             prev_solution = next_solution;
             time += k;
@@ -447,7 +447,7 @@ void time_loop<fp_type, container, allocator>::run_with_stepping(
             time_idx--;
             scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
             solver_obj->set_rhs(rhs);
-            solver_obj->solve(next_solution, time);
+            solver_obj->solve(boundary_pair, next_solution, time);
             solutions(time_idx, next_solution);
             prev_solution = next_solution;
             time -= k;
@@ -515,7 +515,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -560,7 +560,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -633,7 +633,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -678,7 +678,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -754,7 +754,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -799,7 +799,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -872,7 +872,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -917,7 +917,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -989,7 +989,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const &solver = std::make_shared<ds_solver>(space, space_size);
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -1033,7 +1033,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const &solver = std::make_shared<ds_solver>(space, space_size);
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -1105,7 +1105,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const &solver = std::make_shared<tlu_solver>(space, space_size);
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =
@@ -1149,7 +1149,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const &solver = std::make_shared<tlu_solver>(space, space_size);
         solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
                               std::move(std::get<2>(diagonals_)));
-        solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
+        // solver->set_boundary(std::get<0>(boundary_pair_), std::get<1>(boundary_pair_));
         if (is_heat_sourse_set)
         {
             auto scheme_function =

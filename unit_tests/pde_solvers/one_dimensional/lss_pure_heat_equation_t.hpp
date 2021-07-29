@@ -22,7 +22,7 @@
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQREuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -105,7 +105,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQRCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -201,7 +201,7 @@ void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR()
 
 template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_sorsolver_euler_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -287,7 +287,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceEul
 
 template <typename T> void testImplPureHeatEquationDirichletBCSORSolverDeviceCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_sorsolver_cn_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -387,7 +387,7 @@ void testImplPureHeatEquationDirichletBCSORSolverDevice()
 
 template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -473,7 +473,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostEuler
 
 template <typename T> void testImplPureHeatEquationDirichletBCSORSolverHostCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -574,7 +574,7 @@ void testImplPureHeatEquationDirichletBCSORSolverHost()
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQREuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -657,7 +657,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQREu
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverHostQRCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -754,7 +754,7 @@ void testImplPureHeatEquationDirichletBCCUDASolverHostQR()
 
 template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -836,7 +836,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverE
 
 template <typename T> void testImplPureHeatEquationDirichletBCDoubleSweepSolverCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -933,7 +933,7 @@ void testImplPureHeatEquationDirichletBCDoubleSweepSolver()
 
 template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -1015,7 +1015,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverEule
 
 template <typename T> void testImplPureHeatEquationDirichletBCThomasLUSolverCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -1115,8 +1115,8 @@ void testImplPureHeatEquationDirichletBCThomasLUSolver()
 
 template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQREuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -1194,8 +1194,8 @@ template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQREu
 
 template <typename T> void testImplPureHeatEquationNeumannBCCUDASolverDeviceQRCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -1287,7 +1287,7 @@ void testImplPureHeatEquationNeumannBCCUDASolverDeviceQR()
 // Neumann-Neumann Boundaries:
 template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverEuler()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -1373,7 +1373,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverEuler(
 
 template <typename T> void testImplPureHeatEquationNeumannBCThomasLUSolverCrankNicolson()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -1472,7 +1472,7 @@ void testImplPureHeatEquationNeumannBCThomasLUSolver()
 
 template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverEuler()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -1557,7 +1557,7 @@ template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverEul
 
 template <typename T> void testImplPureHeatEquationNeumannBCDoubleSweepSolverCrankNicolson()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -1657,7 +1657,7 @@ void testImplPureHeatEquationNeumannBCDoubleSweepSolver()
 // get the whole surface with stepping:
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQREulerStepping()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_euler_solver_config_ptr;
@@ -1748,7 +1748,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 
 template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQRCrankNicolsonStepping()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_cn_solver_config_ptr;
@@ -1863,7 +1863,7 @@ void testImplPureHeatEquationDirichletBCCUDASolverDeviceQRStepping()
 
 template <typename T> void testExplPureHeatEquationDirichletBCBarakatClark()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::explicit_solver_config;
@@ -1945,7 +1945,7 @@ template <typename T> void testExplPureHeatEquationDirichletBCBarakatClark()
 
 template <typename T> void testExplPureHeatEquationDirichletBCSaulyev()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::explicit_solver_config;
@@ -2027,7 +2027,7 @@ template <typename T> void testExplPureHeatEquationDirichletBCSaulyev()
 
 template <typename T> void testExplPureHeatEquationDirichletBCEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::explicit_solver_config;
@@ -2125,8 +2125,8 @@ void testExplPureHeatEquationDirichletBCADE()
 
 template <typename T> void testImplPureHeatEquationNeumannDirichletBCEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::explicit_solver_config;
@@ -2203,7 +2203,7 @@ template <typename T> void testImplPureHeatEquationNeumannDirichletBCEuler()
 
 template <typename T> void testExplPureHeatEquationNeumannNeumannBCEuler()
 {
-    using lss_boundary_1d::neumann_boundary_1d;
+    using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -2302,7 +2302,7 @@ void testExplPureHeatEquationNeumannBCEuler()
 
 template <typename T> void testExplPureHeatEquationDirichletBCEulerDEVICE()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::dev_expl_fwd_euler_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;

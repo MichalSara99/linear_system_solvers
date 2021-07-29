@@ -18,7 +18,7 @@
 
 template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDeviceQREuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_bwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -97,7 +97,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
 
 template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDeviceQRCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_bwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -190,7 +190,7 @@ void testImplBlackScholesEquationDirichletBCCUDASolverDeviceQR()
 
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDeviceEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_bwd_sorsolver_euler_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -273,7 +273,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
 
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDeviceCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_bwd_sorsolver_cn_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -370,7 +370,7 @@ void testImplBlackScholesEquationDirichletBCSORSolverDevice()
 
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -453,7 +453,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostE
 
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -550,7 +550,7 @@ void testImplBlackScholesEquationDirichletBCSORSolverHost()
 
 template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSolverEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -629,7 +629,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
 
 template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSolverCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -722,7 +722,7 @@ void testImplBlackScholesEquationDirichletBCDoubleSweepSolver()
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -801,7 +801,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
@@ -895,7 +895,7 @@ void testImplBlackScholesEquationDirichletBCThomasLUSolver()
 // forward starting call:
 template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQREuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_bwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -975,7 +975,7 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
 
 template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQRCrankNicolson()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_bwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::discretization_config_1d;
@@ -1070,7 +1070,7 @@ void testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQR()
 // Uisng stepping = getting the whole surface
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverEulerStepping()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
@@ -1157,7 +1157,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolsonStepping()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
@@ -1265,7 +1265,7 @@ void testImplBlackScholesEquationDirichletBCThomasLUSolverStepping()
 
 template <typename T> void testExplBlackScholesEquationDirichletBCBarakatClark()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::explicit_solver_config;
@@ -1344,7 +1344,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCBarakatClark()
 
 template <typename T> void testExplBlackScholesEquationDirichletBCSaulyev()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::explicit_solver_config;
@@ -1423,7 +1423,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCSaulyev()
 
 template <typename T> void testExplBlackScholesEquationDirichletBCEuler()
 {
-    using lss_boundary_1d::dirichlet_boundary_1d;
+    using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::explicit_solver_config;

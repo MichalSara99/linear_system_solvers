@@ -4,7 +4,7 @@
 #include <functional>
 #include <map>
 
-#include "boundaries/lss_boundary_1d.hpp"
+#include "boundaries/lss_boundary.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
@@ -19,8 +19,8 @@ namespace lss_pde_solvers
 
 namespace one_dimensional
 {
-using lss_boundary_1d::boundary_1d_pair;
-using lss_boundary_1d::boundary_1d_ptr;
+using lss_boundary::boundary_1d_pair;
+using lss_boundary::boundary_1d_ptr;
 using lss_containers::container_2d;
 
 namespace implicit_solvers
