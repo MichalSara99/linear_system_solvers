@@ -11,6 +11,9 @@ Heat equation
 Advection equation
 ![Advection equation](/outputs/temp_advection_equ_numerical.png)
 
+Black-Scholes equation
+![Black-Scholes equation](/outputs/call_option_price_surface_numerical.png)
+
 ## Usage
 Just started.
 To see how to use this library see header files ending with _t.
