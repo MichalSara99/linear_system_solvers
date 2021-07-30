@@ -5,8 +5,11 @@ It also contains some PDE solvers.
 
 ## Some surfaces from PDE solver
 
-![Pure heat equation](/outputs/temp_heat_equ_bench.png)
+Heat equation
+![Pure heat equation](/outputs/temp_heat_equ_numerical.png)
 
+Advection equation
+![Advection equation](/outputs/temp_advection_equ_numerical.png)
 
 ## Usage
 Just started.
