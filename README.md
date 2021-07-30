@@ -3,12 +3,15 @@ Linear System Solvers library. Written in C++17. It contains a few wrappers arou
 It also contains some PDE solvers.
 
 ## PDE Solver
-* 1D general Heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
+* 1D general heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
 
 ## Some surfaces from PDE solver
 
-Heat equation
+Heat equation (Dirichlet BC)
 ![Pure heat equation](/outputs/temp_heat_equ_numerical.png)
+
+Heat equation (Dirichlet andf Neumann BC)
+![Pure heat equation](/outputs/temp_heat_neu_equ_numerical.png)
 
 Advection equation
 ![Advection equation](/outputs/temp_advection_equ_numerical.png)
