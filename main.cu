@@ -146,6 +146,9 @@ int main(int argc, char const *argv[])
     // testImplPureHeatEquationDirichletBCSORSolverHost();
     // testImplPureHeatEquationDirichletBCDoubleSweepSolver();
     // testImplPureHeatEquationDirichletBCThomasLUSolver();
+    // with source:
+    // testImplPureHeatEquationSourceDirichletBCCUDASolverDeviceQR();
+    // testImplPureHeatEquationSourceDirichletBCSORSolverDeviceEuler();
     // neumann bc:
     // testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();
     // testImplPureHeatEquationNeumannBCThomasLUSolver();
