@@ -73,7 +73,6 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
-    // note: size is Sd+1 since we must include space point at x = 0
     std::vector<T> solution(Sd, T{});
     // get the solution:
     pdesolver.solve(solution);
