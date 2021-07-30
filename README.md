@@ -10,7 +10,7 @@ It also contains some PDE solvers.
 Heat equation (Dirichlet BC)
 ![Pure heat equation](/outputs/temp_heat_equ_numerical.png)
 
-Heat equation (Dirichlet andf Neumann BC)
+Heat equation (Dirichlet and Neumann BC)
 ![Pure heat equation](/outputs/temp_heat_neu_equ_numerical.png)
 
 Advection equation
