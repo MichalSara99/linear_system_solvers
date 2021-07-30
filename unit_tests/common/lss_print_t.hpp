@@ -761,4 +761,129 @@ void testExplPureHeatEquationNeumannBCEulerPrintSurface()
     std::cout << "============================================================\n";
 }
 
+template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPrintSurf()
+{
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_containers::container_2d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::discretization_config_1d;
+    using lss_pde_solvers::heat_coefficient_data_config_1d;
+    using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_initial_data_config_1d;
+    using lss_pde_solvers::host_fwd_tlusolver_cn_solver_config_ptr;
+    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_print::print;
+    using lss_utility::pi;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Advection Diffusion equation: \n\n";
+    std::cout << " Using Thomas LU algorithm with implicit CN method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_t(x,t)  +  U_x(x,t) = U_xx(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " x in <0,1> and t > 0,\n";
+    std::cout << " U(0,t) = U(1,t) = 0, t > 0 \n\n";
+    std::cout << " U(x,0) = 1, x in <0,1> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef 2D container
+    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+
+    // typedef the Implicit1DHeatEquation
+    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto a = [](T x) { return 1.0; };
+    auto b = [](T x) { return -1.0; };
+    auto other = [](T x) { return 0.0; };
+    auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
+    // initial condition:
+    auto initial_condition = [](T x) { return 1.0; };
+    auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
+    // heat data config:
+    auto const heat_data_ptr = std::make_shared<heat_data_config_1d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
+    // boundary conditions:
+    auto const &dirichlet = [](T t) { return 0.0; };
+    auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
+    auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_cn_solver_config_ptr);
+    // prepare container for solution:
+    container_2d_t solutions(Td, Sd);
+    // get the solution:
+    pdesolver.solve(solutions);
+    // get exact solution:
+    auto exact = [](T x, T t, std::size_t n) {
+        T const first = 2.0 / pi<T>();
+        T const exp_0p5x = std::exp(0.5 * x);
+        T const exp_m0p5 = std::exp(-0.5);
+        T np_sqr{};
+        T sum{};
+        T num{}, den{}, var{};
+        T lambda{};
+        for (std::size_t i = 1; i <= n; ++i)
+        {
+            np_sqr = (i * i * pi<T>() * pi<T>());
+            lambda = 0.25 + np_sqr;
+            num = (1.0 - std::pow(-1.0, i) * exp_m0p5) * exp_0p5x * std::exp(-1.0 * lambda * t) *
+                  std::sin(i * pi<T>() * x);
+            den = i * (1.0 + (0.25 / np_sqr));
+            var = num / den;
+            sum += var;
+        }
+        return (first * sum);
+    };
+
+    T const h = discretization_ptr->space_step();
+    T const k = discretization_ptr->time_step();
+    container_2d_t benchmark(Td, Sd);
+    for (std::size_t t = 0; t < solutions.rows(); ++t)
+    {
+        for (std::size_t j = 0; j < solutions.columns(); ++j)
+        {
+            benchmark(t, j, exact(j * h, t * k, 20));
+        }
+    }
+
+    // print both of these
+    std::stringstream ssa;
+    ssa << "outputs/advection_cn_approx_surf_" << typeid(T).name() << ".txt";
+    std::string file_name_approx{ssa.str()};
+    std::ofstream approx(file_name_approx);
+    print(discretization_ptr, solutions, approx);
+    approx.close();
+    std::cout << "approx saved to file: " << file_name_approx << "\n";
+    std::stringstream ssb;
+    ssb << "outputs/advection_cn_bench_surf_" << typeid(T).name() << ".txt";
+    std::string file_name_bench{ssb.str()};
+    std::ofstream bench(file_name_bench);
+    print(discretization_ptr, benchmark, bench);
+    bench.close();
+    std::cout << "bench saved to file: " << file_name_bench << "\n";
+}
+
+void testImplAdvDiffEquationDirichletBCThomasLUSolverPrintSurface()
+{
+    std::cout << "============================================================\n";
+    std::cout << "========= Implicit Advection Equation (Non-Dir BC) =========\n";
+    std::cout << "============================================================\n";
+
+    testImplAdvDiffEquationDirichletBCThomasLUSolverCNPrintSurf<double>();
+    testImplAdvDiffEquationDirichletBCThomasLUSolverCNPrintSurf<float>();
+
+    std::cout << "============================================================\n";
+}
+
 #endif ///_LSS_PRINT_T_HPP_

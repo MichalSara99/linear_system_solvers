@@ -7,6 +7,7 @@
 #include "boundaries/lss_boundary.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
+#include "containers/lss_container_3d.hpp"
 //#include "lss_general_svc_heat_equation_explicit_kernel.hpp"
 //#include "lss_general_svc_heat_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_discretization.hpp"
@@ -19,9 +20,9 @@ namespace lss_pde_solvers
 
 namespace two_dimensional
 {
-using lss_boundary::boundary_1d_pair;
-using lss_boundary::boundary_1d_ptr;
+using lss_boundary::boundary_2d_pair;
 using lss_containers::container_2d;
+using lss_containers::container_3d;
 
 namespace implicit_solvers
 {
@@ -31,7 +32,7 @@ namespace implicit_solvers
 Represents general spacial variable coefficient 2D heat equation solver
 
 u_t = a(x,y)*u_xx + b(x,y)*u_yy + c(x,y)*u_xy + d(x,y)*u_x + e(x,y)*u_y +
-        f(x,y)*u + F(x,y,t)
+        f(x,y)*u + F(t,x,y)
 
 t > 0, x_1 < x < x_2, y_1 < y < y_2
 
@@ -52,9 +53,10 @@ class general_svc_heat_equation
 {
 
   private:
-    boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    boundary_2d_pair<fp_type> boundary_pair_hor_;
+    boundary_2d_pair<fp_type> boundary_pair_ver_;
+    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    discretization_config_2d_ptr<fp_type> discretization_cfg_;
     implicit_solver_config_1d_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
@@ -64,8 +66,10 @@ class general_svc_heat_equation
     {
         LSS_VERIFY(heat_data_cfg_, "heat_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
+        LSS_VERIFY(std::get<0>(boundary_pair_hor_), "horizontal boundary_pair.first must not be null");
+        LSS_VERIFY(std::get<1>(boundary_pair_hor_), "horizontal boundary_pair.second must not be null");
+        LSS_VERIFY(std::get<0>(boundary_pair_ver_), "vertical boundary_pair.first must not be null");
+        LSS_VERIFY(std::get<1>(boundary_pair_ver_), "vertical boundary_pair.second must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
         if (!solver_config_details_.empty())
         {
@@ -76,12 +80,14 @@ class general_svc_heat_equation
 
   public:
     explicit general_svc_heat_equation(
-        heat_data_config_1d_ptr<fp_type> const &heat_data_config,
-        discretization_config_1d_ptr<fp_type> const &discretization_config,
-        boundary_1d_pair<fp_type> const &boundary_pair,
+        heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+        discretization_config_2d_ptr<fp_type> const &discretization_config,
+        boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+        boundary_2d_pair<fp_type> const &vertical_boundary_pair,
         implicit_solver_config_1d_ptr const &solver_config = host_fwd_dssolver_euler_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
-        : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
+        : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
+          boundary_pair_hor_{horizontal_boundary_pair}, boundary_pair_ver_{vertical_boundary_pair},
           solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
     {
         initialize();
@@ -99,26 +105,27 @@ class general_svc_heat_equation
     /**
      * Get the final solution of the PDE
      *
-     * \param solution - container for solution
+     * \param solution -  2D container for solution
      */
-    void solve(container<fp_type, allocator> &solution);
+    void solve(container_2d<fp_type, container, allocator> &solution);
 
     /**
      * Get all solutions in time (surface) of the PDE
      *
-     * \param solutions - 2D container for all the solutions in time
+     * \param solutions - 3D container for all the solutions in time
      */
-    void solve(container_2d<fp_type, container, allocator> &solutions);
+    void solve(container_3d<fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
+void general_svc_heat_equation<fp_type, container, allocator>::solve(
+    container_2d<fp_type, container, allocator> &solution)
 {
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void general_svc_heat_equation<fp_type, container, allocator>::solve(
-    container_2d<fp_type, container, allocator> &solutions)
+    container_3d<fp_type, container, allocator> &solutions)
 {
 }
 
@@ -132,9 +139,10 @@ template <typename fp_type, template <typename, typename> typename container = s
 class general_svc_heat_equation
 {
   private:
-    boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    boundary_2d_pair<fp_type> boundary_pair_hor_;
+    boundary_2d_pair<fp_type> boundary_pair_ver_;
+    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    discretization_config_2d_ptr<fp_type> discretization_cfg_;
     explicit_solver_config_1d_ptr solver_cfg_;
 
     explicit general_svc_heat_equation() = delete;
@@ -143,19 +151,23 @@ class general_svc_heat_equation
     {
         LSS_VERIFY(heat_data_cfg_, "heat_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
+        LSS_VERIFY(std::get<0>(boundary_pair_hor_), "horizontal boundary_pair.first must not be null");
+        LSS_VERIFY(std::get<1>(boundary_pair_hor_), "horizontal boundary_pair.second must not be null");
+        LSS_VERIFY(std::get<0>(boundary_pair_ver_), "vertical boundary_pair.first must not be null");
+        LSS_VERIFY(std::get<1>(boundary_pair_ver_), "vertical boundary_pair.second must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
     }
 
   public:
     explicit general_svc_heat_equation(
-        heat_data_config_1d_ptr<fp_type> const &heat_data_config,
-        discretization_config_1d_ptr<fp_type> const &discretization_config,
-        boundary_1d_pair<fp_type> const &boundary_pair,
+        heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+        discretization_config_2d_ptr<fp_type> const &discretization_config,
+        boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+        boundary_2d_pair<fp_type> const &vertical_boundary_pair,
         explicit_solver_config_1d_ptr const &solver_config = dev_expl_fwd_euler_solver_config_ptr)
-        : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
-          solver_cfg_{solver_config}
+        : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
+          boundary_pair_hor_{horizontal_boundary_pair}, boundary_pair_ver_{vertical_boundary_pair}, solver_cfg_{
+                                                                                                        solver_config}
     {
         initialize();
     }
@@ -172,26 +184,27 @@ class general_svc_heat_equation
     /**
      * Get the final solution of the PDE
      *
-     * \param solution - container for solution
+     * \param solution - 2D container for solution
      */
-    void solve(container<fp_type, allocator> &solution);
+    void solve(container_2d<fp_type, container, allocator> &solution);
 
     /**
      * Get all solutions in time (surface) of the PDE
      *
-     * \param solutions - 2D container for all the solutions in time
+     * \param solutions - 3D container for all the solutions in time
      */
-    void solve(container_2d<fp_type, container, allocator> &solutions);
+    void solve(container_3d<fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
+void general_svc_heat_equation<fp_type, container, allocator>::solve(
+    container_2d<fp_type, container, allocator> &solution)
 {
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void general_svc_heat_equation<fp_type, container, allocator>::solve(
-    container_2d<fp_type, container, allocator> &solutions)
+    container_3d<fp_type, container, allocator> &solutions)
 {
 }
 

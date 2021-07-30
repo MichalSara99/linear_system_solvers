@@ -21,6 +21,7 @@
     <ClInclude Include="common\lss_print.hpp" />
     <ClInclude Include="common\lss_utility.hpp" />
     <ClInclude Include="containers\lss_container_2d.hpp" />
+    <ClInclude Include="containers\lss_container_3d.hpp" />
     <ClInclude Include="containers\lss_flat_matrix.hpp" />
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.hpp" />

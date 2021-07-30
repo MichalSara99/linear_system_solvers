@@ -258,6 +258,9 @@
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_advection_equation_t.hpp">
       <Filter>unit_tests\pde_solvers\one_dimensional</Filter>
     </ClInclude>
+    <ClInclude Include="containers\lss_container_3d.hpp">
+      <Filter>containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

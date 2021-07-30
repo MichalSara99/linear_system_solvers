@@ -203,6 +203,7 @@ int main(int argc, char const *argv[])
     // testImplBlackScholesEquationDirichletBCThomasLUSolverPrintSurf();
     // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRPrintSurface();
     // testExplPureHeatEquationNeumannBCEulerPrintSurface();
+    // testImplAdvDiffEquationDirichletBCThomasLUSolverPrintSurface();
 
     // ====================================================================
 
