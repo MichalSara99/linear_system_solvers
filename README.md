@@ -2,6 +2,9 @@
 Linear System Solvers library. Written in C++17. It contains a few wrappers around CUDA cuSolver library functions plus some other well known solvers.
 It also contains some PDE solvers.
 
+## ODE Solver
+* general 2nd degree equation with variable coefficients (supports all Dirichlet, Neumann, Robin boundary conditions)
+
 ## PDE Solver
 * 1D general heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
 
