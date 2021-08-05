@@ -8,6 +8,10 @@ It also contains some PDE solvers.
 ## PDE Solver
 * 1D general heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
 
+## Some curves from ODE solver
+Simple Two-point BVP (u''(x) = -2 with Dirichlet and Robin BC)
+![Simple ODE equation](/outputs/simple_ode_numerical.png)
+
 ## Some surfaces from PDE solver
 
 Heat equation (Dirichlet BC)

@@ -108,6 +108,7 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
     // This is the proper size of the container:
     LSS_ASSERT(solution.size() == space_size, "The input solution container must have the correct size");
     // calculate scheme coefficients:
+    const fp_type zero = static_cast<fp_type>(0.0);
     const fp_type one = static_cast<fp_type>(1.0);
     const fp_type two = static_cast<fp_type>(2.0);
     const fp_type lambda = one / (h * h);
@@ -134,7 +135,7 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
     }
     // wrap up the diagonals into tuple:
     auto const &diag_triplet = std::make_tuple(low, diag, up);
-    container_t rhs(space_size, fp_type{});
+    container_t rhs(space_size, zero);
     const bool is_ode_nonhom_set = ode_data_cfg_->is_nonhom_data_set();
     // get ode_nonhom:
     auto const &ode_nonhom = ode_data_cfg_->nonhom_function();

@@ -96,7 +96,6 @@ template <typename fp_type> struct ode_data_config
     void initialize()
     {
         LSS_VERIFY(coefficient_data_cfg_, "coefficient_data_config must not be null");
-        LSS_VERIFY(nonhom_data_cfg_, "nonhom_data_config must not be null");
     }
 
     explicit ode_data_config() = delete;

@@ -5,8 +5,91 @@
 
 #include "common/lss_print.hpp"
 #include "containers/lss_container_2d.hpp"
+#include "ode_solvers/second_degree/lss_general_ode_equation.hpp"
 #include "pde_solvers/one_dimensional/heat_type/lss_1d_general_svc_heat_equation.hpp"
 
+// ODEs
+
+template <typename T> void testImplSimpleODEThomesLUQRPrint()
+{
+    using lss_boundary::neumann_boundary_1d;
+    using lss_boundary::robin_boundary_1d;
+    using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
+    using lss_ode_solvers::ode_coefficient_data_config;
+    using lss_ode_solvers::ode_data_config;
+    using lss_ode_solvers::ode_discretization_config;
+    using lss_ode_solvers::ode_nonhom_data_config;
+    using lss_ode_solvers::implicit_solvers::general_ode_equation;
+    using lss_print::print;
+    using lss_utility::range;
+
+    std::cout << "=================================\n";
+    std::cout << "Solving Boundary-value problem: \n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " u''(t) = -2, \n\n";
+    std::cout << " where\n\n";
+    std::cout << " t in <0,1>,\n";
+    std::cout << " u'(0) - 1 = 0 \n";
+    std::cout << " u'(1) + 2*u(1) = 0\n\n";
+    std::cout << "Exact solution is:\n\n";
+    std::cout << " u(t) = -t*t + t + 0.5\n";
+    std::cout << "=================================\n";
+
+    // typedef the Implicit1DHeatEquation
+    typedef general_ode_equation<T, std::vector, std::allocator<T>> ode_solver;
+
+    // number of space subdivisions:
+    std::size_t Sd{100};
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<ode_discretization_config<T>>(space_range, Sd);
+    // coeffs:
+    auto a = [](T x) { return 0.0; };
+    auto b = [](T x) { return 0.0; };
+    auto const ode_coeffs_data_ptr = std::make_shared<ode_coefficient_data_config<T>>(a, b);
+    // nonhom data:
+    auto two = [](T x) { return -2.0; };
+    auto const ode_nonhom_data_ptr = std::make_shared<ode_nonhom_data_config<T>>(two);
+    // ode data config:
+    auto const ode_data_ptr = std::make_shared<ode_data_config<T>>(ode_coeffs_data_ptr, ode_nonhom_data_ptr);
+    // boundary conditions:
+    auto const &neumann = [](T t) { return -1.0; };
+    auto const &robin_first = [](T t) { return 2.0; };
+    auto const &robin_second = [](T t) { return 0.0; };
+    auto const &boundary_low_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
+    auto const &boundary_high_ptr = std::make_shared<robin_boundary_1d<T>>(robin_first, robin_second);
+    auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // initialize ode solver
+    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, dev_cusolver_qr_solver_config_ptr);
+    // prepare container for solution:
+    std::vector<T> solution(Sd, T{});
+    // get the solution:
+    odesolver.solve(solution);
+
+    // print both of these
+    std::stringstream ssa;
+    ssa << "outputs/simple_ode_approx_" << typeid(T).name() << ".txt";
+    std::string file_name_approx{ssa.str()};
+    std::ofstream approx(file_name_approx);
+    print(discretization_ptr, solution, approx);
+    approx.close();
+    std::cout << "approx saved to file: " << file_name_approx << "\n";
+}
+
+void testImplSimpleODEThomesLUPrint()
+{
+    std::cout << "============================================================\n";
+    std::cout << "=========== Implicit Simple ODE (Thomas LU)  ===============\n";
+    std::cout << "============================================================\n";
+
+    testImplSimpleODEThomesLUQRPrint<double>();
+    testImplSimpleODEThomesLUQRPrint<float>();
+
+    std::cout << "============================================================\n";
+}
+
+// PDEs
 template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolverEulerPrint()
 {
     using lss_boundary::dirichlet_boundary_1d;
