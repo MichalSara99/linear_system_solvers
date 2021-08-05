@@ -5,9 +5,6 @@
 #include "common/lss_utility.hpp"
 #include <functional>
 
-namespace lss_pde_solvers
-{
-
 using lss_enumerations::dimension_enum;
 
 template <dimension_enum dimension, typename fp_type, template <typename, typename> typename container,
@@ -79,7 +76,5 @@ template <typename fp_type, template <typename, typename> typename container, ty
 struct discretization<dimension_enum::Two, fp_type, container, allocator>
 {
 };
-
-} // namespace lss_pde_solvers
 
 #endif ///_LSS_DISCRETIZATION_HPP_

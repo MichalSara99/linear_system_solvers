@@ -176,7 +176,6 @@ template <typename T> void testBVPSORCUDADirichletNeumannBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
     using lss_utility::range;
 
@@ -266,7 +265,6 @@ template <typename T> void testBVPSORCUDANeumannDirichletBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
     using lss_utility::range;
 
@@ -356,7 +354,6 @@ template <typename T> void testBVPSORCUDANeumannRobinBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_boundary::robin_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_sor_solver_cuda::sor_solver_cuda;
     using lss_utility::range;
 

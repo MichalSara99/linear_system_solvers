@@ -178,7 +178,6 @@ template <typename T> void testBVPDoubleSweepDirichletNeumannBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -267,7 +266,6 @@ template <typename T> void testBVPDoubleSweepNeumannDirichletBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -356,7 +354,6 @@ template <typename T> void testBVPDoubleSweepNeumannRobinBC()
     using lss_boundary::robin_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;

@@ -4,7 +4,7 @@
 
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
-#include "pde_solvers/lss_discretization.hpp"
+#include "discretization/lss_discretization.hpp"
 #include "sparse_solvers/general/core_cuda_solver/lss_core_cuda_solver_policy.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 
@@ -181,7 +181,6 @@ template <typename T> void testBVPCUDADirichletNeumannBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -271,7 +270,6 @@ template <typename T> void testBVPCUDANeumannDirichletBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -361,7 +359,6 @@ template <typename T> void testBVPCUDANeumannRobinBC()
     using lss_boundary::robin_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;

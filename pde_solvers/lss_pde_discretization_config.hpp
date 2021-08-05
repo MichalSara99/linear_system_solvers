@@ -11,14 +11,14 @@ using lss_enumerations::dimension_enum;
 using lss_utility::range;
 using lss_utility::sptr_t;
 
-template <dimension_enum dimension, typename fp_type> struct discretization_config
+template <dimension_enum dimension, typename fp_type> struct pde_discretization_config
 {
 };
 
 /**
-    1D discretization_config structure
+    1D pde_discretization_config structure
  */
-template <typename fp_type> struct discretization_config<dimension_enum::One, fp_type>
+template <typename fp_type> struct pde_discretization_config<dimension_enum::One, fp_type>
 {
   private:
     range<fp_type> space_range_;
@@ -26,16 +26,16 @@ template <typename fp_type> struct discretization_config<dimension_enum::One, fp
     std::size_t number_of_space_points_;
     std::size_t number_of_time_points_;
 
-    explicit discretization_config() = delete;
+    explicit pde_discretization_config() = delete;
 
   public:
-    explicit discretization_config(range<fp_type> const &space_range, std::size_t const &number_of_space_points,
-                                   range<fp_type> const &time_range, std::size_t const &number_of_time_points)
+    explicit pde_discretization_config(range<fp_type> const &space_range, std::size_t const &number_of_space_points,
+                                       range<fp_type> const &time_range, std::size_t const &number_of_time_points)
         : space_range_{space_range}, number_of_space_points_{number_of_space_points}, time_range_{time_range},
           number_of_time_points_{number_of_time_points}
     {
     }
-    ~discretization_config()
+    ~pde_discretization_config()
     {
     }
 
@@ -71,9 +71,9 @@ template <typename fp_type> struct discretization_config<dimension_enum::One, fp
 };
 
 /**
-    2D discretization_config structure
+    2D pde_discretization_config structure
  */
-template <typename fp_type> struct discretization_config<dimension_enum::Two, fp_type>
+template <typename fp_type> struct pde_discretization_config<dimension_enum::Two, fp_type>
 {
   private:
     range<fp_type> space_range_1_;
@@ -83,19 +83,19 @@ template <typename fp_type> struct discretization_config<dimension_enum::Two, fp
     std::size_t number_of_space_points_2_;
     std::size_t number_of_time_points_;
 
-    explicit discretization_config() = delete;
+    explicit pde_discretization_config() = delete;
 
   public:
-    explicit discretization_config(range<fp_type> const &space_range_1, range<fp_type> const &space_range_2,
-                                   std::size_t const &number_of_space_points_1,
-                                   std::size_t const &number_of_space_points_2, range<fp_type> const &time_range,
-                                   std::size_t const &number_of_time_points)
+    explicit pde_discretization_config(range<fp_type> const &space_range_1, range<fp_type> const &space_range_2,
+                                       std::size_t const &number_of_space_points_1,
+                                       std::size_t const &number_of_space_points_2, range<fp_type> const &time_range,
+                                       std::size_t const &number_of_time_points)
         : space_range_1_{space_range_1}, space_range_2_{space_range_2},
           number_of_space_points_1_{number_of_space_points_1}, number_of_space_points_2_{number_of_space_points_2},
           time_range_{time_range}, number_of_time_points_{number_of_time_points}
     {
     }
-    ~discretization_config()
+    ~pde_discretization_config()
     {
     }
 
@@ -131,15 +131,17 @@ template <typename fp_type> struct discretization_config<dimension_enum::Two, fp
     }
 };
 
-template <typename fp_type> using discretization_config_1d = discretization_config<dimension_enum::One, fp_type>;
-
-template <typename fp_type> using discretization_config_2d = discretization_config<dimension_enum::Two, fp_type>;
+template <typename fp_type>
+using pde_discretization_config_1d = pde_discretization_config<dimension_enum::One, fp_type>;
 
 template <typename fp_type>
-using discretization_config_1d_ptr = sptr_t<discretization_config<dimension_enum::One, fp_type>>;
+using pde_discretization_config_2d = pde_discretization_config<dimension_enum::Two, fp_type>;
 
 template <typename fp_type>
-using discretization_config_2d_ptr = sptr_t<discretization_config<dimension_enum::Two, fp_type>>;
+using pde_discretization_config_1d_ptr = sptr_t<pde_discretization_config<dimension_enum::One, fp_type>>;
+
+template <typename fp_type>
+using pde_discretization_config_2d_ptr = sptr_t<pde_discretization_config<dimension_enum::Two, fp_type>>;
 
 } // namespace lss_pde_solvers
 

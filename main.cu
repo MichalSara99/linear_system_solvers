@@ -3,6 +3,7 @@
 #include "unit_tests/common/lss_print_t.hpp"
 #include "unit_tests/containers/lss_container_2d_t.hpp"
 #include "unit_tests/dense_solvers/lss_dense_solvers_cuda_t.hpp"
+#include "unit_tests/ode_solvers/second_degree/lss_odes_2_degree_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_advection_equation_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_black_scholes_equation_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_pure_heat_equation_t.hpp"
@@ -192,6 +193,18 @@ int main(int argc, char const *argv[])
     // testImplAdvDiffEquationDirichletBCCUDASolverHostQR();
     // testImplAdvDiffEquationDirichletBCDoubleSweepSolver();
     // testImplAdvDiffEquationDirichletBCThomasLUSolver();
+
+    // ====================================================================
+
+    // ====================================================================
+    // ===================== ONE_DIM: lss_odes_2_degree_t.h ===============
+    // ====================================================================
+
+    // testImplSimpleODEDirichletBCCUDASolverDevice();
+    // testImplSimpleODEDirichletNeumannBCCUDASolverDevice();
+    // testImplSimpleODEDirichletRobinBCCUDASolverDevice();
+    // testImplSimpleODENeumannRobinBCCUDASolverDevice();
+    // testImplSimpleODE1NeumannRobinBCCUDASolverDevice();
 
     // ====================================================================
 

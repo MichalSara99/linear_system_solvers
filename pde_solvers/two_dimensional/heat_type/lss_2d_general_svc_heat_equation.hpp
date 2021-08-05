@@ -10,7 +10,7 @@
 #include "containers/lss_container_3d.hpp"
 //#include "lss_general_svc_heat_equation_explicit_kernel.hpp"
 //#include "lss_general_svc_heat_equation_implicit_kernel.hpp"
-#include "pde_solvers/lss_discretization.hpp"
+#include "discretization/lss_discretization.hpp"
 #include "pde_solvers/lss_discretization_config.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_solver_config.hpp"

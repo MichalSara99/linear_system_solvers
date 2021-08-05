@@ -26,10 +26,15 @@
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.hpp" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_policy.hpp" />
-    <ClInclude Include="pde_solvers\lss_discretization.hpp" />
-    <ClInclude Include="pde_solvers\lss_discretization_config.hpp" />
+    <ClInclude Include="discretization\lss_discretization.hpp" />
+    <ClInclude Include="ode_solvers\lss_ode_data_config.hpp" />
+    <ClInclude Include="ode_solvers\lss_ode_discretization_config.hpp" />
+    <ClInclude Include="ode_solvers\lss_ode_solver_config.hpp" />
+    <ClInclude Include="ode_solvers\second_degree\lss_general_ode_equation.hpp" />
+    <ClInclude Include="ode_solvers\second_degree\lss_general_ode_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\lss_pde_discretization_config.hpp" />
     <ClInclude Include="pde_solvers\lss_heat_data_config.hpp" />
-    <ClInclude Include="pde_solvers\lss_solver_config.hpp" />
+    <ClInclude Include="pde_solvers\lss_pde_solver_config.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_barakat_clark_svc_scheme.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_cuda_scheme.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_scheme.hpp" />
@@ -57,6 +62,7 @@
     <ClInclude Include="unit_tests\common\lss_print_t.hpp" />
     <ClInclude Include="unit_tests\containers\lss_container_2d_t.hpp" />
     <ClInclude Include="unit_tests\dense_solvers\lss_dense_solvers_cuda_t.hpp" />
+    <ClInclude Include="unit_tests\ode_solvers\second_degree\lss_odes_2_degree_t.hpp" />
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_advection_equation_t.hpp" />
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_black_scholes_equation_t.hpp" />
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_pure_heat_equation_t.hpp" />

@@ -11,12 +11,12 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::host_bwd_tlusolver_euler_solver_config_ptr;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::black_scholes_exact;
@@ -50,7 +50,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
     auto b = [=](T x) { return rate * x; };
@@ -103,12 +103,12 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::host_bwd_tlusolver_cn_solver_config_ptr;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::black_scholes_exact;
@@ -142,7 +142,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
     auto b = [=](T x) { return rate * x; };
@@ -210,12 +210,12 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::host_bwd_tlusolver_euler_solver_config_ptr;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::black_scholes_exact;
@@ -251,7 +251,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
     auto b = [=](T x) { return rate * x; };
@@ -310,12 +310,12 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::host_bwd_tlusolver_cn_solver_config_ptr;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::black_scholes_exact;
@@ -352,7 +352,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
     auto b = [=](T x) { return rate * x; };
@@ -425,11 +425,11 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_euler_solver_config_ptr;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::pi;
@@ -461,7 +461,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [](T x) { return 1.0; };
     auto other = [](T x) { return 0.0; };
@@ -530,11 +530,11 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::dev_fwd_cusolver_qr_cn_solver_config_ptr;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::pi;
@@ -565,7 +565,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [](T x) { return 1.0; };
     auto other = [](T x) { return 0.0; };
@@ -648,11 +648,11 @@ template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSur
     using lss_containers::container_2d;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::dev_expl_fwd_euler_solver_config_ptr;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::explicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::pi;
@@ -683,7 +683,7 @@ template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSur
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.3));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [](T x) { return 1.0; };
     auto other = [](T x) { return 0.0; };
@@ -766,12 +766,12 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPri
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::discretization_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::host_fwd_tlusolver_cn_solver_config_ptr;
-    using lss_pde_solvers::implicit_solver_config;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::pde_implicit_solver_config;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_print::print;
     using lss_utility::pi;
@@ -803,7 +803,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPri
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.1));
     // discretization config:
-    auto const discretization_ptr = std::make_shared<discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
     auto a = [](T x) { return 1.0; };
     auto b = [](T x) { return -1.0; };

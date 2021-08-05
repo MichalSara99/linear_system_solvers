@@ -180,7 +180,6 @@ template <typename T> void testBVPThomasLUDirichletNeumannBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_thomas_lu_solver::thomas_lu_solver;
     using lss_utility::range;
 
@@ -269,7 +268,6 @@ template <typename T> void testBVPThomasLUNeumannDirichletBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_thomas_lu_solver::thomas_lu_solver;
     using lss_utility::range;
 
@@ -358,7 +356,6 @@ template <typename T> void testBVPThomasLUNeumannRobinBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_boundary::robin_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_pde_solvers::discretization_1d;
     using lss_thomas_lu_solver::thomas_lu_solver;
     using lss_utility::range;
 

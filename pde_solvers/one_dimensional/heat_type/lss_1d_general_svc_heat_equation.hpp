@@ -7,12 +7,12 @@
 #include "boundaries/lss_boundary.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
+#include "discretization/lss_discretization.hpp"
 #include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
 #include "lss_1d_general_svc_heat_equation_implicit_kernel.hpp"
-#include "pde_solvers/lss_discretization.hpp"
-#include "pde_solvers/lss_discretization_config.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
-#include "pde_solvers/lss_solver_config.hpp"
+#include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/lss_pde_solver_config.hpp"
 
 namespace lss_pde_solvers
 {
@@ -48,8 +48,8 @@ class general_svc_heat_equation
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
     heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    implicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_implicit_solver_config_1d_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
     explicit general_svc_heat_equation() = delete;
@@ -71,9 +71,9 @@ class general_svc_heat_equation
   public:
     explicit general_svc_heat_equation(
         heat_data_config_1d_ptr<fp_type> const &heat_data_config,
-        discretization_config_1d_ptr<fp_type> const &discretization_config,
+        pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
         boundary_1d_pair<fp_type> const &boundary_pair,
-        implicit_solver_config_1d_ptr const &solver_config = host_fwd_dssolver_euler_solver_config_ptr,
+        pde_implicit_solver_config_1d_ptr const &solver_config = host_fwd_dssolver_euler_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
           solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
@@ -426,8 +426,8 @@ class general_svc_heat_equation
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
     heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    explicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_explicit_solver_config_1d_ptr solver_cfg_;
 
     explicit general_svc_heat_equation() = delete;
 
@@ -443,9 +443,9 @@ class general_svc_heat_equation
   public:
     explicit general_svc_heat_equation(
         heat_data_config_1d_ptr<fp_type> const &heat_data_config,
-        discretization_config_1d_ptr<fp_type> const &discretization_config,
+        pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
         boundary_1d_pair<fp_type> const &boundary_pair,
-        explicit_solver_config_1d_ptr const &solver_config = dev_expl_fwd_euler_solver_config_ptr)
+        pde_explicit_solver_config_1d_ptr const &solver_config = dev_expl_fwd_euler_solver_config_ptr)
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
           solver_cfg_{solver_config}
     {

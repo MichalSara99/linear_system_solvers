@@ -7,9 +7,9 @@
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
-#include "pde_solvers/lss_discretization.hpp"
-#include "pde_solvers/lss_discretization_config.hpp"
-#include "pde_solvers/lss_solver_config.hpp"
+#include "discretization/lss_discretization.hpp"
+#include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/lss_pde_solver_config.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
 #include "sparse_solvers/tridiagonal/sor_solver/lss_sor_solver.hpp"
@@ -477,15 +477,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    implicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
                                               function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
-                                              discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              implicit_solver_config_1d_ptr const &solver_config)
+                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                              pde_implicit_solver_config_1d_ptr const &solver_config)
         : diagonals_{diagonals}, fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair},
           discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {
@@ -595,15 +595,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    implicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
                                               function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
-                                              discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              implicit_solver_config_1d_ptr const &solver_config)
+                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                              pde_implicit_solver_config_1d_ptr const &solver_config)
         : diagonals_{diagonals}, fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair},
           discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {
@@ -716,15 +716,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    implicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
                                               function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
-                                              discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              implicit_solver_config_1d_ptr const &solver_config)
+                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                              pde_implicit_solver_config_1d_ptr const &solver_config)
         : diagonals_{diagonals}, fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair},
           discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {
@@ -834,15 +834,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    implicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
                                               function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
-                                              discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              implicit_solver_config_1d_ptr const &solver_config)
+                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                              pde_implicit_solver_config_1d_ptr const &solver_config)
         : diagonals_{diagonals}, fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair},
           discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {
@@ -952,15 +952,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    implicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
                                               function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
-                                              discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              implicit_solver_config_1d_ptr const &solver_config)
+                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                              pde_implicit_solver_config_1d_ptr const &solver_config)
         : diagonals_{diagonals}, fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair},
           discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {
@@ -1068,15 +1068,15 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    implicit_solver_config_1d_ptr solver_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_implicit_solver_config_1d_ptr solver_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
                                               function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
-                                              discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              implicit_solver_config_1d_ptr const &solver_config)
+                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                              pde_implicit_solver_config_1d_ptr const &solver_config)
         : diagonals_{diagonals}, fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair},
           discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {

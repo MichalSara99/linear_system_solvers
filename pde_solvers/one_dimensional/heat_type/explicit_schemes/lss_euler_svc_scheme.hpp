@@ -8,8 +8,8 @@
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
-#include "pde_solvers/lss_discretization.hpp"
-#include "pde_solvers/lss_discretization_config.hpp"
+#include "discretization/lss_discretization.hpp"
+#include "pde_solvers/lss_pde_discretization_config.hpp"
 
 namespace lss_pde_solvers
 {
@@ -464,7 +464,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
   private:
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
-    discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
 
     bool is_stable()
     {
@@ -507,7 +507,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 
   public:
     euler_svc_scheme(function_triplet_t<fp_type> const &fun_triplet, boundary_1d_pair<fp_type> const &boundary_pair,
-                     discretization_config_1d_ptr<fp_type> const &discretization_config)
+                     pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
         : fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config}
     {
         initialize();

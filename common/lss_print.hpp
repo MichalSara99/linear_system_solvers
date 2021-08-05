@@ -10,13 +10,13 @@
 #include <tuple>
 
 #include "containers/lss_container_2d.hpp"
-#include "pde_solvers/lss_discretization_config.hpp"
+#include "pde_solvers/lss_pde_discretization_config.hpp"
 
 namespace lss_print
 {
 
 using lss_containers::container_2d;
-using lss_pde_solvers::discretization_config_1d_ptr;
+using lss_pde_solvers::pde_discretization_config_1d_ptr;
 
 /**
  * Prints contents of the container using passed discretization
@@ -26,8 +26,8 @@ using lss_pde_solvers::discretization_config_1d_ptr;
  * \param out - stream to print the contents to
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void print(discretization_config_1d_ptr<fp_type> const &discretization_cfg, container<fp_type, allocator> const &cont,
-           std::ostream &out = std::cout)
+void print(pde_discretization_config_1d_ptr<fp_type> const &discretization_cfg,
+           container<fp_type, allocator> const &cont, std::ostream &out = std::cout)
 {
     const std::size_t space_size = discretization_cfg->number_of_space_points();
     LSS_ASSERT(cont.size() == space_size, "Container size differs from passed discretization");
@@ -61,7 +61,7 @@ void print(discretization_config_1d_ptr<fp_type> const &discretization_cfg, cont
  * \param out - stream to print the contents to
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void print(discretization_config_1d_ptr<fp_type> const &discretization_cfg,
+void print(pde_discretization_config_1d_ptr<fp_type> const &discretization_cfg,
            container_2d<fp_type, container, allocator> const &cont_2d, std::ostream &out = std::cout)
 {
     const std::size_t space_size = discretization_cfg->number_of_space_points();

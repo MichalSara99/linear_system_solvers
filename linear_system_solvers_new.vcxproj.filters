@@ -88,6 +88,21 @@
     <Filter Include="unit_tests\common">
       <UniqueIdentifier>{21c37cbd-757b-475d-a307-c5f4e490e9b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ode_solvers">
+      <UniqueIdentifier>{76d21168-0dbf-41ba-964e-ab8b4c6699a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ode_solvers\second_degree">
+      <UniqueIdentifier>{e6d5fc00-30be-490c-909e-956f60a10df4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="discretization">
+      <UniqueIdentifier>{4392688d-3416-4ec5-b5c0-b9ba1642252d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests\ode_solvers">
+      <UniqueIdentifier>{3b3f25bc-5572-4855-a49a-f29bd4a1f584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unit_tests\ode_solvers\second_degree">
+      <UniqueIdentifier>{de1db6f8-5bc3-49ff-9846-9e36690439e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -195,16 +210,7 @@
     <ClInclude Include="unit_tests\containers\lss_container_2d_t.hpp">
       <Filter>unit_tests\containers</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\lss_discretization_config.hpp">
-      <Filter>pde_solvers</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\lss_solver_config.hpp">
-      <Filter>pde_solvers</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\lss_heat_data_config.hpp">
-      <Filter>pde_solvers</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\lss_discretization.hpp">
       <Filter>pde_solvers</Filter>
     </ClInclude>
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_pure_heat_equation_t.hpp">
@@ -260,6 +266,33 @@
     </ClInclude>
     <ClInclude Include="containers\lss_container_3d.hpp">
       <Filter>containers</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\second_degree\lss_general_ode_equation.hpp">
+      <Filter>ode_solvers\second_degree</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\lss_ode_data_config.hpp">
+      <Filter>ode_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\lss_ode_discretization_config.hpp">
+      <Filter>ode_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\lss_ode_solver_config.hpp">
+      <Filter>ode_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="discretization\lss_discretization.hpp">
+      <Filter>discretization</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\second_degree\lss_general_ode_equation_implicit_kernel.hpp">
+      <Filter>ode_solvers\second_degree</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\ode_solvers\second_degree\lss_odes_2_degree_t.hpp">
+      <Filter>unit_tests\ode_solvers\second_degree</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\lss_pde_discretization_config.hpp">
+      <Filter>pde_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\lss_pde_solver_config.hpp">
+      <Filter>pde_solvers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
