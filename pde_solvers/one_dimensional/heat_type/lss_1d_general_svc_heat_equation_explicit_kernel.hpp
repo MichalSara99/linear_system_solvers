@@ -12,8 +12,8 @@
 #include "explicit_schemes/lss_euler_svc_cuda_scheme.hpp"
 #include "explicit_schemes/lss_euler_svc_scheme.hpp"
 #include "explicit_schemes/lss_saulyev_svc_scheme.hpp"
+#include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
-#include "pde_solvers/lss_pde_solver_config.hpp"
 
 namespace lss_pde_solvers
 {
@@ -49,13 +49,13 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    pde_explicit_solver_config_1d_ptr solver_cfg_;
+    heat_explicit_solver_config_ptr solver_cfg_;
 
   public:
     general_svc_heat_equation_explicit_kernel(function_triplet_t<fp_type> const &fun_triplet,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              pde_explicit_solver_config_1d_ptr const &solver_config)
+                                              heat_explicit_solver_config_ptr const &solver_config)
         : fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}
     {
@@ -129,13 +129,13 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
     function_triplet_t<fp_type> fun_triplet_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    pde_explicit_solver_config_1d_ptr solver_cfg_;
+    heat_explicit_solver_config_ptr solver_cfg_;
 
   public:
     class general_svc_heat_equation_explicit_kernel(
         function_triplet_t<fp_type> const &fun_triplet, boundary_1d_pair<fp_type> const &boundary_pair,
         pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-        pde_explicit_solver_config_1d_ptr const &solver_config)
+        heat_explicit_solver_config_ptr const &solver_config)
         : fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}
     {

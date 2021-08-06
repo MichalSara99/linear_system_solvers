@@ -32,9 +32,12 @@
     <ClInclude Include="ode_solvers\lss_ode_solver_config.hpp" />
     <ClInclude Include="ode_solvers\second_degree\lss_general_ode_equation.hpp" />
     <ClInclude Include="ode_solvers\second_degree\lss_general_ode_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\lss_heat_solver_config.hpp" />
     <ClInclude Include="pde_solvers\lss_pde_discretization_config.hpp" />
     <ClInclude Include="pde_solvers\lss_heat_data_config.hpp" />
     <ClInclude Include="pde_solvers\lss_pde_solver_config.hpp" />
+    <ClInclude Include="pde_solvers\lss_wave_data_config.hpp" />
+    <ClInclude Include="pde_solvers\lss_wave_solver_config.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_barakat_clark_svc_scheme.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_cuda_scheme.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_euler_svc_scheme.hpp" />
@@ -42,6 +45,7 @@
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_explicit_kernel.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\lss_1d_general_svc_wave_equation.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heat_equation.hpp" />
     <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver.hpp" />
     <ClInclude Include="sparse_solvers\general\core_cuda_solver\lss_core_cuda_solver_policy.hpp" />

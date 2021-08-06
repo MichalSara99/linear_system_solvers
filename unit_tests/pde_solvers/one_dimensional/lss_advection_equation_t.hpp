@@ -22,12 +22,12 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::dev_fwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::dev_fwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -113,12 +113,12 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::dev_fwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::dev_fwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -218,12 +218,12 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::dev_fwd_sorsolver_euler_solver_config_ptr;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::dev_fwd_sorsolver_euler_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -313,12 +313,12 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
-    using lss_pde_solvers::dev_fwd_sorsolver_cn_solver_config_ptr;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::dev_fwd_sorsolver_cn_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -424,10 +424,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_sorsolver_euler_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_sorsolver_euler_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -519,10 +519,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_sorsolver_cn_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_sorsolver_cn_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -628,10 +628,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_cusolver_qr_euler_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -718,10 +718,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -823,10 +823,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_dssolver_euler_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_dssolver_euler_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -914,10 +914,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_dssolver_cn_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_dssolver_cn_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -1019,10 +1019,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_tlusolver_euler_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_tlusolver_euler_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
@@ -1109,10 +1109,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
+    using lss_pde_solvers::heat_implicit_solver_config;
     using lss_pde_solvers::heat_initial_data_config_1d;
-    using lss_pde_solvers::host_fwd_tlusolver_cn_solver_config_ptr;
     using lss_pde_solvers::pde_discretization_config_1d;
-    using lss_pde_solvers::pde_implicit_solver_config;
+    using lss_pde_solvers::default_heat_solver_configs::host_fwd_tlusolver_cn_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;

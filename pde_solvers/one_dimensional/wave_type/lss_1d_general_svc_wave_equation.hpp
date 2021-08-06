@@ -1,5 +1,5 @@
-#if !defined(_LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_)
-#define _LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_
+#if !defined(_LSS_1D_GENERAL_SVC_WAVE_EQUATION_HPP_)
+#define _LSS_1D_GENERAL_SVC_WAVE_EQUATION_HPP_
 
 #include <functional>
 #include <map>
@@ -8,11 +8,11 @@
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
-#include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
-#include "lss_1d_general_svc_heat_equation_implicit_kernel.hpp"
-#include "pde_solvers/lss_heat_data_config.hpp"
-#include "pde_solvers/lss_heat_solver_config.hpp"
+//#include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
+//#include "lss_1d_general_svc_heat_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/lss_wave_data_config.hpp"
+#include "pde_solvers/lss_wave_solver_config.hpp"
 
 namespace lss_pde_solvers
 {
@@ -28,9 +28,9 @@ namespace implicit_solvers
 
 /*!
 ============================================================================
-Represents general spacial variable coefficient 1D heat equation solver
+Represents general spacial variable coefficient 1D wave equation solver
 
-u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t),
+u_tt + a(x)*u_t = b(x)*u_xx + c(x)*u_x + d(x)*u + F(x,t),
 x_1 < x < x_2
 t_1 < t < t_2
 
@@ -38,30 +38,33 @@ with initial condition:
 
 u(x,t_1) = f(x)
 
+u_t(x,t_1) = g(x)
+
 or terminal condition:
 
 u(x,t_2) = f(x)
 
+u_t(x,t_2) = g(x)
 
 // ============================================================================
 */
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class general_svc_heat_equation
+class general_svc_wave_equation
 {
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    heat_implicit_solver_config_ptr solver_cfg_;
+    wave_implicit_solver_config_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
-    explicit general_svc_heat_equation() = delete;
+    explicit general_svc_wave_equation() = delete;
 
     void initialize()
     {
-        LSS_VERIFY(heat_data_cfg_, "heat_data_config must not be null");
+        LSS_VERIFY(wave_data_cfg_, "wave_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
         LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
         LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
@@ -74,27 +77,27 @@ class general_svc_heat_equation
     }
 
   public:
-    explicit general_svc_heat_equation(
-        heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+    explicit general_svc_wave_equation(
+        wave_data_config_1d_ptr<fp_type> const &wave_data_config,
         pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
         boundary_1d_pair<fp_type> const &boundary_pair,
-        heat_implicit_solver_config_ptr const &solver_config =
-            default_heat_solver_configs::host_fwd_dssolver_euler_solver_config_ptr,
+        wave_implicit_solver_config_ptr const &solver_config =
+            default_wave_solver_configs::dev_fwd_cusolver_qr_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
-        : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
+        : wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
           solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
     {
         initialize();
     }
 
-    ~general_svc_heat_equation()
+    ~general_svc_wave_equation()
     {
     }
 
-    general_svc_heat_equation(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation(general_svc_heat_equation &&) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation &&) = delete;
+    general_svc_wave_equation(general_svc_wave_equation const &) = delete;
+    general_svc_wave_equation(general_svc_wave_equation &&) = delete;
+    general_svc_wave_equation &operator=(general_svc_wave_equation const &) = delete;
+    general_svc_wave_equation &operator=(general_svc_wave_equation &&) = delete;
 
     /**
      * Get the final solution of the PDE
@@ -112,7 +115,7 @@ class general_svc_heat_equation
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
+void general_svc_wave_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
@@ -139,15 +142,15 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     // create container to carry previous solution:
     container_t prev_sol(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->initial_condition(), prev_sol);
     // since coefficients are different in space :
     container_t low(space_size, fp_type{});
     container_t diag(space_size, fp_type{});
     container_t up(space_size, fp_type{});
     // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
+    auto const &a = wave_data_cfg_->a_coefficient();
+    auto const &b = wave_data_cfg_->b_coefficient();
+    auto const &c = wave_data_cfg_->c_coefficient();
     // prepare space variable coefficients:
     auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
     auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
@@ -182,9 +185,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     // create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
     // get heat_source:
-    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    const bool is_heat_source_set = wave_data_cfg_->is_heat_source_set();
     // get heat_source:
-    auto const &heat_source = heat_data_cfg_->heat_source();
+    auto const &heat_source = wave_data_cfg_->heat_source();
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
@@ -267,7 +270,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(
+void general_svc_wave_equation<fp_type, container, allocator>::solve(
     container_2d<fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -427,19 +430,19 @@ namespace explicit_solvers
 
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class general_svc_heat_equation
+class general_svc_wave_equation
 {
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
-    heat_explicit_solver_config_ptr solver_cfg_;
+    wave_explicit_solver_config_ptr solver_cfg_;
 
-    explicit general_svc_heat_equation() = delete;
+    explicit general_svc_wave_equation() = delete;
 
     void initialize()
     {
-        LSS_VERIFY(heat_data_cfg_, "heat_data_config must not be null");
+        LSS_VERIFY(wave_data_cfg_, "wave_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
         LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
         LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
@@ -447,25 +450,25 @@ class general_svc_heat_equation
     }
 
   public:
-    explicit general_svc_heat_equation(heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+    explicit general_svc_wave_equation(wave_data_config_1d_ptr<fp_type> const &wave_data_config,
                                        pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                        boundary_1d_pair<fp_type> const &boundary_pair,
-                                       heat_explicit_solver_config_ptr const &solver_config =
-                                           default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
-        : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
+                                       wave_explicit_solver_config_ptr const &solver_config =
+                                           default_wave_solver_configs::dev_expl_fwd_solver_config_ptr)
+        : wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
           solver_cfg_{solver_config}
     {
         initialize();
     }
 
-    ~general_svc_heat_equation()
+    ~general_svc_wave_equation()
     {
     }
 
-    general_svc_heat_equation(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation(general_svc_heat_equation &&) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation &&) = delete;
+    general_svc_wave_equation(general_svc_wave_equation const &) = delete;
+    general_svc_wave_equation(general_svc_wave_equation &&) = delete;
+    general_svc_wave_equation &operator=(general_svc_wave_equation const &) = delete;
+    general_svc_wave_equation &operator=(general_svc_wave_equation &&) = delete;
 
     /**
      * Get the final solution of the PDE
@@ -483,7 +486,7 @@ class general_svc_heat_equation
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
+void general_svc_wave_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
@@ -547,7 +550,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(
+void general_svc_wave_equation<fp_type, container, allocator>::solve(
     container_2d<fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -620,4 +623,4 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_
+#endif ///_LSS_1D_GENERAL_SVC_WAVE_EQUATION_HPP_

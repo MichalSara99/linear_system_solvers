@@ -211,7 +211,7 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // ============================= lss_print_t.hpp ======================
     // ====================================================================
-    testImplSimpleODEThomesLUPrint();
+    // testImplSimpleODEThomesLUPrint();
 
     // testImplBlackScholesEquationDirichletBCThomasLUSolverPrint();
     // testImplBlackScholesEquationDirichletBCThomasLUSolverPrintSurf();
