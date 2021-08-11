@@ -25,6 +25,14 @@ using function_triplet_t =
     std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
 
 /**
+ * function_quintuple_t alias type
+ */
+template <typename fp_type>
+using function_quintuple_t =
+    std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>,
+               std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
+
+/**
  * function_quad_t alias type
  */
 template <typename fp_type>
