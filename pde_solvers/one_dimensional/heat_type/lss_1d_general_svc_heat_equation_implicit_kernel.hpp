@@ -42,15 +42,16 @@ using lss_utility::pair_t;
 using lss_utility::range;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using implicit_scheme_function_t =
+using implicit_heat_scheme_function_t =
     std::function<void(function_triplet_t<fp_type> const &, pair_t<fp_type> const &, container<fp_type, alloc> const &,
                        container<fp_type, alloc> const &, container<fp_type, alloc> const &,
                        boundary_1d_pair<fp_type> const &, fp_type const &, container<fp_type, alloc> &)>;
 
-template <typename fp_type, template <typename, typename> typename container, typename allocator> class implicit_scheme
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+class implicit_heat_scheme
 {
     typedef container<fp_type, allocator> container_t;
-    typedef implicit_scheme_function_t<container, fp_type, allocator> scheme_function_t;
+    typedef implicit_heat_scheme_function_t<container, fp_type, allocator> scheme_function_t;
 
   private:
     static fp_type const get_scheme_theta(implicit_pde_schemes_enum scheme)
@@ -199,11 +200,11 @@ template <typename fp_type, template <typename, typename> typename container, ty
 };
 
 /**
- * time_loop object
+ * heat_time_loop object
  */
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class time_loop
+class heat_time_loop
 {
     typedef container<fp_type, allocator> container_t;
 
@@ -245,7 +246,7 @@ class time_loop
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run(
+void heat_time_loop<fp_type, container, allocator>::run(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
     function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -301,7 +302,7 @@ void time_loop<fp_type, container, allocator>::run(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run(
+void heat_time_loop<fp_type, container, allocator>::run(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
     function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -345,7 +346,7 @@ void time_loop<fp_type, container, allocator>::run(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
     function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -407,7 +408,7 @@ void time_loop<fp_type, container, allocator>::run_with_stepping(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
     function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -471,7 +472,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Device, fp_type, container, allocator> cusolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef heat_time_loop<fp_type, container, allocator> loop;
 
   private:
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
@@ -519,7 +520,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -529,7 +530,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution, next_solution, rhs);
         }
@@ -564,7 +565,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -575,7 +576,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
@@ -589,7 +590,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver_cuda<fp_type, container, allocator> sorcusolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef heat_time_loop<fp_type, container, allocator> loop;
 
   private:
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
@@ -637,7 +638,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -647,7 +648,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution, next_solution, rhs);
         }
@@ -682,7 +683,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -693,7 +694,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
@@ -710,7 +711,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Host, fp_type, container, allocator> cusolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef heat_time_loop<fp_type, container, allocator> loop;
 
   private:
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
@@ -758,7 +759,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -768,7 +769,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution, next_solution, rhs);
         }
@@ -803,7 +804,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -814,7 +815,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
@@ -828,7 +829,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver<fp_type, container, allocator> sorsolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef heat_time_loop<fp_type, container, allocator> loop;
 
   private:
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
@@ -876,7 +877,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -886,7 +887,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution, next_solution, rhs);
         }
@@ -921,7 +922,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -932,7 +933,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
@@ -946,7 +947,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef double_sweep_solver<fp_type, container, allocator> ds_solver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef heat_time_loop<fp_type, container, allocator> loop;
 
   private:
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
@@ -993,7 +994,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -1003,7 +1004,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution, next_solution, rhs);
         }
@@ -1037,7 +1038,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -1048,7 +1049,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution, next_solution, rhs, solutions);
         }
@@ -1062,7 +1063,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef thomas_lu_solver<fp_type, container, allocator> tlu_solver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef heat_time_loop<fp_type, container, allocator> loop;
 
   private:
     diagonal_triplet_t<fp_type, container, allocator> diagonals_;
@@ -1109,7 +1110,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -1119,7 +1120,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution, next_solution, rhs);
         }
@@ -1153,7 +1154,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         if (is_heat_sourse_set)
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), false);
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
@@ -1164,7 +1165,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         else
         {
             auto scheme_function =
-                implicit_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
+                implicit_heat_scheme<fp_type, container, allocator>::get(solver_cfg_->implicit_pde_scheme(), true);
             loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_triplet_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution, next_solution, rhs, solutions);
         }

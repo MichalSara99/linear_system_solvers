@@ -220,7 +220,7 @@ int main(int argc, char const *argv[])
     // testExplPureHeatEquationNeumannBCEulerPrintSurface();
     // testImplAdvDiffEquationDirichletBCThomasLUSolverPrintSurface();
 
-    testImplPureWaveEquationDirichletBCCUDASolverDeviceQRPrintSurf();
+    // testImplPureWaveEquationDirichletBCCUDASolverDeviceQRPrintSurf();
 
     // ====================================================================
 
