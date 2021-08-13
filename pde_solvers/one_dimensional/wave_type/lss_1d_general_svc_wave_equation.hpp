@@ -150,9 +150,13 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     // discretize first order initial condition:
     d_1d::of_function(space.lower(), h, wave_data_cfg_->second_initial_condition(), prev_sol_1);
     // since coefficients are different in space :
-    container_t low(space_size, fp_type{});
-    container_t diag(space_size, fp_type{});
-    container_t up(space_size, fp_type{});
+    container_t low_1(space_size, fp_type{});
+    container_t diag_1(space_size, fp_type{});
+    container_t up_1(space_size, fp_type{});
+    // since coefficients are different in space :
+    container_t low_0(space_size, fp_type{});
+    container_t diag_0(space_size, fp_type{});
+    container_t up_0(space_size, fp_type{});
     // save coefficients:
     auto const &a = wave_data_cfg_->a_coefficient();
     auto const &b = wave_data_cfg_->b_coefficient();
@@ -167,15 +171,27 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     // wrap up the functions into tuple:
     auto const &fun_quintaple = std::make_tuple(A, B, C, D, E);
     fp_type m{};
-    for (std::size_t t = 0; t < low.size(); ++t)
+    fp_type up{};
+    fp_type mid{};
+    fp_type down{};
+    for (std::size_t t = 0; t < low_0.size(); ++t)
     {
         m = static_cast<fp_type>(t);
-        low[t] = -one * A(m * h);
-        diag[t] = (E(m * h) + C(m * h));
-        up[t] = -one * B(m * h);
+        down = -one * A(m * h);
+        mid = (E(m * h) + C(m * h));
+        up = -one * B(m * h);
+        low_1[t] = down;
+        diag_1[t] = mid;
+        up_1[t] = up;
+
+        low_0[t] = two * down;
+        diag_0[t] = (mid + C(m * h) + D(m * h));
+        up_0[t] = two * up;
     }
     // wrap up the diagonals into tuple:
-    auto const &diag_triplet = std::make_tuple(low, diag, up);
+    auto const &diag_triplet_0 = std::make_tuple(low_0, diag_0, up_0);
+    auto const &diag_triplet_1 = std::make_tuple(low_1, diag_1, up_1);
+    auto const &diag_triplets = std::make_pair(diag_triplet_0, diag_triplet_1);
     container_t rhs(space_size, fp_type{});
     // create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
@@ -192,9 +208,9 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
-            dev_cu_solver solver(diag_triplet, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            dev_cu_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
             solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source);
-            std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+            std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -203,9 +219,9 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            dev_sor_solver solver(diag_triplet, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            dev_sor_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
             solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, omega_value);
-            std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+            std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
         else
         {
@@ -219,9 +235,9 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 host_cu_solver;
-            host_cu_solver solver(diag_triplet, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            host_cu_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
             solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source);
-            std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+            std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -231,27 +247,27 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            host_sor_solver solver(diag_triplet, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            host_sor_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
             solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, omega_value);
-            std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+            std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
         {
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
-            host_dss_solver solver(diag_triplet, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            host_dss_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
             solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source);
-            std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+            std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
         {
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
-            host_lus_solver solver(diag_triplet, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            host_lus_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
             solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source);
-            std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+            std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
         else
         {
@@ -291,79 +307,90 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     const fp_type one = static_cast<fp_type>(1.0);
     const fp_type two = static_cast<fp_type>(2.0);
     const fp_type half = static_cast<fp_type>(0.5);
-    const fp_type lambda = k / (h * h);
-    const fp_type gamma = k / (two * h);
-    const fp_type delta = half * k;
+    const fp_type quater = static_cast<fp_type>(0.25);
+    const fp_type lambda = one / (k * k);
+    const fp_type gamma = one / (two * k);
+    const fp_type delta = one / (h * h);
+    const fp_type rho = one / (two * h);
     // create container to carry previous solution:
-    container_t prev_sol(space_size, fp_type{});
+    container_t prev_sol_0(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->first_initial_condition(), prev_sol_0);
+    // create container to carry second initial condition:
+    container_t prev_sol_1(space_size, fp_type{});
+    // discretize first order initial condition:
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->second_initial_condition(), prev_sol_1);
     // since coefficients are different in space :
-    container_t low(space_size, fp_type{});
-    container_t diag(space_size, fp_type{});
-    container_t up(space_size, fp_type{});
+    container_t low_1(space_size, fp_type{});
+    container_t diag_1(space_size, fp_type{});
+    container_t up_1(space_size, fp_type{});
+    // since coefficients are different in space :
+    container_t low_0(space_size, fp_type{});
+    container_t diag_0(space_size, fp_type{});
+    container_t up_0(space_size, fp_type{});
     // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
+    auto const &a = wave_data_cfg_->a_coefficient();
+    auto const &b = wave_data_cfg_->b_coefficient();
+    auto const &c = wave_data_cfg_->c_coefficient();
+    auto const &d = wave_data_cfg_->d_coefficient();
     // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+    auto const &A = [&](fp_type x) { return quater * (delta * b(x) - rho * c(x)); };
+    auto const &B = [&](fp_type x) { return quater * (delta * b(x) + rho * c(x)); };
+    auto const &C = [&](fp_type x) { return half * (delta * b(x) - half * d(x)); };
+    auto const &D = [&](fp_type x) { return (lambda - gamma * a(x)); };
+    auto const &E = [&](fp_type x) { return (lambda + gamma * a(x)); };
     // wrap up the functions into tuple:
-    auto const &fun_triplet = std::make_tuple(A, B, D);
-    // get propper theta accoring to clients chosen scheme:
-    fp_type theta{};
-    if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
-    {
-        theta = one;
-    }
-    else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
-    {
-        theta = half;
-    }
-    else
-    {
-        throw std::exception("Unreachable");
-    }
+    auto const &fun_quintaple = std::make_tuple(A, B, C, D, E);
     fp_type m{};
-    for (std::size_t t = 0; t < low.size(); ++t)
+    fp_type up{};
+    fp_type mid{};
+    fp_type down{};
+    for (std::size_t t = 0; t < low_0.size(); ++t)
     {
         m = static_cast<fp_type>(t);
-        low[t] = -one * A(m * h) * theta;
-        diag[t] = (one + two * B(m * h) * theta);
-        up[t] = -one * D(m * h) * theta;
+        down = -one * A(m * h);
+        mid = (E(m * h) + C(m * h));
+        up = -one * B(m * h);
+        low_1[t] = down;
+        diag_1[t] = mid;
+        up_1[t] = up;
+
+        low_0[t] = two * down;
+        diag_0[t] = (mid + C(m * h) + D(m * h));
+        up_0[t] = two * up;
     }
     // wrap up the diagonals into tuple:
-    auto const &diag_triplet = std::make_tuple(low, diag, up);
+    auto const &diag_triplet_0 = std::make_tuple(low_0, diag_0, up_0);
+    auto const &diag_triplet_1 = std::make_tuple(low_1, diag_1, up_1);
+    auto const &diag_triplets = std::make_pair(diag_triplet_0, diag_triplet_1);
     container_t rhs(space_size, fp_type{});
     // create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
     // get heat_source:
-    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    const bool is_wave_source_set = wave_data_cfg_->is_wave_source_set();
     // get heat_source:
-    auto const &heat_source = heat_data_cfg_->heat_source();
+    auto const &wave_source = wave_data_cfg_->wave_source();
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
         if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
-            dev_cu_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+            dev_cu_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            dev_sor_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, omega_value, solutions);
+            dev_sor_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, omega_value, solutions);
         }
         else
         {
@@ -372,40 +399,41 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
+
         if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 host_cu_solver;
-            host_cu_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+            host_cu_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
                 host_sor_solver;
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            host_sor_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, omega_value, solutions);
+            host_sor_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, omega_value, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
-            host_dss_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+            host_dss_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
-            host_lus_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+            host_lus_solver solver(diag_triplets, fun_quintaple, boundary_pair_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol_0, prev_sol_1, next_sol, rhs, is_wave_source_set, wave_source, solutions);
         }
         else
         {
@@ -504,9 +532,9 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     const fp_type gamma = k / (two * h);
     const fp_type delta = half * k;
     // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
+    auto const &a = wave_data_cfg_->a_coefficient();
+    auto const &b = wave_data_cfg_->b_coefficient();
+    auto const &c = wave_data_cfg_->c_coefficient();
     // prepare space variable coefficients:
     auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
     auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
@@ -516,11 +544,11 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     // create container to carry previous solution:
     container_t prev_sol(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->initial_condition(), prev_sol);
     // get heat_source:
-    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    const bool is_heat_source_set = wave_data_cfg_->is_wave_source_set();
     // get heat_source:
-    auto const &heat_source = heat_data_cfg_->heat_source();
+    auto const &heat_source = wave_data_cfg_->wave_source();
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
@@ -574,9 +602,9 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     const fp_type gamma = k / (two * h);
     const fp_type delta = half * k;
     // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
+    auto const &a = wave_data_cfg_->a_coefficient();
+    auto const &b = wave_data_cfg_->b_coefficient();
+    auto const &c = wave_data_cfg_->c_coefficient();
     // prepare space variable coefficients:
     auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
     auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
@@ -586,11 +614,11 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     // create container to carry previous solution:
     container_t prev_sol(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->initial_condition(), prev_sol);
     // get heat_source:
-    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    const bool is_heat_source_set = wave_data_cfg_->is_wave_source_set();
     // get heat_source:
-    auto const &heat_source = heat_data_cfg_->heat_source();
+    auto const &heat_source = wave_data_cfg_->wave_source();
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {

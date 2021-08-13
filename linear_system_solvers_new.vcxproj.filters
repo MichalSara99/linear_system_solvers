@@ -312,6 +312,9 @@
     <ClInclude Include="pde_solvers\one_dimensional\wave_type\lss_1d_general_svc_wave_equation_implicit_kernel.hpp">
       <Filter>pde_solvers\one_dimensional\wave_type</Filter>
     </ClInclude>
+    <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_pure_wave_equation_t.hpp">
+      <Filter>unit_tests\pde_solvers\one_dimensional</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

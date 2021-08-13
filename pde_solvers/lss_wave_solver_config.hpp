@@ -81,10 +81,10 @@ auto dev_fwd_cusolver_lu_solver_config_ptr =
 // ===== some default explicit solver configs ======
 // =================================================
 auto dev_expl_fwd_solver_config_ptr =
-    std::make_shared<wave_implicit_solver_config>(memory_space_enum::Device, traverse_direction_enum::Forward);
+    std::make_shared<wave_explicit_solver_config>(memory_space_enum::Device, traverse_direction_enum::Forward);
 
 auto host_expl_fwd_solver_config_ptr =
-    std::make_shared<wave_implicit_solver_config>(memory_space_enum::Host, traverse_direction_enum::Forward);
+    std::make_shared<wave_explicit_solver_config>(memory_space_enum::Host, traverse_direction_enum::Forward);
 
 } // namespace default_wave_solver_configs
 

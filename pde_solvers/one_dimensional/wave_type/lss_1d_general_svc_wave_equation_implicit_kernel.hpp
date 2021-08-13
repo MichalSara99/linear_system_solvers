@@ -35,6 +35,7 @@ using lss_enumerations::tridiagonal_method_enum;
 using lss_sor_solver::sor_solver;
 using lss_sor_solver_cuda::sor_solver_cuda;
 using lss_thomas_lu_solver::thomas_lu_solver;
+using lss_utility::diagonal_triplet_pair_t;
 using lss_utility::diagonal_triplet_t;
 using lss_utility::function_quintuple_t;
 using lss_utility::NaN;
@@ -42,16 +43,17 @@ using lss_utility::pair_t;
 using lss_utility::range;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using implicit_scheme_function_t =
+using implicit_wave_scheme_function_t =
     std::function<void(function_quintuple_t<fp_type> const &, pair_t<fp_type> const &,
                        container<fp_type, alloc> const &, container<fp_type, alloc> const &,
                        container<fp_type, alloc> const &, container<fp_type, alloc> const &,
                        boundary_1d_pair<fp_type> const &, fp_type const &, container<fp_type, alloc> &)>;
 
-template <typename fp_type, template <typename, typename> typename container, typename allocator> class implicit_scheme
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+class implicit_wave_scheme
 {
     typedef container<fp_type, allocator> container_t;
-    typedef implicit_scheme_function_t<container, fp_type, allocator> scheme_function_t;
+    typedef implicit_wave_scheme_function_t<container, fp_type, allocator> scheme_function_t;
 
   public:
     static scheme_function_t const get(bool is_homogeneus)
@@ -499,61 +501,70 @@ template <typename fp_type, template <typename, typename> typename container, ty
 };
 
 /**
- * time_loop object
+ * wave_time_loop object
  */
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class time_loop
+class wave_time_loop
 {
     typedef container<fp_type, allocator> container_t;
 
   public:
-    template <typename solver_object, typename scheme_function>
-    static void run(solver_object &solver_obj, scheme_function &scheme_fun,
-                    boundary_1d_pair<fp_type> const &boundary_pair, function_triplet_t<fp_type> const &fun_triplet,
+    template <typename solver_object>
+    static void run(solver_object &solver_obj, diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
+                    boundary_1d_pair<fp_type> const &boundary_pair, function_quintuple_t<fp_type> const &fun_quintuple,
                     range<fp_type> const &space_range, range<fp_type> const &time_range,
                     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-                    traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
-                    container_t &rhs, std::function<fp_type(fp_type, fp_type)> const &heat_source,
-                    container_t &curr_source, container_t &next_source);
-    template <typename solver_object, typename scheme_function>
-    static void run(solver_object &solver_obj, scheme_function &scheme_fun,
-                    boundary_1d_pair<fp_type> const &boundary_pair, function_triplet_t<fp_type> const &fun_triplet,
+                    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+                    container_t &prev_solution_1, container_t &next_solution, container_t &rhs,
+                    std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
+                    container_t &next_source);
+    template <typename solver_object>
+    static void run(solver_object &solver_obj, diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
+                    boundary_1d_pair<fp_type> const &boundary_pair, function_quintuple_t<fp_type> const &fun_quintuple,
                     range<fp_type> const &space_range, range<fp_type> const &time_range,
                     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-                    traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
-                    container_t &rhs);
+                    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+                    container_t &prev_solution_1, container_t &next_solution, container_t &rhs);
 
-    template <typename solver_object, typename scheme_function>
-    static void run_with_stepping(solver_object &solver_obj, scheme_function &scheme_fun,
+    template <typename solver_object>
+    static void run_with_stepping(solver_object &solver_obj,
+                                  diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                   boundary_1d_pair<fp_type> const &boundary_pair,
-                                  function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range,
+                                  function_quintuple_t<fp_type> const &fun_quintuple, range<fp_type> const &space_range,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
-                                  container_t &prev_solution, container_t &next_solution, container_t &rhs,
-                                  std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
+                                  container_t &prev_solution_0, container_t &prev_solution_1,
+                                  container_t &next_solution, container_t &rhs,
+                                  std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &curr_source,
                                   container_t &next_source, container_2d<fp_type, container, allocator> &solutions);
-    template <typename solver_object, typename scheme_function>
-    static void run_with_stepping(solver_object &solver_obj, scheme_function &scheme_fun,
+    template <typename solver_object>
+    static void run_with_stepping(solver_object &solver_obj,
+                                  diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                   boundary_1d_pair<fp_type> const &boundary_pair,
-                                  function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range,
+                                  function_quintuple_t<fp_type> const &fun_quintuple, range<fp_type> const &space_range,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
-                                  container_t &prev_solution, container_t &next_solution, container_t &rhs,
+                                  container_t &prev_solution_0, container_t &prev_solution_1,
+                                  container_t &next_solution, container_t &rhs,
                                   container_2d<fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run(
-    solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
-    container_t &rhs, std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
-    container_t &next_source)
+template <typename solver_object>
+void wave_time_loop<fp_type, container, allocator>::run(
+    solver_object &solver_obj, diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
+    boundary_1d_pair<fp_type> const &boundary_pair, function_quintuple_t<fp_type> const &fun_quintuple,
+    range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
+    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+    container_t &prev_solution_1, container_t &next_solution, container_t &rhs,
+    std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &curr_source, container_t &next_source)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
+    typedef implicit_wave_scheme<fp_type, container, allocator> implicit_scheme;
+
+    const auto &diagonals_0 = diagonals.first;
+    const auto &diagonals_1 = diagonals.second;
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
     const fp_type start_x = space_range.lower();
@@ -561,99 +572,170 @@ void time_loop<fp_type, container, allocator>::run(
     const fp_type k = std::get<0>(steps);
     fp_type time{};
     std::size_t time_idx{};
+
     if (traverse_dir == traverse_direction_enum::Forward)
     {
-        d_1d::of_function(start_x, step_x, start_time, heat_source, curr_source);
-        d_1d::of_function(start_x, step_x, start_time + k, heat_source, next_source);
+
+        // solve for initial time step:
+        auto init_scheme = implicit_scheme::get_initial(false);
+        d_1d::of_function(start_x, step_x, start_time, wave_source, curr_source);
+        init_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                    start_time, rhs);
         time = start_time + k;
         time_idx = 1;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(false);
+        d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
+        time_idx++;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                   time, rhs);
+            time += k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
-            prev_solution = next_solution;
-            d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
-            d_1d::of_function(start_x, step_x, time + k, heat_source, next_source);
-            time += k;
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
+            d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
             time_idx++;
         }
     }
     else
     {
-        d_1d::of_function(start_x, step_x, end_time, heat_source, curr_source);
-        d_1d::of_function(start_x, step_x, end_time - k, heat_source, next_source);
+        time_idx = last_time_idx;
+        // solve for initial time step:
+        auto term_scheme = implicit_scheme::get_terminal(false);
+        d_1d::of_function(start_x, step_x, end_time, wave_source, curr_source);
+        term_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                    end_time, rhs);
+        time_idx--;
         time = end_time - time;
-        time_idx = last_time_idx;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(false);
+        d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
         do
         {
             time_idx--;
-            scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                   time, rhs);
+            time -= k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
-            prev_solution = next_solution;
-            d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
-            d_1d::of_function(start_x, step_x, time - k, heat_source, next_source);
-            time -= k;
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
+            d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
         } while (time_idx > 0);
     }
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run(
-    solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
-    container_t &rhs)
+template <typename solver_object>
+void wave_time_loop<fp_type, container, allocator>::run(
+    solver_object &solver_obj, diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
+    boundary_1d_pair<fp_type> const &boundary_pair, function_quintuple_t<fp_type> const &fun_quintuple,
+    range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
+    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+    container_t &prev_solution_1, container_t &next_solution, container_t &rhs)
 {
+    typedef implicit_wave_scheme<fp_type, container, allocator> implicit_scheme;
+
+    const auto &diagonals_0 = diagonals.first;
+    const auto &diagonals_1 = diagonals.second;
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
     const fp_type k = std::get<0>(steps);
     fp_type time{};
     std::size_t time_idx{};
+
     if (traverse_dir == traverse_direction_enum::Forward)
     {
+        // solve for initial time step:
+        auto init_scheme = implicit_scheme::get_initial(true);
+        init_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                    start_time, rhs);
         time = start_time + k;
         time_idx = 1;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(true);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
+        time_idx++;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                   time, rhs);
+            time += k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
-            prev_solution = next_solution;
-            time += k;
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
             time_idx++;
         }
     }
     else
     {
-        time = end_time - k;
         time_idx = last_time_idx;
+        // solve for initial time step:
+        auto term_scheme = implicit_scheme::get_terminal(true);
+        term_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                    end_time, rhs);
+        time_idx--;
+        time = end_time - time;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(true);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
         do
         {
             time_idx--;
-            scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                   time, rhs);
+            time -= k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
-            prev_solution = next_solution;
-            time -= k;
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
+
         } while (time_idx > 0);
     }
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run_with_stepping(
-    solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
-    container_t &rhs, std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
-    container_t &next_source, container_2d<fp_type, container, allocator> &solutions)
+template <typename solver_object>
+void wave_time_loop<fp_type, container, allocator>::run_with_stepping(
+    solver_object &solver_obj, diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
+    boundary_1d_pair<fp_type> const &boundary_pair, function_quintuple_t<fp_type> const &fun_quintuple,
+    range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
+    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+    container_t &prev_solution_1, container_t &next_solution, container_t &rhs,
+    std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &curr_source, container_t &next_source,
+    container_2d<fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
+    typedef implicit_wave_scheme<fp_type, container, allocator> implicit_scheme;
+
+    const auto &diagonals_0 = diagonals.first;
+    const auto &diagonals_1 = diagonals.second;
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
     const fp_type start_x = space_range.lower();
@@ -661,59 +743,95 @@ void time_loop<fp_type, container, allocator>::run_with_stepping(
     const fp_type k = std::get<0>(steps);
     fp_type time{};
     std::size_t time_idx{};
+
     if (traverse_dir == traverse_direction_enum::Forward)
     {
         // store the initial solution:
-        solutions(0, prev_solution);
-        d_1d::of_function(start_x, step_x, start_time, heat_source, curr_source);
-        d_1d::of_function(start_x, step_x, start_time + k, heat_source, next_source);
+        solutions(0, prev_solution_0);
+        // solve for initial time step:
+        auto init_scheme = implicit_scheme::get_initial(false);
+        d_1d::of_function(start_x, step_x, start_time, wave_source, curr_source);
+        init_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                    start_time, rhs);
         time = start_time + k;
         time_idx = 1;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+        solutions(time_idx, next_solution);
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(false);
+        d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
+        time_idx++;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                   time, rhs);
+            time += k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
             solutions(time_idx, next_solution);
-            prev_solution = next_solution;
-            d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
-            d_1d::of_function(start_x, step_x, time + k, heat_source, next_source);
-            time += k;
+            d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
             time_idx++;
         }
     }
     else
     {
-        // store the initial solution:
-        solutions(last_time_idx, prev_solution);
-        d_1d::of_function(start_x, step_x, end_time, heat_source, curr_source);
-        d_1d::of_function(start_x, step_x, end_time - k, heat_source, next_source);
-        time = end_time - k;
         time_idx = last_time_idx;
+        // store the terminal solution:
+        solutions(last_time_idx, prev_solution_0);
+        // solve for terminal time step:
+        auto term_scheme = implicit_scheme::get_terminal(false);
+        d_1d::of_function(start_x, step_x, end_time, wave_source, curr_source);
+        term_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                    end_time, rhs);
+        time_idx--;
+        time = end_time - time;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+        solutions(time_idx, next_solution);
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(false);
+        d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
         do
         {
             time_idx--;
-            scheme_fun(fun_triplet, steps, prev_solution, curr_source, next_source, boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, curr_source, container_t(), boundary_pair,
+                   time, rhs);
+            time -= k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
             solutions(time_idx, next_solution);
-            prev_solution = next_solution;
-            d_1d::of_function(start_x, step_x, time, heat_source, curr_source);
-            d_1d::of_function(start_x, step_x, time - k, heat_source, next_source);
-            time -= k;
+            d_1d::of_function(start_x, step_x, time, wave_source, curr_source);
         } while (time_idx > 0);
     }
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-template <typename solver_object, typename scheme_function>
-void time_loop<fp_type, container, allocator>::run_with_stepping(
-    solver_object &solver_obj, scheme_function &scheme_fun, boundary_1d_pair<fp_type> const &boundary_pair,
-    function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
-    container_t &rhs, container_2d<fp_type, container, allocator> &solutions)
+template <typename solver_object>
+void wave_time_loop<fp_type, container, allocator>::run_with_stepping(
+    solver_object &solver_obj, diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
+    boundary_1d_pair<fp_type> const &boundary_pair, function_quintuple_t<fp_type> const &fun_quintuple,
+    range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
+    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+    container_t &prev_solution_1, container_t &next_solution, container_t &rhs,
+    container_2d<fp_type, container, allocator> &solutions)
 {
+    typedef implicit_wave_scheme<fp_type, container, allocator> implicit_scheme;
+
+    const auto &diagonals_0 = diagonals.first;
+    const auto &diagonals_1 = diagonals.second;
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
     const fp_type k = std::get<0>(steps);
@@ -721,36 +839,69 @@ void time_loop<fp_type, container, allocator>::run_with_stepping(
     std::size_t time_idx{};
     if (traverse_dir == traverse_direction_enum::Forward)
     {
+
         // store the initial solution:
-        solutions(0, prev_solution);
+        solutions(0, prev_solution_0);
+        // solve for initial time step:
+        auto init_scheme = implicit_scheme::get_initial(true);
+        init_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                    start_time, rhs);
         time = start_time + k;
         time_idx = 1;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+        solutions(time_idx, next_solution);
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(true);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
+        time_idx++;
         while (time_idx <= last_time_idx)
         {
-            scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                   time, rhs);
+            time += k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
             solutions(time_idx, next_solution);
-            prev_solution = next_solution;
-            time += k;
             time_idx++;
         }
     }
     else
     {
-        // store the initial solution:
-        solutions(last_time_idx, prev_solution);
-        time = end_time - k;
         time_idx = last_time_idx;
+        // store the terminal solution:
+        solutions(last_time_idx, prev_solution_0);
+        // solve for terminal time step:
+        auto term_scheme = implicit_scheme::get_terminal(true);
+        term_scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                    end_time, rhs);
+        time_idx--;
+        time = end_time - time;
+        solver_obj->set_diagonals(std::get<0>(diagonals_0), std::get<1>(diagonals_0), std::get<2>(diagonals_0));
+        solver_obj->set_rhs(rhs);
+        solver_obj->solve(boundary_pair, next_solution, time);
+        prev_solution_1 = next_solution;
+        solutions(time_idx, next_solution);
+
+        // solve for rest of time steps:
+        auto scheme = implicit_scheme::get(true);
+        solver_obj->set_diagonals(std::get<0>(diagonals_1), std::get<1>(diagonals_1), std::get<2>(diagonals_1));
         do
         {
             time_idx--;
-            scheme_fun(fun_triplet, steps, prev_solution, container_t(), container_t(), boundary_pair, time, rhs);
+            scheme(fun_quintuple, steps, prev_solution_0, prev_solution_1, container_t(), container_t(), boundary_pair,
+                   time, rhs);
+            time -= k;
             solver_obj->set_rhs(rhs);
             solver_obj->solve(boundary_pair, next_solution, time);
+            prev_solution_0 = prev_solution_1;
+            prev_solution_1 = next_solution;
             solutions(time_idx, next_solution);
-            prev_solution = next_solution;
-            time -= k;
         } while (time_idx > 0);
     }
 }
@@ -771,17 +922,17 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Device, fp_type, container, allocator> cusolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef wave_time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    diagonal_triplet_pair_t<fp_type, container, allocator> diagonals_;
     function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_implicit_solver_config_ptr solver_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+    general_svc_wave_equation_implicit_kernel(diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                               function_quintuple_t<fp_type> const &fun_quintuple,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
@@ -813,23 +964,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs, wave_source, source_curr,
                       source_next);
         }
         else
         {
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs);
         }
     }
@@ -857,23 +1004,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     wave_source, source_curr, source_next, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     solutions);
         }
@@ -887,17 +1030,17 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver_cuda<fp_type, container, allocator> sorcusolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef wave_time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    diagonal_triplet_pair_t<fp_type, container, allocator> diagonals_;
     function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_implicit_solver_config_ptr solver_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+    general_svc_wave_equation_implicit_kernel(diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                               function_quintuple_t<fp_type> const &fun_quintuple,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
@@ -929,23 +1072,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs, wave_source, source_curr,
                       source_next);
         }
         else
         {
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs);
         }
     }
@@ -973,23 +1112,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     wave_source, source_curr, source_next, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     solutions);
         }
@@ -1006,17 +1141,17 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Host, fp_type, container, allocator> cusolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef wave_time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    diagonal_triplet_pair_t<fp_type, container, allocator> diagonals_;
     function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_implicit_solver_config_ptr solver_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+    general_svc_wave_equation_implicit_kernel(diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                               function_quintuple_t<fp_type> const &fun_quintuple,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
@@ -1048,23 +1183,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs, wave_source, source_curr,
                       source_next);
         }
         else
         {
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs);
         }
     }
@@ -1092,23 +1223,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     wave_source, source_curr, source_next, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     solutions);
         }
@@ -1122,17 +1249,17 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver<fp_type, container, allocator> sorsolver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef wave_time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    diagonal_triplet_pair_t<fp_type, container, allocator> diagonals_;
     function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_implicit_solver_config_ptr solver_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+    general_svc_wave_equation_implicit_kernel(diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                               function_quintuple_t<fp_type> const &fun_quintuple,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
@@ -1164,23 +1291,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs, wave_source, source_curr,
                       source_next);
         }
         else
         {
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs);
         }
     }
@@ -1208,23 +1331,19 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
         solver->set_omega(omega_value);
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     wave_source, source_curr, source_next, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     solutions);
         }
@@ -1238,17 +1357,17 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef double_sweep_solver<fp_type, container, allocator> ds_solver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef wave_time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    diagonal_triplet_pair_t<fp_type, container, allocator> diagonals_;
     function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_implicit_solver_config_ptr solver_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+    general_svc_wave_equation_implicit_kernel(diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                               function_quintuple_t<fp_type> const &fun_quintuple,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
@@ -1280,22 +1399,18 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs, wave_source, source_curr,
                       source_next);
         }
         else
         {
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs);
         }
     }
@@ -1323,22 +1438,18 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     wave_source, source_curr, source_next, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     solutions);
         }
@@ -1352,17 +1463,17 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
     typedef thomas_lu_solver<fp_type, container, allocator> tlu_solver;
-    typedef time_loop<fp_type, container, allocator> loop;
+    typedef wave_time_loop<fp_type, container, allocator> loop;
 
   private:
-    diagonal_triplet_t<fp_type, container, allocator> diagonals_;
+    diagonal_triplet_pair_t<fp_type, container, allocator> diagonals_;
     function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_implicit_solver_config_ptr solver_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(diagonal_triplet_t<fp_type, container, allocator> const &diagonals,
+    general_svc_wave_equation_implicit_kernel(diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
                                               function_quintuple_t<fp_type> const &fun_quintuple,
                                               boundary_1d_pair<fp_type> const &boundary_pair,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
@@ -1394,22 +1505,18 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs, wave_source, source_curr,
                       source_next);
         }
         else
         {
-            loop::run(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
+            loop::run(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx, steps,
                       traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs);
         }
     }
@@ -1437,22 +1544,18 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space, space_size);
-        solver->set_diagonals(std::move(std::get<0>(diagonals_)), std::move(std::get<1>(diagonals_)),
-                              std::move(std::get<2>(diagonals_)));
-        const bool is_homogeneous = !is_wave_sourse_set;
-        auto scheme_function = implicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_wave_sourse_set)
         {
             // create a container to carry discretized source heat
             container_t source_curr(space_size, NaN<fp_type>());
             container_t source_next(space_size, NaN<fp_type>());
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     wave_source, source_curr, source_next, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver, scheme_function, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
+            loop::run_with_stepping(solver, diagonals_, boundary_pair_, fun_quintuple_, space, time, last_time_idx,
                                     steps, traverse_dir, prev_solution_0, prev_solution_1, next_solution, rhs,
                                     solutions);
         }

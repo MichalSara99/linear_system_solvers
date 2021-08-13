@@ -7,6 +7,7 @@
 #include "unit_tests/pde_solvers/one_dimensional/lss_advection_equation_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_black_scholes_equation_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_pure_heat_equation_t.hpp"
+#include "unit_tests/pde_solvers/one_dimensional/lss_pure_wave_equation_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_cuda_solver_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_sor_solver_cuda_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_sor_solver_t.hpp"
@@ -218,6 +219,16 @@ int main(int argc, char const *argv[])
     // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRPrintSurface();
     // testExplPureHeatEquationNeumannBCEulerPrintSurface();
     // testImplAdvDiffEquationDirichletBCThomasLUSolverPrintSurface();
+
+    testImplPureWaveEquationDirichletBCCUDASolverDeviceQRPrintSurf();
+
+    // ====================================================================
+
+    // ====================================================================
+    // ============== ONE_DIM: lss_wave_heat_equation_t.h =================
+    // ====================================================================
+
+    // testImplPureWaveEquationDirichletBCCUDASolverDeviceQR();
 
     // ====================================================================
 
