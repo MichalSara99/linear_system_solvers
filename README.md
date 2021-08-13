@@ -7,7 +7,7 @@ It also contains some PDE solvers.
 
 ## PDE Solver
 * 1D general heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
-* 1D general wave equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions) - IN PROGRESS
+* 1D general wave equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions) - IN PROGRESS (Testing stage)
 
 ## Some curves from ODE solver
 Simple Two-point BVP (u''(x) = -2 with Dirichlet and Robin BC)
@@ -17,6 +17,9 @@ Simple Two-point BVP (u''(x) = -2 with Dirichlet and Robin BC)
 
 Heat equation (Dirichlet BC)
 ![Pure heat equation](/outputs/temp_heat_equ_numerical.png)
+
+Wave equation (Dirichlet BC)
+![Pure heat equation](/outputs/wave_pure_dir_equ_numerical.png)
 
 Heat equation (Dirichlet and Neumann BC)
 ![Pure heat equation](/outputs/temp_heat_neu_equ_numerical.png)
