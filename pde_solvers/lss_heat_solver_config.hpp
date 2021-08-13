@@ -87,6 +87,7 @@ namespace default_heat_solver_configs
 // ===== some default implicit solver configs ======
 // =================================================
 // forward stepping:
+
 auto dev_fwd_cusolver_qr_euler_solver_config_ptr = std::make_shared<heat_implicit_solver_config>(
     memory_space_enum::Device, traverse_direction_enum::Forward, tridiagonal_method_enum::CUDASolver,
     factorization_enum::QRMethod, implicit_pde_schemes_enum::Euler);
@@ -158,7 +159,9 @@ auto host_fwd_tlusolver_euler_solver_config_ptr = std::make_shared<heat_implicit
 auto host_fwd_tlusolver_cn_solver_config_ptr = std::make_shared<heat_implicit_solver_config>(
     memory_space_enum::Host, traverse_direction_enum::Forward, tridiagonal_method_enum::ThomasLUSolver,
     factorization_enum::None, implicit_pde_schemes_enum::CrankNicolson);
+
 // backward stepping:
+
 auto dev_bwd_cusolver_qr_euler_solver_config_ptr = std::make_shared<heat_implicit_solver_config>(
     memory_space_enum::Device, traverse_direction_enum::Backward, tridiagonal_method_enum::CUDASolver,
     factorization_enum::QRMethod, implicit_pde_schemes_enum::Euler);

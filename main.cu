@@ -229,6 +229,10 @@ int main(int argc, char const *argv[])
     // ====================================================================
 
     // testImplPureWaveEquationDirichletBCCUDASolverDeviceQR();
+    // testImplPureWaveEquationDirichletBCCUDASolverHostSOR();
+    // testImplPureWaveEquationDirichletBCCUDASolverDeviceSOR();
+    // testImplPureWaveEquationDirichletBCSolverDoubleSweep();
+    // testImplPureWaveEquationDirichletBCSolverLU();
 
     // ====================================================================
 
