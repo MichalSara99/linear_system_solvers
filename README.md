@@ -19,10 +19,13 @@ Heat equation (Dirichlet BC)
 ![Pure heat equation](/outputs/temp_heat_equ_numerical.png)
 
 Wave equation (Dirichlet BC)
-![Pure heat equation](/outputs/wave_pure_dir_equ_numerical.png)
+![Pure wave equation](/outputs/wave_pure_dir_equ_numerical.png)
+
+Wave equation (Neumann BC)
+![Pure wave equation - neumann](/outputs/wave_neu_equ_numerical.png)
 
 Damped wave equation (Dirichlet BC)
-![Pure heat equation](/outputs/damped_wave_dir_equ_numerical.png)
+![Damped wave equation](/outputs/damped_wave_dir_equ_numerical.png)
 
 Heat equation (Dirichlet and Neumann BC)
 ![Pure heat equation](/outputs/temp_heat_neu_equ_numerical.png)
