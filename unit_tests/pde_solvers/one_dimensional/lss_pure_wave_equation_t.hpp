@@ -650,4 +650,96 @@ void testImplDampedWaveEquationDirichletBCSolverDoubleSweep()
     std::cout << "============================================================\n";
 }
 
+// Neumann BC:
+
+template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDetail()
+{
+    using lss_boundary::neumann_boundary_1d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::wave_coefficient_data_config_1d;
+    using lss_pde_solvers::wave_data_config_1d;
+    using lss_pde_solvers::wave_implicit_solver_config;
+    using lss_pde_solvers::wave_initial_data_config_1d;
+    using lss_pde_solvers::default_wave_solver_configs::dev_fwd_cusolver_qr_solver_config_ptr;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_utility::pi;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Wave equation: \n\n";
+    std::cout << " Using CUDA solver with QR (DEVICE) method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_tt(x,t) = 4*U_xx(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " x in <0,pi> and t > 0,\n";
+    std::cout << " U_x(0,t) = U_x(pi,t) = 0, t > 0 \n\n";
+    std::cout << " U(x,0) = 3*cos(x), x in <0,pi> \n\n";
+    std::cout << " U_x(x,0) = 1 - cos(4*x), x in <0,1> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef the general_svc_wave_equation
+    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(pi<T>()));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.8));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto b = [](T x) { return 4.0; };
+    auto other = [](T x) { return 0.0; };
+    auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
+    // initial condition:
+    auto first_initial_condition = [](T x) { return 3.0 * std::cos(x); };
+    auto second_initial_condition = [](T x) { return (1.0 - std::cos(4.0 * x)); };
+    auto const wave_init_data_ptr =
+        std::make_shared<wave_initial_data_config_1d<T>>(first_initial_condition, second_initial_condition);
+    // wave data config:
+    auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
+    // boundary conditions:
+    auto const &neumann = [](T t) { return 0.0; };
+    auto const &boundary_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
+    auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_solver_config_ptr);
+    // prepare container for solution:
+    std::vector<T> solution(Sd, T{});
+    // get the solution:
+    pdesolver.solve(solution);
+    // get exact solution:
+    auto exact = [](T x, T t) {
+        const T var1 = 3.0 * std::cos(2.0 * t) * std::cos(x);
+        const T var2 = -0.125 * std::sin(8.0 * t) * std::cos(4.0 * x);
+        return (t + var1 + var2);
+    };
+
+    T const h = discretization_ptr->space_step();
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    T benchmark{};
+    for (std::size_t j = 0; j < solution.size(); ++j)
+    {
+        benchmark = exact(j * h, time_range.upper());
+        std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
+                  << '\n';
+    }
+}
+
+void testImplPureWaveEquationNeumannBCCUDASolverDeviceQR()
+{
+    std::cout << "============================================================\n";
+    std::cout << "= Implicit Pure Wave (CUDA QR DEVICE) Equation (Neumann BC)=\n";
+    std::cout << "============================================================\n";
+
+    testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDetail<double>();
+    testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDetail<float>();
+
+    std::cout << "============================================================\n";
+}
+
 #endif //_LSS_PURE_WAVE_EQUATION_T_HPP_

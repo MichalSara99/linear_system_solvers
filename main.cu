@@ -223,6 +223,7 @@ int main(int argc, char const *argv[])
     // testImplPureWaveEquationDirichletBCCUDASolverDeviceQRPrintSurf();
     // testImplWaveEquationDirichletBCSolverHostLUPrintSurf();
     // testImplWaveEquationDirichletBCSolverHostDoubleSweepPrintSurf();
+    // testImplPureWaveEquationNeumannBCCUDASolverDeviceQRPrintSurf();
 
     // ====================================================================
 
@@ -237,6 +238,8 @@ int main(int argc, char const *argv[])
     // testImplPureWaveEquationDirichletBCSolverLU();
     // testImplWaveEquationDirichletBCSolverLU();
     // testImplDampedWaveEquationDirichletBCSolverDoubleSweep();
+
+    // testImplPureWaveEquationNeumannBCCUDASolverDeviceQR();
 
     // ====================================================================
 
