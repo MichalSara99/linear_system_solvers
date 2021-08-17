@@ -221,6 +221,8 @@ int main(int argc, char const *argv[])
     // testImplAdvDiffEquationDirichletBCThomasLUSolverPrintSurface();
 
     // testImplPureWaveEquationDirichletBCCUDASolverDeviceQRPrintSurf();
+    // testImplWaveEquationDirichletBCSolverHostLUPrintSurf();
+    // testImplWaveEquationDirichletBCSolverHostDoubleSweepPrintSurf();
 
     // ====================================================================
 
@@ -233,6 +235,8 @@ int main(int argc, char const *argv[])
     // testImplPureWaveEquationDirichletBCCUDASolverDeviceSOR();
     // testImplPureWaveEquationDirichletBCSolverDoubleSweep();
     // testImplPureWaveEquationDirichletBCSolverLU();
+    // testImplWaveEquationDirichletBCSolverLU();
+    // testImplDampedWaveEquationDirichletBCSolverDoubleSweep();
 
     // ====================================================================
 

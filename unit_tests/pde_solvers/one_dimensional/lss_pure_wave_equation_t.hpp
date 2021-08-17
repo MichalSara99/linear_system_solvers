@@ -466,4 +466,188 @@ void testImplPureWaveEquationDirichletBCSolverLU()
     std::cout << "============================================================\n";
 }
 
+template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetail()
+{
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::wave_coefficient_data_config_1d;
+    using lss_pde_solvers::wave_data_config_1d;
+    using lss_pde_solvers::wave_implicit_solver_config;
+    using lss_pde_solvers::wave_initial_data_config_1d;
+    using lss_pde_solvers::default_wave_solver_configs::host_fwd_tlusolver_solver_config_ptr;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_utility::pi;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Wave equation: \n\n";
+    std::cout << " Using Thomas LU Solver method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_tt(x,t) = 4*U_xx(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " x in <0,1> and t > 0,\n";
+    std::cout << " U(0,t) = U(1,t) = -4*t*t, t > 0 \n\n";
+    std::cout << " U(x,0) = x*(1 - x), x in <0,1> \n\n";
+    std::cout << " U_x(x,0) = 8*x, x in <0,1> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef the general_svc_wave_equation
+    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.7));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto b = [](T x) { return 4.0; };
+    auto other = [](T x) { return 0.0; };
+    auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
+    // initial condition:
+    auto first_initial_condition = [](T x) { return (x * (1.0 - x)); };
+    auto second_initial_condition = [](T x) { return (8 * x); };
+    auto const wave_init_data_ptr =
+        std::make_shared<wave_initial_data_config_1d<T>>(first_initial_condition, second_initial_condition);
+    // wave data config:
+    auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
+    // boundary conditions:
+    auto const &dirichlet_0 = [](T t) { return (-4.0 * t * t); };
+    auto const &dirichlet_1 = [](T t) { return (-4.0 * t * t + 8.0 * t); };
+    auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_0);
+    auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_1);
+    auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_solver_config_ptr);
+    // prepare container for solution:
+    std::vector<T> solution(Sd, T{});
+    // get the solution:
+    pdesolver.solve(solution);
+    // get exact solution:
+    auto exact = [](T x, T t) {
+        const T res = x - x * x - 4.0 * t * t + 8.0 * t * x;
+        return (res);
+    };
+
+    T const h = discretization_ptr->space_step();
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    T benchmark{};
+    for (std::size_t j = 0; j < solution.size(); ++j)
+    {
+        benchmark = exact(j * h, time_range.upper());
+        std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
+                  << '\n';
+    }
+}
+
+void testImplWaveEquationDirichletBCSolverLU()
+{
+    std::cout << "============================================================\n";
+    std::cout << "===== Implicit Wave (Thomas LU) Equation (Dirichlet BC) ====\n";
+    std::cout << "============================================================\n";
+
+    testImplWaveEquationDirichletBCSolverHostLUDetail<double>();
+    testImplWaveEquationDirichletBCSolverHostLUDetail<float>();
+
+    std::cout << "============================================================\n";
+}
+
+template <typename T> void testImplDampedWaveEquationDirichletBCSolverHostDoubleSweepDetail()
+{
+    using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_pde_solvers::pde_discretization_config_1d;
+    using lss_pde_solvers::wave_coefficient_data_config_1d;
+    using lss_pde_solvers::wave_data_config_1d;
+    using lss_pde_solvers::wave_implicit_solver_config;
+    using lss_pde_solvers::wave_initial_data_config_1d;
+    using lss_pde_solvers::default_wave_solver_configs::host_fwd_dssolver_solver_config_ptr;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_utility::pi;
+    using lss_utility::range;
+
+    std::cout << "============================================================\n";
+    std::cout << "Solving Boundary-value Wave equation: \n\n";
+    std::cout << " Using Double Sweep Solver method\n\n";
+    std::cout << " Value type: " << typeid(T).name() << "\n\n";
+    std::cout << " U_tt(x,t)  + U_t(x,t) = U_xx(x,t), \n\n";
+    std::cout << " where\n\n";
+    std::cout << " x in <0,pi> and t > 0,\n";
+    std::cout << " U(0,t) = U(pi,t) = 0, t > 0 \n\n";
+    std::cout << " U(x,0) = sin(x), x in <0,1> \n\n";
+    std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
+    std::cout << "============================================================\n";
+
+    // typedef the general_svc_wave_equation
+    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+
+    // number of space subdivisions:
+    std::size_t const Sd = 100;
+    // number of time subdivisions:
+    std::size_t const Td = 100;
+    // space range:
+    range<T> space_range(static_cast<T>(0.0), static_cast<T>(pi<T>()));
+    // time range
+    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.7));
+    // discretization config:
+    auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
+    // coeffs:
+    auto a = [](T x) { return 1.0; };
+    auto b = [](T x) { return 1.0; };
+    auto other = [](T x) { return 0.0; };
+    auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(a, b, other, other);
+    // initial condition:
+    auto first_initial_condition = [](T x) { return std::sin(x); };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(first_initial_condition, other);
+    // wave data config:
+    auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
+    // boundary conditions:
+    auto const &dirichlet_0 = [](T t) { return 0.0; };
+    auto const &dirichlet_1 = [](T t) { return 0.0; };
+    auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_0);
+    auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_1);
+    auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // initialize pde solver
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_solver_config_ptr);
+    // prepare container for solution:
+    std::vector<T> solution(Sd, T{});
+    // get the solution:
+    pdesolver.solve(solution);
+    // get exact solution:
+    auto exact = [](T x, T t) {
+        const T exp_half = std::exp(-0.5 * t);
+        const T sqrt_3 = std::sqrt(3.0);
+        const T arg = 0.5 * sqrt_3;
+        const T res = exp_half * std::sin(x) * (std::cos(arg * t) + (sin(arg * t) / sqrt_3));
+        return (res);
+    };
+
+    T const h = discretization_ptr->space_step();
+    std::cout << "tp : FDM | Exact | Abs Diff\n";
+    T benchmark{};
+    for (std::size_t j = 0; j < solution.size(); ++j)
+    {
+        benchmark = exact(j * h, time_range.upper());
+        std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
+                  << '\n';
+    }
+}
+
+void testImplDampedWaveEquationDirichletBCSolverDoubleSweep()
+{
+    std::cout << "============================================================\n";
+    std::cout << "==== Implicit Wave (Double Sweep) Equation (Dirichlet BC) ==\n";
+    std::cout << "============================================================\n";
+
+    testImplDampedWaveEquationDirichletBCSolverHostDoubleSweepDetail<double>();
+    testImplDampedWaveEquationDirichletBCSolverHostDoubleSweepDetail<float>();
+
+    std::cout << "============================================================\n";
+}
+
 #endif //_LSS_PURE_WAVE_EQUATION_T_HPP_
