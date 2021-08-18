@@ -106,6 +106,9 @@
     <Filter Include="pde_solvers\one_dimensional\wave_type">
       <UniqueIdentifier>{32e8aadd-4257-4721-adfb-35bd7a379a10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pde_solvers\one_dimensional\wave_type\explicit_schemes">
+      <UniqueIdentifier>{2d94f3ec-7038-4caf-b5f4-433b591330fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -314,6 +317,12 @@
     </ClInclude>
     <ClInclude Include="unit_tests\pde_solvers\one_dimensional\lss_pure_wave_equation_t.hpp">
       <Filter>unit_tests\pde_solvers\one_dimensional</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\lss_1d_general_svc_wave_equation_explicit_kernel.hpp">
+      <Filter>pde_solvers\one_dimensional\wave_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\explicit_schemes\lss_wave_euler_svc_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\wave_type\explicit_schemes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,7 +8,7 @@
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
-//#include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
+#include "lss_1d_general_svc_wave_equation_explicit_kernel.hpp"
 #include "lss_1d_general_svc_wave_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_data_config.hpp"
@@ -526,45 +526,57 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     // This is the proper size of the container:
     LSS_ASSERT((solution.size() == space_size), "The input solution container must have the correct size");
     // calculate scheme coefficients:
+    const fp_type one = static_cast<fp_type>(1.0);
     const fp_type two = static_cast<fp_type>(2.0);
     const fp_type half = static_cast<fp_type>(0.5);
-    const fp_type lambda = k / (h * h);
-    const fp_type gamma = k / (two * h);
-    const fp_type delta = half * k;
+    const fp_type lambda = one / (k * k);
+    const fp_type gamma = one / (two * k);
+    const fp_type delta = one / (h * h);
+    const fp_type rho = one / (two * h);
+    // create container to carry previous solution:
+    container_t prev_sol_0(space_size, fp_type{});
+    // discretize initial condition
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->first_initial_condition(), prev_sol_0);
+    // create container to carry second initial condition:
+    container_t prev_sol_1(space_size, fp_type{});
+    // discretize first order initial condition:
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->second_initial_condition(), prev_sol_1);
     // save coefficients:
     auto const &a = wave_data_cfg_->a_coefficient();
     auto const &b = wave_data_cfg_->b_coefficient();
     auto const &c = wave_data_cfg_->c_coefficient();
+    auto const &d = wave_data_cfg_->d_coefficient();
+    // get wave_source:
+    auto const &wave_source = wave_data_cfg_->wave_source();
     // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+    auto const &E = [&](fp_type x) { return (lambda + a(x) * gamma); };
+    auto const &A = [&](fp_type x) { return ((delta * b(x) - rho * c(x)) / E(x)); };
+    auto const &B = [&](fp_type x) { return ((delta * b(x) + rho * c(x)) / E(x)); };
+    auto const &C = [&](fp_type x) { return ((two * (lambda - (delta * b(x) - half * d(x)))) / E(x)); };
+    auto const &D = [&](fp_type x) { return ((lambda - a(x) * gamma) / E(x)); };
+    auto const &wave_source_modified = [&](fp_type x, fp_type t) { return (wave_source(x, t) / E(x)); };
     // wrap up the functions into tuple:
-    auto const &fun_triplet = std::make_tuple(A, B, D);
-    // create container to carry previous solution:
-    container_t prev_sol(space_size, fp_type{});
-    // discretize initial condition
-    d_1d::of_function(space.lower(), h, wave_data_cfg_->initial_condition(), prev_sol);
-    // get heat_source:
-    const bool is_heat_source_set = wave_data_cfg_->is_wave_source_set();
-    // get heat_source:
-    auto const &heat_source = wave_data_cfg_->wave_source();
+    auto const &fun_quintuple = std::make_tuple(A, B, C, D, b);
+    // is wave_source set:
+    const bool is_wave_source_set = wave_data_cfg_->is_wave_source_set();
+    // create container to carry new solution:
+    container_t next_sol(space_size, fp_type{});
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
+        typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
-        device_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-        solver(prev_sol, is_heat_source_set, heat_source);
-        std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        device_solver solver(fun_quintuple, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source_modified);
+        std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
+        typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
-        host_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-        solver(prev_sol, is_heat_source_set, heat_source);
-        std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        host_solver solver(fun_quintuple, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source_modified);
+        std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
     }
     else
     {
@@ -596,43 +608,55 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
                "The input solution 2D container must have the correct size");
     // calculate scheme coefficients:
+    const fp_type one = static_cast<fp_type>(1.0);
     const fp_type two = static_cast<fp_type>(2.0);
     const fp_type half = static_cast<fp_type>(0.5);
-    const fp_type lambda = k / (h * h);
-    const fp_type gamma = k / (two * h);
-    const fp_type delta = half * k;
+    const fp_type lambda = one / (k * k);
+    const fp_type gamma = one / (two * k);
+    const fp_type delta = one / (h * h);
+    const fp_type rho = one / (two * h);
+    // create container to carry previous solution:
+    container_t prev_sol_0(space_size, fp_type{});
+    // discretize initial condition
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->first_initial_condition(), prev_sol_0);
+    // create container to carry second initial condition:
+    container_t prev_sol_1(space_size, fp_type{});
+    // discretize first order initial condition:
+    d_1d::of_function(space.lower(), h, wave_data_cfg_->second_initial_condition(), prev_sol_1);
     // save coefficients:
     auto const &a = wave_data_cfg_->a_coefficient();
     auto const &b = wave_data_cfg_->b_coefficient();
     auto const &c = wave_data_cfg_->c_coefficient();
+    auto const &d = wave_data_cfg_->d_coefficient();
+    // get wave_source:
+    auto const &wave_source = wave_data_cfg_->wave_source();
     // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
+    auto const &E = [&](fp_type x) { return (lambda + a(x) * gamma); };
+    auto const &A = [&](fp_type x) { return ((delta * b(x) - rho * c(x)) / E(x)); };
+    auto const &B = [&](fp_type x) { return ((delta * b(x) + rho * c(x)) / E(x)); };
+    auto const &C = [&](fp_type x) { return ((two * (lambda - (delta * b(x) - half * d(x)))) / E(x)); };
+    auto const &D = [&](fp_type x) { return ((lambda - a(x) * gamma) / E(x)); };
+    auto const &wave_source_modified = [&](fp_type x, fp_type t) { return (wave_source(x, t) / E(x)); };
     // wrap up the functions into tuple:
-    auto const &fun_triplet = std::make_tuple(A, B, D);
-    // create container to carry previous solution:
-    container_t prev_sol(space_size, fp_type{});
-    // discretize initial condition
-    d_1d::of_function(space.lower(), h, wave_data_cfg_->initial_condition(), prev_sol);
-    // get heat_source:
-    const bool is_heat_source_set = wave_data_cfg_->is_wave_source_set();
-    // get heat_source:
-    auto const &heat_source = wave_data_cfg_->wave_source();
+    auto const &fun_quintuple = std::make_tuple(A, B, C, D, b);
+    // is wave_source set:
+    const bool is_wave_source_set = wave_data_cfg_->is_wave_source_set();
+    // create container to carry new solution:
+    container_t next_sol(space_size, fp_type{});
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
+        typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
-        device_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-        solver(prev_sol, is_heat_source_set, heat_source, solutions);
+        device_solver solver(fun_quintuple, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source_modified, solutions);
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
+        typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
-        host_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-        solver(prev_sol, is_heat_source_set, heat_source, solutions);
+        host_solver solver(fun_quintuple, boundary_pair_, discretization_cfg_, solver_cfg_);
+        solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source_modified, solutions);
     }
     else
     {

@@ -1903,7 +1903,7 @@ template <typename T> void testImplPureHeatEquationSourceDirichletBCCUDASolverDe
     auto initial_condition = [](T x) { return 1.0; };
     auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
     // heat source data:
-    auto source = [](T t, T x) { return x; };
+    auto source = [](T x, T t) { return x; };
     auto const heat_source_data_ptr = std::make_shared<heat_source_data_config_1d<T>>(source);
     // heat data config:
     auto const heat_data_ptr =
@@ -1999,7 +1999,7 @@ template <typename T> void testImplPureHeatEquationSourceDirichletBCCUDASolverDe
     auto initial_condition = [](T x) { return 1.0; };
     auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
     // heat source data:
-    auto source = [](T t, T x) { return x; };
+    auto source = [](T x, T t) { return x; };
     auto const heat_source_data_ptr = std::make_shared<heat_source_data_config_1d<T>>(source);
     // heat data config:
     auto const heat_data_ptr =
@@ -2109,7 +2109,7 @@ template <typename T> void testImplPureHeatEquationSourceDirichletBCSORSolverDev
     auto initial_condition = [](T x) { return 1.0; };
     auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
     // heat source data:
-    auto source = [](T t, T x) { return x; };
+    auto source = [](T x, T t) { return x; };
     auto const heat_source_data_ptr = std::make_shared<heat_source_data_config_1d<T>>(source);
     // heat data config:
     auto const heat_data_ptr =
@@ -2209,7 +2209,7 @@ template <typename T> void testImplPureHeatEquationSourceDirichletBCSORSolverDev
     auto initial_condition = [](T x) { return 1.0; };
     auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_1d<T>>(initial_condition);
     // heat source data:
-    auto source = [](T t, T x) { return x; };
+    auto source = [](T x, T t) { return x; };
     auto const heat_source_data_ptr = std::make_shared<heat_source_data_config_1d<T>>(source);
     // heat data config:
     auto const heat_data_ptr =
