@@ -1,12 +1,7 @@
-#if !defined(_LSS_BARAKAT_CLARK_SVC_SCHEME_HPP_)
-#define _LSS_BARAKAT_CLARK_SVC_SCHEME_HPP_
-
-#include <thread>
+#if !defined(_LSS_HEAT_SAULYEV_SVC_SCHEME_HPP_)
+#define _LSS_HEAT_SAULYEV_SVC_SCHEME_HPP_
 
 #include "boundaries/lss_boundary.hpp"
-#include "boundaries/lss_dirichlet_boundary.hpp"
-#include "boundaries/lss_neumann_boundary.hpp"
-#include "boundaries/lss_robin_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
@@ -32,10 +27,11 @@ using lss_utility::NaN;
 using lss_utility::range;
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class barakat_clark_svc_time_loop
+class heat_saulyev_svc_time_loop
 {
     typedef container<fp_type, allocator> container_t;
     typedef container_2d<fp_type, container, allocator> container_2d_t;
+    typedef std::function<void(container_t, container_t, fp_type)> thread_core;
 
   public:
     static void run(function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
@@ -66,14 +62,12 @@ class barakat_clark_svc_time_loop
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
+void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run(
     function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution)
 {
-
     const fp_type zero = static_cast<fp_type>(0.0);
-    const fp_type half = static_cast<fp_type>(0.5);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -81,9 +75,6 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // conmponents of the solution:
-    container_t cont_1(solution);
-    container_t cont_2(solution);
     // dummy container for source:
     container_t source_dummy(sol_size, zero);
     // get Dirichlet BC:
@@ -123,16 +114,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), source_dummy, zero);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), source_dummy, zero);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, source_dummy, zero);
             }
+            else
+            {
+                up_sweep(solution, source_dummy, zero);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             time += k;
             time_idx++;
         }
@@ -144,16 +135,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
         do
         {
             time_idx--;
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), source_dummy, zero);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), source_dummy, zero);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, source_dummy, zero);
             }
+            else
+            {
+                up_sweep(solution, source_dummy, zero);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             time -= k;
         } while (time_idx > 0);
     }
@@ -164,7 +155,7 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
+void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run(
     function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution,
@@ -173,7 +164,6 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
 
     const fp_type one = static_cast<fp_type>(1.0);
-    const fp_type half = static_cast<fp_type>(0.5);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -181,9 +171,6 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // conmponents of the solution:
-    container_t cont_1(solution);
-    container_t cont_2(solution);
     // get Dirichlet BC:
     auto const &first_bnd = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(boundary_pair.first);
     auto const &second_bnd = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(boundary_pair.second);
@@ -222,16 +209,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), next_source, one);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), curr_source, one);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, curr_source, one);
             }
+            else
+            {
+                up_sweep(solution, next_source, one);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             d_1d::of_function(start_x, h, time, heat_source, curr_source);
             d_1d::of_function(start_x, h, time + k, heat_source, next_source);
             time += k;
@@ -247,16 +234,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
         do
         {
             time_idx--;
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), next_source, one);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), curr_source, one);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, curr_source, one);
             }
+            else
+            {
+                up_sweep(solution, next_source, one);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             d_1d::of_function(start_x, h, time, heat_source, curr_source);
             d_1d::of_function(start_x, h, time - k, heat_source, next_source);
             time -= k;
@@ -269,14 +256,13 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run(
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
     function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution,
     container_2d_t &solutions)
 {
     const fp_type zero = static_cast<fp_type>(0.0);
-    const fp_type half = static_cast<fp_type>(0.5);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -284,11 +270,8 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // conmponents of the solution:
-    container_t cont_1(solution);
-    container_t cont_2(solution);
     // dummy container for source:
-    container_t source_dummy(sol_size, NaN<fp_type>());
+    container_t source_dummy(sol_size, zero);
     // get Dirichlet BC:
     auto const &first_bnd = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(boundary_pair.first);
     auto const &second_bnd = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(boundary_pair.second);
@@ -327,16 +310,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), source_dummy, zero);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), source_dummy, zero);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, source_dummy, zero);
             }
+            else
+            {
+                up_sweep(solution, source_dummy, zero);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             solutions(time_idx, solution);
             time += k;
             time_idx++;
@@ -351,16 +334,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
         do
         {
             time_idx--;
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), source_dummy, zero);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), source_dummy, zero);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, source_dummy, zero);
             }
+            else
+            {
+                up_sweep(solution, source_dummy, zero);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             solutions(time_idx, solution);
             time -= k;
         } while (time_idx > 0);
@@ -372,7 +355,7 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
     function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &solution,
@@ -382,7 +365,6 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
 
     const fp_type one = static_cast<fp_type>(1.0);
-    const fp_type half = static_cast<fp_type>(0.5);
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
@@ -390,9 +372,6 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
     const fp_type start_x = space_range.lower();
     const fp_type k = std::get<0>(steps);
     const fp_type h = std::get<1>(steps);
-    // conmponents of the solution:
-    container_t cont_1(solution);
-    container_t cont_2(solution);
     // get Dirichlet BC:
     auto const &first_bnd = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(boundary_pair.first);
     auto const &second_bnd = std::dynamic_pointer_cast<dirichlet_boundary_1d<fp_type>>(boundary_pair.second);
@@ -433,16 +412,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
         time_idx = 1;
         while (time_idx <= last_time_idx)
         {
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), next_source, one);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), curr_source, one);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, curr_source, one);
             }
+            else
+            {
+                up_sweep(solution, next_source, one);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             d_1d::of_function(start_x, h, time, heat_source, curr_source);
             d_1d::of_function(start_x, h, time + k, heat_source, next_source);
             solutions(time_idx, solution);
@@ -461,16 +440,16 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
         do
         {
             time_idx--;
-            std::thread up_sweep_tr(std::move(up_sweep), std::ref(cont_1), next_source, one);
-            std::thread down_sweep_tr(std::move(down_sweep), std::ref(cont_2), curr_source, one);
-            up_sweep_tr.join();
-            down_sweep_tr.join();
-            cont_1[0] = cont_2[0] = first_bnd->value(time);
-            cont_1[sol_size - 1] = cont_2[sol_size - 1] = second_bnd->value(time);
-            for (std::size_t t = 0; t < sol_size; ++t)
+            if (time_idx % 2 == 0)
             {
-                solution[t] = half * (cont_1[t] + cont_2[t]);
+                down_sweep(solution, curr_source, one);
             }
+            else
+            {
+                up_sweep(solution, next_source, one);
+            }
+            solution[0] = first_bnd->value(time);
+            solution[sol_size - 1] = second_bnd->value(time);
             d_1d::of_function(start_x, h, time, heat_source, curr_source);
             d_1d::of_function(start_x, h, time - k, heat_source, next_source);
             solutions(time_idx, solution);
@@ -484,9 +463,9 @@ void barakat_clark_svc_time_loop<fp_type, container, allocator>::run_with_steppi
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class barakat_clark_svc_scheme
+class heat_saulyev_svc_scheme
 {
-    typedef barakat_clark_svc_time_loop<fp_type, container, allocator> loop;
+    typedef heat_saulyev_svc_time_loop<fp_type, container, allocator> loop;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
 
@@ -517,18 +496,18 @@ class barakat_clark_svc_scheme
         }
     }
 
-    explicit barakat_clark_svc_scheme() = delete;
+    explicit heat_saulyev_svc_scheme() = delete;
 
   public:
-    barakat_clark_svc_scheme(function_triplet_t<fp_type> const &fun_triplet,
-                             boundary_1d_pair<fp_type> const &boundary_pair,
-                             pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
+    heat_saulyev_svc_scheme(function_triplet_t<fp_type> const &fun_triplet,
+                            boundary_1d_pair<fp_type> const &boundary_pair,
+                            pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
         : fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config}
     {
         initialize();
     }
 
-    ~barakat_clark_svc_scheme()
+    ~heat_saulyev_svc_scheme()
     {
     }
 
@@ -614,4 +593,4 @@ class barakat_clark_svc_scheme
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_BARAKAT_CLARK_SVC_SCHEME_HPP_
+#endif ///_LSS_HEAT_SAULYEV_SVC_SCHEME_HPP_

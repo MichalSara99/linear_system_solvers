@@ -1,5 +1,5 @@
-#if !defined(_LSS_EULER_SVC_SCHEME_HPP_)
-#define _LSS_EULER_SVC_SCHEME_HPP_
+#if !defined(_LSS_HEAT_EULER_SVC_SCHEME_HPP_)
+#define _LSS_HEAT_EULER_SVC_SCHEME_HPP_
 
 #include "boundaries/lss_boundary.hpp"
 #include "boundaries/lss_dirichlet_boundary.hpp"
@@ -30,15 +30,19 @@ using lss_utility::pair_t;
 using lss_utility::range;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using explicit_scheme_function =
+using explicit_heat_svc_scheme_function =
     std::function<void(function_triplet_t<fp_type> const &, pair_t<fp_type> const &, container<fp_type, alloc> const &,
                        container<fp_type, alloc> const &, boundary_1d_pair<fp_type> const &, fp_type const &,
                        container<fp_type, alloc> &)>;
 
-template <typename fp_type, template <typename, typename> typename container, typename allocator> class explicit_scheme
+/**
+    explicit_heat_svc_scheme object
+ */
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+class explicit_heat_svc_scheme
 {
     typedef container<fp_type, allocator> container_t;
-    typedef explicit_scheme_function<container, fp_type, allocator> scheme_function_t;
+    typedef explicit_heat_svc_scheme_function<container, fp_type, allocator> scheme_function_t;
 
   public:
     static scheme_function_t const get(bool is_homogeneus)
@@ -169,10 +173,10 @@ template <typename fp_type, template <typename, typename> typename container, ty
 };
 
 /**
- * euler_svc_time_loop object
+ * heat_euler_svc_time_loop object
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class euler_svc_time_loop
+class heat_euler_svc_time_loop
 {
     typedef container<fp_type, allocator> container_t;
     typedef container_2d<fp_type, container, allocator> container_2d_t;
@@ -211,7 +215,7 @@ class euler_svc_time_loop
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_time_loop<fp_type, container, allocator>::run(
+void heat_euler_svc_time_loop<fp_type, container, allocator>::run(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -266,7 +270,7 @@ void euler_svc_time_loop<fp_type, container, allocator>::run(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_time_loop<fp_type, container, allocator>::run(
+void heat_euler_svc_time_loop<fp_type, container, allocator>::run(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -328,7 +332,7 @@ void euler_svc_time_loop<fp_type, container, allocator>::run(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_euler_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -389,7 +393,7 @@ void euler_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_euler_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -455,9 +459,10 @@ void euler_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
     }
 }
 
-template <typename fp_type, template <typename, typename> typename container, typename allocator> class euler_svc_scheme
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+class heat_euler_svc_scheme
 {
-    typedef euler_svc_time_loop<fp_type, container, allocator> loop;
+    typedef heat_euler_svc_time_loop<fp_type, container, allocator> loop;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
 
@@ -503,17 +508,18 @@ template <typename fp_type, template <typename, typename> typename container, ty
         LSS_ASSERT(is_stable() == true, "The chosen scheme is not stable");
     }
 
-    explicit euler_svc_scheme() = delete;
+    explicit heat_euler_svc_scheme() = delete;
 
   public:
-    euler_svc_scheme(function_triplet_t<fp_type> const &fun_triplet, boundary_1d_pair<fp_type> const &boundary_pair,
-                     pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
+    heat_euler_svc_scheme(function_triplet_t<fp_type> const &fun_triplet,
+                          boundary_1d_pair<fp_type> const &boundary_pair,
+                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
         : fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config}
     {
         initialize();
     }
 
-    ~euler_svc_scheme()
+    ~heat_euler_svc_scheme()
     {
     }
 
@@ -543,7 +549,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
         container_t source(sol_size, NaN<fp_type>());
         auto const &steps = std::make_pair(k, h);
         const bool is_homogeneous = !is_heat_sourse_set;
-        auto scheme_function = explicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
+        auto scheme_function = explicit_heat_svc_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_heat_sourse_set)
         {
             loop::run(fun_trip, scheme_function, boundary_pair_, spacer, timer, last_time_idx, steps, traverse_dir,
@@ -583,7 +589,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
         container_t source(sol_size, NaN<fp_type>());
         auto const &steps = std::make_pair(k, h);
         const bool is_homogeneous = !is_heat_sourse_set;
-        auto scheme_function = explicit_scheme<fp_type, container, allocator>::get(is_homogeneous);
+        auto scheme_function = explicit_heat_svc_scheme<fp_type, container, allocator>::get(is_homogeneous);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(fun_trip, scheme_function, boundary_pair_, spacer, timer, last_time_idx, steps,
@@ -601,4 +607,4 @@ template <typename fp_type, template <typename, typename> typename container, ty
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_EULER_SVC_SCHEME_HPP_
+#endif ///_LSS_HEAT_EULER_SVC_SCHEME_HPP_

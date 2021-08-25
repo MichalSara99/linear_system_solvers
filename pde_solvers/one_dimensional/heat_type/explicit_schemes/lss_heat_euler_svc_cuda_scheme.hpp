@@ -1,5 +1,5 @@
-#if !defined(_LSS_EULER_SVC_CUDA_SCHEME_HPP_)
-#define _LSS_EULER_SVC_CUDA_SCHEME_HPP_
+#if !defined(_LSS_HEAT_EULER_SVC_CUDA_SCHEME_HPP_)
+#define _LSS_HEAT_EULER_SVC_CUDA_SCHEME_HPP_
 
 #include <device_launch_parameters.h>
 #include <thrust/device_vector.h>
@@ -35,7 +35,7 @@ using lss_utility::range;
 using lss_utility::sptr_t;
 
 /**
- * core_kernel function
+ * heat_core_kernel function
  *
  * \param a_coeff
  * \param b_coeff
@@ -46,8 +46,8 @@ using lss_utility::sptr_t;
  * \return
  */
 template <typename fp_type>
-__global__ void core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_type const *d_coeff,
-                            fp_type const *input, fp_type *solution, const std::size_t size)
+__global__ void heat_core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_type const *d_coeff,
+                                 fp_type const *input, fp_type *solution, const std::size_t size)
 {
     const std::size_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid == 0)
@@ -58,7 +58,7 @@ __global__ void core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_t
 }
 
 /**
- * core_kernel function
+ * heat_core_kernel function
  *
  * \param a_coeff
  * \param b_coeff
@@ -71,8 +71,9 @@ __global__ void core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_t
  * \return
  */
 template <typename fp_type>
-__global__ void core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_type const *d_coeff, fp_type time_step,
-                            fp_type const *input, fp_type const *source, fp_type *solution, const std::size_t size)
+__global__ void heat_core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_type const *d_coeff,
+                                 fp_type time_step, fp_type const *input, fp_type const *source, fp_type *solution,
+                                 const std::size_t size)
 {
     const std::size_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid == 0)
@@ -84,9 +85,9 @@ __global__ void core_kernel(fp_type const *a_coeff, fp_type const *b_coeff, fp_t
 }
 
 /**
- * euler_svc_cuda_kernel object
+ * heat_euler_svc_cuda_kernel object
  */
-template <typename fp_type> class euler_svc_cuda_kernel
+template <typename fp_type> class heat_euler_svc_cuda_kernel
 {
     typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
 
@@ -122,13 +123,13 @@ template <typename fp_type> class euler_svc_cuda_kernel
     }
 
   public:
-    explicit euler_svc_cuda_kernel(function_triplet_t<fp_type> const &fun_triplet, pair_t<fp_type> const &steps,
-                                   range<fp_type> const &space_range, std::size_t const space_size)
+    explicit heat_euler_svc_cuda_kernel(function_triplet_t<fp_type> const &fun_triplet, pair_t<fp_type> const &steps,
+                                        range<fp_type> const &space_range, std::size_t const space_size)
         : steps_{steps}, spacer_{space_range}, space_size_{space_size}
     {
         initialize(fun_triplet);
     }
-    ~euler_svc_cuda_kernel()
+    ~heat_euler_svc_cuda_kernel()
     {
     }
     void launch(thrust::device_vector<fp_type> const &input, thrust::device_vector<fp_type> &solution);
@@ -137,11 +138,11 @@ template <typename fp_type> class euler_svc_cuda_kernel
                 thrust::device_vector<fp_type> &solution);
 };
 
-template <typename fp_type> using euler_svc_cuda_kernel_ptr = sptr_t<euler_svc_cuda_kernel<fp_type>>;
+template <typename fp_type> using heat_euler_svc_cuda_kernel_ptr = sptr_t<heat_euler_svc_cuda_kernel<fp_type>>;
 
 template <typename fp_type>
-using explicit_svc_cuda_scheme_function =
-    std::function<void(function_triplet_t<fp_type> const &, euler_svc_cuda_kernel_ptr<fp_type> const &,
+using explicit_heat_svc_cuda_scheme_function =
+    std::function<void(function_triplet_t<fp_type> const &, heat_euler_svc_cuda_kernel_ptr<fp_type> const &,
                        pair_t<fp_type> const &, thrust::host_vector<fp_type> const &,
                        thrust::host_vector<fp_type> const &, boundary_1d_pair<fp_type> const &, fp_type const &,
                        thrust::host_vector<fp_type> &)>;
@@ -149,16 +150,16 @@ using explicit_svc_cuda_scheme_function =
 /**
  * explicit_svc_cuda_scheme object
  */
-template <typename fp_type> class explicit_svc_cuda_scheme
+template <typename fp_type> class explicit_heat_svc_cuda_scheme
 {
-    typedef explicit_svc_cuda_scheme_function<fp_type> scheme_function_t;
+    typedef explicit_heat_svc_cuda_scheme_function<fp_type> scheme_function_t;
 
   public:
     static scheme_function_t const get(bool is_homogeneus)
     {
         const fp_type two = static_cast<fp_type>(2.0);
         auto scheme_fun_h =
-            [=](function_triplet_t<fp_type> const &coefficients, euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
+            [=](function_triplet_t<fp_type> const &coefficients, heat_euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
                 std::pair<fp_type, fp_type> const &steps, thrust::host_vector<fp_type> const &input,
                 thrust::host_vector<fp_type> const &inhom_input, boundary_1d_pair<fp_type> const &boundary_pair,
                 fp_type const &time, thrust::host_vector<fp_type> &solution) {
@@ -215,7 +216,7 @@ template <typename fp_type> class explicit_svc_cuda_scheme
                 thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
             };
         auto scheme_fun_nh =
-            [=](function_triplet_t<fp_type> const &coefficients, euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
+            [=](function_triplet_t<fp_type> const &coefficients, heat_euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
                 std::pair<fp_type, fp_type> const &steps, thrust::host_vector<fp_type> const &input,
                 thrust::host_vector<fp_type> const &inhom_input, boundary_1d_pair<fp_type> const &boundary_pair,
                 fp_type const &time, thrust::host_vector<fp_type> &solution) {
@@ -280,10 +281,10 @@ template <typename fp_type> class explicit_svc_cuda_scheme
 };
 
 /**
- * euler_svc_cuda_time_loop object
+ * heat_euler_svc_cuda_time_loop object
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class euler_svc_cuda_time_loop
+class heat_euler_svc_cuda_time_loop
 {
     typedef container<fp_type, allocator> container_t;
     typedef container_2d<fp_type, container, allocator> container_2d_t;
@@ -322,7 +323,7 @@ class euler_svc_cuda_time_loop
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
+void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -340,7 +341,8 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
-    auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    auto const &kernel =
+        std::make_shared<heat_euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::copy(solution.begin(), solution.end(), h_solution.begin());
@@ -383,7 +385,7 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
+void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -404,7 +406,8 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
-    auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    auto const &kernel =
+        std::make_shared<heat_euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::host_vector<fp_type> h_next_solution(sol_size);
@@ -450,7 +453,7 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -468,7 +471,8 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
-    auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    auto const &kernel =
+        std::make_shared<heat_euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::copy(solution.begin(), solution.end(), h_solution.begin());
@@ -518,7 +522,7 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 template <typename scheme_function>
-void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
+void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     function_triplet_t<fp_type> const &func_triplet, scheme_function &scheme_fun,
     boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
@@ -539,7 +543,8 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     auto const &b = std::get<1>(func_triplet);
     auto const &d = std::get<2>(func_triplet);
     // create a kernel:
-    auto const &kernel = std::make_shared<euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
+    auto const &kernel =
+        std::make_shared<heat_euler_svc_cuda_kernel<fp_type>>(func_triplet, steps, space_range, sol_size);
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::host_vector<fp_type> h_next_solution(sol_size);
@@ -591,12 +596,12 @@ void euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
 }
 
 /**
- * euler_svc_cuda_scheme object
+ * heat_euler_svc_cuda_scheme object
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class euler_svc_cuda_scheme
+class heat_euler_svc_cuda_scheme
 {
-    typedef euler_svc_cuda_time_loop<fp_type, container, allocator> loop;
+    typedef heat_euler_svc_cuda_time_loop<fp_type, container, allocator> loop;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
 
@@ -642,18 +647,18 @@ class euler_svc_cuda_scheme
         LSS_ASSERT(is_stable() == true, "The chosen scheme is not stable");
     }
 
-    explicit euler_svc_cuda_scheme() = delete;
+    explicit heat_euler_svc_cuda_scheme() = delete;
 
   public:
-    euler_svc_cuda_scheme(function_triplet_t<fp_type> const &fun_triplet,
-                          boundary_1d_pair<fp_type> const &boundary_pair,
-                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
+    heat_euler_svc_cuda_scheme(function_triplet_t<fp_type> const &fun_triplet,
+                               boundary_1d_pair<fp_type> const &boundary_pair,
+                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
         : fun_triplet_{fun_triplet}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config}
     {
         initialize();
     }
 
-    ~euler_svc_cuda_scheme()
+    ~heat_euler_svc_cuda_scheme()
     {
     }
 
@@ -683,7 +688,7 @@ class euler_svc_cuda_scheme
         container_t source(sol_size, NaN<fp_type>());
         auto const &steps = std::make_pair(k, h);
         const bool is_homogeneous = !is_heat_sourse_set;
-        auto scheme_function = explicit_svc_cuda_scheme<fp_type>::get(is_homogeneous);
+        auto scheme_function = explicit_heat_svc_cuda_scheme<fp_type>::get(is_homogeneous);
         if (is_heat_sourse_set)
         {
             loop::run(fun_trip, scheme_function, boundary_pair_, spacer, timer, last_time_idx, steps, traverse_dir,
@@ -723,7 +728,7 @@ class euler_svc_cuda_scheme
         container_t source(sol_size, NaN<fp_type>());
         auto const &steps = std::make_pair(k, h);
         const bool is_homogeneous = !is_heat_sourse_set;
-        auto scheme_function = explicit_svc_cuda_scheme<fp_type>::get(is_homogeneous);
+        auto scheme_function = explicit_heat_svc_cuda_scheme<fp_type>::get(is_homogeneous);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(fun_trip, scheme_function, boundary_pair_, spacer, timer, last_time_idx, steps,
