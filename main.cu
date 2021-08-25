@@ -255,6 +255,7 @@ int main(int argc, char const *argv[])
 
     // explicit:
     // testExplPureWaveEquationDirichletBCCUDAHostSolver();
+    // testExplPureWaveEquationDirichletBCCUDADeviceSolver();
 
     // ====================================================================
 

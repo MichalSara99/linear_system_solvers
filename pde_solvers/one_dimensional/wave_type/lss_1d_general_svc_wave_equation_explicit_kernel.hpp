@@ -8,7 +8,7 @@
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
-//#include "explicit_schemes/lss_euler_svc_cuda_scheme.hpp"
+#include "explicit_schemes/lss_wave_euler_svc_cuda_scheme.hpp"
 #include "explicit_schemes/lss_wave_euler_svc_scheme.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_solver_config.hpp"
@@ -67,7 +67,7 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_ty
 
         // Here we have only Euler discretization available:
 
-        typedef wave_euler_svc_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
+        typedef wave_euler_svc_cuda_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
         euler_cuda_scheme_t euler_scheme(fun_quintuple_, boundary_pair_, discretization_cfg_);
         euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, wave_source, traverse_dir);
     }
@@ -81,7 +81,7 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_ty
 
         // Here we have only Euler discretization available:
 
-        typedef wave_euler_svc_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
+        typedef wave_euler_svc_cuda_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
         euler_cuda_scheme_t euler_scheme(fun_quintuple_, boundary_pair_, discretization_cfg_);
         euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, wave_source, traverse_dir,
                      solutions);

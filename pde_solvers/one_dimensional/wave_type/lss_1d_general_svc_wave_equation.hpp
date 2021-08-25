@@ -568,7 +568,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
             device_solver;
         device_solver solver(fun_quintuple, boundary_pair_, discretization_cfg_, solver_cfg_);
         solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source_modified);
-        std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
+        std::copy(next_sol.begin(), next_sol.end(), solution.begin());
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
