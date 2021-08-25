@@ -7,7 +7,10 @@ It also contains some PDE solvers.
 
 ## PDE Solver
 * 1D general heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
-* 1D general wave equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions) - IN PROGRESS (Testing stage)
+* 1D general wave equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions) - IN TESTING STAGE
+* 2D general Heston type model with variable coefficients in space dimensions - INITIAL STAGE
+
+
 
 ## Some curves from ODE solver
 Simple Two-point BVP (u''(x) = -2 with Dirichlet and Robin BC)
