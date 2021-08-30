@@ -25,6 +25,7 @@ using lss_boundary::dirichlet_boundary_1d;
 using lss_boundary::neumann_boundary_1d;
 using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
+using lss_enumerations::by_enum;
 using lss_enumerations::traverse_direction_enum;
 using lss_utility::function_quad_t;
 using lss_utility::function_triplet_t;
@@ -35,7 +36,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 class heat_barakat_clark_svc_time_loop
 {
     typedef container<fp_type, allocator> container_t;
-    typedef container_2d<fp_type, container, allocator> container_2d_t;
+    typedef container_2d<by_enum::Row, fp_type, container, allocator> container_2d_t;
 
   public:
     static void run(function_quad_t<fp_type> const &func_quad, boundary_1d_pair<fp_type> const &boundary_pair,
@@ -571,7 +572,7 @@ class heat_barakat_clark_svc_scheme
 
     void operator()(container_t &solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source, traverse_direction_enum traverse_dir,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         const fp_type one = static_cast<fp_type>(1.0);
         const range<fp_type> spacer = discretization_cfg_->space_range();

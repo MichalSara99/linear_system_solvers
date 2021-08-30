@@ -89,7 +89,7 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_ty
 
     void operator()(container_t &solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
@@ -173,7 +173,7 @@ class general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type
 
     void operator()(container_t &solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();

@@ -293,6 +293,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -317,7 +318,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     std::cout << " U(x,T) = max(0,x-K), x in <0,20> \n\n";
     std::cout << "============================================================\n";
     // typedef the constiner_2d:
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
@@ -393,6 +394,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -418,7 +420,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     std::cout << "============================================================\n";
 
     // typedef the constiner_2d:
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
@@ -507,6 +509,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -531,7 +534,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the general_svc_heat_equation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
@@ -612,6 +615,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -636,7 +640,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
     // typedef the general_svc_heat_equation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
@@ -730,6 +734,7 @@ template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSur
 {
     using lss_boundary::neumann_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::explicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -754,7 +759,7 @@ template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSur
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
@@ -849,6 +854,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPri
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -873,7 +879,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPri
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
@@ -974,6 +980,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
@@ -998,7 +1005,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the general_svc_wave_equation
     typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
@@ -1083,6 +1090,7 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetailPrin
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
@@ -1108,7 +1116,7 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetailPrin
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the general_svc_wave_equation
     typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
@@ -1196,6 +1204,7 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostDoubleSweepD
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
@@ -1221,7 +1230,7 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostDoubleSweepD
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the general_svc_wave_equation
     typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
@@ -1311,6 +1320,7 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
 {
     using lss_boundary::neumann_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
@@ -1336,7 +1346,7 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
     // typedef the general_svc_wave_equation
     typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
@@ -1422,6 +1432,7 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -1446,7 +1457,7 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     std::cout << "============================================================\n";
 
     // typedef 2D container
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the general_svc_wave_equation
     typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;

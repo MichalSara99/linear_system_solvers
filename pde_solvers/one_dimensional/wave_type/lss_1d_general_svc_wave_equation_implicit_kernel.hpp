@@ -528,16 +528,14 @@ class wave_time_loop
                     container_t &prev_solution_1, container_t &next_solution, container_t &rhs);
 
     template <typename solver_object>
-    static void run_with_stepping(solver_object &solver_obj,
-                                  diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
-                                  boundary_1d_pair<fp_type> const &boundary_pair,
-                                  function_quintuple_t<fp_type> const &fun_quintuple, range<fp_type> const &space_range,
-                                  range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                                  std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
-                                  container_t &prev_solution_0, container_t &prev_solution_1,
-                                  container_t &next_solution, container_t &rhs,
-                                  std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &curr_source,
-                                  container_t &next_source, container_2d<fp_type, container, allocator> &solutions);
+    static void run_with_stepping(
+        solver_object &solver_obj, diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
+        boundary_1d_pair<fp_type> const &boundary_pair, function_quintuple_t<fp_type> const &fun_quintuple,
+        range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
+        std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+        container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution, container_t &rhs,
+        std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &curr_source, container_t &next_source,
+        container_2d<by_enum::Row, fp_type, container, allocator> &solutions);
     template <typename solver_object>
     static void run_with_stepping(solver_object &solver_obj,
                                   diagonal_triplet_pair_t<fp_type, container, allocator> const &diagonals,
@@ -547,7 +545,7 @@ class wave_time_loop
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
                                   container_t &prev_solution_0, container_t &prev_solution_1,
                                   container_t &next_solution, container_t &rhs,
-                                  container_2d<fp_type, container, allocator> &solutions);
+                                  container_2d<by_enum::Row, fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -729,7 +727,7 @@ void wave_time_loop<fp_type, container, allocator>::run_with_stepping(
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
     container_t &prev_solution_1, container_t &next_solution, container_t &rhs,
     std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &curr_source, container_t &next_source,
-    container_2d<fp_type, container, allocator> &solutions)
+    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef implicit_wave_scheme<fp_type, container, allocator> implicit_scheme;
@@ -826,7 +824,7 @@ void wave_time_loop<fp_type, container, allocator>::run_with_stepping(
     range<fp_type> const &space_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
     std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
     container_t &prev_solution_1, container_t &next_solution, container_t &rhs,
-    container_2d<fp_type, container, allocator> &solutions)
+    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     typedef implicit_wave_scheme<fp_type, container, allocator> implicit_scheme;
 
@@ -984,7 +982,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     container_t &rhs, bool is_wave_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &wave_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -1092,7 +1090,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     container_t &rhs, bool is_wave_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &wave_source, fp_type omega_value,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -1203,7 +1201,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     container_t &rhs, bool is_wave_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &wave_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -1311,7 +1309,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     container_t &rhs, bool is_wave_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &wave_source, fp_type omega_value,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -1418,7 +1416,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     container_t &rhs, bool is_wave_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &wave_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -1524,7 +1522,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     container_t &rhs, bool is_wave_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &wave_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();

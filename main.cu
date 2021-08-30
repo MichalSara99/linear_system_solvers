@@ -36,7 +36,7 @@ int main(int argc, char const *argv[])
 
     // testContainer2d();
     // testCopyContainer2d();
-    // testPartialCopyRowContainer2d();
+    // testNotSymetricalContainer2d();
 
     // ====================================================================
 
@@ -330,7 +330,7 @@ int main(int argc, char const *argv[])
     // ====================================================================
 
     // test_pure_wave_equation_builder();
-    test_expl_pure_wave_equation_builder();
+    // test_expl_pure_wave_equation_builder();
 
     // ====================================================================
 

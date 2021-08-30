@@ -497,7 +497,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 class wave_euler_svc_time_loop
 {
     typedef container<fp_type, allocator> container_t;
-    typedef container_2d<fp_type, container, allocator> container_2d_t;
+    typedef container_2d<by_enum::Row, fp_type, container, allocator> container_2d_t;
 
   public:
     static void run(function_quintuple_t<fp_type> const &fun_quintuple, boundary_1d_pair<fp_type> const &boundary_pair,
@@ -920,7 +920,8 @@ class wave_euler_svc_scheme
 
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
-                    traverse_direction_enum traverse_dir, container_2d<fp_type, container, allocator> &solutions)
+                    traverse_direction_enum traverse_dir,
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
 
         const range<fp_type> spacer = discretization_cfg_->space_range();

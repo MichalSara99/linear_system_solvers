@@ -9,6 +9,14 @@
 
 namespace lss_enumerations
 {
+/**
+    by_enum
+ */
+enum class by_enum
+{
+    Row,
+    Column,
+};
 
 /**
     factorization_enum

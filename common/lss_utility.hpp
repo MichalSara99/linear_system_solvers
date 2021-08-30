@@ -32,6 +32,16 @@ using function_triplet_t =
     std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
 
 /**
+ * function_sevenlet_t alias type
+ */
+template <typename fp_type>
+using function_sevenlet_t =
+    std::tuple<std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>>;
+
+/**
  * function_quintuple_t alias type
  */
 template <typename fp_type>
@@ -45,6 +55,12 @@ using function_quintuple_t =
 template <typename fp_type>
 using function_quad_t = std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>,
                                    std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
+
+/**
+ * coefficient_sevenlet_t alias type
+ */
+template <typename fp_type>
+using coefficient_sevenlet_t = std::tuple<fp_type, fp_type, fp_type, fp_type, fp_type, fp_type, fp_type>;
 
 /**
  * pair_t alias type

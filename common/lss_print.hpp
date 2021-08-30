@@ -9,6 +9,7 @@
 #include <memory>
 #include <tuple>
 
+#include "common/lss_enumerations.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "ode_solvers/lss_ode_discretization_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
@@ -17,6 +18,7 @@ namespace lss_print
 {
 
 using lss_containers::container_2d;
+using lss_enumerations::by_enum;
 using lss_ode_solvers::ode_discretization_config_ptr;
 using lss_pde_solvers::pde_discretization_config_1d_ptr;
 
@@ -99,7 +101,7 @@ void print(pde_discretization_config_1d_ptr<fp_type> const &pde_discretization_c
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void print(pde_discretization_config_1d_ptr<fp_type> const &pde_discretization_cfg,
-           container_2d<fp_type, container, allocator> const &cont_2d, std::ostream &out = std::cout)
+           container_2d<by_enum::Row, fp_type, container, allocator> const &cont_2d, std::ostream &out = std::cout)
 {
     const std::size_t space_size = pde_discretization_cfg->number_of_space_points();
     const std::size_t time_size = pde_discretization_cfg->number_of_time_points();

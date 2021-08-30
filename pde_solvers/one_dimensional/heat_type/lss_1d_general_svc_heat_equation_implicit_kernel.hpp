@@ -27,6 +27,7 @@ using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_cuda_solver::cuda_solver;
 using lss_double_sweep_solver::double_sweep_solver;
+using lss_enumerations::by_enum;
 using lss_enumerations::dimension_enum;
 using lss_enumerations::implicit_pde_schemes_enum;
 using lss_enumerations::memory_space_enum;
@@ -233,7 +234,8 @@ class heat_time_loop
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
                                   container_t &prev_solution, container_t &next_solution, container_t &rhs,
                                   std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
-                                  container_t &next_source, container_2d<fp_type, container, allocator> &solutions);
+                                  container_t &next_source,
+                                  container_2d<by_enum::Row, fp_type, container, allocator> &solutions);
     template <typename solver_object, typename scheme_function>
     static void run_with_stepping(solver_object &solver_obj, scheme_function &scheme_fun,
                                   boundary_1d_pair<fp_type> const &boundary_pair,
@@ -241,7 +243,7 @@ class heat_time_loop
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
                                   std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
                                   container_t &prev_solution, container_t &next_solution, container_t &rhs,
-                                  container_2d<fp_type, container, allocator> &solutions);
+                                  container_2d<by_enum::Row, fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -352,7 +354,7 @@ void heat_time_loop<fp_type, container, allocator>::run_with_stepping(
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
     container_t &rhs, std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &curr_source,
-    container_t &next_source, container_2d<fp_type, container, allocator> &solutions)
+    container_t &next_source, container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     const fp_type start_time = time_range.lower();
@@ -413,7 +415,7 @@ void heat_time_loop<fp_type, container, allocator>::run_with_stepping(
     function_triplet_t<fp_type> const &fun_triplet, range<fp_type> const &space_range, range<fp_type> const &time_range,
     std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
     traverse_direction_enum const &traverse_dir, container_t &prev_solution, container_t &next_solution,
-    container_t &rhs, container_2d<fp_type, container, allocator> &solutions)
+    container_t &rhs, container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
@@ -538,7 +540,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
 
     void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -656,7 +658,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
 
     void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source, fp_type omega_value,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -777,7 +779,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
     void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -895,7 +897,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
     void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source, fp_type omega_value,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -1012,7 +1014,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
     void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();
@@ -1128,7 +1130,7 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
     void operator()(container_t &prev_solution, container_t &next_solution, container_t &rhs, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source,
-                    container_2d<fp_type, container, allocator> &solutions)
+                    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
         // get space range:
         const range<fp_type> space = discretization_cfg_->space_range();

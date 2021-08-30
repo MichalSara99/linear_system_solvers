@@ -1072,6 +1072,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -1096,7 +1097,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     std::cout << "============================================================\n";
 
     // typedef the constiner_2d:
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
@@ -1159,6 +1160,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
+    using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
@@ -1183,7 +1185,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     std::cout << "============================================================\n";
 
     // typedef the constiner_2d:
-    typedef container_2d<T, std::vector, std::allocator<T>> container_2d_t;
+    typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;

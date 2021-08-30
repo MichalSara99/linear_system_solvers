@@ -108,7 +108,7 @@ class general_svc_heat_equation
      *
      * \param solutions - 2D container for all the solutions in time
      */
-    void solve(container_2d<fp_type, container, allocator> &solutions);
+    void solve(container_2d<by_enum::Row, fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -268,7 +268,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void general_svc_heat_equation<fp_type, container, allocator>::solve(
-    container_2d<fp_type, container, allocator> &solutions)
+    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
@@ -479,7 +479,7 @@ class general_svc_heat_equation
      *
      * \param solutions - 2D container for all the solutions in time
      */
-    void solve(container_2d<fp_type, container, allocator> &solutions);
+    void solve(container_2d<by_enum::Row, fp_type, container, allocator> &solutions);
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -548,7 +548,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void general_svc_heat_equation<fp_type, container, allocator>::solve(
-    container_2d<fp_type, container, allocator> &solutions)
+    container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;

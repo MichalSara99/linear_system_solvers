@@ -5,12 +5,14 @@
 #include <map>
 
 #include "boundaries/lss_boundary.hpp"
+#include "boundaries/lss_dirichlet_boundary.hpp"
+#include "boundaries/lss_neumann_boundary.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "containers/lss_container_3d.hpp"
 //#include "lss_general_svc_heat_equation_explicit_kernel.hpp"
-//#include "lss_general_svc_heat_equation_implicit_kernel.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "lss_2d_general_svc_heston_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
@@ -21,8 +23,12 @@ namespace lss_pde_solvers
 namespace two_dimensional
 {
 using lss_boundary::boundary_2d_pair;
+using lss_boundary::boundary_2d_ptr;
+using lss_boundary::dirichlet_boundary_2d;
+using lss_boundary::neumann_boundary_2d;
 using lss_containers::container_2d;
 using lss_containers::container_3d;
+using lss_enumerations::by_enum;
 
 namespace implicit_solvers
 {
@@ -53,7 +59,7 @@ class general_svc_heston_equation
 {
 
   private:
-    boundary_2d_pair<fp_type> boundary_pair_hor_;
+    boundary_2d_ptr<fp_type> boundary_hor_;
     boundary_2d_pair<fp_type> boundary_pair_ver_;
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
@@ -66,10 +72,21 @@ class general_svc_heston_equation
     {
         LSS_VERIFY(heat_data_cfg_, "heat_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_hor_), "horizontal boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_hor_), "horizontal boundary_pair.second must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_ver_), "vertical boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_ver_), "vertical boundary_pair.second must not be null");
+
+        if (auto hor_ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(boundary_hor_))
+        {
+            LSS_VERIFY(hor_ptr, "horizontal_upper_boundary_ptr must be of dirichlet type only");
+        }
+
+        if (auto ver_ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(std::get<0>(boundary_pair_ver_)))
+        {
+            LSS_VERIFY(ver_ptr, "vertical_boundary_pair.first must be of dirichlet type only");
+        }
+        if (auto ver_ptr = std::dynamic_pointer_cast<neumann_boundary_2d<fp_type>>(std::get<1>(boundary_pair_ver_)))
+        {
+            LSS_VERIFY(ver_ptr, "vertical_boundary_pair.second must be of neumann type only");
+        }
+
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
         if (!solver_config_details_.empty())
         {
@@ -82,12 +99,12 @@ class general_svc_heston_equation
     explicit general_svc_heston_equation(
         heat_data_config_2d_ptr<fp_type> const &heat_data_config,
         pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-        boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+        boundary_2d_ptr<fp_type> const &horizontal_upper_boundary_ptr,
         boundary_2d_pair<fp_type> const &vertical_boundary_pair,
         heat_implicit_solver_config_ptr const &solver_config = host_fwd_dssolver_euler_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          boundary_pair_hor_{horizontal_boundary_pair}, boundary_pair_ver_{vertical_boundary_pair},
+          boundary_hor_{horizontal_upper_boundary_ptr}, boundary_pair_ver_{vertical_boundary_pair},
           solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
     {
         initialize();
@@ -107,7 +124,7 @@ class general_svc_heston_equation
      *
      * \param solution -  2D container for solution
      */
-    void solve(container_2d<fp_type, container, allocator> &solution);
+    void solve(container_2d<by_enum::Row, fp_type, container, allocator> &solution);
 
     /**
      * Get all solutions in time (surface) of the PDE
@@ -119,8 +136,125 @@ class general_svc_heston_equation
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void general_svc_heston_equation<fp_type, container, allocator>::solve(
-    container_2d<fp_type, container, allocator> &solution)
+    container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
+    typedef discretization<dimension_enum::Two, fp_type, container, allocator> d_2d;
+    typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
+    typedef container<fp_type, allocator> container_t;
+
+    LSS_ASSERT((solution.rows()) > 0 && (solution.columns() > 0), "The input solution container must be initialized");
+
+    // get space ranges:
+    const auto &spaces = discretization_cfg_->space_range();
+    // across X:
+    const auto space_x = std::get<0>(spaces);
+    // across Y:
+    const auto space_y = std::get<1>(spaces);
+    // get space steps:
+    const auto &hs = discretization_cfg_->space_step();
+    // across X:
+    const fp_type h_1 = std::get<0>(hs);
+    // across Y:
+    const fp_type h_2 = std::get<1>(hs);
+    // size of spaces discretization:
+    const auto &space_sizes = discretization_cfg_->number_of_space_points();
+    const std::size_t space_size_x = std::get<0>(space_sizes);
+    const std::size_t space_size_y = std::get<1>(space_sizes);
+    // This is the proper size of the container:
+    LSS_ASSERT((solution.columns() == space_size_x) && (solution.rows() == space_size_y),
+               "The input solution container must have the correct size");
+
+    // create container to carry previous solution:
+    rcontainer_2d_t prev_sol(space_size_y, space_size_x, fp_type{});
+    // create container to carry next solution:
+    rcontainer_2d_t next_sol(space_size_y, space_size_x, fp_type{});
+    // discretize initial condition
+    d_2d::of_function(space_x.lower(), space_y.lower(), h_1, h_2, heat_data_cfg_->initial_condition(), prev_sol);
+    // get heat_source:
+    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    // get heat_source:
+    auto const &heat_source = heat_data_cfg_->heat_source();
+
+    if (solver_cfg_->memory_space() == memory_space_enum::Device)
+    {
+        if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
+        {
+            typedef general_svc_heston_equation_implicit_kernel<
+                memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
+                dev_cu_solver;
+
+            dev_cu_solver solver(boundary_hor_, boundary_pair_ver_, heat_data_cfg_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
+            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        }
+        else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
+        {
+            typedef general_svc_heston_equation_implicit_kernel<
+                memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
+                dev_sor_solver;
+
+            LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
+            fp_type omega_value = solver_config_details_["sor_omega"];
+            dev_sor_solver solver(boundary_hor_, boundary_pair_ver_, heat_data_cfg_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
+            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        }
+        else
+        {
+            throw std::exception("Not supported on Device");
+        }
+    }
+    else if (solver_cfg_->memory_space() == memory_space_enum::Host)
+    {
+        if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
+        {
+            typedef general_svc_heston_equation_implicit_kernel<
+                memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
+                host_cu_solver;
+
+            host_cu_solver solver(boundary_hor_, boundary_pair_ver_, heat_data_cfg_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
+            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        }
+        else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
+        {
+            typedef general_svc_heston_equation_implicit_kernel<
+                memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
+                host_sor_solver;
+
+            LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
+            fp_type omega_value = solver_config_details_["sor_omega"];
+            host_sor_solver solver(boundary_hor_, boundary_pair_ver_, heat_data_cfg_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
+            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        }
+        else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
+        {
+            typedef general_svc_heston_equation_implicit_kernel<
+                memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
+                host_dss_solver;
+            host_dss_solver solver(boundary_hor_, boundary_pair_ver_, heat_data_cfg_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
+            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        }
+        else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
+        {
+            typedef general_svc_heston_equation_implicit_kernel<
+                memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
+                host_lus_solver;
+            host_lus_solver solver(boundary_hor_, boundary_pair_ver_, heat_data_cfg_, discretization_cfg_, solver_cfg_);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
+            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
+        }
+        else
+        {
+            throw std::exception("Not supported on Host");
+        }
+    }
+    else
+    {
+        throw std::exception("Unreachable");
+    }
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -160,7 +294,7 @@ template <typename fp_type, template <typename, typename> typename container = s
 class general_svc_heston_equation
 {
   private:
-    boundary_2d_pair<fp_type> boundary_pair_hor_;
+    boundary_2d_ptr<fp_type> boundary_hor_;
     boundary_2d_pair<fp_type> boundary_pair_ver_;
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
@@ -172,10 +306,21 @@ class general_svc_heston_equation
     {
         LSS_VERIFY(heat_data_cfg_, "heat_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_hor_), "horizontal boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_hor_), "horizontal boundary_pair.second must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_ver_), "vertical boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_ver_), "vertical boundary_pair.second must not be null");
+
+        if (auto hor_ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(boundary_hor_))
+        {
+            LSS_VERIFY(hor_ptr, "horizontal_upper_boundary_ptr must be of dirichlet type only");
+        }
+
+        if (auto ver_ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(std::get<0>(boundary_pair_ver_)))
+        {
+            LSS_VERIFY(ver_ptr, "vertical_boundary_pair.first must be of dirichlet type only");
+        }
+        if (auto ver_ptr = std::dynamic_pointer_cast<neumann_boundary_2d<fp_type>>(std::get<1>(boundary_pair_ver_)))
+        {
+            LSS_VERIFY(ver_ptr, "vertical_boundary_pair.second must be of neumann type only");
+        }
+
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
     }
 
@@ -183,11 +328,11 @@ class general_svc_heston_equation
     explicit general_svc_heston_equation(
         heat_data_config_2d_ptr<fp_type> const &heat_data_config,
         pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-        boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+        boundary_2d_ptr<fp_type> const &horizontal_upper_boundary_ptr,
         boundary_2d_pair<fp_type> const &vertical_boundary_pair,
         heat_explicit_solver_config_ptr const &solver_config = dev_expl_fwd_euler_solver_config_ptr)
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          boundary_pair_hor_{horizontal_boundary_pair}, boundary_pair_ver_{vertical_boundary_pair}, solver_cfg_{
+          boundary_hor_{horizontal_upper_boundary_ptr}, boundary_pair_ver_{vertical_boundary_pair}, solver_cfg_{
                                                                                                         solver_config}
     {
         initialize();
@@ -207,7 +352,7 @@ class general_svc_heston_equation
      *
      * \param solution - 2D container for solution
      */
-    void solve(container_2d<fp_type, container, allocator> &solution);
+    void solve(container_2d<by_enum::Row, fp_type, container, allocator> &solution);
 
     /**
      * Get all solutions in time (surface) of the PDE
@@ -219,7 +364,7 @@ class general_svc_heston_equation
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void general_svc_heston_equation<fp_type, container, allocator>::solve(
-    container_2d<fp_type, container, allocator> &solution)
+    container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
 }
 
