@@ -42,6 +42,9 @@ Black-Scholes equation
 Heston equation
 ![Heston equation](/outputs/impl_heston_dr_numerical.png)
 
+SABR equation
+![SABR equation](/outputs/impl_sabr_dr_numerical.png)
+
 ## Usage
 Just started.
 To see how to use this library see header files ending with _t.
