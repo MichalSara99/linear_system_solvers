@@ -239,7 +239,8 @@ int main(int argc, char const *argv[])
     // testExplPureWaveEquationDirichletBCCUDAHostSolverPrintSurf();
 
     // testImplHestonEquationCUDAQRSolverCrankNicolsonPrint();
-    testImplHestonEquationThomasLUSolverCrankNicolsonPrint();
+    // testImplHestonEquationThomasLUSolverCrankNicolsonPrint();
+    testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();
 
 
     // ====================================================================
@@ -268,8 +269,15 @@ int main(int argc, char const *argv[])
     // =================== TWO_DIM: lss_heston_equation_t.hpp =============
     // ====================================================================
 
-     // completeTestTest();
-     //testImplHestonEquationThomasLUSolver();
+    // testImplHestonEquationThomasLUSolver();
+
+    // ====================================================================
+
+    // ====================================================================
+    // =================== TWO_DIM: lss_sabr_equation_t.hpp ===============
+    // ====================================================================
+
+    // testImplSABREquationDoubleSweepSolver();
 
     // ====================================================================
 

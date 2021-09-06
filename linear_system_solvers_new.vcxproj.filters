@@ -420,6 +420,9 @@
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_splitting_method.hpp">
       <Filter>pde_solvers\two_dimensional\heat_type\splitting_method</Filter>
     </ClInclude>
+    <ClInclude Include="unit_tests\pde_solvers\two_dimensional\lss_sabr_equation_t.hpp">
+      <Filter>unit_tests\pde_solvers\two_dimensional</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
