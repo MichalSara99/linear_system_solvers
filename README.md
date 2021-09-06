@@ -39,6 +39,9 @@ Advection equation
 Black-Scholes equation
 ![Black-Scholes equation](/outputs/call_option_price_surface_numerical.png)
 
+Heston equation
+![Heston equation](/outputs/impl_heston_dr_numerical.png)
+
 ## Usage
 Just started.
 To see how to use this library see header files ending with _t.
