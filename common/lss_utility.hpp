@@ -32,10 +32,18 @@ using function_triplet_t =
     std::tuple<std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>, std::function<fp_type(fp_type)>>;
 
 /**
- * function_sevenlet_t alias type
+ * function_2d_triplet_t alias type
  */
 template <typename fp_type>
-using function_sevenlet_t =
+using function_2d_triplet_t =
+    std::tuple<std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>>;
+
+/**
+ * function_2d_sevenlet_t alias type
+ */
+template <typename fp_type>
+using function_2d_sevenlet_t =
     std::tuple<std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
                std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
                std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,

@@ -101,7 +101,7 @@ void discretization<dimension_enum::Two, fp_type, container, allocator>::of_func
     {
         for (std::size_t c = 0; c < container_fun.columns(); ++c)
         {
-            value = fun(init_x + static_cast<fp_type>(c) * step_x, init_y + static_cast<fp_type>(r) * step_y);
+            value = fun(init_x + static_cast<fp_type>(r) * step_x, init_y + static_cast<fp_type>(c) * step_y);
             container_fun(r, c, value);
         }
     }
@@ -120,7 +120,7 @@ void discretization<dimension_enum::Two, fp_type, container, allocator>::of_func
     {
         for (std::size_t c = 0; c < container_fun_t.columns(); ++c)
         {
-            value = fun(init_x + static_cast<fp_type>(c) * step_x, init_y + static_cast<fp_type>(r) * step_y, time);
+            value = fun(init_x + static_cast<fp_type>(r) * step_x, init_y + static_cast<fp_type>(c) * step_y, time);
             container_fun_t(r, c, value);
         }
     }

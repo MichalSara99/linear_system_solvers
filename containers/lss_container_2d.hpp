@@ -103,18 +103,16 @@ class container_2d<by_enum::Row, fp_type, container, allocator>
 
     container_2d &operator=(container_2d<by_enum::Column, fp_type, container, allocator> const &copy)
     {
-        if (this != &copy)
+
+        data_.clear();
+        rows_ = copy.rows();
+        columns_ = copy.columns();
+        for (std::size_t r = 0; r < rows_; ++r)
         {
-            data_.clear();
-            rows_ = copy.rows();
-            columns_ = copy.columns();
-            for (std::size_t r = 0; r < rows_; ++r)
+            data_.emplace_back(container<fp_type, allocator>(static_cast<std::size_t>(columns_)));
+            for (std::size_t c = 0; c < columns_; ++c)
             {
-                data_.emplace_back(container<fp_type, allocator>(static_cast<std::size_t>(columns_)));
-                for (std::size_t c = 0; c < columns_; ++c)
-                {
-                    data_[r][c] = copy(r, c);
-                }
+                data_[r][c] = copy(r, c);
             }
         }
         return *this;
@@ -274,19 +272,17 @@ class container_2d<by_enum::Column, fp_type, container, allocator>
 
     container_2d &operator=(container_2d<by_enum::Row, fp_type, container, allocator> const &copy)
     {
-        if (this != &copy)
-        {
-            data_.clear();
-            rows_ = copy.rows();
-            columns_ = copy.columns();
 
-            for (std::size_t c = 0; c < columns_; ++c)
+        data_.clear();
+        rows_ = copy.rows();
+        columns_ = copy.columns();
+
+        for (std::size_t c = 0; c < columns_; ++c)
+        {
+            data_.emplace_back(container<fp_type, allocator>(static_cast<std::size_t>(rows_)));
+            for (std::size_t r = 0; r < rows_; ++r)
             {
-                data_.emplace_back(container<fp_type, allocator>(static_cast<std::size_t>(rows_)));
-                for (std::size_t r = 0; r < rows_; ++r)
-                {
-                    data_[c][r] = copy(r, c);
-                }
+                data_[c][r] = copy(r, c);
             }
         }
         return *this;

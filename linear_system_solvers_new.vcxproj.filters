@@ -118,6 +118,9 @@
     <Filter Include="pde_solvers\two_dimensional\heat_type\splitting_method">
       <UniqueIdentifier>{3ee637b8-5c72-493d-8fa2-a73f0894e470}</UniqueIdentifier>
     </Filter>
+    <Filter Include="unit_tests\pde_solvers\two_dimensional">
+      <UniqueIdentifier>{c5b2c027-cf62-4fc5-8817-ffb5a71a1037}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -401,6 +404,21 @@
     </ClInclude>
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heston_equation_implicit_kernel.hpp">
       <Filter>pde_solvers\two_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\pde_solvers\two_dimensional\lss_heston_equation_t.hpp">
+      <Filter>unit_tests\pde_solvers\two_dimensional</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heston_equation_explicit_boundary.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\lss_splitting_method_config.hpp">
+      <Filter>pde_solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heston_equation_implicit_coefficients.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_splitting_method.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\splitting_method</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

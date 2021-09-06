@@ -99,7 +99,7 @@ template <typename fp_type> struct pde_discretization_config<dimension_enum::Two
     {
     }
 
-    inline std::pair<range<fp_type>, range<fp_type>> const &space_range() const
+    inline std::pair<range<fp_type>, range<fp_type>> const space_range() const
     {
         return std::make_pair(space_range_1_, space_range_2_);
     }

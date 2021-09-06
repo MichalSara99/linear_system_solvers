@@ -30,6 +30,16 @@ enum class factorization_enum
 };
 
 /**
+    splitting_method_enum
+ */
+enum class splitting_method_enum
+{
+    DouglasRachford,
+    CraigSneyd,
+    HundsdorferVerwer,
+};
+
+/**
     tridiagonal_method_enum
  */
 enum class tridiagonal_method_enum
