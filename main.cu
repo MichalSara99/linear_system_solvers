@@ -27,6 +27,7 @@
 #include "unit_tests/sparse_solvers/lss_sor_solver_cuda_t.hpp"
 #include "unit_tests/sparse_solvers/lss_sor_solver_t.hpp"
 #include "unit_tests/sparse_solvers/lss_thomas_lu_solver_t.hpp"
+#include "unit_tests/sparse_solvers/lss_karawia_solver_t.hpp"
 
 int main(int argc, char const *argv[])
 {
@@ -47,6 +48,7 @@ int main(int argc, char const *argv[])
     // tested:
 
     // testDoubleSweepDirichletBC();
+    // testKarawiaDirichletBC();
     // testDoubleSweepRobinBC();
     // testDoubleSweepDirichletNeumannBC();
     // testDoubleSweepNeumannDirichletBC();
@@ -239,8 +241,8 @@ int main(int argc, char const *argv[])
     // testExplPureWaveEquationDirichletBCCUDAHostSolverPrintSurf();
 
     // testImplHestonEquationCUDAQRSolverCrankNicolsonPrint();
-    // testImplHestonEquationThomasLUSolverCrankNicolsonPrint();
-    testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();
+   //  testImplHestonEquationThomasLUSolverCrankNicolsonPrint();
+    //testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();
 
 
     // ====================================================================

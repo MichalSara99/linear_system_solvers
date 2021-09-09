@@ -1696,7 +1696,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     auto const &strike = 100.0;
     auto const &maturity = 1.0;
     auto const &rate = 0.03;
-    auto const &sig_sig = 0.41;
+    auto const &sig_sig = 0.041;
     auto const &sig_kappa = 3.0;
     auto const &sig_theta = 0.12;
     auto const &rho = 0.6;
@@ -1709,7 +1709,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     // space Spot range:
     range<T> spacex_range(static_cast<T>(50.0), static_cast<T>(200.0));
     // space Vol range:
-    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(0.5));
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:

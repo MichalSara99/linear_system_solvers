@@ -73,6 +73,8 @@
     <ClInclude Include="sparse_solvers\general\core_sor_solver_cuda\lss_core_sor_solver_cuda.hpp" />
     <ClInclude Include="sparse_solvers\general\core_sor_solver_cuda\lss_core_sor_solver_kernels.hpp" />
     <ClInclude Include="sparse_solvers\general\sor_solver_traits\lss_sor_solver_traits.hpp" />
+    <ClInclude Include="sparse_solvers\pentadiagonal\karawia_solver\lss_karawia_boundary.hpp" />
+    <ClInclude Include="sparse_solvers\pentadiagonal\karawia_solver\lss_karawia_solver.hpp" />
     <ClInclude Include="sparse_solvers\tridiagonal\cuda_solver\lss_cuda_boundary.hpp" />
     <ClInclude Include="sparse_solvers\tridiagonal\cuda_solver\lss_cuda_solver.hpp" />
     <ClInclude Include="sparse_solvers\tridiagonal\double_sweep_solver\lss_double_sweep_boundary.hpp" />
@@ -108,6 +110,7 @@
     <ClInclude Include="unit_tests\sparse_solvers\lss_core_sor_solver_t.hpp" />
     <ClInclude Include="unit_tests\sparse_solvers\lss_cuda_solver_t.hpp" />
     <ClInclude Include="unit_tests\sparse_solvers\lss_double_sweep_solver_t.hpp" />
+    <ClInclude Include="unit_tests\sparse_solvers\lss_karawia_solver_t.hpp" />
     <ClInclude Include="unit_tests\sparse_solvers\lss_sor_solver_cuda_t.hpp" />
     <ClInclude Include="unit_tests\sparse_solvers\lss_sor_solver_t.hpp" />
     <ClInclude Include="unit_tests\sparse_solvers\lss_thomas_lu_solver_t.hpp" />

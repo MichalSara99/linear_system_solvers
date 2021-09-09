@@ -121,6 +121,12 @@
     <Filter Include="unit_tests\pde_solvers\two_dimensional">
       <UniqueIdentifier>{c5b2c027-cf62-4fc5-8817-ffb5a71a1037}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sparse_solvers\pentadiagonal">
+      <UniqueIdentifier>{6f0b8aba-102c-4517-84ac-132d637fce86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sparse_solvers\pentadiagonal\karawia_solver">
+      <UniqueIdentifier>{38fba20e-fd43-495c-8319-f92956f2c56e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -422,6 +428,15 @@
     </ClInclude>
     <ClInclude Include="unit_tests\pde_solvers\two_dimensional\lss_sabr_equation_t.hpp">
       <Filter>unit_tests\pde_solvers\two_dimensional</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\pentadiagonal\karawia_solver\lss_karawia_solver.hpp">
+      <Filter>sparse_solvers\pentadiagonal\karawia_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="sparse_solvers\pentadiagonal\karawia_solver\lss_karawia_boundary.hpp">
+      <Filter>sparse_solvers\pentadiagonal\karawia_solver</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\sparse_solvers\lss_karawia_solver_t.hpp">
+      <Filter>unit_tests\sparse_solvers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
