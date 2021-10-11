@@ -438,6 +438,9 @@
     <ClInclude Include="unit_tests\sparse_solvers\lss_karawia_solver_t.hpp">
       <Filter>unit_tests\sparse_solvers</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\lss_weighted_scheme_config.hpp">
+      <Filter>pde_solvers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />

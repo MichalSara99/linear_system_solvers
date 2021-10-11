@@ -27,13 +27,12 @@ template <typename fp_type> struct general_svc_heston_equation_implicit_coeffici
     // theta variable:
     fp_type theta_;
     // functional coefficients:
-    std::function<fp_type(fp_type, fp_type)> M_;
-    std::function<fp_type(fp_type, fp_type)> M_tilde_;
-    std::function<fp_type(fp_type, fp_type)> P_;
-    std::function<fp_type(fp_type, fp_type)> P_tilde_;
-    std::function<fp_type(fp_type, fp_type)> S_;
-    std::function<fp_type(fp_type, fp_type)> Z_;
-    std::function<fp_type(fp_type, fp_type)> W_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> M_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> M_tilde_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> P_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> P_tilde_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> Z_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> W_;
     std::function<fp_type(fp_type, fp_type)> C_;
     std::function<fp_type(fp_type, fp_type)> D_;
     std::function<fp_type(fp_type, fp_type)> E_;
@@ -88,15 +87,16 @@ template <typename fp_type> struct general_svc_heston_equation_implicit_coeffici
         const fp_type two = static_cast<fp_type>(2.0);
         const fp_type half = static_cast<fp_type>(0.5);
 
-        M_ = [=](fp_type x, fp_type y) { return (alpha_ * a(x, y) - delta_ * d(x, y)); };
-        M_tilde_ = [=](fp_type x, fp_type y) { return (beta_ * b(x, y) - ni_ * e(x, y)); };
-        P_ = [=](fp_type x, fp_type y) { return (alpha_ * a(x, y) + delta_ * d(x, y)); };
-        P_tilde_ = [=](fp_type x, fp_type y) { return (beta_ * b(x, y) + ni_ * e(x, y)); };
-        S_ = [=](fp_type x, fp_type y) {
-            return (one - two * (alpha_ * a(x, y) + beta_ * b(x, y) - half * rho_ * f(x, y)));
+        M_ = [=](fp_type x, fp_type y, fp_type w_x) { return (alpha_ * a(x, y) - (two - w_x) * delta_ * d(x, y)); };
+        M_tilde_ = [=](fp_type x, fp_type y, fp_type w_y) { return (beta_ * b(x, y) - (two - w_y) * ni_ * e(x, y)); };
+        P_ = [=](fp_type x, fp_type y, fp_type w_x) { return (alpha_ * a(x, y) + w_x * delta_ * d(x, y)); };
+        P_tilde_ = [=](fp_type x, fp_type y, fp_type w_y) { return (beta_ * b(x, y) + w_y * ni_ * e(x, y)); };
+        Z_ = [=](fp_type x, fp_type y, fp_type w_x) {
+            return (two * alpha_ * a(x, y) - two * (one - w_x) * delta_ * d(x, y) - half * rho_ * f(x, y));
         };
-        Z_ = [=](fp_type x, fp_type y) { return (two * alpha_ * a(x, y) - half * rho_ * f(x, y)); };
-        W_ = [=](fp_type x, fp_type y) { return (two * beta_ * b(x, y) - half * rho_ * f(x, y)); };
+        W_ = [=](fp_type x, fp_type y, fp_type w_y) {
+            return (two * beta_ * b(x, y) - two * (one - w_y) * ni_ * e(x, y) - half * rho_ * f(x, y));
+        };
         C_ = [=](fp_type x, fp_type y) { return c(x, y); };
         D_ = [=](fp_type x, fp_type y) { return d(x, y); };
         E_ = [=](fp_type x, fp_type y) { return e(x, y); };

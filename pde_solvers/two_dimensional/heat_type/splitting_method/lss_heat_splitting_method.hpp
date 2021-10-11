@@ -45,11 +45,13 @@ class heat_splitting_method
     virtual void solve(container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
                        boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                        boundary_2d_pair<fp_type> const &vertical_boundary_pair, fp_type const &time,
+                       std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                        container_2d<by_enum::Row, fp_type, container, allocator> &solution) = 0;
 
     virtual void solve(container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
                        boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                        boundary_2d_pair<fp_type> const &vertical_boundary_pair, fp_type const &time,
+                       std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                        std::function<fp_type(fp_type, fp_type)> const &heat_source,
                        container_2d<by_enum::Row, fp_type, container, allocator> &solution) = 0;
 };

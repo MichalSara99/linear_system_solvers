@@ -70,10 +70,11 @@ template <typename T> void testBVPDoubleSweepDirichletBC()
     // exact value:
     auto exact = [](T x) { return x * (static_cast<T>(1.0) - x); };
 
-    std::cout << "tp : FDM | Exact\n";
+    std::cout << "tp : FDM | Exact | Diff\n";
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        std::cout << "t_" << j << ": " << solution[j] << " |  " << exact(j * h) << '\n';
+        std::cout << "t_" << j << ": " << solution[j] << " |  " << exact(j * h) << " | " << (solution[j] - exact(j * h))
+                  << '\n';
     }
 }
 

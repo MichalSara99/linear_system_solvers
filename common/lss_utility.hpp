@@ -50,6 +50,17 @@ using function_2d_sevenlet_t =
                std::function<fp_type(fp_type, fp_type)>>;
 
 /**
+ * function_2d_ninelet_t alias type
+ */
+template <typename fp_type>
+using function_2d_ninelet_t =
+    std::tuple<std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>, std::function<fp_type(fp_type, fp_type)>,
+               std::function<fp_type(fp_type, fp_type)>>;
+
+/**
  * function_quintuple_t alias type
  */
 template <typename fp_type>

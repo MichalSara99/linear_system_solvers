@@ -35,11 +35,12 @@ using lss_utility::function_2d_sevenlet_t;
 using lss_utility::pair_t;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using implicit_heston_scheme_function_t = std::function<void(
-    function_2d_sevenlet_t<fp_type> const &, coefficient_sevenlet_t<fp_type> const &, std::size_t const &,
-    fp_type const &, pair_t<fp_type> const &, container_2d<by_enum::Row, fp_type, container, alloc> const &,
-    container_2d<by_enum::Row, fp_type, container, alloc> const &,
-    container_2d<by_enum::Row, fp_type, container, alloc> const &, fp_type const &, container<fp_type, alloc> &)>;
+using implicit_heston_scheme_function_t =
+    std::function<void(general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &, std::size_t const &,
+                       fp_type const &, container_2d<by_enum::Row, fp_type, container, alloc> const &,
+                       container_2d<by_enum::Row, fp_type, container, alloc> const &,
+                       container_2d<by_enum::Row, fp_type, container, alloc> const &, fp_type const &,
+                       container<fp_type, alloc> &)>;
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 class implicit_heston_scheme
@@ -49,74 +50,95 @@ class implicit_heston_scheme
     typedef implicit_heston_scheme_function_t<container, fp_type, allocator> scheme_function_t;
 
   public:
-    static scheme_function_t const get_intermediate(range<fp_type> const &rangex, bool is_homogeneus)
+    static scheme_function_t const get_intermediate(std::pair<fp_type, fp_type> const &weights,
+                                                    std::pair<fp_type, fp_type> const &weight_values,
+                                                    bool is_homogeneus)
     {
+        const fp_type zero = static_cast<fp_type>(0.0);
         const fp_type one = static_cast<fp_type>(1.0);
 
-        auto scheme_fun_h = [=](function_2d_sevenlet_t<fp_type> const &funcs,
-                                coefficient_sevenlet_t<fp_type> const &coefficients, std::size_t const &y_index,
-                                fp_type const &y, pair_t<fp_type> const &steps, rcontainer_2d_t const &input,
+        auto scheme_fun_h = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfs,
+                                std::size_t const &y_index, fp_type const &y, rcontainer_2d_t const &input,
                                 rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
                                 fp_type const &time, container_t &solution) {
-            auto M = std::get<0>(funcs);
-            auto M_tilde = std::get<1>(funcs);
-            auto P = std::get<2>(funcs);
-            auto P_tilde = std::get<3>(funcs);
-            auto Z = std::get<4>(funcs);
-            auto W = std::get<5>(funcs);
-            auto C = std::get<6>(funcs);
+            auto M = cfs->M_;
+            auto M_tilde = cfs->M_tilde_;
+            auto P = cfs->P_;
+            auto P_tilde = cfs->P_tilde_;
+            auto Z = cfs->Z_;
+            auto W = cfs->W_;
+            auto C = cfs->C_;
 
-            auto const gamma = std::get<2>(coefficients);
-            auto const theta = std::get<6>(coefficients);
+            auto const gamma = cfs->gamma_;
+            auto const theta = cfs->theta_;
 
-            auto const start_x = rangex.lower();
-            auto const h_1 = steps.first;
+            auto const start_x = cfs->rangex_.lower();
+            auto const h_1 = cfs->h_1_;
+
+            auto const v_x = weight_values.first;
+            auto const v_y = weight_values.second;
+            auto const w_x = weights.first;
+            auto const w_y = weights.second;
 
             const std::size_t N = solution.size() - 1;
+            const fp_type wg_y = (y - v_y) <= zero ? one : w_y;
             fp_type x{};
+            fp_type wg_x{};
             for (std::size_t t = 1; t < N; ++t)
             {
                 x = start_x + static_cast<fp_type>(t) * h_1;
+                wg_x = (x - v_x) <= zero ? one : w_x;
                 solution[t] =
-                    (gamma * C(x, y) * input(t - 1, y_index - 1)) + ((one - theta) * M(x, y) * input(t - 1, y_index)) -
-                    (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y) * input(t, y_index - 1)) +
-                    ((one - W(x, y) - (one - theta) * Z(x, y)) * input(t, y_index)) +
-                    (P_tilde(x, y) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
-                    ((one - theta) * P(x, y) * input(t + 1, y_index)) + (gamma * C(x, y) * input(t + 1, y_index + 1));
+                    (gamma * C(x, y) * input(t - 1, y_index - 1)) +
+                    ((one - theta) * M(x, y, wg_x) * input(t - 1, y_index)) -
+                    (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y, wg_y) * input(t, y_index - 1)) +
+                    ((one - W(x, y, wg_y) - (one - theta) * Z(x, y, wg_x)) * input(t, y_index)) +
+                    (P_tilde(x, y, wg_y) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
+                    ((one - theta) * P(x, y, wg_x) * input(t + 1, y_index)) +
+                    (gamma * C(x, y) * input(t + 1, y_index + 1));
             }
         };
-        auto scheme_fun_nh = [=](function_2d_sevenlet_t<fp_type> const &funcs,
-                                 coefficient_sevenlet_t<fp_type> const &coefficients, std::size_t const &y_index,
-                                 fp_type const &y, pair_t<fp_type> const &steps, rcontainer_2d_t const &input,
+        auto scheme_fun_nh = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfs,
+                                 std::size_t const &y_index, fp_type const &y, rcontainer_2d_t const &input,
                                  rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
                                  fp_type const &time, container_t &solution) {
-            auto M = std::get<0>(funcs);
-            auto M_tilde = std::get<1>(funcs);
-            auto P = std::get<2>(funcs);
-            auto P_tilde = std::get<3>(funcs);
-            auto Z = std::get<4>(funcs);
-            auto W = std::get<5>(funcs);
-            auto C = std::get<6>(funcs);
+            auto M = cfs->M_;
+            auto M_tilde = cfs->M_tilde_;
+            auto P = cfs->P_;
+            auto P_tilde = cfs->P_tilde_;
+            auto Z = cfs->Z_;
+            auto W = cfs->W_;
+            auto C = cfs->C_;
 
-            auto const gamma = std::get<2>(coefficients);
-            auto const rho = std::get<5>(coefficients);
-            auto const theta = std::get<6>(coefficients);
+            auto const gamma = cfs->gamma_;
+            auto const theta = cfs->theta_;
+            auto const rho = cfs->rho_;
 
-            auto const start_x = rangex.lower();
-            auto const h_1 = steps.first;
+            auto const start_x = cfs->rangex_.lower();
+            auto const h_1 = cfs->h_1_;
+
+            auto const v_x = weight_values.first;
+            auto const v_y = weight_values.second;
+            auto const w_x = weights.first;
+            auto const w_y = weights.second;
 
             const std::size_t N = solution.size() - 1;
+            const fp_type wg_y = (y - v_y) <= zero ? one : w_y;
             fp_type x{};
+            fp_type wg_x{};
             for (std::size_t t = 1; t < N; ++t)
             {
                 x = start_x + static_cast<fp_type>(t) * h_1;
+                wg_x = (x - v_x) <= zero ? one : w_x;
                 solution[t] =
-                    (gamma * C(x, y) * input(t - 1, y_index - 1)) + ((one - theta) * M(x, y) * input(t - 1, y_index)) -
-                    (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y) * input(t, y_index - 1)) +
-                    ((one - W(x, y) - (one - theta) * Z(x, y)) * input(t, y_index)) +
-                    (P_tilde(x, y) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
-                    ((one - theta) * P(x, y) * input(t + 1, y_index)) + (gamma * C(x, y) * input(t + 1, y_index + 1)) +
-                    (theta * rho * inhom_input_next(t, y_index)) + ((one - theta) * rho * inhom_input(t, y_index));
+                    (gamma * C(x, y) * input(t - 1, y_index - 1)) +
+                    ((one - theta) * M(x, y, wg_x) * input(t - 1, y_index)) -
+                    (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y, wg_y) * input(t, y_index - 1)) +
+                    ((one - W(x, y, wg_y) - (one - theta) * Z(x, y, wg_x)) * input(t, y_index)) +
+                    (P_tilde(x, y, wg_y) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
+                    ((one - theta) * P(x, y, wg_y) * input(t + 1, y_index)) +
+                    (gamma * C(x, y) * input(t + 1, y_index + 1)) + (theta * rho * inhom_input_next(t, y_index)) +
+                    ((one - theta) * rho * inhom_input(t, y_index));
             }
         };
         if (is_homogeneus)
@@ -129,30 +151,39 @@ class implicit_heston_scheme
         }
     }
 
-    static scheme_function_t const get(range<fp_type> const &rangey)
+    static scheme_function_t const get(std::pair<fp_type, fp_type> const &weights,
+                                       std::pair<fp_type, fp_type> const &weight_values)
     {
 
-        auto scheme_fun = [=](function_2d_sevenlet_t<fp_type> const &funcs,
-                              coefficient_sevenlet_t<fp_type> const &coefficients, std::size_t const &x_index,
-                              fp_type const &x, pair_t<fp_type> const &steps, rcontainer_2d_t const &input,
+        const fp_type zero = static_cast<fp_type>(0.0);
+        const fp_type one = static_cast<fp_type>(1.0);
+
+        auto scheme_fun = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfs,
+                              std::size_t const &x_index, fp_type const &x, rcontainer_2d_t const &input,
                               rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
                               fp_type const &time, container_t &solution) {
-            auto const M_tilde = std::get<1>(funcs);
-            auto const P_tilde = std::get<3>(funcs);
-            auto const W = std::get<5>(funcs);
+            auto const M_tilde = cfs->M_tilde_;
+            auto const P_tilde = cfs->P_tilde_;
+            auto const W = cfs->W_;
 
-            auto const theta = std::get<6>(coefficients);
+            auto const theta = cfs->theta_;
 
-            auto const start_y = rangey.lower();
-            auto const h_2 = steps.second;
+            auto const start_y = cfs->rangey_.lower();
+            auto const h_2 = cfs->h_2_;
+
+            auto const v_y = weight_values.second;
+            auto const w_y = weights.second;
 
             const std::size_t N = solution.size() - 1;
             fp_type y{};
+            fp_type wg_y{};
             for (std::size_t t = 1; t < N; ++t)
             {
                 y = start_y + static_cast<fp_type>(t) * h_2;
-                solution[t] = (-theta * M_tilde(x, y) * input(x_index, t - 1)) + (theta * W(x, y) * input(x_index, t)) -
-                              (theta * P_tilde(x, y) * input(x_index, t + 1)) + inhom_input(x_index, t);
+                wg_y = (y - v_y) <= zero ? one : w_y;
+                solution[t] = (-theta * M_tilde(x, y, wg_y) * input(x_index, t - 1)) +
+                              (theta * W(x, y, wg_y) * input(x_index, t)) -
+                              (theta * P_tilde(x, y, wg_y) * input(x_index, t + 1)) + inhom_input(x_index, t);
             }
         };
 
@@ -177,50 +208,46 @@ class heat_douglas_rachford_method : public heat_splitting_method<fp_type, conta
     solver solveru_ptr_;
     // scheme coefficients:
     general_svc_heston_equation_implicit_coefficients_ptr<fp_type> coefficients_;
-    function_2d_sevenlet_t<fp_type> fun_sevenlet_;
-    // constant coefficients:
-    coefficient_sevenlet_t<fp_type> coeff_sevenlet_;
-    // steps pair:
-    std::pair<fp_type, fp_type> steps_;
 
     explicit heat_douglas_rachford_method() = delete;
 
     void initialize()
     {
-        fun_sevenlet_ =
-            std::make_tuple(coefficients_->M_, coefficients_->M_tilde_, coefficients_->P_, coefficients_->P_tilde_,
-                            coefficients_->Z_, coefficients_->W_, coefficients_->C_);
-        coeff_sevenlet_ =
-            std::make_tuple(coefficients_->alpha_, coefficients_->beta_, coefficients_->gamma_, coefficients_->delta_,
-                            coefficients_->ni_, coefficients_->rho_, coefficients_->theta_);
-        steps_ = std::make_pair(coefficients_->h_1_, coefficients_->h_2_);
     }
 
-    void split_0(fp_type const &y, container_t &low, container_t &diag, container_t &high)
+    void split_0(fp_type const &y, fp_type const &v_x, fp_type const &w_x, container_t &low, container_t &diag,
+                 container_t &high)
     {
         fp_type x{};
+        fp_type w{};
         const fp_type start_x = coefficients_->rangex_.lower();
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type zero = static_cast<fp_type>(0.0);
         for (std::size_t t = 0; t < low.size(); ++t)
         {
             x = start_x + static_cast<fp_type>(t) * coefficients_->h_1_;
-            low[t] = (-coefficients_->theta_ * coefficients_->M_(x, y));
-            diag[t] = (one + coefficients_->theta_ * coefficients_->Z_(x, y));
-            high[t] = (-coefficients_->theta_ * coefficients_->P_(x, y));
+            w = (x - v_x) <= zero ? one : w_x;
+            low[t] = (-coefficients_->theta_ * coefficients_->M_(x, y, w));
+            diag[t] = (one + coefficients_->theta_ * coefficients_->Z_(x, y, w));
+            high[t] = (-coefficients_->theta_ * coefficients_->P_(x, y, w));
         }
     }
 
-    void split_1(fp_type const &x, container_t &low, container_t &diag, container_t &high)
+    void split_1(fp_type const &x, fp_type const &v_y, fp_type const &w_y, container_t &low, container_t &diag,
+                 container_t &high)
     {
         fp_type y{};
+        fp_type w{};
         fp_type start_y = coefficients_->rangey_.lower();
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type zero = static_cast<fp_type>(0.0);
         for (std::size_t t = 0; t < low.size(); ++t)
         {
             y = start_y + static_cast<fp_type>(t) * coefficients_->h_2_;
-            low[t] = (-coefficients_->theta_ * coefficients_->M_tilde_(x, y));
-            diag[t] = (one + coefficients_->theta_ * coefficients_->W_(x, y));
-            high[t] = (-coefficients_->theta_ * coefficients_->P_tilde_(x, y));
+            w = (y - v_y) <= zero ? one : w_y;
+            low[t] = (-coefficients_->theta_ * coefficients_->M_tilde_(x, y, w));
+            diag[t] = (one + coefficients_->theta_ * coefficients_->W_(x, y, w));
+            high[t] = (-coefficients_->theta_ * coefficients_->P_tilde_(x, y, w));
         }
     }
 
@@ -245,11 +272,13 @@ class heat_douglas_rachford_method : public heat_splitting_method<fp_type, conta
     void solve(container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                boundary_2d_pair<fp_type> const &vertical_boundary_pair, fp_type const &time,
+               std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                container_2d<by_enum::Row, fp_type, container, allocator> &solution) override;
 
     void solve(container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                boundary_2d_pair<fp_type> const &vertical_boundary_pair, fp_type const &time,
+               std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                std::function<fp_type(fp_type, fp_type)> const &heat_source,
                container_2d<by_enum::Row, fp_type, container, allocator> &solution) override;
 };
@@ -258,10 +287,15 @@ template <typename fp_type, typename solver, template <typename, typename> typen
 void heat_douglas_rachford_method<fp_type, solver, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair, boundary_2d_pair<fp_type> const &vertical_boundary_pair,
-    fp_type const &time, container_2d<by_enum::Row, fp_type, container, allocator> &solution)
+    fp_type const &time, std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
+    container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
     typedef implicit_heston_scheme<fp_type, container, allocator> heston_scheme;
-
+    // extract weights:
+    const fp_type w_x = weights.first;
+    const fp_type x_val = weight_values.first;
+    const fp_type w_y = weights.second;
+    const fp_type y_val = weight_values.second;
     // 2D container for intermediate solution:
     ccontainer_2d_t inter_solution(coefficients_->space_size_x_, coefficients_->space_size_y_, fp_type{});
     // 1D container for intermediate solution:
@@ -274,14 +308,14 @@ void heat_douglas_rachford_method<fp_type, solver, container, allocator>::solve(
     container_t high(coefficients_->space_size_x_, fp_type{});
     container_t rhs(coefficients_->space_size_x_, fp_type{});
     // get the right-hand side of the scheme:
-    auto scheme_y = heston_scheme::get_intermediate(coefficients_->rangex_, true);
+    auto scheme_y = heston_scheme::get_intermediate(weights, weight_values, true);
     fp_type y{};
     fp_type start_y{coefficients_->rangey_.lower()};
     for (std::size_t j = 1; j < coefficients_->space_size_y_ - 1; ++j)
     {
         y = start_y + static_cast<fp_type>(j) * coefficients_->h_2_;
-        split_0(y, low, diag, high);
-        scheme_y(fun_sevenlet_, coeff_sevenlet_, j, y, steps_, prev_solution, curr_source, curr_source, time, rhs);
+        split_0(y, x_val, w_x, low, diag, high);
+        scheme_y(coefficients_, j, y, prev_solution, curr_source, curr_source, time, rhs);
         solvery_ptr_->set_diagonals(low, diag, high);
         solvery_ptr_->set_rhs(rhs);
         solvery_ptr_->solve(horizontal_boundary_pair, solution_v, time, y);
@@ -296,15 +330,15 @@ void heat_douglas_rachford_method<fp_type, solver, container, allocator>::solve(
     high.resize(coefficients_->space_size_y_);
     rhs.resize(coefficients_->space_size_y_);
     // get the right-hand side of the scheme:
-    auto scheme_u = heston_scheme::get(coefficients_->rangey_);
+    auto scheme_u = heston_scheme::get(weights, weight_values);
     fp_type x{};
     fp_type start_x{coefficients_->rangex_.lower()};
 
     for (std::size_t i = 1; i < coefficients_->space_size_x_ - 1; ++i)
     {
         x = start_x + static_cast<fp_type>(i) * coefficients_->h_1_;
-        split_1(x, low, diag, high);
-        scheme_u(fun_sevenlet_, coeff_sevenlet_, i, x, steps_, prev_solution, inter_solution, curr_source, time, rhs);
+        split_1(x, y_val, w_y, low, diag, high);
+        scheme_u(coefficients_, i, x, prev_solution, inter_solution, curr_source, time, rhs);
         solveru_ptr_->set_diagonals(low, diag, high);
         solveru_ptr_->set_rhs(rhs);
         solveru_ptr_->solve(vertical_boundary_pair, solution_v, time, x);
@@ -316,7 +350,8 @@ template <typename fp_type, typename solver, template <typename, typename> typen
 void heat_douglas_rachford_method<fp_type, solver, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair, boundary_2d_pair<fp_type> const &vertical_boundary_pair,
-    fp_type const &time, std::function<fp_type(fp_type, fp_type)> const &heat_source,
+    fp_type const &time, std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
+    std::function<fp_type(fp_type, fp_type)> const &heat_source,
     container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
 }

@@ -72,7 +72,7 @@ class karawia_solver
         kernel(boundary, other_boundary, solution, at_time);
     }
 
-    void solve(boundary_pair<fp_type> const &boundary, boundary_pair<fp_type> const &other_boundary,
+    void solve(boundary_pair<fp_type, fp_type> const &boundary, boundary_pair<fp_type, fp_type> const &other_boundary,
                container<fp_type, allocator> &solution, fp_type at_time, fp_type space_arg)
     {
         LSS_ASSERT(solution.size() == discretization_size_, "Incorrect size of solution container");

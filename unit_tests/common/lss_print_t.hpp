@@ -1553,6 +1553,7 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
     using lss_pde_solvers::heat_initial_data_config_2d;
     using lss_pde_solvers::pde_discretization_config_2d;
     using lss_pde_solvers::splitting_method_config;
+    using lss_pde_solvers::weighted_scheme_config;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_cusolver_qr_cn_solver_config_ptr;
     using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation;
     using lss_print::print;
@@ -1625,10 +1626,12 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
     // splitting method configuration:
     auto const &splitting_config_ptr =
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
+    // default weighted scheme config:
+    auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, dev_bwd_cusolver_qr_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, dev_bwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -1668,6 +1671,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     using lss_pde_solvers::heat_initial_data_config_2d;
     using lss_pde_solvers::pde_discretization_config_2d;
     using lss_pde_solvers::splitting_method_config;
+    using lss_pde_solvers::weighted_scheme_config;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_cn_solver_config_ptr;
     using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation;
     using lss_print::print;
@@ -1698,7 +1702,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     auto const &rate = 0.03;
     auto const &sig_sig = 0.041;
     auto const &sig_kappa = 3.0;
-    auto const &sig_theta = 0.12;
+    auto const &sig_theta = 0.8;
     auto const &rho = 0.6;
     // number of space subdivisions for spot:
     std::size_t const Sd = 100;
@@ -1709,7 +1713,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     // space Spot range:
     range<T> spacex_range(static_cast<T>(50.0), static_cast<T>(200.0));
     // space Vol range:
-    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(0.5));
+    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:
@@ -1740,10 +1744,12 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     // splitting method configuration:
     auto const &splitting_config_ptr =
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
+    // default weighted scheme config:
+    auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>(T(0.0), sig_theta, T(1.0), T(0.90));
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, host_bwd_tlusolver_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, host_bwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -1783,6 +1789,7 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolsonPri
     using lss_pde_solvers::heat_initial_data_config_2d;
     using lss_pde_solvers::pde_discretization_config_2d;
     using lss_pde_solvers::splitting_method_config;
+    using lss_pde_solvers::weighted_scheme_config;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_dssolver_cn_solver_config_ptr;
     using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation;
     using lss_print::print;
@@ -1860,10 +1867,12 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolsonPri
     // splitting method configuration:
     auto const &splitting_config_ptr =
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
+    // default weighted scheme config:
+    auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, host_bwd_dssolver_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, host_bwd_dssolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:

@@ -16,6 +16,8 @@
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_splitting_method_config.hpp"
+#include "pde_solvers/lss_weighted_scheme_config.hpp"
+#include "sparse_solvers/pentadiagonal/karawia_solver/lss_karawia_solver.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
 #include "sparse_solvers/tridiagonal/sor_solver/lss_sor_solver.hpp"
@@ -113,6 +115,7 @@ class implicit_heston_time_loop
                     boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr, range<fp_type> const &spacex_range,
                     range<fp_type> const &spacey_range, range<fp_type> const &time_range,
                     std::size_t const &last_time_idx, std::tuple<fp_type, fp_type, fp_type> const &steps,
+                    std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                     traverse_direction_enum const &traverse_dir, container_2d_t &prev_solution,
                     container_2d_t &next_solution);
 
@@ -150,7 +153,8 @@ void implicit_heston_time_loop<fp_type, container, allocator>::run(
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
     boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr, range<fp_type> const &spacex_range,
     range<fp_type> const &spacey_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
-    std::tuple<fp_type, fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+    std::tuple<fp_type, fp_type, fp_type> const &steps, std::pair<fp_type, fp_type> const &weights,
+    std::pair<fp_type, fp_type> const &weight_values, traverse_direction_enum const &traverse_dir,
     container_2d_t &prev_solution, container_2d_t &next_solution)
 {
 
@@ -166,7 +170,6 @@ void implicit_heston_time_loop<fp_type, container, allocator>::run(
     const fp_type k = std::get<2>(steps);
     boundary_2d_pair<fp_type> ver_boundary_pair;
     boundary_2d_pair<fp_type> hor_inter_boundary_pair;
-    boundary_2d_pair<fp_type> hor_boundary_pair;
 
     fp_type time{};
     std::size_t time_idx{};
@@ -181,7 +184,8 @@ void implicit_heston_time_loop<fp_type, container, allocator>::run(
                                        next_solution);
             ver_boundary_pair = boundaries::get_vertical(start_x, h_1, next_solution);
             hor_inter_boundary_pair = boundaries::get_intermed_horizontal(start_y, h_2, prev_solution, next_solution);
-            solver_ptr->solve(prev_solution, hor_inter_boundary_pair, ver_boundary_pair, time, next_solution);
+            solver_ptr->solve(prev_solution, hor_inter_boundary_pair, ver_boundary_pair, time, weights, weight_values,
+                              next_solution);
             boundary_solver_ptr->solve(prev_solution, horizontal_boundary_pair, time, next_solution);
 
             prev_solution = next_solution;
@@ -200,7 +204,8 @@ void implicit_heston_time_loop<fp_type, container, allocator>::run(
                                        next_solution);
             ver_boundary_pair = boundaries::get_vertical(start_x, h_1, next_solution);
             hor_inter_boundary_pair = boundaries::get_intermed_horizontal(start_y, h_2, prev_solution, next_solution);
-            solver_ptr->solve(prev_solution, hor_inter_boundary_pair, ver_boundary_pair, time, next_solution);
+            solver_ptr->solve(prev_solution, hor_inter_boundary_pair, ver_boundary_pair, time, weights, weight_values,
+                              next_solution);
             boundary_solver_ptr->solve(prev_solution, horizontal_boundary_pair, time, next_solution);
 
             prev_solution = next_solution;
@@ -236,6 +241,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
+    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
 
   public:
@@ -243,11 +249,12 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                                 heat_data_config_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const splitting_config,
+                                                splitting_method_config_ptr<fp_type> const &splitting_config,
+                                                weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
                                                 heat_implicit_solver_config_ptr const &solver_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          splitting_cfg_{splitting_config}, solver_cfg_{solver_config}
+          splitting_cfg_{splitting_config}, weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}
     {
     }
 
@@ -325,6 +332,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
         // create and set up lower volatility boundary solver:
         auto boundary_solver = std::make_shared<explicit_boundary>(heston_coeff_holder);
+        auto const &weights = std::make_pair(weighted_scheme_cfg_->weight_x(), weighted_scheme_cfg_->weight_y());
+        auto const &weight_values =
+            std::make_pair(weighted_scheme_cfg_->start_x_value(), weighted_scheme_cfg_->start_y_value());
 
         if (is_heat_sourse_set)
         {
@@ -339,7 +349,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         else
         {
             loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, traverse_dir, prev_solution, next_solution);
+                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -368,6 +378,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
+    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
 
   public:
@@ -375,11 +386,12 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                                 heat_data_config_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const splitting_config,
+                                                splitting_method_config_ptr<fp_type> const &splitting_config,
+                                                weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
                                                 heat_implicit_solver_config_ptr const &solver_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          splitting_cfg_{splitting_config}, solver_cfg_{solver_config}
+          splitting_cfg_{splitting_config}, weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}
     {
     }
 
@@ -457,6 +469,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
         // create and set up lower volatility boundary solver:
         auto boundary_solver = std::make_shared<explicit_boundary>(heston_coeff_holder);
+        auto const &weights = std::make_pair(weighted_scheme_cfg_->weight_x(), weighted_scheme_cfg_->weight_y());
+        auto const &weight_values =
+            std::make_pair(weighted_scheme_cfg_->start_x_value(), weighted_scheme_cfg_->start_y_value());
 
         if (is_heat_sourse_set)
         {
@@ -474,7 +489,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         else
         {
             loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, traverse_dir, prev_solution, next_solution);
+                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -506,6 +521,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
+    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
 
   public:
@@ -513,11 +529,12 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                                 heat_data_config_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const splitting_config,
+                                                splitting_method_config_ptr<fp_type> const &splitting_config,
+                                                weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
                                                 heat_implicit_solver_config_ptr const &solver_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          splitting_cfg_{splitting_config}, solver_cfg_{solver_config}
+          splitting_cfg_{splitting_config}, weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}
     {
     }
 
@@ -595,6 +612,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         // create and set up lower volatility boundary solver:
         auto boundary_solver = std::make_shared<explicit_boundary>(heston_coeff_holder);
+        auto const &weights = std::make_pair(weighted_scheme_cfg_->weight_x(), weighted_scheme_cfg_->weight_y());
+        auto const &weight_values =
+            std::make_pair(weighted_scheme_cfg_->start_x_value(), weighted_scheme_cfg_->start_y_value());
 
         if (is_heat_sourse_set)
         {
@@ -612,7 +632,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         else
         {
             loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, traverse_dir, prev_solution, next_solution);
+                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -640,6 +660,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
+    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
 
   public:
@@ -647,11 +668,12 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                                 heat_data_config_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const splitting_config,
+                                                splitting_method_config_ptr<fp_type> const &splitting_config,
+                                                weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
                                                 heat_implicit_solver_config_ptr const &solver_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          splitting_cfg_{splitting_config}, solver_cfg_{solver_config}
+          splitting_cfg_{splitting_config}, weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}
     {
     }
 
@@ -729,6 +751,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         // create and set up lower volatility boundary solver:
         auto boundary_solver = std::make_shared<explicit_boundary>(heston_coeff_holder);
+        auto const &weights = std::make_pair(weighted_scheme_cfg_->weight_x(), weighted_scheme_cfg_->weight_y());
+        auto const &weight_values =
+            std::make_pair(weighted_scheme_cfg_->start_x_value(), weighted_scheme_cfg_->start_y_value());
 
         if (is_heat_sourse_set)
         {
@@ -746,7 +771,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         else
         {
             loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, traverse_dir, prev_solution, next_solution);
+                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -775,6 +800,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
+    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
 
   public:
@@ -782,11 +808,12 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                                 heat_data_config_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const splitting_config,
+                                                splitting_method_config_ptr<fp_type> const &splitting_config,
+                                                weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
                                                 heat_implicit_solver_config_ptr const &solver_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          splitting_cfg_{splitting_config}, solver_cfg_{solver_config}
+          splitting_cfg_{splitting_config}, weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}
     {
     }
 
@@ -862,6 +889,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         // create and set up lower volatility boundary solver:
         auto boundary_solver = std::make_shared<explicit_boundary>(heston_coeff_holder);
+        auto const &weights = std::make_pair(weighted_scheme_cfg_->weight_x(), weighted_scheme_cfg_->weight_y());
+        auto const &weight_values =
+            std::make_pair(weighted_scheme_cfg_->start_x_value(), weighted_scheme_cfg_->start_y_value());
 
         if (is_heat_sourse_set)
         {
@@ -879,7 +909,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         else
         {
             loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, traverse_dir, prev_solution, next_solution);
+                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -907,6 +937,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
+    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
 
   public:
@@ -914,11 +945,12 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                                 heat_data_config_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const splitting_config,
+                                                splitting_method_config_ptr<fp_type> const &splitting_config,
+                                                weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
                                                 heat_implicit_solver_config_ptr const &solver_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
-          splitting_cfg_{splitting_config}, solver_cfg_{solver_config}
+          splitting_cfg_{splitting_config}, weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}
     {
     }
 
@@ -994,6 +1026,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         // create and set up lower volatility boundary solver:
         auto boundary_solver = std::make_shared<explicit_boundary>(heston_coeff_holder);
+        auto const &weights = std::make_pair(weighted_scheme_cfg_->weight_x(), weighted_scheme_cfg_->weight_y());
+        auto const &weight_values =
+            std::make_pair(weighted_scheme_cfg_->start_x_value(), weighted_scheme_cfg_->start_y_value());
 
         if (is_heat_sourse_set)
         {
@@ -1011,7 +1046,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         else
         {
             loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, traverse_dir, prev_solution, next_solution);
+                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
