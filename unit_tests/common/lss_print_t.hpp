@@ -1705,11 +1705,11 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     auto const &sig_theta = 0.8;
     auto const &rho = 0.6;
     // number of space subdivisions for spot:
-    std::size_t const Sd = 100;
+    std::size_t const Sd = 150;
     // number of space subdivision for volatility:
     std::size_t const Vd = 50;
     // number of time subdivisions:
-    std::size_t const Td = 150;
+    std::size_t const Td = 200;
     // space Spot range:
     range<T> spacex_range(static_cast<T>(50.0), static_cast<T>(200.0));
     // space Vol range:
