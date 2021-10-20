@@ -23,6 +23,7 @@
 #include "sparse_solvers/tridiagonal/sor_solver/lss_sor_solver.hpp"
 #include "sparse_solvers/tridiagonal/sor_solver_cuda/lss_sor_solver_cuda.hpp"
 #include "sparse_solvers/tridiagonal/thomas_lu_solver/lss_thomas_lu_solver.hpp"
+#include "splitting_method/lss_heat_craig_sneyd_method.hpp"
 #include "splitting_method/lss_heat_douglas_rachford_method.hpp"
 #include "splitting_method/lss_heat_splitting_method.hpp"
 
@@ -232,6 +233,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef cuda_solver<memory_space_enum::Device, fp_type, container, allocator> cusolver;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<cusolver>, container, allocator> douglas_rachford_method;
+    typedef heat_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> craig_sneyd_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -288,39 +290,46 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // get propper theta accoring to clients chosen scheme:
-        const fp_type half = static_cast<fp_type>(0.5);
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type half = static_cast<fp_type>(0.5);
+        const fp_type o_three = static_cast<fp_type>(0.3);
+        const fp_type o_eight = static_cast<fp_type>(0.8);
         fp_type theta{};
-        if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+        switch (solver_cfg_->implicit_pde_scheme())
         {
+        case implicit_pde_schemes_enum::Euler:
             theta = one;
-        }
-        else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
-        {
+            break;
+        case implicit_pde_schemes_enum::Theta_30:
+            theta = o_three;
+            break;
+        case implicit_pde_schemes_enum::CrankNicolson:
             theta = half;
-        }
-        else
-        {
-            throw std::exception("Unreachable");
+            break;
+        case implicit_pde_schemes_enum::Theta_80:
+            theta = o_eight;
+            break;
+        default:
+            theta = half;
         }
 
         // create a Heston coefficient holder:
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+            heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
+        auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
+        solver_y->set_factorization(solver_cfg_->tridiagonal_factorization());
+        auto solver_u = std::make_shared<cusolver>(space_y, space_size_y);
+        solver_u->set_factorization(solver_cfg_->tridiagonal_factorization());
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {
             // create and set up the main solvers:
-            auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
-            solver_y->set_factorization(solver_cfg_->tridiagonal_factorization());
-            auto solver_u = std::make_shared<cusolver>(space_y, space_size_y);
-            solver_u->set_factorization(solver_cfg_->tridiagonal_factorization());
             splitting_ptr = std::make_shared<douglas_rachford_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::CraigSneyd)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
@@ -369,6 +378,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<sorcusolver>, container, allocator> douglas_rachford_method;
+    typedef heat_craig_sneyd_method<fp_type, sptr_t<sorcusolver>, container, allocator> craig_sneyd_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -425,39 +435,46 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // get propper theta accoring to clients chosen scheme:
-        const fp_type half = static_cast<fp_type>(0.5);
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type half = static_cast<fp_type>(0.5);
+        const fp_type o_three = static_cast<fp_type>(0.3);
+        const fp_type o_eight = static_cast<fp_type>(0.8);
         fp_type theta{};
-        if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+        switch (solver_cfg_->implicit_pde_scheme())
         {
+        case implicit_pde_schemes_enum::Euler:
             theta = one;
-        }
-        else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
-        {
+            break;
+        case implicit_pde_schemes_enum::Theta_30:
+            theta = o_three;
+            break;
+        case implicit_pde_schemes_enum::CrankNicolson:
             theta = half;
-        }
-        else
-        {
-            throw std::exception("Unreachable");
+            break;
+        case implicit_pde_schemes_enum::Theta_80:
+            theta = o_eight;
+            break;
+        default:
+            theta = half;
         }
 
         // create a Heston coefficient holder:
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+            heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
+        auto solver_y = std::make_shared<sorcusolver>(space_x, space_size_x);
+        solver_y->set_omega(omega_value);
+        auto solver_u = std::make_shared<sorcusolver>(space_y, space_size_y);
+        solver_u->set_omega(omega_value);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {
             // create and set up the main solvers:
-            auto solver_y = std::make_shared<sorcusolver>(space_x, space_size_x);
-            solver_y->set_omega(omega_value);
-            auto solver_u = std::make_shared<sorcusolver>(space_y, space_size_y);
-            solver_u->set_omega(omega_value);
             splitting_ptr = std::make_shared<douglas_rachford_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::CraigSneyd)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
@@ -512,6 +529,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<cusolver>, container, allocator> douglas_rachford_method;
+    typedef heat_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> craig_sneyd_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -568,39 +586,46 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // get propper theta accoring to clients chosen scheme:
-        const fp_type half = static_cast<fp_type>(0.5);
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type half = static_cast<fp_type>(0.5);
+        const fp_type o_three = static_cast<fp_type>(0.3);
+        const fp_type o_eight = static_cast<fp_type>(0.8);
         fp_type theta{};
-        if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+        switch (solver_cfg_->implicit_pde_scheme())
         {
+        case implicit_pde_schemes_enum::Euler:
             theta = one;
-        }
-        else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
-        {
+            break;
+        case implicit_pde_schemes_enum::Theta_30:
+            theta = o_three;
+            break;
+        case implicit_pde_schemes_enum::CrankNicolson:
             theta = half;
-        }
-        else
-        {
-            throw std::exception("Unreachable");
+            break;
+        case implicit_pde_schemes_enum::Theta_80:
+            theta = o_eight;
+            break;
+        default:
+            theta = half;
         }
 
         // create a Heston coefficient holder:
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+            heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
+        auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
+        solver_y->set_factorization(solver_cfg_->tridiagonal_factorization());
+        auto solver_u = std::make_shared<cusolver>(space_y, space_size_y);
+        solver_u->set_factorization(solver_cfg_->tridiagonal_factorization());
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {
             // create and set up the main solvers:
-            auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
-            solver_y->set_factorization(solver_cfg_->tridiagonal_factorization());
-            auto solver_u = std::make_shared<cusolver>(space_y, space_size_y);
-            solver_u->set_factorization(solver_cfg_->tridiagonal_factorization());
             splitting_ptr = std::make_shared<douglas_rachford_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::CraigSneyd)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
@@ -651,6 +676,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<sorsolver>, container, allocator> douglas_rachford_method;
+    typedef heat_craig_sneyd_method<fp_type, sptr_t<sorsolver>, container, allocator> craig_sneyd_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -707,39 +733,46 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // get propper theta accoring to clients chosen scheme:
-        const fp_type half = static_cast<fp_type>(0.5);
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type half = static_cast<fp_type>(0.5);
+        const fp_type o_three = static_cast<fp_type>(0.3);
+        const fp_type o_eight = static_cast<fp_type>(0.8);
         fp_type theta{};
-        if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+        switch (solver_cfg_->implicit_pde_scheme())
         {
+        case implicit_pde_schemes_enum::Euler:
             theta = one;
-        }
-        else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
-        {
+            break;
+        case implicit_pde_schemes_enum::Theta_30:
+            theta = o_three;
+            break;
+        case implicit_pde_schemes_enum::CrankNicolson:
             theta = half;
-        }
-        else
-        {
-            throw std::exception("Unreachable");
+            break;
+        case implicit_pde_schemes_enum::Theta_80:
+            theta = o_eight;
+            break;
+        default:
+            theta = half;
         }
 
         // create a Heston coefficient holder:
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+            heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
+        auto solver_y = std::make_shared<sorsolver>(space_x, space_size_x);
+        solver_y->set_omega(omega_value);
+        auto solver_u = std::make_shared<sorsolver>(space_y, space_size_y);
+        solver_u->set_omega(omega_value);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {
             // create and set up the main solvers:
-            auto solver_y = std::make_shared<sorsolver>(space_x, space_size_x);
-            solver_y->set_omega(omega_value);
-            auto solver_u = std::make_shared<sorsolver>(space_y, space_size_y);
-            solver_u->set_omega(omega_value);
             splitting_ptr = std::make_shared<douglas_rachford_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::CraigSneyd)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
@@ -791,6 +824,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<ds_solver>, container, allocator> douglas_rachford_method;
+    typedef heat_craig_sneyd_method<fp_type, sptr_t<ds_solver>, container, allocator> craig_sneyd_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -847,37 +881,44 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // get propper theta accoring to clients chosen scheme:
-        const fp_type half = static_cast<fp_type>(0.5);
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type half = static_cast<fp_type>(0.5);
+        const fp_type o_three = static_cast<fp_type>(0.3);
+        const fp_type o_eight = static_cast<fp_type>(0.8);
         fp_type theta{};
-        if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+        switch (solver_cfg_->implicit_pde_scheme())
         {
+        case implicit_pde_schemes_enum::Euler:
             theta = one;
-        }
-        else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
-        {
+            break;
+        case implicit_pde_schemes_enum::Theta_30:
+            theta = o_three;
+            break;
+        case implicit_pde_schemes_enum::CrankNicolson:
             theta = half;
-        }
-        else
-        {
-            throw std::exception("Unreachable");
+            break;
+        case implicit_pde_schemes_enum::Theta_80:
+            theta = o_eight;
+            break;
+        default:
+            theta = half;
         }
 
         // create a Heston coefficient holder:
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+            heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
+        // create and set up the main solvers:
+        auto solver_y = std::make_shared<ds_solver>(space_x, space_size_x);
+        auto solver_u = std::make_shared<ds_solver>(space_y, space_size_y);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {
-            // create and set up the main solvers:
-            auto solver_y = std::make_shared<ds_solver>(space_x, space_size_x);
-            auto solver_u = std::make_shared<ds_solver>(space_y, space_size_y);
             splitting_ptr = std::make_shared<douglas_rachford_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::CraigSneyd)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
@@ -928,6 +969,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<tlu_solver>, container, allocator> douglas_rachford_method;
+    typedef heat_craig_sneyd_method<fp_type, sptr_t<tlu_solver>, container, allocator> craig_sneyd_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -984,37 +1026,44 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // get propper theta accoring to clients chosen scheme:
-        const fp_type half = static_cast<fp_type>(0.5);
         const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type half = static_cast<fp_type>(0.5);
+        const fp_type o_three = static_cast<fp_type>(0.3);
+        const fp_type o_eight = static_cast<fp_type>(0.8);
         fp_type theta{};
-        if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+        switch (solver_cfg_->implicit_pde_scheme())
         {
+        case implicit_pde_schemes_enum::Euler:
             theta = one;
-        }
-        else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
-        {
+            break;
+        case implicit_pde_schemes_enum::Theta_30:
+            theta = o_three;
+            break;
+        case implicit_pde_schemes_enum::CrankNicolson:
             theta = half;
-        }
-        else
-        {
-            throw std::exception("Unreachable");
+            break;
+        case implicit_pde_schemes_enum::Theta_80:
+            theta = o_eight;
+            break;
+        default:
+            theta = half;
         }
 
         // create a Heston coefficient holder:
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+            heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
+        // create and set up the main solvers:
+        auto solver_y = std::make_shared<tlu_solver>(space_x, space_size_x);
+        auto solver_u = std::make_shared<tlu_solver>(space_y, space_size_y);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {
-            // create and set up the main solvers:
-            auto solver_y = std::make_shared<tlu_solver>(space_x, space_size_x);
-            auto solver_u = std::make_shared<tlu_solver>(space_y, space_size_y);
             splitting_ptr = std::make_shared<douglas_rachford_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::CraigSneyd)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {

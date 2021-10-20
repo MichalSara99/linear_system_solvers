@@ -92,7 +92,9 @@ enum class flat_matrix_sort_enum
 enum class implicit_pde_schemes_enum
 {
     Euler,
-    CrankNicolson
+    Theta_30,
+    CrankNicolson,
+    Theta_80,
 };
 
 /**

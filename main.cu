@@ -241,8 +241,9 @@ int main(int argc, char const *argv[])
     // testExplPureWaveEquationDirichletBCCUDAHostSolverPrintSurf();
 
     // testImplHestonEquationCUDAQRSolverCrankNicolsonPrint();
-     testImplHestonEquationThomasLUSolverCrankNicolsonPrint();
+    // testImplHestonEquationThomasLUSolverCrankNicolsonPrint();
     //testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();
+     testImplHestonEquationThomasLUSolverCraigSneydCrankNicolsonPrint();
 
 
     // ====================================================================

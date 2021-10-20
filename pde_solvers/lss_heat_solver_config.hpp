@@ -234,6 +234,10 @@ auto host_bwd_tlusolver_cn_solver_config_ptr = std::make_shared<heat_implicit_so
     memory_space_enum::Host, traverse_direction_enum::Backward, tridiagonal_method_enum::ThomasLUSolver,
     factorization_enum::None, implicit_pde_schemes_enum::CrankNicolson);
 
+auto host_bwd_tlusolver_o8_solver_config_ptr = std::make_shared<heat_implicit_solver_config>(
+    memory_space_enum::Host, traverse_direction_enum::Backward, tridiagonal_method_enum::ThomasLUSolver,
+    factorization_enum::None, implicit_pde_schemes_enum::Theta_80);
+
 // =================================================
 // ===== some default explicit solver configs ======
 // =================================================

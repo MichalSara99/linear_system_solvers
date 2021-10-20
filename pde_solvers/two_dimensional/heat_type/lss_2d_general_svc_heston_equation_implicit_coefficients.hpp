@@ -5,6 +5,7 @@
 #include "discretization/lss_discretization.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/lss_splitting_method_config.hpp"
 
 namespace lss_pde_solvers
 {
@@ -21,7 +22,7 @@ template <typename fp_type> struct general_svc_heston_equation_implicit_coeffici
 {
   public:
     // scheme coefficients:
-    fp_type alpha_, beta_, gamma_, delta_, ni_, rho_, h_1_, h_2_, k_;
+    fp_type alpha_, beta_, gamma_, delta_, ni_, rho_, zeta_, h_1_, h_2_, k_;
     std::size_t space_size_x_, space_size_y_;
     range<fp_type> rangex_, rangey_;
     // theta variable:
@@ -39,7 +40,8 @@ template <typename fp_type> struct general_svc_heston_equation_implicit_coeffici
     std::function<fp_type(fp_type, fp_type)> F_;
 
   private:
-    void initialize(pde_discretization_config_2d_ptr<fp_type> const &discretization_config)
+    void initialize(pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                    splitting_method_config_ptr<fp_type> const &splitting_config)
     {
         // get space ranges:
         const auto &spaces = discretization_config->space_range();
@@ -68,6 +70,7 @@ template <typename fp_type> struct general_svc_heston_equation_implicit_coeffici
         delta_ = half * k / h_1;
         ni_ = half * k / h_2;
         rho_ = k;
+        zeta_ = splitting_config->weighting_value();
         h_1_ = h_1;
         h_2_ = h_2;
         k_ = k;
@@ -106,10 +109,11 @@ template <typename fp_type> struct general_svc_heston_equation_implicit_coeffici
   public:
     general_svc_heston_equation_implicit_coefficients(
         heat_data_config_2d_ptr<fp_type> const &heat_data_config,
-        pde_discretization_config_2d_ptr<fp_type> const &discretization_config, fp_type const &theta)
+        pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+        splitting_method_config_ptr<fp_type> const splitting_config, fp_type const &theta)
         : theta_{theta}
     {
-        initialize(discretization_config);
+        initialize(discretization_config, splitting_config);
         initialize_coefficients(heat_data_config);
     }
 };
