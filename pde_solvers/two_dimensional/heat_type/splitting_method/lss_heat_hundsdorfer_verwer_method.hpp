@@ -175,6 +175,9 @@ class implicit_heston_scheme_hv
             auto P = cfs->P_;
             auto Z = cfs->Z_;
             auto C = cfs->C_;
+            auto W = cfs->W_;
+            auto M_tilde = cfs->M_tilde_;
+            auto P_tilde = cfs->P_tilde_;
 
             auto const gamma = cfs->gamma_;
             auto const theta = cfs->theta_;
@@ -188,18 +191,53 @@ class implicit_heston_scheme_hv
             for (std::size_t t = 1; t < N; ++t)
             {
                 x = start_x + static_cast<fp_type>(t) * h_1;
-                solution[t] = (-theta * M(x, y, one) * inhom_input(t - 1, y_index)) +
-                              ((one + theta * Z(x, y, one)) * inhom_input(t, y_index)) -
-                              (theta * P(x, y, one) * inhom_input(t + 1, y_index)) +
-                              (zeta * gamma * C(x, y) *
-                               ((inhom_input_next(t + 1, y_index + 1) - input(t + 1, y_index + 1)) -
-                                (inhom_input_next(t + 1, y_index - 1) - input(t + 1, y_index - 1)) -
-                                (inhom_input_next(t - 1, y_index + 1) - input(t - 1, y_index + 1)) +
-                                (inhom_input_next(t - 1, y_index - 1) - input(t - 1, y_index - 1)))) +
-                              (zeta * (one - theta) *
-                               (M(x, y, one) * (inhom_input_next(t - 1, y_index) - input(t - 1, y_index)) -
-                                Z(x, y, one) * (inhom_input_next(t, y_index) - input(t, y_index)) +
-                                P(x, y, one) * (inhom_input_next(t + 1, y_index) - input(t + 1, y_index))));
+                solution[t] =
+                    (-theta * M(x, y, one) * inhom_input(t - 1, y_index)) +
+                    ((one + theta * Z(x, y, one)) * inhom_input(t, y_index)) -
+                    (theta * P(x, y, one) * inhom_input(t + 1, y_index)) +
+                    (theta * M(x, y, one) * input(t - 1, y_index)) - (theta * Z(x, y, one) * input(t, y_index)) +
+                    (theta * P(x, y, one) * input(t + 1, y_index)) +
+                    (zeta * gamma * C(x, y) *
+                     ((inhom_input_next(t + 1, y_index + 1) - input(t + 1, y_index + 1)) -
+                      (inhom_input_next(t + 1, y_index - 1) - input(t + 1, y_index - 1)) -
+                      (inhom_input_next(t - 1, y_index + 1) - input(t - 1, y_index + 1)) +
+                      (inhom_input_next(t - 1, y_index - 1) - input(t - 1, y_index - 1)))) +
+                    (zeta * (M(x, y, one) * (inhom_input_next(t - 1, y_index) - input(t - 1, y_index)) -
+                             (W(x, y, one) + Z(x, y, one)) * (inhom_input_next(t, y_index) - input(t, y_index)) +
+                             P(x, y, one) * (inhom_input_next(t + 1, y_index) - input(t + 1, y_index)) +
+                             M_tilde(x, y, one) * (inhom_input_next(t, y_index - 1) - input(t, y_index - 1)) +
+                             P_tilde(x, y, one) * (inhom_input_next(t, y_index + 1) - input(t, y_index + 1))));
+            }
+        };
+
+        return scheme_fun;
+    }
+
+    static scheme_function_t const get_intermediate_4()
+    {
+        const fp_type one = static_cast<fp_type>(1.0);
+
+        auto scheme_fun = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfs,
+                              std::size_t const &y_index, fp_type const &y, rcontainer_2d_t const &input,
+                              rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
+                              fp_type const &time, container_t &solution) {
+            auto M = cfs->M_;
+            auto P = cfs->P_;
+            auto Z = cfs->Z_;
+
+            auto const theta = cfs->theta_;
+
+            auto const start_x = cfs->rangex_.lower();
+            auto const h_1 = cfs->h_1_;
+
+            const std::size_t N = solution.size() - 1;
+            fp_type x{};
+            for (std::size_t t = 1; t < N; ++t)
+            {
+                x = start_x + static_cast<fp_type>(t) * h_1;
+                solution[t] = (-theta * M(x, y, one) * input(t - 1, y_index)) +
+                              (theta * Z(x, y, one) * input(t, y_index)) -
+                              (theta * P(x, y, one) * input(t + 1, y_index)) + inhom_input(t, y_index);
             }
         };
 

@@ -39,8 +39,14 @@ Advection equation
 Black-Scholes equation
 ![Black-Scholes equation](/outputs/call_option_price_surface_numerical.png)
 
-Heston equation
-![Heston equation](/outputs/impl_heston_dr_numerical.png)
+Heston equation DR
+![Heston equation DR](/outputs/impl_heston_dr_numerical.png)
+
+Heston equation CS
+![Heston equation CS](/outputs/impl_heston_cs_numerical.png)
+
+Heston equation MCS
+![Heston equation MCS](/outputs/impl_heston_mcs_numerical.png)
 
 SABR equation
 ![SABR equation](/outputs/impl_sabr_dr_numerical.png)
