@@ -1,5 +1,5 @@
-#if !defined(_LSS_HEAT_CRAIG_SNEYD_METHOD_HPP_)
-#define _LSS_HEAT_CRAIG_SNEYD_METHOD_HPP_
+#if !defined(_LSS_HEAT_HUNDSDORFER_VERWER_METHOD_HPP_)
+#define _LSS_HEAT_HUNDSDORFER_VERWER_METHOD_HPP_
 
 #include <functional>
 #include <map>
@@ -35,7 +35,7 @@ using lss_utility::function_2d_sevenlet_t;
 using lss_utility::pair_t;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using implicit_heston_scheme_cs_function_t =
+using implicit_heston_scheme_hv_function_t =
     std::function<void(general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &, std::size_t const &,
                        fp_type const &, container_2d<by_enum::Row, fp_type, container, alloc> const &,
                        container_2d<by_enum::Row, fp_type, container, alloc> const &,
@@ -43,11 +43,11 @@ using implicit_heston_scheme_cs_function_t =
                        container<fp_type, alloc> &)>;
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class implicit_heston_scheme_cs
+class implicit_heston_scheme_hv
 {
     typedef container<fp_type, allocator> container_t;
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
-    typedef implicit_heston_scheme_cs_function_t<container, fp_type, allocator> scheme_function_t;
+    typedef implicit_heston_scheme_hv_function_t<container, fp_type, allocator> scheme_function_t;
 
   public:
     static scheme_function_t const get_intermediate_1(bool is_homogeneus)
@@ -188,14 +188,18 @@ class implicit_heston_scheme_cs
             for (std::size_t t = 1; t < N; ++t)
             {
                 x = start_x + static_cast<fp_type>(t) * h_1;
-                solution[t] = (-theta * M(x, y, one) * input(t - 1, y_index)) +
-                              (theta * Z(x, y, one) * input(t, y_index)) -
-                              (theta * P(x, y, one) * input(t + 1, y_index)) + (inhom_input(t, y_index)) +
+                solution[t] = (-theta * M(x, y, one) * inhom_input(t - 1, y_index)) +
+                              ((one + theta * Z(x, y, one)) * inhom_input(t, y_index)) -
+                              (theta * P(x, y, one) * inhom_input(t + 1, y_index)) +
                               (zeta * gamma * C(x, y) *
                                ((inhom_input_next(t + 1, y_index + 1) - input(t + 1, y_index + 1)) -
                                 (inhom_input_next(t + 1, y_index - 1) - input(t + 1, y_index - 1)) -
                                 (inhom_input_next(t - 1, y_index + 1) - input(t - 1, y_index + 1)) +
-                                (inhom_input_next(t - 1, y_index - 1) - input(t - 1, y_index - 1))));
+                                (inhom_input_next(t - 1, y_index - 1) - input(t - 1, y_index - 1)))) +
+                              (zeta * (one - theta) *
+                               (M(x, y, one) * (inhom_input_next(t - 1, y_index) - input(t - 1, y_index)) -
+                                Z(x, y, one) * (inhom_input_next(t, y_index) - input(t, y_index)) +
+                                P(x, y, one) * (inhom_input_next(t + 1, y_index) - input(t + 1, y_index))));
             }
         };
 
@@ -236,11 +240,11 @@ class implicit_heston_scheme_cs
 };
 
 /**
-    heat_craig_sneyd_method object
+    heat_hundsdorfer_verwer_method object
  */
 template <typename fp_type, typename solver, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class heat_craig_sneyd_method : public heat_splitting_method<fp_type, container, allocator>
+class heat_hundsdorfer_verwer_method : public heat_splitting_method<fp_type, container, allocator>
 {
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
     typedef container_2d<by_enum::Column, fp_type, container, allocator> ccontainer_2d_t;
@@ -253,7 +257,7 @@ class heat_craig_sneyd_method : public heat_splitting_method<fp_type, container,
     // scheme coefficients:
     general_svc_heston_equation_implicit_coefficients_ptr<fp_type> coefficients_;
 
-    explicit heat_craig_sneyd_method() = delete;
+    explicit heat_hundsdorfer_verwer_method() = delete;
 
     void initialize()
     {
@@ -288,21 +292,22 @@ class heat_craig_sneyd_method : public heat_splitting_method<fp_type, container,
     }
 
   public:
-    explicit heat_craig_sneyd_method(solver const &solvery_ptr, solver const &solveru_ptr,
-                                     general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &coefficients)
+    explicit heat_hundsdorfer_verwer_method(
+        solver const &solvery_ptr, solver const &solveru_ptr,
+        general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &coefficients)
         : solvery_ptr_{solvery_ptr}, solveru_ptr_{solveru_ptr}, coefficients_{coefficients}
     {
         initialize();
     }
 
-    ~heat_craig_sneyd_method()
+    ~heat_hundsdorfer_verwer_method()
     {
     }
 
-    heat_craig_sneyd_method(heat_craig_sneyd_method const &) = delete;
-    heat_craig_sneyd_method(heat_craig_sneyd_method &&) = delete;
-    heat_craig_sneyd_method &operator=(heat_craig_sneyd_method const &) = delete;
-    heat_craig_sneyd_method &operator=(heat_craig_sneyd_method &&) = delete;
+    heat_hundsdorfer_verwer_method(heat_hundsdorfer_verwer_method const &) = delete;
+    heat_hundsdorfer_verwer_method(heat_hundsdorfer_verwer_method &&) = delete;
+    heat_hundsdorfer_verwer_method &operator=(heat_hundsdorfer_verwer_method const &) = delete;
+    heat_hundsdorfer_verwer_method &operator=(heat_hundsdorfer_verwer_method &&) = delete;
 
     void solve(container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
@@ -319,13 +324,13 @@ class heat_craig_sneyd_method : public heat_splitting_method<fp_type, container,
 };
 
 template <typename fp_type, typename solver, template <typename, typename> typename container, typename allocator>
-void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
+void heat_hundsdorfer_verwer_method<fp_type, solver, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair, boundary_2d_pair<fp_type> const &vertical_boundary_pair,
     fp_type const &time, std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
     container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
-    typedef implicit_heston_scheme_cs<fp_type, container, allocator> heston_scheme;
+    typedef implicit_heston_scheme_hv<fp_type, container, allocator> heston_scheme;
 
     // 2D container for intermediate solution Y_1:
     ccontainer_2d_t inter_solution_1(coefficients_->space_size_x_, coefficients_->space_size_y_, fp_type{});
@@ -422,7 +427,7 @@ void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
 }
 
 template <typename fp_type, typename solver, template <typename, typename> typename container, typename allocator>
-void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
+void heat_hundsdorfer_verwer_method<fp_type, solver, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair, boundary_2d_pair<fp_type> const &vertical_boundary_pair,
     fp_type const &time, std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
@@ -434,4 +439,4 @@ void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_HEAT_CRAIG_SNEYD_METHOD_HPP_
+#endif ///_LSS_HEAT_HUNDSDORFER_VERWER_METHOD_HPP_

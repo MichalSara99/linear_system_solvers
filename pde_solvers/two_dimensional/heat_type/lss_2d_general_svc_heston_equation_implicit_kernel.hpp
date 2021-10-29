@@ -25,6 +25,8 @@
 #include "sparse_solvers/tridiagonal/thomas_lu_solver/lss_thomas_lu_solver.hpp"
 #include "splitting_method/lss_heat_craig_sneyd_method.hpp"
 #include "splitting_method/lss_heat_douglas_rachford_method.hpp"
+#include "splitting_method/lss_heat_hundsdorfer_verwer_method.hpp"
+#include "splitting_method/lss_heat_modified_craig_sneyd_method.hpp"
 #include "splitting_method/lss_heat_splitting_method.hpp"
 
 namespace lss_pde_solvers
@@ -234,6 +236,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     typedef cuda_solver<memory_space_enum::Device, fp_type, container, allocator> cusolver;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<cusolver>, container, allocator> douglas_rachford_method;
     typedef heat_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> craig_sneyd_method;
+    typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> m_craig_sneyd_method;
+    typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<cusolver>, container, allocator> hundsdorfer_verwer_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -331,9 +335,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         {
             splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
+        else if (splitting_cfg_->splitting_method() == splitting_method_enum::ModifiedCraigSneyd)
+        {
+            splitting_ptr = std::make_shared<m_craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
+        }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<hundsdorfer_verwer_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else
         {
@@ -379,6 +387,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<sorcusolver>, container, allocator> douglas_rachford_method;
     typedef heat_craig_sneyd_method<fp_type, sptr_t<sorcusolver>, container, allocator> craig_sneyd_method;
+    typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<sorcusolver>, container, allocator> m_craig_sneyd_method;
+    typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<sorcusolver>, container, allocator>
+        hundsdorfer_verwer_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -476,9 +487,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         {
             splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
+        else if (splitting_cfg_->splitting_method() == splitting_method_enum::ModifiedCraigSneyd)
+        {
+            splitting_ptr = std::make_shared<m_craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
+        }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<hundsdorfer_verwer_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else
         {
@@ -530,6 +545,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<cusolver>, container, allocator> douglas_rachford_method;
     typedef heat_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> craig_sneyd_method;
+    typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> m_craig_sneyd_method;
+    typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<cusolver>, container, allocator> hundsdorfer_verwer_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -627,9 +644,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         {
             splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
+        else if (splitting_cfg_->splitting_method() == splitting_method_enum::ModifiedCraigSneyd)
+        {
+            splitting_ptr = std::make_shared<m_craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
+        }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<hundsdorfer_verwer_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else
         {
@@ -677,6 +698,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<sorsolver>, container, allocator> douglas_rachford_method;
     typedef heat_craig_sneyd_method<fp_type, sptr_t<sorsolver>, container, allocator> craig_sneyd_method;
+    typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<sorsolver>, container, allocator> m_craig_sneyd_method;
+    typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<sorsolver>, container, allocator> hundsdorfer_verwer_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -774,9 +797,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         {
             splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
+        else if (splitting_cfg_->splitting_method() == splitting_method_enum::ModifiedCraigSneyd)
+        {
+            splitting_ptr = std::make_shared<m_craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
+        }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<hundsdorfer_verwer_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else
         {
@@ -825,6 +852,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<ds_solver>, container, allocator> douglas_rachford_method;
     typedef heat_craig_sneyd_method<fp_type, sptr_t<ds_solver>, container, allocator> craig_sneyd_method;
+    typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<ds_solver>, container, allocator> m_craig_sneyd_method;
+    typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<ds_solver>, container, allocator> hundsdorfer_verwer_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -920,9 +949,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         {
             splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
+        else if (splitting_cfg_->splitting_method() == splitting_method_enum::ModifiedCraigSneyd)
+        {
+            splitting_ptr = std::make_shared<m_craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
+        }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<hundsdorfer_verwer_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else
         {
@@ -970,6 +1003,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef container_3d<by_enum::Row, fp_type, container, allocator> rcontainer_3d_t;
     typedef heat_douglas_rachford_method<fp_type, sptr_t<tlu_solver>, container, allocator> douglas_rachford_method;
     typedef heat_craig_sneyd_method<fp_type, sptr_t<tlu_solver>, container, allocator> craig_sneyd_method;
+    typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<tlu_solver>, container, allocator> m_craig_sneyd_method;
+    typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<tlu_solver>, container, allocator> hundsdorfer_verwer_method;
     typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
@@ -1065,9 +1100,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         {
             splitting_ptr = std::make_shared<craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
         }
+        else if (splitting_cfg_->splitting_method() == splitting_method_enum::ModifiedCraigSneyd)
+        {
+            splitting_ptr = std::make_shared<m_craig_sneyd_method>(solver_y, solver_u, heston_coeff_holder);
+        }
         else if (splitting_cfg_->splitting_method() == splitting_method_enum::HundsdorferVerwer)
         {
-            throw std::exception("Not yet implemented");
+            splitting_ptr = std::make_shared<hundsdorfer_verwer_method>(solver_y, solver_u, heston_coeff_holder);
         }
         else
         {

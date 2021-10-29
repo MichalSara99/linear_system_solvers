@@ -36,6 +36,7 @@ enum class splitting_method_enum
 {
     DouglasRachford,
     CraigSneyd,
+    ModifiedCraigSneyd,
     HundsdorferVerwer,
 };
 

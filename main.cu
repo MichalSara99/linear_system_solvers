@@ -242,9 +242,11 @@ int main(int argc, char const *argv[])
 
     // testImplHestonEquationCUDAQRSolverCrankNicolsonPrint();
     // testImplHestonEquationThomasLUSolverCrankNicolsonPrint();
-    //testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();
-     testImplHestonEquationThomasLUSolverCraigSneydCrankNicolsonPrint();
-
+    // testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();
+    // testImplHestonEquationThomasLUSolverDouglasRachfordCrankNicolsonPrint();
+    // testImplHestonEquationThomasLUSolverCraigSneydCrankNicolsonPrint();
+    testImplHestonEquationThomasLUSolverModCraigSneydCrankNicolsonPrint();
+    // testImplHestonEquationThomasLUSolverHundsdorferVerwerCrankNicolsonPrint();
 
     // ====================================================================
 

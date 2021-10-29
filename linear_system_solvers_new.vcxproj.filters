@@ -444,6 +444,12 @@
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_craig_sneyd_method.hpp">
       <Filter>pde_solvers\two_dimensional\heat_type\splitting_method</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_hundsdorfer_verwer_method.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\splitting_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_modified_craig_sneyd_method.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\splitting_method</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
