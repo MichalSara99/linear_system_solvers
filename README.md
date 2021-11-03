@@ -48,6 +48,9 @@ Heston equation CS
 Heston equation MCS
 ![Heston equation MCS](/outputs/impl_heston_mcs_numerical.png)
 
+Heston equation HV
+![Heston equation HV](/outputs/impl_heston_hv_numerical.png)
+
 SABR equation
 ![SABR equation](/outputs/impl_sabr_dr_numerical.png)
 
