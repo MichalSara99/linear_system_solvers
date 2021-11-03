@@ -2289,23 +2289,23 @@ template <typename T> void testImplHestonEquationThomasLUSolverHundsdorferVerwer
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heston_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
-    auto const &strike = 10.0;
+    auto const &strike = 100.0;
     auto const &maturity = 1.0;
     auto const &rate = 0.03;
-    auto const &sig_sig = 0.3;
-    auto const &sig_kappa = 2.0;
-    auto const &sig_theta = 0.2;
-    auto const &rho = 0.1;
+    auto const &sig_sig = 0.041;
+    auto const &sig_kappa = 3.0;
+    auto const &sig_theta = 0.8;
+    auto const &rho = 0.6;
     // number of space subdivisions for spot:
-    std::size_t const Sd = 40;
+    std::size_t const Sd = 150;
     // number of space subdivision for volatility:
-    std::size_t const Vd = 40;
+    std::size_t const Vd = 50;
     // number of time subdivisions:
-    std::size_t const Td = 100;
+    std::size_t const Td = 200;
     // space Spot range:
-    range<T> spacex_range(static_cast<T>(0.0), static_cast<T>(20.0));
+    range<T> spacex_range(static_cast<T>(50.0), static_cast<T>(200.0));
     // space Vol range:
-    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.2));
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:
