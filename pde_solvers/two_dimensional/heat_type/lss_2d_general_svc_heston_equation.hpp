@@ -12,6 +12,9 @@
 #include "containers/lss_container_3d.hpp"
 //#include "lss_general_svc_heat_equation_explicit_kernel.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "discretization/lss_grid.hpp"
+#include "discretization/lss_grid_config.hpp"
+#include "discretization/lss_grid_config_hints.hpp"
 #include "lss_2d_general_svc_heston_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
@@ -81,6 +84,7 @@ class general_svc_heston_equation
     boundary_2d_pair<fp_type> boundary_pair_hor_;
     splitting_method_config_ptr<fp_type> splitting_method_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
+    grid_config_hints_2d_ptr<fp_type> grid_hints_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
@@ -108,6 +112,7 @@ class general_svc_heston_equation
         LSS_VERIFY(splitting_method_cfg_, "splitting_method_config must not be null");
         LSS_VERIFY(weighted_scheme_cfg_, "weighted_scheme_config must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
+        LSS_VERIFY(grid_hints_cfg_, "grid_config_hints must not be null");
         if (!solver_config_details_.empty())
         {
             auto const &it = solver_config_details_.find("sor_omega");
@@ -123,13 +128,14 @@ class general_svc_heston_equation
         boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
         splitting_method_config_ptr<fp_type> const &splitting_method_config,
         weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
+        grid_config_hints_2d_ptr<fp_type> const &grid_config_hints,
         heat_implicit_solver_config_ptr const &solver_config =
             default_heat_solver_configs::host_fwd_dssolver_euler_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           splitting_method_cfg_{splitting_method_config}, weighted_scheme_cfg_{weighted_scheme_config},
-          solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
+          grid_hints_cfg_{grid_config_hints}, solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
     {
         initialize();
     }
@@ -198,6 +204,22 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
     const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
     // get heat_source:
     auto const &heat_source = heat_data_cfg_->heat_source();
+    // grid:
+    grid_config_2d_ptr<fp_type> grid_cfg;
+    if (grid_hints_cfg_->grid() == grid_enum::Uniform)
+    {
+        grid_cfg = std::make_shared<uniform_grid_config_2d<fp_type>>(discretization_cfg_);
+    }
+    else if (grid_hints_cfg_->grid() == grid_enum::Nonuniform)
+    {
+        grid_cfg = std::make_shared<nonuniform_grid_config_2d<fp_type>>(
+            discretization_cfg_, grid_hints_cfg_->strike(), grid_hints_cfg_->p_scale(), grid_hints_cfg_->c_scale(),
+            grid_hints_cfg_->d_scale());
+    }
+    else
+    {
+        throw std::exception("Unreachable");
+    }
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
@@ -208,7 +230,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 dev_cu_solver;
 
             dev_cu_solver solver(boundary_ver_, boundary_pair_hor_, heat_data_cfg_, discretization_cfg_,
-                                 splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_);
+                                 splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = prev_sol;
             // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
@@ -222,7 +244,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
             dev_sor_solver solver(boundary_ver_, boundary_pair_hor_, heat_data_cfg_, discretization_cfg_,
-                                  splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_);
+                                  splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             solution = prev_sol;
             // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
@@ -241,7 +263,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 host_cu_solver;
 
             host_cu_solver solver(boundary_ver_, boundary_pair_hor_, heat_data_cfg_, discretization_cfg_,
-                                  splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_);
+                                  splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
             // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
@@ -255,7 +277,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
             host_sor_solver solver(boundary_ver_, boundary_pair_hor_, heat_data_cfg_, discretization_cfg_,
-                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_);
+                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             solution = next_sol;
             // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
@@ -266,7 +288,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
             host_dss_solver solver(boundary_ver_, boundary_pair_hor_, heat_data_cfg_, discretization_cfg_,
-                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_);
+                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
             // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
@@ -277,7 +299,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
             host_lus_solver solver(boundary_ver_, boundary_pair_hor_, heat_data_cfg_, discretization_cfg_,
-                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_);
+                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
             // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());

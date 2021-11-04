@@ -12,6 +12,8 @@
 #include "containers/lss_container_2d.hpp"
 #include "containers/lss_container_3d.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "discretization/lss_grid.hpp"
+#include "discretization/lss_grid_config.hpp"
 #include "lss_heat_splitting_method.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
@@ -35,12 +37,11 @@ using lss_utility::function_2d_sevenlet_t;
 using lss_utility::pair_t;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using implicit_heston_scheme_function_t =
-    std::function<void(general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &, std::size_t const &,
-                       fp_type const &, container_2d<by_enum::Row, fp_type, container, alloc> const &,
-                       container_2d<by_enum::Row, fp_type, container, alloc> const &,
-                       container_2d<by_enum::Row, fp_type, container, alloc> const &, fp_type const &,
-                       container<fp_type, alloc> &)>;
+using implicit_heston_scheme_function_t = std::function<void(
+    general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &, grid_config_2d_ptr<fp_type> const &,
+    std::size_t const &, fp_type const &, container_2d<by_enum::Row, fp_type, container, alloc> const &,
+    container_2d<by_enum::Row, fp_type, container, alloc> const &,
+    container_2d<by_enum::Row, fp_type, container, alloc> const &, fp_type const &, container<fp_type, alloc> &)>;
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 class implicit_heston_scheme
@@ -58,9 +59,9 @@ class implicit_heston_scheme
         const fp_type one = static_cast<fp_type>(1.0);
 
         auto scheme_fun_h = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfs,
-                                std::size_t const &y_index, fp_type const &y, rcontainer_2d_t const &input,
-                                rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
-                                fp_type const &time, container_t &solution) {
+                                grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
+                                fp_type const &y, rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
+                                rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
             auto M = cfs->M_;
             auto M_tilde = cfs->M_tilde_;
             auto P = cfs->P_;
@@ -71,9 +72,6 @@ class implicit_heston_scheme
 
             auto const gamma = cfs->gamma_;
             auto const theta = cfs->theta_;
-
-            auto const start_x = cfs->rangex_.lower();
-            auto const h_1 = cfs->h_1_;
 
             auto const v_x = weight_values.first;
             auto const v_y = weight_values.second;
@@ -86,7 +84,7 @@ class implicit_heston_scheme
             fp_type wg_x{};
             for (std::size_t t = 1; t < N; ++t)
             {
-                x = start_x + static_cast<fp_type>(t) * h_1;
+                x = grid_2d<fp_type>::value_1(grid_cfg, t);
                 wg_x = (x - v_x) <= zero ? one : w_x;
                 solution[t] =
                     (gamma * C(x, y) * input(t - 1, y_index - 1)) +
@@ -99,9 +97,9 @@ class implicit_heston_scheme
             }
         };
         auto scheme_fun_nh = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfs,
-                                 std::size_t const &y_index, fp_type const &y, rcontainer_2d_t const &input,
-                                 rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
-                                 fp_type const &time, container_t &solution) {
+                                 grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
+                                 fp_type const &y, rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
+                                 rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
             auto M = cfs->M_;
             auto M_tilde = cfs->M_tilde_;
             auto P = cfs->P_;
@@ -114,9 +112,6 @@ class implicit_heston_scheme
             auto const theta = cfs->theta_;
             auto const rho = cfs->rho_;
 
-            auto const start_x = cfs->rangex_.lower();
-            auto const h_1 = cfs->h_1_;
-
             auto const v_x = weight_values.first;
             auto const v_y = weight_values.second;
             auto const w_x = weights.first;
@@ -128,7 +123,7 @@ class implicit_heston_scheme
             fp_type wg_x{};
             for (std::size_t t = 1; t < N; ++t)
             {
-                x = start_x + static_cast<fp_type>(t) * h_1;
+                x = grid_2d<fp_type>::value_1(grid_cfg, t);
                 wg_x = (x - v_x) <= zero ? one : w_x;
                 solution[t] =
                     (gamma * C(x, y) * input(t - 1, y_index - 1)) +
@@ -159,17 +154,14 @@ class implicit_heston_scheme
         const fp_type one = static_cast<fp_type>(1.0);
 
         auto scheme_fun = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfs,
-                              std::size_t const &x_index, fp_type const &x, rcontainer_2d_t const &input,
-                              rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
-                              fp_type const &time, container_t &solution) {
+                              grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &x_index, fp_type const &x,
+                              rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
+                              rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
             auto const M_tilde = cfs->M_tilde_;
             auto const P_tilde = cfs->P_tilde_;
             auto const W = cfs->W_;
 
             auto const theta = cfs->theta_;
-
-            auto const start_y = cfs->rangey_.lower();
-            auto const h_2 = cfs->h_2_;
 
             auto const v_y = weight_values.second;
             auto const w_y = weights.second;
@@ -179,7 +171,7 @@ class implicit_heston_scheme
             fp_type wg_y{};
             for (std::size_t t = 1; t < N; ++t)
             {
-                y = start_y + static_cast<fp_type>(t) * h_2;
+                y = grid_2d<fp_type>::value_2(grid_cfg, t);
                 wg_y = (y - v_y) <= zero ? one : w_y;
                 solution[t] = (-theta * M_tilde(x, y, wg_y) * input(x_index, t - 1)) +
                               (theta * W(x, y, wg_y) * input(x_index, t)) -
@@ -208,6 +200,7 @@ class heat_douglas_rachford_method : public heat_splitting_method<fp_type, conta
     solver solveru_ptr_;
     // scheme coefficients:
     general_svc_heston_equation_implicit_coefficients_ptr<fp_type> coefficients_;
+    grid_config_2d_ptr<fp_type> grid_cfg_;
 
     explicit heat_douglas_rachford_method() = delete;
 
@@ -220,12 +213,11 @@ class heat_douglas_rachford_method : public heat_splitting_method<fp_type, conta
     {
         fp_type x{};
         fp_type w{};
-        const fp_type start_x = coefficients_->rangex_.lower();
         const fp_type one = static_cast<fp_type>(1.0);
         const fp_type zero = static_cast<fp_type>(0.0);
         for (std::size_t t = 0; t < low.size(); ++t)
         {
-            x = start_x + static_cast<fp_type>(t) * coefficients_->h_1_;
+            x = grid_2d<fp_type>::value_1(grid_cfg_, t);
             w = (x - v_x) <= zero ? one : w_x;
             low[t] = (-coefficients_->theta_ * coefficients_->M_(x, y, w));
             diag[t] = (one + coefficients_->theta_ * coefficients_->Z_(x, y, w));
@@ -238,12 +230,11 @@ class heat_douglas_rachford_method : public heat_splitting_method<fp_type, conta
     {
         fp_type y{};
         fp_type w{};
-        fp_type start_y = coefficients_->rangey_.lower();
         const fp_type one = static_cast<fp_type>(1.0);
         const fp_type zero = static_cast<fp_type>(0.0);
         for (std::size_t t = 0; t < low.size(); ++t)
         {
-            y = start_y + static_cast<fp_type>(t) * coefficients_->h_2_;
+            y = grid_2d<fp_type>::value_2(grid_cfg_, t);
             w = (y - v_y) <= zero ? one : w_y;
             low[t] = (-coefficients_->theta_ * coefficients_->M_tilde_(x, y, w));
             diag[t] = (one + coefficients_->theta_ * coefficients_->W_(x, y, w));
@@ -254,8 +245,9 @@ class heat_douglas_rachford_method : public heat_splitting_method<fp_type, conta
   public:
     explicit heat_douglas_rachford_method(
         solver const &solvery_ptr, solver const &solveru_ptr,
-        general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &coefficients)
-        : solvery_ptr_{solvery_ptr}, solveru_ptr_{solveru_ptr}, coefficients_{coefficients}
+        general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &coefficients,
+        grid_config_2d_ptr<fp_type> const &grid_config)
+        : solvery_ptr_{solvery_ptr}, solveru_ptr_{solveru_ptr}, coefficients_{coefficients}, grid_cfg_{grid_config}
     {
         initialize();
     }
@@ -310,12 +302,12 @@ void heat_douglas_rachford_method<fp_type, solver, container, allocator>::solve(
     // get the right-hand side of the scheme:
     auto scheme_y = heston_scheme::get_intermediate(weights, weight_values, true);
     fp_type y{};
-    fp_type start_y{coefficients_->rangey_.lower()};
+
     for (std::size_t j = 1; j < coefficients_->space_size_y_ - 1; ++j)
     {
-        y = start_y + static_cast<fp_type>(j) * coefficients_->h_2_;
+        y = grid_2d<fp_type>::value_2(grid_cfg_, j);
         split_0(y, x_val, w_x, low, diag, high);
-        scheme_y(coefficients_, j, y, prev_solution, curr_source, curr_source, time, rhs);
+        scheme_y(coefficients_, grid_cfg_, j, y, prev_solution, curr_source, curr_source, time, rhs);
         solvery_ptr_->set_diagonals(low, diag, high);
         solvery_ptr_->set_rhs(rhs);
         solvery_ptr_->solve(horizontal_boundary_pair, solution_v, time, y);
@@ -332,13 +324,12 @@ void heat_douglas_rachford_method<fp_type, solver, container, allocator>::solve(
     // get the right-hand side of the scheme:
     auto scheme_u = heston_scheme::get(weights, weight_values);
     fp_type x{};
-    fp_type start_x{coefficients_->rangex_.lower()};
 
     for (std::size_t i = 1; i < coefficients_->space_size_x_ - 1; ++i)
     {
-        x = start_x + static_cast<fp_type>(i) * coefficients_->h_1_;
+        x = grid_2d<fp_type>::value_1(grid_cfg_, i);
         split_1(x, y_val, w_y, low, diag, high);
-        scheme_u(coefficients_, i, x, prev_solution, inter_solution, curr_source, time, rhs);
+        scheme_u(coefficients_, grid_cfg_, i, x, prev_solution, inter_solution, curr_source, time, rhs);
         solveru_ptr_->set_diagonals(low, diag, high);
         solveru_ptr_->set_rhs(rhs);
         solveru_ptr_->solve(vertical_boundary_pair, solution_v, time, x);

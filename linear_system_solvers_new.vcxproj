@@ -37,6 +37,9 @@
     <ClInclude Include="dense_solvers\lss_dense_solvers_cuda.hpp" />
     <ClInclude Include="dense_solvers\lss_dense_solvers_policy.hpp" />
     <ClInclude Include="discretization\lss_discretization.hpp" />
+    <ClInclude Include="discretization\lss_grid.hpp" />
+    <ClInclude Include="discretization\lss_grid_config.hpp" />
+    <ClInclude Include="discretization\lss_grid_config_hints.hpp" />
     <ClInclude Include="ode_solvers\lss_ode_data_config.hpp" />
     <ClInclude Include="ode_solvers\lss_ode_discretization_config.hpp" />
     <ClInclude Include="ode_solvers\lss_ode_solver_config.hpp" />
@@ -178,7 +181,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalCompilerOptions>/bigobj</AdditionalCompilerOptions>
+      <AdditionalCompilerOptions>/bigobj /Zm2000</AdditionalCompilerOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -199,7 +202,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalCompilerOptions>/bigobj</AdditionalCompilerOptions>
+      <AdditionalCompilerOptions>/bigobj /Zm2000</AdditionalCompilerOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

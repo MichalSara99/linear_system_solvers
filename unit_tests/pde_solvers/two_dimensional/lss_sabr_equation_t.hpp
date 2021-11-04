@@ -20,6 +20,7 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolson()
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -104,13 +105,15 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolson()
     // splitting method configuration:
     auto const &splitting_config_ptr =
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
-
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, host_bwd_dssolver_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         host_bwd_dssolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:

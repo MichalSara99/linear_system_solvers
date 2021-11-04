@@ -1547,6 +1547,7 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1628,10 +1629,13 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, dev_bwd_cusolver_qr_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         dev_bwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -1665,6 +1669,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1746,10 +1751,13 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>(T(0.0), sig_theta, T(1.0), T(0.90));
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, host_bwd_tlusolver_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         host_bwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -1783,6 +1791,7 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolsonPri
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1869,10 +1878,13 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolsonPri
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, host_bwd_dssolver_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         host_bwd_dssolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -1906,6 +1918,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverDouglasRachfordCr
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1987,9 +2000,13 @@ template <typename T> void testImplHestonEquationThomasLUSolverDouglasRachfordCr
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford, T{0.8});
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, host_bwd_tlusolver_o8_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         host_bwd_tlusolver_o8_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -2023,6 +2040,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCraigSneydCrankNi
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -2104,9 +2122,13 @@ template <typename T> void testImplHestonEquationThomasLUSolverCraigSneydCrankNi
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::CraigSneyd, T{0.8});
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, host_bwd_tlusolver_o8_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         host_bwd_tlusolver_o8_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -2140,6 +2162,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverModCraigSneydCran
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -2221,9 +2244,13 @@ template <typename T> void testImplHestonEquationThomasLUSolverModCraigSneydCran
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::ModifiedCraigSneyd, T{0.5});
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, host_bwd_tlusolver_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         host_bwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -2257,6 +2284,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverHundsdorferVerwer
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
+    using lss_pde_solvers::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -2338,9 +2366,13 @@ template <typename T> void testImplHestonEquationThomasLUSolverHundsdorferVerwer
         std::make_shared<splitting_method_config<T>>(splitting_method_enum::HundsdorferVerwer, T{0.5});
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
-                         splitting_config_ptr, weighted_config_ptr, host_bwd_tlusolver_cn_solver_config_ptr);
+                         splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
+                         host_bwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:

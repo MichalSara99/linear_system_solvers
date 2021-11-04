@@ -61,6 +61,15 @@ enum class dimension_enum
 };
 
 /**
+    grid_enum
+ */
+enum class grid_enum
+{
+    Uniform,
+    Nonuniform,
+};
+
+/**
     traverse_direction_enum
  */
 enum class traverse_direction_enum
