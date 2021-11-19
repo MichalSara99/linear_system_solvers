@@ -5,9 +5,13 @@
 #include <map>
 
 #include "boundaries/lss_boundary.hpp"
+#include "common/lss_enumerations.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "discretization/lss_grid.hpp"
+#include "discretization/lss_grid_config.hpp"
+#include "discretization/lss_grid_config_hints.hpp"
 #include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
 #include "lss_1d_general_svc_heat_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
@@ -22,6 +26,10 @@ namespace one_dimensional
 using lss_boundary::boundary_1d_pair;
 using lss_boundary::boundary_1d_ptr;
 using lss_containers::container_2d;
+using lss_enumerations::grid_enum;
+using lss_grids::grid_config_hints_1d_ptr;
+using lss_grids::nonuniform_grid_config_1d;
+using lss_grids::uniform_grid_config_1d;
 
 namespace implicit_solvers
 {
@@ -54,6 +62,7 @@ class general_svc_heat_equation
     boundary_1d_pair<fp_type> boundary_pair_;
     heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    grid_config_hints_1d_ptr<fp_type> grid_hints_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
@@ -66,6 +75,7 @@ class general_svc_heat_equation
         LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
         LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
+        LSS_VERIFY(grid_hints_cfg_, "grid_config_hints must not be null");
         if (!solver_config_details_.empty())
         {
             auto const &it = solver_config_details_.find("sor_omega");
@@ -77,12 +87,12 @@ class general_svc_heat_equation
     explicit general_svc_heat_equation(
         heat_data_config_1d_ptr<fp_type> const &heat_data_config,
         pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-        boundary_1d_pair<fp_type> const &boundary_pair,
+        boundary_1d_pair<fp_type> const &boundary_pair, grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
         heat_implicit_solver_config_ptr const &solver_config =
             default_heat_solver_configs::host_fwd_dssolver_euler_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
-          solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
+          grid_hints_cfg_{grid_config_hints}, solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
     {
         initialize();
     }
@@ -129,58 +139,26 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     const std::size_t space_size = discretization_cfg_->number_of_space_points();
     // This is the proper size of the container:
     LSS_ASSERT(solution.size() == space_size, "The input solution container must have the correct size");
-    // calculate scheme coefficients:
-    const fp_type one = static_cast<fp_type>(1.0);
-    const fp_type two = static_cast<fp_type>(2.0);
-    const fp_type half = static_cast<fp_type>(0.5);
-    const fp_type lambda = k / (h * h);
-    const fp_type gamma = k / (two * h);
-    const fp_type delta = half * k;
-    // create container to carry previous solution:
-    container_t prev_sol(space_size, fp_type{});
-    // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
-    // since coefficients are different in space :
-    container_t low(space_size, fp_type{});
-    container_t diag(space_size, fp_type{});
-    container_t up(space_size, fp_type{});
-    // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
-    // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
-    // wrap up the functions into tuple:
-    auto const &fun_triplet = std::make_tuple(A, B, D);
-    // get propper theta accoring to clients chosen scheme:
-    fp_type theta{};
-    if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+    grid_config_1d_ptr<fp_type> grid_cfg;
+    if (grid_hints_cfg_->grid() == grid_enum::Uniform)
     {
-        theta = one;
+        grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
     }
-    else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
+    else if (grid_hints_cfg_->grid() == grid_enum::Nonuniform)
     {
-        theta = half;
+        grid_cfg = std::make_shared<nonuniform_grid_config_1d<fp_type>>(
+            discretization_cfg_, grid_hints_cfg_->strike(), grid_hints_cfg_->p_scale(), grid_hints_cfg_->c_scale());
     }
     else
     {
         throw std::exception("Unreachable");
     }
-    fp_type m{};
-    for (std::size_t t = 0; t < low.size(); ++t)
-    {
-        m = static_cast<fp_type>(t);
-        low[t] = -one * A(m * h) * theta;
-        diag[t] = (one + two * B(m * h) * theta);
-        up[t] = -one * D(m * h) * theta;
-    }
-    // wrap up the diagonals into tuple:
-    auto const &diag_triplet = std::make_tuple(low, diag, up);
-    container_t rhs(space_size, fp_type{});
-    // create container to carry new solution:
+    // create container to carry previous solution:
+    container_t prev_sol(space_size, fp_type{});
+    //  create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
+    // discretize initial condition
+    d_1d::of_function(grid_cfg, heat_data_cfg_->initial_condition(), prev_sol);
     // get heat_source:
     const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
     // get heat_source:
@@ -194,8 +172,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
-            dev_cu_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source);
+            dev_cu_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
@@ -205,8 +183,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            dev_sor_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, omega_value);
+
+            dev_sor_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else
@@ -221,8 +200,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
             typedef general_svc_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 host_cu_solver;
-            host_cu_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source);
+
+            host_cu_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
@@ -233,8 +213,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            host_sor_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, omega_value);
+
+            host_sor_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
@@ -242,8 +223,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
             typedef general_svc_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
-            host_dss_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source);
+
+            host_dss_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
@@ -251,8 +233,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
             typedef general_svc_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
-            host_lus_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source);
+
+            host_lus_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else
@@ -289,58 +272,27 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
     // This is the proper size of the container:
     LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
                "The input solution 2D container must have the correct size");
-    // calculate scheme coefficients:
-    const fp_type one = static_cast<fp_type>(1.0);
-    const fp_type two = static_cast<fp_type>(2.0);
-    const fp_type half = static_cast<fp_type>(0.5);
-    const fp_type lambda = k / (h * h);
-    const fp_type gamma = k / (two * h);
-    const fp_type delta = half * k;
-    // create container to carry previous solution:
-    container_t prev_sol(space_size, fp_type{});
-    // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
-    // since coefficients are different in space :
-    container_t low(space_size, fp_type{});
-    container_t diag(space_size, fp_type{});
-    container_t up(space_size, fp_type{});
-    // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
-    // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
-    // wrap up the functions into tuple:
-    auto const &fun_triplet = std::make_tuple(A, B, D);
-    // get propper theta accoring to clients chosen scheme:
-    fp_type theta{};
-    if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::Euler)
+    // grid:
+    grid_config_1d_ptr<fp_type> grid_cfg;
+    if (grid_hints_cfg_->grid() == grid_enum::Uniform)
     {
-        theta = one;
+        grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
     }
-    else if (solver_cfg_->implicit_pde_scheme() == implicit_pde_schemes_enum::CrankNicolson)
+    else if (grid_hints_cfg_->grid() == grid_enum::Nonuniform)
     {
-        theta = half;
+        grid_cfg = std::make_shared<nonuniform_grid_config_1d<fp_type>>(
+            discretization_cfg_, grid_hints_cfg_->strike(), grid_hints_cfg_->p_scale(), grid_hints_cfg_->c_scale());
     }
     else
     {
         throw std::exception("Unreachable");
     }
-    fp_type m{};
-    for (std::size_t t = 0; t < low.size(); ++t)
-    {
-        m = static_cast<fp_type>(t);
-        low[t] = -one * A(m * h) * theta;
-        diag[t] = (one + two * B(m * h) * theta);
-        up[t] = -one * D(m * h) * theta;
-    }
-    // wrap up the diagonals into tuple:
-    auto const &diag_triplet = std::make_tuple(low, diag, up);
-    container_t rhs(space_size, fp_type{});
-    // create container to carry new solution:
+    // create container to carry previous solution:
+    container_t prev_sol(space_size, fp_type{});
+    //  create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
+    // discretize initial condition
+    d_1d::of_function(grid_cfg, heat_data_cfg_->initial_condition(), prev_sol);
     // get heat_source:
     const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
     // get heat_source:
@@ -354,8 +306,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
-            dev_cu_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+            dev_cu_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -364,8 +316,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            dev_sor_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, omega_value, solutions);
+
+            dev_sor_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value, solutions);
         }
         else
         {
@@ -379,8 +332,9 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
             typedef general_svc_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 host_cu_solver;
-            host_cu_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+
+            host_cu_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -390,24 +344,24 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            host_sor_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, omega_value, solutions);
+            host_sor_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
         {
             typedef general_svc_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
-            host_dss_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+            host_dss_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
         {
             typedef general_svc_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
-            host_lus_solver solver(diag_triplet, fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
-            solver(prev_sol, next_sol, rhs, is_heat_source_set, heat_source, solutions);
+            host_lus_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            solver(prev_sol, next_sol, is_heat_source_set, heat_source, solutions);
         }
         else
         {
@@ -433,6 +387,7 @@ class general_svc_heat_equation
     boundary_1d_pair<fp_type> boundary_pair_;
     heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    grid_config_hints_1d_ptr<fp_type> grid_hints_cfg_;
     heat_explicit_solver_config_ptr solver_cfg_;
 
     explicit general_svc_heat_equation() = delete;
@@ -443,6 +398,7 @@ class general_svc_heat_equation
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
         LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
         LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
+        LSS_VERIFY(grid_hints_cfg_, "grid_config_hints must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
     }
 
@@ -450,10 +406,11 @@ class general_svc_heat_equation
     explicit general_svc_heat_equation(heat_data_config_1d_ptr<fp_type> const &heat_data_config,
                                        pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                        boundary_1d_pair<fp_type> const &boundary_pair,
+                                       grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
                                        heat_explicit_solver_config_ptr const &solver_config =
                                            default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
-          solver_cfg_{solver_config}
+          grid_hints_cfg_{grid_config_hints}, solver_cfg_{solver_config}
     {
         initialize();
     }
@@ -499,26 +456,25 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     const std::size_t space_size = discretization_cfg_->number_of_space_points();
     // This is the proper size of the container:
     LSS_ASSERT((solution.size() == space_size), "The input solution container must have the correct size");
-    // calculate scheme coefficients:
-    const fp_type two = static_cast<fp_type>(2.0);
-    const fp_type half = static_cast<fp_type>(0.5);
-    const fp_type lambda = k / (h * h);
-    const fp_type gamma = k / (two * h);
-    const fp_type delta = half * k;
-    // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
-    // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
-    // wrap up the functions into tuple:
-    auto const &fun_triplet = std::make_tuple(A, B, D);
+    //  grid:
+    grid_config_1d_ptr<fp_type> grid_cfg;
+    if (grid_hints_cfg_->grid() == grid_enum::Uniform)
+    {
+        grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
+    }
+    else if (grid_hints_cfg_->grid() == grid_enum::Nonuniform)
+    {
+        grid_cfg = std::make_shared<nonuniform_grid_config_1d<fp_type>>(
+            discretization_cfg_, grid_hints_cfg_->strike(), grid_hints_cfg_->p_scale(), grid_hints_cfg_->c_scale());
+    }
+    else
+    {
+        throw std::exception("Unreachable");
+    }
     // create container to carry previous solution:
     container_t prev_sol(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    d_1d::of_function(grid_cfg, heat_data_cfg_->initial_condition(), prev_sol);
     // get heat_source:
     const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
     // get heat_source:
@@ -528,7 +484,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     {
         typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
-        device_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        device_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source);
         std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
     }
@@ -536,7 +492,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     {
         typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
-        host_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        host_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source);
         std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
     }
@@ -569,26 +525,25 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
     // This is the proper size of the container:
     LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
                "The input solution 2D container must have the correct size");
-    // calculate scheme coefficients:
-    const fp_type two = static_cast<fp_type>(2.0);
-    const fp_type half = static_cast<fp_type>(0.5);
-    const fp_type lambda = k / (h * h);
-    const fp_type gamma = k / (two * h);
-    const fp_type delta = half * k;
-    // save coefficients:
-    auto const &a = heat_data_cfg_->a_coefficient();
-    auto const &b = heat_data_cfg_->b_coefficient();
-    auto const &c = heat_data_cfg_->c_coefficient();
-    // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda * a(x) - gamma * b(x)); };
-    auto const &B = [&](fp_type x) { return (lambda * a(x) - delta * c(x)); };
-    auto const &D = [&](fp_type x) { return (lambda * a(x) + gamma * b(x)); };
-    // wrap up the functions into tuple:
-    auto const &fun_triplet = std::make_tuple(A, B, D);
+    //  grid:
+    grid_config_1d_ptr<fp_type> grid_cfg;
+    if (grid_hints_cfg_->grid() == grid_enum::Uniform)
+    {
+        grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
+    }
+    else if (grid_hints_cfg_->grid() == grid_enum::Nonuniform)
+    {
+        grid_cfg = std::make_shared<nonuniform_grid_config_1d<fp_type>>(
+            discretization_cfg_, grid_hints_cfg_->strike(), grid_hints_cfg_->p_scale(), grid_hints_cfg_->c_scale());
+    }
+    else
+    {
+        throw std::exception("Unreachable");
+    }
     // create container to carry previous solution:
     container_t prev_sol(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(space.lower(), h, heat_data_cfg_->initial_condition(), prev_sol);
+    d_1d::of_function(grid_cfg, heat_data_cfg_->initial_condition(), prev_sol);
     // get heat_source:
     const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
     // get heat_source:
@@ -598,14 +553,14 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
     {
         typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
-        device_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        device_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source, solutions);
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
         typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
-        host_solver solver(fun_triplet, boundary_pair_, discretization_cfg_, solver_cfg_);
+        host_solver solver(boundary_pair_, heat_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source, solutions);
     }
     else

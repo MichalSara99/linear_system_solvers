@@ -9,6 +9,7 @@
 #include "containers/lss_container_2d.hpp"
 //#include "lss_general_ode_equation_explicit_kernel.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "discretization/lss_grid_config.hpp"
 #include "lss_general_ode_equation_implicit_kernel.hpp"
 #include "ode_solvers/lss_ode_data_config.hpp"
 #include "ode_solvers/lss_ode_discretization_config.hpp"
@@ -19,6 +20,7 @@ namespace lss_ode_solvers
 
 using lss_boundary::boundary_1d_pair;
 using lss_boundary::boundary_1d_ptr;
+using lss_grids::uniform_grid_config_1d;
 
 namespace implicit_solvers
 {
@@ -98,7 +100,6 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
     typedef container<fp_type, allocator> container_t;
 
     LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized");
-
     // get space range:
     const range<fp_type> space = ode_discretization_cfg_->space_range();
     // get space step:
@@ -107,35 +108,9 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
     const std::size_t space_size = ode_discretization_cfg_->number_of_space_points();
     // This is the proper size of the container:
     LSS_ASSERT(solution.size() == space_size, "The input solution container must have the correct size");
-    // calculate scheme coefficients:
-    const fp_type zero = static_cast<fp_type>(0.0);
-    const fp_type one = static_cast<fp_type>(1.0);
-    const fp_type two = static_cast<fp_type>(2.0);
-    const fp_type lambda = one / (h * h);
-    const fp_type gamma = one / (two * h);
-    // since coefficients are different in space :
-    container_t low(space_size, fp_type{});
-    container_t diag(space_size, fp_type{});
-    container_t up(space_size, fp_type{});
-    // save coefficients:
-    auto const &a = ode_data_cfg_->a_coefficient();
-    auto const &b = ode_data_cfg_->b_coefficient();
-    // prepare space variable coefficients:
-    auto const &A = [&](fp_type x) { return (lambda - gamma * a(x)); };
-    auto const &B = [&](fp_type x) { return (lambda + gamma * a(x)); };
-    auto const &C = [&](fp_type x) { return (b(x) - two * lambda); };
-
-    fp_type m{};
-    for (std::size_t t = 0; t < low.size(); ++t)
-    {
-        m = static_cast<fp_type>(t);
-        low[t] = A(m * h);
-        diag[t] = C(m * h);
-        up[t] = B(m * h);
-    }
-    // wrap up the diagonals into tuple:
-    auto const &diag_triplet = std::make_tuple(low, diag, up);
-    container_t rhs(space_size, zero);
+    // grid:
+    // for now lets stick to uniform:
+    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(ode_discretization_cfg_);
     const bool is_ode_nonhom_set = ode_data_cfg_->is_nonhom_data_set();
     // get ode_nonhom:
     auto const &ode_nonhom = ode_data_cfg_->nonhom_function();
@@ -148,8 +123,8 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
                                                          fp_type, container, allocator>
                 dev_cu_solver;
 
-            dev_cu_solver solver(diag_triplet, boundary_pair_, ode_discretization_cfg_, ode_solver_cfg_);
-            solver(solution, rhs, is_ode_nonhom_set, ode_nonhom);
+            dev_cu_solver solver(boundary_pair_, ode_data_cfg_, ode_discretization_cfg_, ode_solver_cfg_, grid_cfg);
+            solver(solution, is_ode_nonhom_set, ode_nonhom);
         }
         else if (ode_solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -158,8 +133,8 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
                 dev_sor_solver;
             LSS_ASSERT(!ode_solver_config_details_.empty(), "ode_solver_config_details map must not be empty");
             fp_type omega_value = ode_solver_config_details_["sor_omega"];
-            dev_sor_solver solver(diag_triplet, boundary_pair_, ode_discretization_cfg_, ode_solver_cfg_);
-            solver(solution, rhs, is_ode_nonhom_set, ode_nonhom, omega_value);
+            dev_sor_solver solver(boundary_pair_, ode_data_cfg_, ode_discretization_cfg_, ode_solver_cfg_, grid_cfg);
+            solver(solution, is_ode_nonhom_set, ode_nonhom, omega_value);
         }
         else
         {
@@ -173,8 +148,8 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
             typedef general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver,
                                                          fp_type, container, allocator>
                 host_cu_solver;
-            host_cu_solver solver(diag_triplet, boundary_pair_, ode_discretization_cfg_, ode_solver_cfg_);
-            solver(solution, rhs, is_ode_nonhom_set, ode_nonhom);
+            host_cu_solver solver(boundary_pair_, ode_data_cfg_, ode_discretization_cfg_, ode_solver_cfg_, grid_cfg);
+            solver(solution, is_ode_nonhom_set, ode_nonhom);
         }
         else if (ode_solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -184,24 +159,24 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
 
             LSS_ASSERT(!ode_solver_config_details_.empty(), "ode_solver_config_details map must not be empty");
             fp_type omega_value = ode_solver_config_details_["sor_omega"];
-            host_sor_solver solver(diag_triplet, boundary_pair_, ode_discretization_cfg_, ode_solver_cfg_);
-            solver(solution, rhs, is_ode_nonhom_set, ode_nonhom, omega_value);
+            host_sor_solver solver(boundary_pair_, ode_data_cfg_, ode_discretization_cfg_, ode_solver_cfg_, grid_cfg);
+            solver(solution, is_ode_nonhom_set, ode_nonhom, omega_value);
         }
         else if (ode_solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
         {
             typedef general_ode_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
-            host_dss_solver solver(diag_triplet, boundary_pair_, ode_discretization_cfg_, ode_solver_cfg_);
-            solver(solution, rhs, is_ode_nonhom_set, ode_nonhom);
+            host_dss_solver solver(boundary_pair_, ode_data_cfg_, ode_discretization_cfg_, ode_solver_cfg_, grid_cfg);
+            solver(solution, is_ode_nonhom_set, ode_nonhom);
         }
         else if (ode_solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
         {
             typedef general_ode_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
-            host_lus_solver solver(diag_triplet, boundary_pair_, ode_discretization_cfg_, ode_solver_cfg_);
-            solver(solution, rhs, is_ode_nonhom_set, ode_nonhom);
+            host_lus_solver solver(boundary_pair_, ode_data_cfg_, ode_discretization_cfg_, ode_solver_cfg_, grid_cfg);
+            solver(solution, is_ode_nonhom_set, ode_nonhom);
         }
         else
         {

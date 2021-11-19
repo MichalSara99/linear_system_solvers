@@ -7,6 +7,7 @@
 #include "boundaries/lss_boundary.hpp"
 #include "boundaries/lss_dirichlet_boundary.hpp"
 #include "boundaries/lss_neumann_boundary.hpp"
+#include "common/lss_enumerations.hpp"
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "containers/lss_container_3d.hpp"
@@ -34,6 +35,10 @@ using lss_boundary::neumann_boundary_2d;
 using lss_containers::container_2d;
 using lss_containers::container_3d;
 using lss_enumerations::by_enum;
+using lss_enumerations::grid_enum;
+using lss_grids::grid_config_hints_2d_ptr;
+using lss_grids::nonuniform_grid_config_2d;
+using lss_grids::uniform_grid_config_2d;
 
 namespace implicit_solvers
 {
@@ -182,10 +187,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
     const auto space_y = spaces.second;
     // get space steps:
     const auto &hs = discretization_cfg_->space_step();
-    // across X:
-    const fp_type h_1 = hs.first;
-    // across Y:
-    const fp_type h_2 = hs.second;
     // size of spaces discretization:
     const auto &space_sizes = discretization_cfg_->number_of_space_points();
     const std::size_t space_size_x = std::get<0>(space_sizes);
@@ -193,17 +194,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
     // This is the proper size of the container:
     LSS_ASSERT((solution.columns() == space_size_y) && (solution.rows() == space_size_x),
                "The input solution container must have the correct size");
-
-    // create container to carry previous solution:
-    rcontainer_2d_t prev_sol(space_size_x, space_size_y, fp_type{});
-    // create container to carry next solution:
-    rcontainer_2d_t next_sol(space_size_x, space_size_y, fp_type{});
-    // discretize initial condition
-    d_2d::of_function(space_x.lower(), space_y.lower(), h_1, h_2, heat_data_cfg_->initial_condition(), prev_sol);
-    // get heat_source:
-    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
-    // get heat_source:
-    auto const &heat_source = heat_data_cfg_->heat_source();
     // grid:
     grid_config_2d_ptr<fp_type> grid_cfg;
     if (grid_hints_cfg_->grid() == grid_enum::Uniform)
@@ -221,6 +211,17 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
         throw std::exception("Unreachable");
     }
 
+    // create container to carry previous solution:
+    rcontainer_2d_t prev_sol(space_size_x, space_size_y, fp_type{});
+    // create container to carry next solution:
+    rcontainer_2d_t next_sol(space_size_x, space_size_y, fp_type{});
+    // discretize initial condition
+    d_2d::of_function(grid_cfg, heat_data_cfg_->initial_condition(), prev_sol);
+    // get heat_source:
+    const bool is_heat_source_set = heat_data_cfg_->is_heat_source_set();
+    // get heat_source:
+    auto const &heat_source = heat_data_cfg_->heat_source();
+
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
         if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
@@ -233,7 +234,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                                  splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = prev_sol;
-            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -247,7 +247,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             solution = prev_sol;
-            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else
         {
@@ -266,7 +265,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
-            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
@@ -280,7 +278,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                                    splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             solution = next_sol;
-            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
         {
@@ -291,7 +288,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                                    splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
-            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
         {
@@ -302,7 +298,6 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                                    splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
-            // std::copy(prev_sol.begin(), prev_sol.end(), solution.begin());
         }
         else
         {
@@ -357,6 +352,7 @@ class general_svc_heston_equation
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
+    grid_config_hints_2d_ptr<fp_type> grid_hints_cfg_;
     heat_explicit_solver_config_ptr solver_cfg_;
 
     explicit general_svc_heston_equation() = delete;
@@ -380,6 +376,7 @@ class general_svc_heston_equation
             LSS_VERIFY(ver_ptr, "vertical_boundary_pair.second must be of neumann type only");
         }
 
+        LSS_VERIFY(grid_hints_cfg_, "grid_config_hints must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
     }
 
@@ -389,11 +386,12 @@ class general_svc_heston_equation
                                          boundary_2d_ptr<fp_type> const &horizontal_upper_boundary_ptr,
                                          boundary_2d_pair<fp_type> const &vertical_boundary_pair,
                                          weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
+                                         grid_config_hints_2d_ptr<fp_type> const &grid_config_hints,
                                          heat_explicit_solver_config_ptr const &solver_config =
                                              default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           boundary_hor_{horizontal_upper_boundary_ptr}, boundary_pair_ver_{vertical_boundary_pair},
-          weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}
+          weighted_scheme_cfg_{weighted_scheme_config}, grid_hints_cfg_{grid_config_hints}, solver_cfg_{solver_config}
     {
         initialize();
     }

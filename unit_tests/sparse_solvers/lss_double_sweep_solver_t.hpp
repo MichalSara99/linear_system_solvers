@@ -7,6 +7,8 @@
 #include "boundaries/lss_dirichlet_boundary.hpp"
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
+#include "discretization/lss_grid_config.hpp"
+#include "ode_solvers/lss_ode_discretization_config.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
 
 template <typename T> void testBVPDoubleSweepDirichletBC()
@@ -179,6 +181,8 @@ template <typename T> void testBVPDoubleSweepDirichletNeumannBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -225,7 +229,11 @@ template <typename T> void testBVPDoubleSweepDirichletNeumannBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &lower_ptr = std::make_shared<dirichlet_boundary_1d<T>>([](T t) { return 1.0; });
@@ -267,6 +275,8 @@ template <typename T> void testBVPDoubleSweepNeumannDirichletBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -313,7 +323,11 @@ template <typename T> void testBVPDoubleSweepNeumannDirichletBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &upper_ptr = std::make_shared<dirichlet_boundary_1d<T>>([](T t) { return 0.0; });
@@ -355,6 +369,8 @@ template <typename T> void testBVPDoubleSweepNeumannRobinBC()
     using lss_boundary::robin_boundary_1d;
     using lss_double_sweep_solver::double_sweep_solver;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -403,7 +419,11 @@ template <typename T> void testBVPDoubleSweepNeumannRobinBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &lower_ptr = std::make_shared<neumann_boundary_1d<T>>([](T t) { return 0.0; });

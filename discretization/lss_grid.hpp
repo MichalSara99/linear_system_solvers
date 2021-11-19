@@ -6,7 +6,7 @@
 #include "lss_grid_config.hpp"
 #include <functional>
 
-namespace lss_pde_solvers
+namespace lss_grids
 {
 using lss_enumerations::dimension_enum;
 
@@ -27,7 +27,7 @@ template <typename fp_type> struct grid<dimension_enum::One, fp_type>
   public:
     static fp_type value(grid_config_1d_ptr<fp_type> const &grid_config, std::size_t const &idx)
     {
-        return (grid_config->init() + static_cast<fp_type>(idx) * grid_config->step());
+        return (grid_config->init() + grid_config->gen_function(idx));
     }
 };
 
@@ -39,12 +39,12 @@ template <typename fp_type> struct grid<dimension_enum::Two, fp_type>
   public:
     static fp_type value_1(grid_config_2d_ptr<fp_type> const &grid_config, std::size_t const &idx)
     {
-        return (grid_config->init_1() + static_cast<fp_type>(idx) * grid_config->step_1());
+        return (grid_config->init_1() + grid_config->gen_function_1(idx));
     }
 
     static fp_type value_2(grid_config_2d_ptr<fp_type> const &grid_config, std::size_t const &idx)
     {
-        return (grid_config->init_2() + static_cast<fp_type>(idx) * grid_config->step_2());
+        return (grid_config->init_2() + grid_config->gen_function_2(idx));
     }
 };
 
@@ -53,5 +53,5 @@ template <typename fp_type> using grid_2d = grid<dimension_enum::Two, fp_type>;
 template <typename fp_type> using grid_1d_ptr = sptr_t<grid_1d<fp_type>>;
 template <typename fp_type> using grid_2d_ptr = sptr_t<grid_2d<fp_type>>;
 
-} // namespace lss_pde_solvers
+} // namespace lss_grids
 #endif ///_LSS_GRID_HPP_

@@ -180,6 +180,8 @@ template <typename T> void testBVPThomasLUDirichletNeumannBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_thomas_lu_solver::thomas_lu_solver;
     using lss_utility::range;
 
@@ -227,7 +229,11 @@ template <typename T> void testBVPThomasLUDirichletNeumannBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &lower_ptr = std::make_shared<dirichlet_boundary_1d<T>>([](T t) { return 1.0; });
@@ -268,6 +274,8 @@ template <typename T> void testBVPThomasLUNeumannDirichletBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_thomas_lu_solver::thomas_lu_solver;
     using lss_utility::range;
 
@@ -315,7 +323,11 @@ template <typename T> void testBVPThomasLUNeumannDirichletBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &upper_ptr = std::make_shared<dirichlet_boundary_1d<T>>([](T t) { return 0.0; });
@@ -356,6 +368,8 @@ template <typename T> void testBVPThomasLUNeumannRobinBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_boundary::robin_boundary_1d;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_thomas_lu_solver::thomas_lu_solver;
     using lss_utility::range;
 
@@ -405,7 +419,11 @@ template <typename T> void testBVPThomasLUNeumannRobinBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &lower_ptr = std::make_shared<neumann_boundary_1d<T>>([](T t) { return 0.0; });

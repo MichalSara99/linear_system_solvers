@@ -3,7 +3,7 @@
 
 #include "common/lss_enumerations.hpp"
 
-namespace lss_pde_solvers
+namespace lss_grids
 {
 using lss_enumerations::dimension_enum;
 using lss_enumerations::grid_enum;
@@ -27,10 +27,8 @@ template <typename fp_type> struct grid_config_hints<dimension_enum::One, fp_typ
     grid_enum grid_;
 
   public:
-    grid_config_hints() = delete;
-
-    explicit grid_config_hints(fp_type strike, fp_type p_scale = fp_type(8.4216), fp_type c_scale = fp_type(0.1),
-                               grid_enum grid_type = grid_enum::Uniform)
+    explicit grid_config_hints(fp_type strike = fp_type(0.0), fp_type p_scale = fp_type(8.4216),
+                               fp_type c_scale = fp_type(0.1), grid_enum grid_type = grid_enum::Uniform)
         : strike_{strike}, p_scale_{p_scale}, c_scale_{c_scale}, grid_{grid_type}
     {
     }
@@ -69,10 +67,9 @@ template <typename fp_type> struct grid_config_hints<dimension_enum::Two, fp_typ
     grid_enum grid_;
 
   public:
-    grid_config_hints() = delete;
-
-    explicit grid_config_hints(fp_type strike, fp_type p_scale = fp_type(8.4216), fp_type c_scale = fp_type(0.1),
-                               fp_type d_scale = fp_type(2.0), grid_enum grid_type = grid_enum::Uniform)
+    explicit grid_config_hints(fp_type strike = fp_type(0.0), fp_type p_scale = fp_type(8.4216),
+                               fp_type c_scale = fp_type(0.1), fp_type d_scale = fp_type(2.0),
+                               grid_enum grid_type = grid_enum::Uniform)
         : strike_{strike}, p_scale_{p_scale}, c_scale_{c_scale}, d_scale_{d_scale}, grid_{grid_type}
     {
     }
@@ -110,5 +107,5 @@ template <typename fp_type> using grid_config_hints_2d_ptr = sptr_t<grid_config_
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-} // namespace lss_pde_solvers
+} // namespace lss_grids
 #endif ///_LSS_GRID_CONFIG_HINTS_HPP_

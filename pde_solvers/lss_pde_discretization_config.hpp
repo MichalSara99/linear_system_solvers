@@ -99,6 +99,18 @@ template <typename fp_type> struct pde_discretization_config<dimension_enum::Two
     {
     }
 
+    inline sptr_t<pde_discretization_config<dimension_enum::One, fp_type>> const pde_discretization_1() const
+    {
+        return std::make_shared<pde_discretization_config<dimension_enum::One, fp_type>>(
+            space_range_1_, number_of_space_points_1_, time_range_, number_of_time_points_);
+    }
+
+    inline sptr_t<pde_discretization_config<dimension_enum::One, fp_type>> const pde_discretization_2() const
+    {
+        return std::make_shared<pde_discretization_config<dimension_enum::One, fp_type>>(
+            space_range_2_, number_of_space_points_2_, time_range_, number_of_time_points_);
+    }
+
     inline std::pair<range<fp_type>, range<fp_type>> const space_range() const
     {
         return std::make_pair(space_range_1_, space_range_2_);

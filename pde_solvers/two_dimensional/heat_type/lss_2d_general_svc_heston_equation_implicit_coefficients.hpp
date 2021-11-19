@@ -107,6 +107,8 @@ template <typename fp_type> struct general_svc_heston_equation_implicit_coeffici
     }
 
   public:
+    general_svc_heston_equation_implicit_coefficients() = delete;
+
     general_svc_heston_equation_implicit_coefficients(
         heat_data_config_2d_ptr<fp_type> const &heat_data_config,
         pde_discretization_config_2d_ptr<fp_type> const &discretization_config,

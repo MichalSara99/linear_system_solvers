@@ -215,7 +215,7 @@ void general_svc_heston_equation_explicit_boundary<fp_type, container, allocator
 
     auto const &upper_bnd_ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(vertical_upper_boundary_ptr);
     auto const &upper_bnd = [=](fp_type s, fp_type t) { return upper_bnd_ptr->value(t, s); };
-    d_1d::of_function(coefficients_->rangex_.lower(), coefficients_->h_1_, time, upper_bnd, solution_v);
+    d_1d::of_function(grid_cfg_->grid_1(), time, upper_bnd, solution_v);
     csolution(coefficients_->space_size_y_ - 1, solution_v);
     solution = csolution;
 }
@@ -237,7 +237,7 @@ void general_svc_heston_equation_explicit_boundary<fp_type, container, allocator
     auto const &lower_bnd_ptr =
         std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(horizonatal_boundary_pair.first);
     auto const &lower_bnd = [=](fp_type v, fp_type t) { return lower_bnd_ptr->value(t, v); };
-    d_1d::of_function(start_y, coefficients_->h_2_, time, lower_bnd, solution_v);
+    d_1d::of_function(grid_cfg_->grid_2(), time, lower_bnd, solution_v);
     solution(0, solution_v);
     // populating upper horizontal:
     auto const lri = solution.rows() - 1;
@@ -251,7 +251,7 @@ void general_svc_heston_equation_explicit_boundary<fp_type, container, allocator
         auto const bnd_val = upper_bnd_ptr->value(t, v);
         return (((four * solution(lri - 1, j)) - solution(lri - 2, j) - (two * coefficients_->h_1_ * bnd_val)) / three);
     };
-    d_1d::of_function(start_y, coefficients_->h_2_, time, upper_bnd, solution_v);
+    d_1d::of_function(grid_cfg_->grid_2(), time, upper_bnd, solution_v);
     solution(coefficients_->space_size_x_ - 1, solution_v);
 }
 

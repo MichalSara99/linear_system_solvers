@@ -1,9 +1,12 @@
 #if !defined(_LSS_SABR_EQUATION_T_HPP_)
 #define _LSS_SABR_EQUATION_T_HPP_
 
+#include <cmath>
+#include <map>
+#include <sstream>
+
 #include "pde_solvers/two_dimensional/heat_type/lss_2d_general_svc_heston_equation.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
-#include <map>
 
 // ///////////////////////////////////////////////////////////////////////////
 //							SABR PROBLEMS
@@ -20,7 +23,7 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolson()
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -72,17 +75,21 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolson()
     range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
+    auto const half = static_cast<T>(0.5);
+    auto const one = static_cast<T>(1.0);
+    auto const two = static_cast<T>(2.0);
+
     // discretization config:
     auto const discretization_ptr =
         std::make_shared<pde_discretization_config_2d<T>>(spacex_range, spacey_range, Sd, Vd, time_range, Td);
     // coeffs:
-    auto D = [=](T s, T alpha) { return std::exp(-rate * 0.5); };
+    auto D = [=](T s, T alpha) { return std::exp(-rate * half); };
     auto a = [=](T s, T alpha) {
-        return (0.5 * alpha * alpha * std::pow(s, 2.0 * beta) * std::pow(D, 2.0 * (1.0 - beta)));
+        return (half * alpha * alpha * std::pow(s, two * beta) * std::pow(D, two * (one - beta)));
     };
-    auto b = [=](T s, T alpha) { return (0.5 * sig_sig * sig_sig * alpha * alpha); };
+    auto b = [=](T s, T alpha) { return (half * sig_sig * sig_sig * alpha * alpha); };
     auto c = [=](T s, T alpha) {
-        return (rho * sig_sig * alpha * alpha * std::pow(s, beta) * std::pow(D, (1.0 - beta)));
+        return (rho * sig_sig * alpha * alpha * std::pow(s, beta) * std::pow(D, (one - beta)));
     };
     auto d = [=](T s, T alpha) { return (rate * s); };
     auto e = [=](T s, T alpha) { return 0.0; };
@@ -119,7 +126,7 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolson()
     // get the solution:
     pdesolver.solve(solution);
 
-    print(discretization_ptr, solution);
+    print(discretization_ptr, grid_config_hints_ptr, solution);
 }
 
 void testImplSABREquationDoubleSweepSolver()

@@ -5,6 +5,8 @@
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "discretization/lss_grid_config.hpp"
+#include "ode_solvers/lss_ode_discretization_config.hpp"
 #include "sparse_solvers/general/core_cuda_solver/lss_core_cuda_solver_policy.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 
@@ -181,6 +183,8 @@ template <typename T> void testBVPCUDADirichletNeumannBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -227,7 +231,11 @@ template <typename T> void testBVPCUDADirichletNeumannBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_config = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_config, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &lower_ptr = std::make_shared<dirichlet_boundary_1d<T>>([](T t) { return 1.0; });
@@ -270,6 +278,8 @@ template <typename T> void testBVPCUDANeumannDirichletBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -316,7 +326,11 @@ template <typename T> void testBVPCUDANeumannDirichletBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_config = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_config, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &upper_ptr = std::make_shared<dirichlet_boundary_1d<T>>([](T t) { return 0.0; });
@@ -359,6 +373,8 @@ template <typename T> void testBVPCUDANeumannRobinBC()
     using lss_boundary::robin_boundary_1d;
     using lss_cuda_solver::cuda_solver;
     using lss_enumerations::memory_space_enum;
+    using lss_grids::uniform_grid_config_1d;
+    using lss_ode_solvers::ode_discretization_config;
     using lss_utility::range;
 
     typedef discretization_1d<T, std::vector, std::allocator<T>> d_1d;
@@ -407,7 +423,11 @@ template <typename T> void testBVPCUDANeumannRobinBC()
     // right-hand side:
     auto const &rhs_fun = [=](T t) { return static_cast<T>(h * h * 6.0) * t; };
     std::vector<T> rhs(N, T{});
-    d_1d::of_function(space_range.lower(), h, rhs_fun, rhs);
+
+    auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
+    auto const &grid_config = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+
+    d_1d::of_function(grid_config, rhs_fun, rhs);
 
     // boundary conditions:
     auto const &lower_ptr = std::make_shared<neumann_boundary_1d<T>>([](T t) { return 0.0; });

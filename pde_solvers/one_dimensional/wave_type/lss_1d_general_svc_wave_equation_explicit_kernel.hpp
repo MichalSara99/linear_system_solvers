@@ -8,9 +8,12 @@
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "discretization/lss_grid_config.hpp"
+#include "explicit_coefficients/lss_wave_svc_explicit_coefficients.hpp"
 #include "explicit_schemes/lss_wave_euler_svc_cuda_scheme.hpp"
 #include "explicit_schemes/lss_wave_euler_svc_scheme.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/lss_wave_data_config.hpp"
 #include "pde_solvers/lss_wave_solver_config.hpp"
 
 namespace lss_pde_solvers
@@ -44,18 +47,20 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_ty
     typedef container<fp_type, allocator> container_t;
 
   private:
-    function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
+    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_explicit_solver_config_ptr solver_cfg_;
+    grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_wave_equation_explicit_kernel(function_quintuple_t<fp_type> const &fun_quintuple,
-                                              boundary_1d_pair<fp_type> const &boundary_pair,
+    general_svc_wave_equation_explicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                              wave_data_config_1d_ptr<fp_type> const &wave_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              wave_explicit_solver_config_ptr const &solver_config)
-        : fun_quintuple_{fun_quintuple}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config},
-          solver_cfg_{solver_config}
+                                              wave_explicit_solver_config_ptr const &solver_config,
+                                              grid_config_1d_ptr<fp_type> const &grid_config)
+        : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
+          solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
     }
 
@@ -65,11 +70,18 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_ty
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
 
-        // Here we have only Euler discretization available:
+        // create a heat coefficient holder:
+        auto wave_coeff_holder =
+            std::make_shared<wave_svc_explicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+        // get the modified wave source:
+        auto const mod_wave_source =
+            (is_wave_sourse_set == true) ? wave_coeff_holder->modified_wave_source(wave_source) : nullptr;
 
+        // Here we have only Euler discretization available:
         typedef wave_euler_svc_cuda_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
-        euler_cuda_scheme_t euler_scheme(fun_quintuple_, boundary_pair_, discretization_cfg_);
-        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, wave_source, traverse_dir);
+        euler_cuda_scheme_t euler_scheme(wave_coeff_holder, boundary_pair_, discretization_cfg_, grid_cfg_);
+        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, mod_wave_source,
+                     traverse_dir);
     }
 
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
@@ -79,11 +91,17 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_ty
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
 
-        // Here we have only Euler discretization available:
+        // create a heat coefficient holder:
+        auto const wave_coeff_holder =
+            std::make_shared<wave_svc_explicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+        // get the modified wave source:
+        auto const mod_wave_source =
+            (is_wave_sourse_set == true) ? wave_coeff_holder->modified_wave_source(wave_source) : nullptr;
 
+        // Here we have only Euler discretization available:
         typedef wave_euler_svc_cuda_scheme<fp_type, container, allocator> euler_cuda_scheme_t;
-        euler_cuda_scheme_t euler_scheme(fun_quintuple_, boundary_pair_, discretization_cfg_);
-        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, wave_source, traverse_dir,
+        euler_cuda_scheme_t euler_scheme(wave_coeff_holder, boundary_pair_, discretization_cfg_, grid_cfg_);
+        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, mod_wave_source, traverse_dir,
                      solutions);
     }
 };
@@ -99,18 +117,20 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type
     typedef container<fp_type, allocator> container_t;
 
   private:
-    function_quintuple_t<fp_type> fun_quintuple_;
     boundary_1d_pair<fp_type> boundary_pair_;
+    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_explicit_solver_config_ptr solver_cfg_;
+    grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    class general_svc_wave_equation_explicit_kernel(
-        function_quintuple_t<fp_type> const &fun_quintuple, boundary_1d_pair<fp_type> const &boundary_pair,
-        pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-        wave_explicit_solver_config_ptr const &solver_config)
-        : fun_quintuple_{fun_quintuple}, boundary_pair_{boundary_pair}, discretization_cfg_{discretization_config},
-          solver_cfg_{solver_config}
+    general_svc_wave_equation_explicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                              wave_data_config_1d_ptr<fp_type> const &wave_data_config,
+                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                              wave_explicit_solver_config_ptr const &solver_config,
+                                              grid_config_1d_ptr<fp_type> const &grid_config)
+        : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
+          solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
     }
 
@@ -119,11 +139,19 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type
     {
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
-        // Here make a dicision which explicit scheme to launch:
 
+        // create a heat coefficient holder:
+        auto const wave_coeff_holder =
+            std::make_shared<wave_svc_explicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+
+        auto const mod_wave_source =
+            (is_wave_sourse_set == true) ? wave_coeff_holder->modified_wave_source(wave_source) : nullptr;
+
+        // Here make a dicision which explicit scheme to launch:
         typedef wave_euler_svc_scheme<fp_type, container, allocator> euler_scheme_t;
-        euler_scheme_t euler_scheme(fun_quintuple_, boundary_pair_, discretization_cfg_);
-        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, wave_source, traverse_dir);
+        euler_scheme_t euler_scheme(wave_coeff_holder, boundary_pair_, discretization_cfg_, grid_cfg_);
+        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, mod_wave_source,
+                     traverse_dir);
     }
 
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
@@ -132,11 +160,16 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type
     {
         // save traverse_direction
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
-        // Here make a dicision which explicit scheme to launch:
 
+        // create a heat coefficient holder:
+        auto const wave_coeff_holder =
+            std::make_shared<wave_svc_explicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+        auto const mod_wave_source =
+            (is_wave_sourse_set == true) ? wave_coeff_holder->modified_wave_source(wave_source) : nullptr;
+        // Here make a dicision which explicit scheme to launch:
         typedef wave_euler_svc_scheme<fp_type, container, allocator> euler_scheme_t;
-        euler_scheme_t euler_scheme(fun_quintuple_, boundary_pair_, discretization_cfg_);
-        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, wave_source, traverse_dir,
+        euler_scheme_t euler_scheme(wave_coeff_holder, boundary_pair_, discretization_cfg_, grid_cfg_);
+        euler_scheme(prev_solution_0, prev_solution_1, next_solution, is_wave_sourse_set, mod_wave_source, traverse_dir,
                      solutions);
     }
 };

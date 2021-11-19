@@ -127,6 +127,30 @@
     <Filter Include="sparse_solvers\pentadiagonal\karawia_solver">
       <UniqueIdentifier>{38fba20e-fd43-495c-8319-f92956f2c56e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients">
+      <UniqueIdentifier>{10647b52-f797-4c24-88e9-49b3136d4379}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dimensional\heat_type\implicit_coefficients">
+      <UniqueIdentifier>{895d23b6-b0e5-43a8-b559-01a8d94d2f68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dimensional\heat_type\solver_method">
+      <UniqueIdentifier>{05fedbbd-610e-47d4-b36a-2110c5d346e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dimensional\wave_type\explicit_coefficients">
+      <UniqueIdentifier>{1c8af66a-eee2-4e05-995b-6e928eec2355}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dimensional\wave_type\implicit_coefficients">
+      <UniqueIdentifier>{bf5c690e-aefc-4398-acfd-fc6bc6412af2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\one_dimensional\wave_type\solver_method">
+      <UniqueIdentifier>{c37ed026-32d7-4d0f-93d7-d0a523ecce14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ode_solvers\second_degree\solver_method">
+      <UniqueIdentifier>{8d7fdd84-0519-4c29-bb27-6850adc1301a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ode_solvers\second_degree\implicit_coefficients">
+      <UniqueIdentifier>{58c5c3a2-3f4e-4b60-b53c-e9485b672965}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -458,6 +482,54 @@
     </ClInclude>
     <ClInclude Include="discretization\lss_grid_config_hints.hpp">
       <Filter>discretization</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\implicit_coefficients\lss_1d_general_svc_heat_equation_implicit_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\implicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_implicit_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_euler_svc_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_euler_cuda_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_euler_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_barakat_clark_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_barakat_clark_svc_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_saulyev_svc_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_saulyev_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\implicit_coefficients\lss_wave_svc_implicit_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\wave_type\implicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\solver_method\lss_wave_implicit_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\wave_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\explicit_coefficients\lss_wave_svc_explicit_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\wave_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\solver_method\lss_wave_euler_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\wave_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\wave_type\solver_method\lss_wave_euler_cuda_solver_method.hpp">
+      <Filter>pde_solvers\one_dimensional\wave_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\second_degree\implicit_coefficients\lss_general_ode_implicit_coefficients.hpp">
+      <Filter>ode_solvers\second_degree\implicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\second_degree\solver_method\lss_general_ode_implicit_solver_method.hpp">
+      <Filter>ode_solvers\second_degree\solver_method</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

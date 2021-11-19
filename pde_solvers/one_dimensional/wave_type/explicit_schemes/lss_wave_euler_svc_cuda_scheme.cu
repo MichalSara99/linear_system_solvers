@@ -1,4 +1,4 @@
-#include "lss_wave_euler_svc_cuda_scheme.hpp"
+#include "pde_solvers/one_dimensional/wave_type/solver_method/lss_wave_euler_cuda_solver_method.hpp"
 
 #define THREADS_PER_BLOCK 256
 

@@ -16,6 +16,7 @@ template <typename T> void test_pure_heat_equation_builder_t()
 {
     using lss_boundary::dirichlet_boundary_1d_builder;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d_builder;
     using lss_pde_solvers::heat_data_config_1d_builder;
     using lss_pde_solvers::heat_implicit_solver_config_builder;
@@ -68,6 +69,9 @@ template <typename T> void test_pure_heat_equation_builder_t()
                                .initial_data_config(init_data_ptr)
                                .build();
 
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+
     // boundary conditions builder:
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_low = dirichlet_boundary_1d_builder<T>().value(dirichlet).build();
@@ -78,6 +82,7 @@ template <typename T> void test_pure_heat_equation_builder_t()
     auto const &pde_solver = general_svc_heat_equation_builder<T, std::vector, std::allocator<T>>()
                                  .boundary_pair(boundary_pair)
                                  .discretization_config(discretization_ptr)
+                                 .grid_hints(grid_config_hints_ptr)
                                  .solver_config(dev_fwd_cusolver_qr_euler_solver_config_ptr)
                                  .heat_data_config(data_ptr)
                                  .build();

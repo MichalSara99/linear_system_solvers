@@ -22,6 +22,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -70,8 +71,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_euler_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -113,6 +117,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -161,8 +166,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -218,6 +226,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -266,12 +275,14 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_sorsolver_euler_solver_config_ptr,
-                         details);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_sorsolver_euler_solver_config_ptr, details);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -313,6 +324,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -361,12 +373,14 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_sorsolver_cn_solver_config_ptr,
-                         details);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_sorsolver_cn_solver_config_ptr, details);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -422,6 +436,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -470,12 +485,14 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_sorsolver_euler_solver_config_ptr,
-                         details);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_sorsolver_euler_solver_config_ptr, details);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -517,6 +534,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -565,12 +583,14 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_sorsolver_cn_solver_config_ptr,
-                         details);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_sorsolver_cn_solver_config_ptr, details);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -626,6 +646,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -672,8 +693,10 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair,
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
                          host_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
@@ -716,6 +739,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -764,8 +788,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_cusolver_qr_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -821,6 +848,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -869,8 +897,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_euler_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_dssolver_euler_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -912,6 +943,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -960,8 +992,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_dssolver_cn_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -1017,6 +1052,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1065,8 +1101,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_euler_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_tlusolver_euler_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -1107,6 +1146,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1155,8 +1195,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:

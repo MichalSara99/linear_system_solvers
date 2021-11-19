@@ -97,6 +97,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -153,8 +154,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_low);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>(strike);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_bwd_tlusolver_euler_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_bwd_tlusolver_euler_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -170,17 +174,18 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     }
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/call_approx_" << typeid(T).name() << ".txt";
+    std::string name = "ImplBlackScholesEquationDirichletBCThomasLUSolverEuler";
+    ssa << "outputs/call_approx_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/call_bench_" << typeid(T).name() << ".txt";
+    ssb << "outputs/call_bench_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -189,6 +194,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -245,8 +251,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_low);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>(strike);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_bwd_tlusolver_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_bwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -262,17 +271,18 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     }
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/call_approx_" << typeid(T).name() << ".txt";
+    std::string name = "ImplBlackScholesEquationDirichletBCThomasLUSolverCrankNicolson";
+    ssa << "outputs/call_approx_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/call_bench_" << typeid(T).name() << ".txt";
+    ssb << "outputs/call_bench_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -297,6 +307,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -355,8 +366,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_low);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>(strike);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_bwd_tlusolver_euler_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_bwd_tlusolver_euler_solver_config_ptr);
     // prepare container for solution:
     container_2d_t solutions(Td, Sd);
     // get the solution:
@@ -377,17 +391,18 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     }
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/call_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplBlackScholesEquationDirichletBCThomasLUSolverEuler";
+    ssa << "outputs/call_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/call_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/call_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -398,6 +413,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -457,8 +473,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_low);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>(strike);
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_bwd_tlusolver_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_bwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     container_2d_t solutions(Td, Sd);
     // get the solution:
@@ -477,18 +496,19 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
         }
     }
     // print both of these
+    std::string name = "ImplBlackScholesEquationDirichletBCThomasLUSolver";
     std::stringstream ssa;
-    ssa << "outputs/call_approx_surf_" << typeid(T).name() << ".txt";
+    ssa << "outputs/call_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/call_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/call_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -513,6 +533,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -564,8 +585,11 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_euler_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_cusolver_qr_euler_solver_config_ptr);
     // prepare container for solution:
     container_2d_t solutions(Td, Sd);
     // get the solution:
@@ -598,17 +622,18 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/pheat_euler_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplPureHeatEquationDirichletBCCUDASolverDeviceQREuler";
+    ssa << "outputs/pheat_euler_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/pheat_euler_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/pheat_euler_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -619,6 +644,7 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -669,8 +695,11 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_cusolver_qr_cn_solver_config_ptr);
     // prepare container for solution:
     container_2d_t solutions(Td, Sd);
     // get the solution:
@@ -703,17 +732,18 @@ template <typename T> void testImplPureHeatEquationDirichletBCCUDASolverDeviceQR
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/pheat_cn_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplPureHeatEquationDirichletBCCUDASolverDeviceQRCrankNicolson";
+    ssa << "outputs/pheat_cn_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/pheat_cn_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/pheat_cn_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -738,6 +768,7 @@ template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSur
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::explicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_explicit_solver_config;
@@ -788,8 +819,11 @@ template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSur
     auto const &neumann = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, dev_expl_fwd_euler_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_expl_fwd_euler_solver_config_ptr);
     // prepare container for solution:
     container_2d_t solutions(Td, Sd);
     // get the solution:
@@ -825,17 +859,18 @@ template <typename T> void testExplPureHeatEquationNeumannNeumannBCEulerPrintSur
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/pheatneu_e_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ExplPureHeatEquationNeumannNeumannBCEuler";
+    ssa << "outputs/pheatneu_e_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/pheatneu_e_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/pheatneu_e_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -858,6 +893,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPri
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -910,8 +946,11 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPri
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
-    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_cn_solver_config_ptr);
+    pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     container_2d_t solutions(Td, Sd);
     // get the solution:
@@ -951,17 +990,18 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCNPri
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/advection_cn_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplAdvDiffEquationDirichletBCThomasLUSolverCN";
+    ssa << "outputs/advection_cn_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/advection_cn_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/advection_cn_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -984,6 +1024,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -1035,6 +1076,8 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
     pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
@@ -1061,17 +1104,18 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/pure_wave_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplPureWaveEquationDirichletBCCUDASolverDeviceQR";
+    ssa << "outputs/pure_wave_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/pure_wave_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/pure_wave_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -1094,6 +1138,7 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetailPrin
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -1150,6 +1195,8 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetailPrin
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_0);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_1);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
     pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_solver_config_ptr);
     // prepare container for solution:
@@ -1175,17 +1222,18 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetailPrin
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/wave_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplWaveEquationDirichletBCSolverHostLU";
+    ssa << "outputs/wave_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/wave_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/wave_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -1208,6 +1256,7 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostDoubleSweepD
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -1263,6 +1312,8 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostDoubleSweepD
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_0);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_1);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
     pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_solver_config_ptr);
     // prepare container for solution:
@@ -1291,17 +1342,18 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostDoubleSweepD
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/damped_wave_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplWaveEquationDirichletBCSolverHostDoubleSweep";
+    ssa << "outputs/damped_wave_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/damped_wave_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/damped_wave_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -1324,6 +1376,7 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -1377,6 +1430,8 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
     auto const &neumann = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
     pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
@@ -1403,17 +1458,18 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/wave_neumann_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplPureWaveEquationNeumannBCCUDASolverDeviceQR";
+    ssa << "outputs/wave_neumann_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/wave_neumann_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/wave_neumann_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -1435,6 +1491,7 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     using lss_boundary::dirichlet_boundary_1d;
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
+    using lss_grids::grid_config_hints_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -1487,6 +1544,8 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid hints:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
     // initialize pde solver
     pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_expl_fwd_solver_config_ptr);
     // prepare container for solution:
@@ -1513,17 +1572,18 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
 
     // print both of these
     std::stringstream ssa;
-    ssa << "outputs/expl_pure_wave_dir_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ExplPureWaveEquationDirichletBCCUDAHostSolver";
+    ssa << "outputs/expl_pure_wave_dir_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solutions, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solutions, approx);
     approx.close();
     std::cout << "approx saved to file: " << file_name_approx << "\n";
     std::stringstream ssb;
-    ssb << "outputs/expl_pure_wave_dir_bench_surf_" << typeid(T).name() << ".txt";
+    ssb << "outputs/expl_pure_wave_dir_bench_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_bench{ssb.str()};
     std::ofstream bench(file_name_bench);
-    print(discretization_ptr, benchmark, bench);
+    print(discretization_ptr, grid_config_hints_ptr, benchmark, bench);
     bench.close();
     std::cout << "bench saved to file: " << file_name_bench << "\n";
 }
@@ -1546,8 +1606,9 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
     using lss_boundary::neumann_boundary_2d;
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1594,7 +1655,7 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
     // number of time subdivisions:
     std::size_t const Td = 150;
     // space Spot range:
-    range<T> spacex_range(static_cast<T>(0.0), static_cast<T>(20.0));
+    range<T> spacex_range(static_cast<T>(5.0), static_cast<T>(20.0));
     // space Vol range:
     range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
@@ -1630,7 +1691,11 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+    auto const p_scale = static_cast<T>(10.);
+    auto const c_scale = static_cast<T>(1.00);
+    auto const d_scale = static_cast<T>(.01);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_2d<T>>(strike, p_scale, c_scale, d_scale, grid_enum::Nonuniform);
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
@@ -1643,10 +1708,11 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolsonPrintS
 
     // print approx only:
     std::stringstream ssa;
-    ssa << "outputs/heston_equation_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplHestonEquationCUDAQRSolverCrankNicolson";
+    ssa << "outputs/heston_equation_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
 }
 
@@ -1668,8 +1734,9 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     using lss_boundary::neumann_boundary_2d;
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1752,7 +1819,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>(T(0.0), sig_theta, T(1.0), T(0.90));
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+    auto const grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
@@ -1765,10 +1832,11 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolsonPrin
 
     // print approx only:
     std::stringstream ssa;
-    ssa << "outputs/heston_lusolver_equation_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplHestonEquationThomasLUSolverCrankNicolson";
+    ssa << "outputs/heston_lusolver_equation_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
 }
 
@@ -1791,7 +1859,7 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolsonPri
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1879,7 +1947,7 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolsonPri
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>();
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
@@ -1892,10 +1960,11 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolsonPri
 
     // print approx only:
     std::stringstream ssa;
-    ssa << "outputs/sabr_dssolver_equation_approx_surf_" << typeid(T).name() << ".txt";
+    std::string name = "ImplSABREquationDoubleSweepSolverCrankNicolson";
+    ssa << "outputs/sabr_dssolver_equation_approx_surf_" << name << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
 }
 
@@ -1917,8 +1986,9 @@ template <typename T> void testImplHestonEquationThomasLUSolverDouglasRachfordCr
     using lss_boundary::neumann_boundary_2d;
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1926,7 +1996,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverDouglasRachfordCr
     using lss_pde_solvers::pde_discretization_config_2d;
     using lss_pde_solvers::splitting_method_config;
     using lss_pde_solvers::weighted_scheme_config;
-    using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_o8_solver_config_ptr;
+    using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_cn_solver_config_ptr;
     using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation;
     using lss_print::print;
     using lss_utility::range;
@@ -1951,23 +2021,23 @@ template <typename T> void testImplHestonEquationThomasLUSolverDouglasRachfordCr
     // typedef the Implicit1DHeatEquation
     typedef general_svc_heston_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
-    auto const &strike = 10.0;
+    auto const &strike = 100.0;
     auto const &maturity = 1.0;
     auto const &rate = 0.03;
-    auto const &sig_sig = 0.3;
-    auto const &sig_kappa = 2.0;
-    auto const &sig_theta = 0.2;
-    auto const &rho = 0.1;
+    auto const &sig_sig = 0.091;
+    auto const &sig_kappa = 3.0;
+    auto const &sig_theta = 0.8;
+    auto const &rho = 0.6;
     // number of space subdivisions for spot:
-    std::size_t const Sd = 40;
+    std::size_t const Sd = 150;
     // number of space subdivision for volatility:
-    std::size_t const Vd = 40;
+    std::size_t const Vd = 50;
     // number of time subdivisions:
-    std::size_t const Td = 100;
+    std::size_t const Td = 200;
     // space Spot range:
-    range<T> spacex_range(static_cast<T>(0.0), static_cast<T>(20.0));
+    range<T> spacex_range(static_cast<T>(50.0), static_cast<T>(150.0));
     // space Vol range:
-    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.2));
     // time range
     range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
     // discretization config:
@@ -1997,16 +2067,17 @@ template <typename T> void testImplHestonEquationThomasLUSolverDouglasRachfordCr
     auto const &vertical_upper_boundary_ptr = std::make_shared<dirichlet_boundary_2d<T>>(dirichlet_high);
     // splitting method configuration:
     auto const &splitting_config_ptr =
-        std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford, T{0.8});
+        std::make_shared<splitting_method_config<T>>(splitting_method_enum::DouglasRachford);
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_2d<T>>(/*strike, T(8.4216), T(0.1), T(2.0), grid_enum::Nonuniform*/);
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
                          splitting_config_ptr, weighted_config_ptr, grid_config_hints_ptr,
-                         host_bwd_tlusolver_o8_solver_config_ptr);
+                         host_bwd_tlusolver_cn_solver_config_ptr);
     // prepare container for solution:
     rcontainer_2d_t solution(Sd, Vd, T{});
     // get the solution:
@@ -2017,7 +2088,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverDouglasRachfordCr
     ssa << "outputs/heston_lusolver_douglas_rachford_equation_approx_surf_" << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
 }
 
@@ -2040,7 +2111,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCraigSneydCrankNi
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -2123,7 +2194,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCraigSneydCrankNi
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>();
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
@@ -2139,7 +2210,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCraigSneydCrankNi
     ssa << "outputs/heston_lusolver_craig_sneyd_equation_approx_surf_" << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
 }
 
@@ -2162,7 +2233,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverModCraigSneydCran
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -2209,7 +2280,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverModCraigSneydCran
     // number of time subdivisions:
     std::size_t const Td = 200;
     // space Spot range:
-    range<T> spacex_range(static_cast<T>(50.0), static_cast<T>(200.0));
+    range<T> spacex_range(static_cast<T>(50.0), static_cast<T>(180.0));
     // space Vol range:
     range<T> spacey_range(static_cast<T>(0.0), static_cast<T>(1.2));
     // time range
@@ -2261,7 +2332,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverModCraigSneydCran
     ssa << "outputs/heston_lusolver_mod_craig_sneyd_equation_approx_surf_" << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
 }
 
@@ -2284,7 +2355,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverHundsdorferVerwer
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::splitting_method_enum;
-    using lss_pde_solvers::grid_config_hints_2d;
+    using lss_grids::grid_config_hints_2d;
     using lss_pde_solvers::heat_coefficient_data_config_2d;
     using lss_pde_solvers::heat_data_config_2d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -2363,11 +2434,11 @@ template <typename T> void testImplHestonEquationThomasLUSolverHundsdorferVerwer
     auto const &vertical_upper_boundary_ptr = std::make_shared<dirichlet_boundary_2d<T>>(dirichlet_high);
     // splitting method configuration:
     auto const &splitting_config_ptr =
-        std::make_shared<splitting_method_config<T>>(splitting_method_enum::HundsdorferVerwer, T{0.5});
+        std::make_shared<splitting_method_config<T>>(splitting_method_enum::HundsdorferVerwer);
     // default weighted scheme config:
     auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>(strike);
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_2d<T>>();
 
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, vertical_upper_boundary_ptr, horizontal_boundary_pair,
@@ -2383,7 +2454,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverHundsdorferVerwer
     ssa << "outputs/heston_lusolver_hundsdorfer_verwer_equation_approx_surf_" << typeid(T).name() << ".txt";
     std::string file_name_approx{ssa.str()};
     std::ofstream approx(file_name_approx);
-    print(discretization_ptr, solution, approx);
+    print(discretization_ptr, grid_config_hints_ptr, solution, approx);
     approx.close();
 }
 

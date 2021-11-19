@@ -47,6 +47,7 @@ class general_svc_heat_equation_builder
     heat_data_config_1d_ptr<fp_type> heat_data_config_;
     pde_discretization_config_1d_ptr<fp_type> discretization_config_;
     boundary_1d_pair<fp_type> boundary_pair_;
+    grid_config_hints_1d_ptr<fp_type> grid_hints_cfg_;
     heat_implicit_solver_config_ptr solver_config_;
     std::map<std::string, fp_type> solver_config_details_;
 
@@ -70,6 +71,12 @@ class general_svc_heat_equation_builder
         return *this;
     }
 
+    general_svc_heat_equation_builder &grid_hints(const grid_config_hints_1d_ptr<fp_type> &grid_hints)
+    {
+        grid_hints_cfg_ = grid_hints;
+        return *this;
+    }
+
     general_svc_heat_equation_builder &solver_config(const heat_implicit_solver_config_ptr &solver_config)
     {
         solver_config_ = solver_config;
@@ -86,7 +93,8 @@ class general_svc_heat_equation_builder
     sptr_t<general_svc_heat_equation<fp_type, container, allocator>> build()
     {
         return std::make_shared<general_svc_heat_equation<fp_type, container, allocator>>(
-            heat_data_config_, discretization_config_, boundary_pair_, solver_config_, solver_config_details_);
+            heat_data_config_, discretization_config_, boundary_pair_, grid_hints_cfg_, solver_config_,
+            solver_config_details_);
     }
 };
 
@@ -103,6 +111,7 @@ class general_svc_heat_equation_builder
     heat_data_config_1d_ptr<fp_type> heat_data_config_;
     pde_discretization_config_1d_ptr<fp_type> discretization_config_;
     boundary_1d_pair<fp_type> boundary_pair_;
+    grid_config_hints_1d_ptr<fp_type> grid_hints_cfg_;
     heat_explicit_solver_config_ptr solver_config_;
 
   public:
@@ -125,6 +134,12 @@ class general_svc_heat_equation_builder
         return *this;
     }
 
+    general_svc_heat_equation_builder &grid_hints(const grid_config_hints_1d_ptr<fp_type> &grid_hints)
+    {
+        grid_hints_cfg_ = grid_hints;
+        return *this;
+    }
+
     general_svc_heat_equation_builder &solver_config(const heat_explicit_solver_config_ptr &solver_config)
     {
         solver_config_ = solver_config;
@@ -134,7 +149,7 @@ class general_svc_heat_equation_builder
     sptr_t<general_svc_heat_equation<fp_type, container, allocator>> build()
     {
         return std::make_shared<general_svc_heat_equation<fp_type, container, allocator>>(
-            heat_data_config_, discretization_config_, boundary_pair_, solver_config_);
+            heat_data_config_, discretization_config_, boundary_pair_, grid_hints_cfg_, solver_config_);
     }
 };
 
