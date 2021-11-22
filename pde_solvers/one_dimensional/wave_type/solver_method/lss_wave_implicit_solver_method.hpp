@@ -27,8 +27,6 @@ using lss_boundary::neumann_boundary_1d;
 using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::by_enum;
-using lss_utility::coefficient_sevenlet_t;
-using lss_utility::function_2d_sevenlet_t; // ?
 using lss_utility::pair_t;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
@@ -61,7 +59,7 @@ class implicit_wave_scheme
             auto const &C = cfs->C_;
             auto const &D = cfs->D_;
             auto const k = cfs->k_;
-            auto const h = cfs->h_;
+            auto const h = grid_1d<fp_type>::step(grid_cfg);
             auto const lambda = one / (k * k);
 
             fp_type x{};
@@ -126,7 +124,7 @@ class implicit_wave_scheme
                 auto const &C = cfs->C_;
                 auto const &D = cfs->D_;
                 auto const k = cfs->k_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_cfg);
                 auto const lambda = one / (k * k);
                 fp_type x{};
 
@@ -207,7 +205,7 @@ class implicit_wave_scheme
             auto const &C = cfs->C_;
             auto const &D = cfs->D_;
             auto const k = cfs->k_;
-            auto const h = cfs->h_;
+            auto const h = grid_1d<fp_type>::step(grid_cfg);
             auto const lambda = cfs->lambda_;
             auto const one_gamma = (two * k);
 
@@ -264,7 +262,7 @@ class implicit_wave_scheme
                 auto const &C = cfs->C_;
                 auto const &D = cfs->D_;
                 auto const k = cfs->k_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_cfg);
                 auto const lambda = cfs->lambda_;
                 auto const one_gamma = (two * k);
 
@@ -339,7 +337,7 @@ class implicit_wave_scheme
             auto const &C = cfs->C_;
             auto const &D = cfs->D_;
             auto const k = cfs->k_;
-            auto const h = cfs->h_;
+            auto const h = grid_1d<fp_type>::step(grid_cfg);
             auto const lambda = cfs->lambda_;
             auto const one_gamma = (two * k);
 
@@ -396,7 +394,7 @@ class implicit_wave_scheme
                 auto const &C = cfs->C_;
                 auto const &D = cfs->D_;
                 auto const k = cfs->k_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_cfg);
                 auto const lambda = cfs->lambda_;
                 auto const one_gamma = (two * k);
 

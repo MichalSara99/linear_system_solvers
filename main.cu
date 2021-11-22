@@ -132,12 +132,12 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // testSORCUDADirichletBC();                                // -- tested
-    // testSORRobinBC();                                        // -- tested
-    // testSORCUDADirichletNeumannBC();                         // -- tested
-    // testSORCUDANeumannDirichletBC();                         // -- tested
-    // testSORCUDANeumannRobinBC();                             // -- tested
-    // testSORMixBC();                                          // -- tested
+    // testSORCUDADirichletBC();                                                    // -- tested
+    // testSORRobinBC();                                                            // -- tested
+    // testSORCUDADirichletNeumannBC();                                             // -- tested
+    // testSORCUDANeumannDirichletBC();                                             // -- tested
+    // testSORCUDANeumannRobinBC();                                                 // -- tested
+    // testSORMixBC();                                                              // -- tested
 
     // ====================================================================
 
@@ -146,8 +146,8 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // deviceDenseQRTest();                                     // -- tested
-    // deviceDenseLUTest();                                     // -- tested
+    // deviceDenseQRTest();                                                         // -- tested
+    // deviceDenseLUTest();                                                         // -- tested
 
     // ====================================================================
 
@@ -155,26 +155,26 @@ int main(int argc, char const *argv[])
     // ============== ONE_DIM: lss_pure_heat_equation_t.h =================
     // ====================================================================
 
-    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQR(); // -- tested
-    // testImplPureHeatEquationDirichletBCCUDASolverHostQR();   // -- tested
-    // testImplPureHeatEquationDirichletBCSORSolverDevice();    // -- tested
-    // testImplPureHeatEquationDirichletBCSORSolverHost();      // -- tested
-    // testImplPureHeatEquationDirichletBCDoubleSweepSolver();  // -- tested
-    // testImplPureHeatEquationDirichletBCThomasLUSolver();     // -- tested
+    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQR();                     // -- tested
+    // testImplPureHeatEquationDirichletBCCUDASolverHostQR();                       // -- tested
+    // testImplPureHeatEquationDirichletBCSORSolverDevice();                        // -- tested
+    // testImplPureHeatEquationDirichletBCSORSolverHost();                          // -- tested
+    // testImplPureHeatEquationDirichletBCDoubleSweepSolver();                      // -- tested
+    // testImplPureHeatEquationDirichletBCThomasLUSolver();                         // -- tested
     // with source:
-    // testImplPureHeatEquationSourceDirichletBCCUDASolverDeviceQR();   // -- tested
-    // testImplPureHeatEquationSourceDirichletBCSORSolverDeviceEuler(); // -- tested
+    // testImplPureHeatEquationSourceDirichletBCCUDASolverDeviceQR();               // -- tested
+    // testImplPureHeatEquationSourceDirichletBCSORSolverDeviceEuler();             // -- tested
     // neumann bc:
-    // testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();   // -- tested
-    // testImplPureHeatEquationNeumannBCThomasLUSolver();       // -- tested
-    // testImplPureHeatEquationNeumannBCDoubleSweepSolver();    // -- tested
+    // testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();                       // -- tested
+    // testImplPureHeatEquationNeumannBCThomasLUSolver();                           // -- tested
+    // testImplPureHeatEquationNeumannBCDoubleSweepSolver();                        // -- tested
 
-    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRStepping(); // -- tested 
+    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRStepping();             // -- tested 
 
     // explicit:
-    // testExplPureHeatEquationDirichletBCADE();                // -- tested
-    // testExplPureHeatEquationNeumannBCEuler();                // -- tested
-    // testExplPureHeatEquationDirichletBCDevice();             // -- tested
+    // testExplPureHeatEquationDirichletBCADE();                                    // -- tested
+    // testExplPureHeatEquationNeumannBCEuler();                                    // -- tested
+    // testExplPureHeatEquationDirichletBCDevice();                                 // -- tested
 
     // ====================================================================
 
@@ -182,18 +182,17 @@ int main(int argc, char const *argv[])
     // ============== ONE_DIM: lss_black_scholes_equation_t.h =============
     // ====================================================================
 
-    // testImplBlackScholesEquationDirichletBCCUDASolverDeviceQR(); // -- tested
-    // testImplBlackScholesEquationDirichletBCSORSolverDevice();    // -- tested
-    // testImplBlackScholesEquationDirichletBCSORSolverHost();      // -- tested
-    // testImplBlackScholesEquationDirichletBCDoubleSweepSolver();  // -- tested
-    // testImplBlackScholesEquationDirichletBCThomasLUSolver();     // -- tested
+    // testImplBlackScholesEquationDirichletBCCUDASolverDeviceQR();                 // -- tested
+    // testImplBlackScholesEquationDirichletBCSORSolverDevice();                    // -- tested
+    // testImplBlackScholesEquationDirichletBCSORSolverHost();                      // -- tested
+    // testImplBlackScholesEquationDirichletBCDoubleSweepSolver();                  // -- tested
+    // testImplBlackScholesEquationDirichletBCThomasLUSolver();                     // -- tested
+    // testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQR();              // -- tested
 
-    // testImplFwdBlackScholesEquationDirichletBCCUDASolverDeviceQR();  // -- tested
-
-    // testImplBlackScholesEquationDirichletBCThomasLUSolverStepping(); // -- tested
+    // testImplBlackScholesEquationDirichletBCThomasLUSolverStepping();             // -- tested
 
     // explicit:
-    // testExplBlackScholesEquationDirichletBCADE();                 // -- tested
+    // testExplBlackScholesEquationDirichletBCADE();                                // -- tested
 
     // ====================================================================
 
@@ -201,12 +200,12 @@ int main(int argc, char const *argv[])
     // ================= ONE_DIM: lss_advection_equation_t.h ==============
     // ====================================================================
 
-    // testImplAdvDiffEquationDirichletBCCUDASolverDeviceQR();      // -- tested
-    // testImplAdvDiffEquationDirichletBCSORSolverDevice();         // -- tested
-    // testImplAdvDiffEquationDirichletBCSORSolverHost();           // -- tested
-    // testImplAdvDiffEquationDirichletBCCUDASolverHostQR();        // -- tested
-    // testImplAdvDiffEquationDirichletBCDoubleSweepSolver();       // -- tested
-    // testImplAdvDiffEquationDirichletBCThomasLUSolver();          // -- tested
+    // testImplAdvDiffEquationDirichletBCCUDASolverDeviceQR();                      // -- tested
+    // testImplAdvDiffEquationDirichletBCSORSolverDevice();                         // -- tested
+    // testImplAdvDiffEquationDirichletBCSORSolverHost();                           // -- tested
+    // testImplAdvDiffEquationDirichletBCCUDASolverHostQR();                        // -- tested
+    // testImplAdvDiffEquationDirichletBCDoubleSweepSolver();                       // -- tested
+    // testImplAdvDiffEquationDirichletBCThomasLUSolver();                          // -- tested
 
     // ====================================================================
 
@@ -214,38 +213,38 @@ int main(int argc, char const *argv[])
     // ===================== ONE_DIM: lss_odes_2_degree_t.h ===============
     // ====================================================================
 
-    // testImplSimpleODEDirichletBCCUDASolverDevice();              // -- tested
-    // testImplSimpleODEDirichletNeumannBCCUDASolverDevice();       // -- tested
-    // testImplSimpleODEDirichletRobinBCCUDASolverDevice();         // -- tested
-    // testImplSimpleODENeumannRobinBCCUDASolverDevice();           // -- tested
-    // testImplSimpleODE1NeumannRobinBCCUDASolverDevice();          // -- tested
+    // testImplSimpleODEDirichletBCCUDASolverDevice();                              // -- tested
+    // testImplSimpleODEDirichletNeumannBCCUDASolverDevice();                       // -- tested
+    // testImplSimpleODEDirichletRobinBCCUDASolverDevice();                         // -- tested
+    // testImplSimpleODENeumannRobinBCCUDASolverDevice();                           // -- tested
+    // testImplSimpleODE1NeumannRobinBCCUDASolverDevice();                          // -- tested
 
     // ====================================================================
 
     // ====================================================================
     // ============================= lss_print_t.hpp ======================
     // ====================================================================
-    // testImplSimpleODEThomesLUPrint();                                        // -- tested
+    // testImplSimpleODEThomesLUPrint();                                            // -- tested
 
-    // testImplBlackScholesEquationDirichletBCThomasLUSolverPrint();            // -- tested
-    // testImplBlackScholesEquationDirichletBCThomasLUSolverPrintSurf();        // -- tested
-    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRPrintSurface();     // -- tested
-    // testExplPureHeatEquationNeumannBCEulerPrintSurface();                    // -- tested
-    // testImplAdvDiffEquationDirichletBCThomasLUSolverPrintSurface();          // -- tested
+    // testImplBlackScholesEquationDirichletBCThomasLUSolverPrint();                // -- tested
+    // testImplBlackScholesEquationDirichletBCThomasLUSolverPrintSurf();            // -- tested
+    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQRPrintSurface();         // -- tested
+    // testExplPureHeatEquationNeumannBCEulerPrintSurface();                        // -- tested
+    // testImplAdvDiffEquationDirichletBCThomasLUSolverPrintSurface();              // -- tested
 
-    // testImplPureWaveEquationDirichletBCCUDASolverDeviceQRPrintSurf();        // -- tested
-    // testImplWaveEquationDirichletBCSolverHostLUPrintSurf();                  // -- tested
-    // testImplWaveEquationDirichletBCSolverHostDoubleSweepPrintSurf();         // -- tested
-    // testImplPureWaveEquationNeumannBCCUDASolverDeviceQRPrintSurf();          // -- tested
-    // testExplPureWaveEquationDirichletBCCUDAHostSolverPrintSurf();            // -- tested
+    // testImplPureWaveEquationDirichletBCCUDASolverDeviceQRPrintSurf();            // -- tested
+    // testImplWaveEquationDirichletBCSolverHostLUPrintSurf();                      // -- tested
+    // testImplWaveEquationDirichletBCSolverHostDoubleSweepPrintSurf();             // -- tested
+    // testImplPureWaveEquationNeumannBCCUDASolverDeviceQRPrintSurf();              // -- tested
+    // testExplPureWaveEquationDirichletBCCUDAHostSolverPrintSurf();                // -- tested
 
-    // testImplHestonEquationCUDAQRSolverCrankNicolsonPrint();                  // -- tested
-    // testImplHestonEquationThomasLUSolverCrankNicolsonPrint();                // -- tested
-    // testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();               // -- tested
-    // testImplHestonEquationThomasLUSolverDouglasRachfordCrankNicolsonPrint();
-    // testImplHestonEquationThomasLUSolverCraigSneydCrankNicolsonPrint();
-    // testImplHestonEquationThomasLUSolverModCraigSneydCrankNicolsonPrint();
-    // testImplHestonEquationThomasLUSolverHundsdorferVerwerCrankNicolsonPrint();
+    // testImplHestonEquationCUDAQRSolverCrankNicolsonPrint();                      // -- tested
+    // testImplHestonEquationThomasLUSolverCrankNicolsonPrint();                    // -- tested
+    // testImplSABREquationDoubleSweepSolverCrankNicolsonPrint();                   // -- tested
+    // testImplHestonEquationThomasLUSolverDouglasRachfordCrankNicolsonPrint();     // -- tested
+    // testImplHestonEquationThomasLUSolverCraigSneydCrankNicolsonPrint();          // -- tested
+    // testImplHestonEquationThomasLUSolverModCraigSneydCrankNicolsonPrint();       // -- tested
+    // testImplHestonEquationThomasLUSolverHundsdorferVerwerCrankNicolsonPrint();   // -- tested
 
     // ====================================================================
 
@@ -253,19 +252,19 @@ int main(int argc, char const *argv[])
     // ============== ONE_DIM: lss_wave_heat_equation_t.h =================
     // ====================================================================
 
-    // testImplPureWaveEquationDirichletBCCUDASolverDeviceQR();     // -- tested
-    // testImplPureWaveEquationDirichletBCCUDASolverHostSOR();      // -- tested
-    // testImplPureWaveEquationDirichletBCCUDASolverDeviceSOR();    // -- tested
-    // testImplPureWaveEquationDirichletBCSolverDoubleSweep();      // -- tested
-    // testImplPureWaveEquationDirichletBCSolverLU();               // -- tested
-    // testImplWaveEquationDirichletBCSolverLU();                   // -- tested
-    // testImplDampedWaveEquationDirichletBCSolverDoubleSweep();    // -- tested
+    // testImplPureWaveEquationDirichletBCCUDASolverDeviceQR();                     // -- tested
+    // testImplPureWaveEquationDirichletBCCUDASolverHostSOR();                      // -- tested
+    // testImplPureWaveEquationDirichletBCCUDASolverDeviceSOR();                    // -- tested
+    // testImplPureWaveEquationDirichletBCSolverDoubleSweep();                      // -- tested
+    // testImplPureWaveEquationDirichletBCSolverLU();                               // -- tested
+    // testImplWaveEquationDirichletBCSolverLU();                                   // -- tested
+    // testImplDampedWaveEquationDirichletBCSolverDoubleSweep();                    // -- tested
 
-    // testImplPureWaveEquationNeumannBCCUDASolverDeviceQR();       // -- tested
+    // testImplPureWaveEquationNeumannBCCUDASolverDeviceQR();                       // -- tested
 
     // explicit:
-    // testExplPureWaveEquationDirichletBCCUDAHostSolver();         // -- tested
-    // testExplPureWaveEquationDirichletBCCUDADeviceSolver();       // -- tested
+    // testExplPureWaveEquationDirichletBCCUDAHostSolver();                         // -- tested
+    // testExplPureWaveEquationDirichletBCCUDADeviceSolver();                       // -- tested
 
     // ====================================================================
 

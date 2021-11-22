@@ -6,8 +6,8 @@
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
-#include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/transformation/lss_heat_data_transform.hpp"
 
 namespace lss_pde_solvers
 {
@@ -21,7 +21,7 @@ template <typename fp_type> struct general_svc_heat_equation_implicit_coefficien
 {
   public:
     // scheme coefficients:
-    fp_type lambda_, gamma_, delta_, h_, k_;
+    fp_type lambda_, gamma_, delta_, k_;
     std::size_t space_size_;
     range<fp_type> range_;
     // theta variable:
@@ -36,21 +36,21 @@ template <typename fp_type> struct general_svc_heat_equation_implicit_coefficien
     {
         // get space range:
         range_ = discretization_config->space_range();
-        // get space step:
-        h_ = discretization_config->space_step();
         // get time step:
         k_ = discretization_config->time_step();
         // size of spaces discretization:
         space_size_ = discretization_config->number_of_space_points();
+        const fp_type one = static_cast<fp_type>(1.0);
         const fp_type two = static_cast<fp_type>(2.0);
         const fp_type half = static_cast<fp_type>(0.5);
+        auto const h = one / (space_size_ - 1);
         // calculate scheme coefficients:
-        lambda_ = k_ / (h_ * h_);
-        gamma_ = k_ / (two * h_);
+        lambda_ = k_ / (h * h);
+        gamma_ = k_ / (two * h);
         delta_ = half * k_;
     }
 
-    void initialize_coefficients(heat_data_config_1d_ptr<fp_type> const &heat_data_config)
+    void initialize_coefficients(heat_data_transform_1d_ptr<fp_type> const &heat_data_config)
     {
         // save coefficients locally:
         auto const a = heat_data_config->a_coefficient();
@@ -66,7 +66,7 @@ template <typename fp_type> struct general_svc_heat_equation_implicit_coefficien
     general_svc_heat_equation_implicit_coefficients() = delete;
 
     explicit general_svc_heat_equation_implicit_coefficients(
-        heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+        heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
         pde_discretization_config_1d_ptr<fp_type> const &discretization_config, fp_type const &theta)
         : theta_{theta}
     {

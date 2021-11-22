@@ -13,6 +13,7 @@
 #include "implicit_coefficients/lss_1d_general_svc_heat_equation_implicit_coefficients.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/transformation/lss_heat_data_transform.hpp"
 #include "solver_method/lss_heat_implicit_solver_method.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
@@ -277,14 +278,14 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               heat_implicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)
@@ -415,14 +416,14 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               heat_implicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)
@@ -551,14 +552,14 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               heat_implicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)
@@ -684,14 +685,14 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               heat_implicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)
@@ -817,14 +818,14 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               heat_implicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)
@@ -951,14 +952,14 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    heat_data_config_1d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_1d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     heat_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               heat_implicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)

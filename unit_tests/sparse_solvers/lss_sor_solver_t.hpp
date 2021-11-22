@@ -166,7 +166,7 @@ template <typename T> void testBVPSORNeumannRobinBC()
     using lss_boundary::neumann_boundary_1d;
     using lss_boundary::robin_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_grids::uniform_grid_config_1d;
+    using lss_grids::grid_config_1d;
     using lss_ode_solvers::ode_discretization_config;
     using lss_sor_solver::sor_solver;
     using lss_utility::range;
@@ -219,7 +219,7 @@ template <typename T> void testBVPSORNeumannRobinBC()
     std::vector<T> rhs(N, T{});
 
     auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<T>>(ode_discretization);
 
     d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
@@ -275,7 +275,7 @@ template <typename T> void testBVPSORDirichletNeumannBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_grids::uniform_grid_config_1d;
+    using lss_grids::grid_config_1d;
     using lss_ode_solvers::ode_discretization_config;
     using lss_sor_solver::sor_solver;
     using lss_utility::range;
@@ -326,7 +326,7 @@ template <typename T> void testBVPSORDirichletNeumannBC()
     std::vector<T> rhs(N, T{});
 
     auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<T>>(ode_discretization);
 
     d_1d::of_function(grid_cfg, rhs_fun, rhs);
 
@@ -370,7 +370,7 @@ template <typename T> void testBVPSORNeumannDirichletBC()
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
     using lss_enumerations::memory_space_enum;
-    using lss_grids::uniform_grid_config_1d;
+    using lss_grids::grid_config_1d;
     using lss_ode_solvers::ode_discretization_config;
     using lss_sor_solver::sor_solver;
     using lss_utility::range;
@@ -421,7 +421,7 @@ template <typename T> void testBVPSORNeumannDirichletBC()
     std::vector<T> rhs(N, T{});
 
     auto const &ode_discretization = std::make_shared<ode_discretization_config<T>>(space_range, N);
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<T>>(ode_discretization);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<T>>(ode_discretization);
 
     d_1d::of_function(grid_cfg, rhs_fun, rhs);
 

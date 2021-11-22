@@ -49,28 +49,28 @@ class wave_euler_svc_cuda_time_loop
   public:
     template <typename solver>
     static void run(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
-                    range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
-                    container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution);
+                    range<fp_type> const &time_range, std::size_t const &last_time_idx, fp_type const time_step,
+                    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+                    container_t &prev_solution_1, container_t &next_solution);
 
     template <typename solver>
     static void run(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
-                    range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
-                    container_t &prev_solution_0, container_t &prev_solution_1,
-                    std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &next_solution);
+                    range<fp_type> const &time_range, std::size_t const &last_time_idx, fp_type const time_step,
+                    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0,
+                    container_t &prev_solution_1, std::function<fp_type(fp_type, fp_type)> const &wave_source,
+                    container_t &next_solution);
 
     template <typename solver>
     static void run_with_stepping(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                                  std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                                  fp_type const time_step, traverse_direction_enum const &traverse_dir,
                                   container_t &prev_solution_0, container_t &prev_solution_1,
                                   container_t &next_solution, container_2d_t &solutions);
 
     template <typename solver>
     static void run_with_stepping(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                                  std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                                  fp_type const time_step, traverse_direction_enum const &traverse_dir,
                                   container_t &prev_solution_0, container_t &prev_solution_1,
                                   std::function<fp_type(fp_type, fp_type)> const &wave_source,
                                   container_t &next_solution, container_2d_t &solutions);
@@ -80,13 +80,12 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void wave_euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0, container_t &prev_solution_1,
-    container_t &next_solution)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution)
 {
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     // create host vectors:
     const std::size_t sol_size = prev_solution_0.size();
     thrust::host_vector<fp_type> h_solution_0(sol_size);
@@ -152,13 +151,13 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void wave_euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0, container_t &prev_solution_1,
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &prev_solution_0, container_t &prev_solution_1,
     std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &next_solution)
 {
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     fp_type time{start_time};
     fp_type next_time{time + k};
     std::size_t time_idx{};
@@ -228,13 +227,12 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void wave_euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0, container_t &prev_solution_1,
-    container_t &next_solution, container_2d_t &solutions)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution, container_2d_t &solutions)
 {
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     fp_type time{start_time};
     fp_type next_time{time + k};
     std::size_t time_idx{};
@@ -313,13 +311,13 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void wave_euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &prev_solution_0, container_t &prev_solution_1,
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &prev_solution_0, container_t &prev_solution_1,
     std::function<fp_type(fp_type, fp_type)> const &wave_source, container_t &next_solution, container_2d_t &solutions)
 {
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     fp_type time{start_time};
     fp_type next_time{time + k};
     std::size_t time_idx{};
@@ -415,7 +413,7 @@ class wave_euler_svc_cuda_scheme
     {
         auto const &b = euler_coeffs_->b_;
         const fp_type k = euler_coeffs_->k_;
-        const fp_type h = euler_coeffs_->h_;
+        const fp_type h = grid_1d<fp_type>::step(grid_cfg_);
         const fp_type ratio = h / k;
         const std::size_t space_size = discretization_cfg_->number_of_space_points();
         fp_type x{};
@@ -456,21 +454,19 @@ class wave_euler_svc_cuda_scheme
     {
         const range<fp_type> timer = discretization_cfg_->time_range();
         const fp_type k = discretization_cfg_->time_step();
-        const fp_type h = discretization_cfg_->space_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &steps = std::make_pair(k, h);
         auto const &solver_method_ptr =
             std::make_shared<wave_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
         if (is_wave_sourse_set)
         {
 
-            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir, prev_solution_0,
+            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, prev_solution_0,
                       prev_solution_1, wave_source, next_solution);
         }
         else
         {
-            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir, prev_solution_0,
+            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, prev_solution_0,
                       prev_solution_1, next_solution);
         }
     }
@@ -482,21 +478,19 @@ class wave_euler_svc_cuda_scheme
     {
         const range<fp_type> timer = discretization_cfg_->time_range();
         const fp_type k = discretization_cfg_->time_step();
-        const fp_type h = discretization_cfg_->space_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &steps = std::make_pair(k, h);
         auto const &solver_method_ptr =
             std::make_shared<wave_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
         if (is_wave_sourse_set)
         {
 
-            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir,
+            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir,
                                     prev_solution_0, prev_solution_1, wave_source, next_solution, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir,
+            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir,
                                     prev_solution_0, prev_solution_1, next_solution, solutions);
         }
     }

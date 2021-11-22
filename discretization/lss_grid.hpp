@@ -4,6 +4,7 @@
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
 #include "lss_grid_config.hpp"
+#include "lss_grid_transform_config.hpp"
 #include <functional>
 
 namespace lss_grids
@@ -27,7 +28,22 @@ template <typename fp_type> struct grid<dimension_enum::One, fp_type>
   public:
     static fp_type value(grid_config_1d_ptr<fp_type> const &grid_config, std::size_t const &idx)
     {
-        return (grid_config->init() + grid_config->gen_function(idx));
+        return grid_config->value_for(idx);
+    }
+
+    static fp_type step(grid_config_1d_ptr<fp_type> const &grid_config)
+    {
+        return grid_config->step();
+    }
+
+    static std::size_t index_of(grid_config_1d_ptr<fp_type> const &grid_config, fp_type zeta)
+    {
+        return grid_config->index_of(zeta);
+    }
+
+    static fp_type transformed_value(grid_transform_config_1d_ptr<fp_type> const &grid_trans_config, fp_type zeta)
+    {
+        return grid_trans_config->value_for(zeta);
     }
 };
 
@@ -39,12 +55,42 @@ template <typename fp_type> struct grid<dimension_enum::Two, fp_type>
   public:
     static fp_type value_1(grid_config_2d_ptr<fp_type> const &grid_config, std::size_t const &idx)
     {
-        return (grid_config->init_1() + grid_config->gen_function_1(idx));
+        return grid_config->value_for_1(idx);
     }
 
     static fp_type value_2(grid_config_2d_ptr<fp_type> const &grid_config, std::size_t const &idx)
     {
-        return (grid_config->init_2() + grid_config->gen_function_2(idx));
+        return grid_config->value_for_2(idx);
+    }
+
+    static fp_type step_1(grid_config_2d_ptr<fp_type> const &grid_config)
+    {
+        return grid_config->step_1();
+    }
+
+    static fp_type step_2(grid_config_2d_ptr<fp_type> const &grid_config)
+    {
+        return grid_config->step_2();
+    }
+
+    static std::size_t index_of_1(grid_config_2d_ptr<fp_type> const &grid_config, fp_type zeta)
+    {
+        return grid_config->index_of_1(zeta);
+    }
+
+    static std::size_t index_of_2(grid_config_2d_ptr<fp_type> const &grid_config, fp_type eta)
+    {
+        return grid_config->index_of_2(eta);
+    }
+
+    static fp_type transformed_value_1(grid_transform_config_2d_ptr<fp_type> const &grid_trans_config, fp_type zeta)
+    {
+        return grid_trans_config->value_for_1(zeta);
+    }
+
+    static fp_type transformed_value_2(grid_transform_config_2d_ptr<fp_type> const &grid_trans_config, fp_type eta)
+    {
+        return grid_trans_config->value_for_2(eta);
     }
 };
 

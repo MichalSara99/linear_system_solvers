@@ -233,14 +233,9 @@ template <typename fp_type> struct wave_data_config<dimension_enum::One, fp_type
     {
     }
 
-    bool is_wave_source_set() const
+    wave_source_data_config_1d_ptr<fp_type> const &source_data_config() const
     {
-        return (source_data_cfg_ != nullptr) ? true : false;
-    }
-
-    std::function<fp_type(fp_type, fp_type)> const &wave_source() const
-    {
-        return source_data_cfg_->wave_source();
+        return source_data_cfg_;
     }
 
     std::function<fp_type(fp_type)> const &first_initial_condition() const

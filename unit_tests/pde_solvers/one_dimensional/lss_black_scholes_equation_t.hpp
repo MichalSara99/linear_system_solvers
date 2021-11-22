@@ -19,8 +19,11 @@
 template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDeviceQREuler()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -77,7 +80,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
                          dev_bwd_cusolver_qr_euler_solver_config_ptr);
@@ -88,12 +93,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -102,8 +111,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
 template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDeviceQRCrankNicolson()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -160,7 +172,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
                          dev_bwd_cusolver_qr_cn_solver_config_ptr);
@@ -171,12 +185,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -199,8 +217,11 @@ void testImplBlackScholesEquationDirichletBCCUDASolverDeviceQR()
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDeviceEuler()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -257,7 +278,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
@@ -271,12 +294,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -285,8 +312,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDeviceCrankNicolson()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -343,7 +373,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
@@ -357,12 +389,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -385,8 +421,11 @@ void testImplBlackScholesEquationDirichletBCSORSolverDevice()
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostEuler()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -443,7 +482,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostE
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
@@ -457,12 +498,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostE
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -471,8 +516,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostE
 template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostCrankNicolson()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -529,7 +577,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostC
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
@@ -543,12 +593,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostC
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -571,8 +625,11 @@ void testImplBlackScholesEquationDirichletBCSORSolverHost()
 template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSolverEuler()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -629,7 +686,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
                          host_bwd_dssolver_euler_solver_config_ptr);
@@ -640,12 +699,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -654,8 +717,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
 template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSolverCrankNicolson()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -712,7 +778,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_high);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(strike, alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
     pde_solver pdesolver(heat_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
                          host_bwd_dssolver_cn_solver_config_ptr);
@@ -723,12 +791,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -752,7 +824,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -820,12 +894,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -835,7 +913,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -903,12 +983,16 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -933,7 +1017,9 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1002,12 +1088,16 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     // get exact solution:
     black_scholes_exact<T> bs_exact(fwd_start, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -1017,7 +1107,9 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1086,12 +1178,16 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     // get exact solution:
     black_scholes_exact<T> bs_exact(fwd_start, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -1118,7 +1214,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1188,8 +1286,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
     T const k = discretization_ptr->time_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t t = 0; t < solutions.rows(); ++t)
@@ -1197,7 +1298,8 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
         std::cout << "time: " << t * k << ":\n";
         for (std::size_t j = 0; j < solutions.columns(); ++j)
         {
-            benchmark = bs_exact.call(j * h, maturity - t * k);
+            x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+            benchmark = bs_exact.call(x, maturity - t * k);
             std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
                       << (solutions(t, j) - benchmark) << '\n';
         }
@@ -1210,7 +1312,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_containers::container_2d;
     using lss_enumerations::by_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1281,8 +1385,11 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
     T const k = discretization_ptr->time_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t t = 0; t < solutions.rows(); ++t)
@@ -1290,7 +1397,8 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
         std::cout << "time: " << t * k << ":\n";
         for (std::size_t j = 0; j < solutions.columns(); ++j)
         {
-            benchmark = bs_exact.call(j * h, maturity - t * k);
+            x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+            benchmark = bs_exact.call(x, maturity - t * k);
             std::cout << "t_" << j << ": " << solutions(t, j) << " |  " << benchmark << " | "
                       << (solutions(t, j) - benchmark) << '\n';
         }
@@ -1321,7 +1429,9 @@ template <typename T> void testExplBlackScholesEquationDirichletBCBarakatClark()
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_explicit_solver_config;
@@ -1389,12 +1499,16 @@ template <typename T> void testExplBlackScholesEquationDirichletBCBarakatClark()
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -1404,7 +1518,9 @@ template <typename T> void testExplBlackScholesEquationDirichletBCSaulyev()
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_explicit_solver_config;
@@ -1472,12 +1588,16 @@ template <typename T> void testExplBlackScholesEquationDirichletBCSaulyev()
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -1487,7 +1607,9 @@ template <typename T> void testExplBlackScholesEquationDirichletBCEuler()
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::explicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_explicit_solver_config;
@@ -1555,12 +1677,16 @@ template <typename T> void testExplBlackScholesEquationDirichletBCEuler()
     // get exact solution:
     black_scholes_exact<T> bs_exact(0.0, strike, rate, sig, maturity);
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = bs_exact.call(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = bs_exact.call(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }

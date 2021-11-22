@@ -65,7 +65,7 @@ class explicit_wave_svc_scheme
                 auto const &b = cfs->B_;
                 auto const &c = cfs->C_;
                 auto const &d = cfs->D_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_config);
                 fp_type x{};
                 // for lower boundaries first:
                 x = grid_1d<fp_type>::value(grid_config, 0);
@@ -122,7 +122,7 @@ class explicit_wave_svc_scheme
                 auto const &b = cfs->B_;
                 auto const &c = cfs->C_;
                 auto const &d = cfs->D_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_config);
                 fp_type x{};
                 // for lower boundaries first:
                 x = grid_1d<fp_type>::value(grid_config, 0);
@@ -196,7 +196,7 @@ class explicit_wave_svc_scheme
             auto const &b = cfs->B_;
             auto const &c = cfs->C_;
             auto const &d = cfs->D_;
-            auto const h = cfs->h_;
+            auto const h = grid_1d<fp_type>::step(grid_config);
             auto const k = cfs->k_;
             auto const one_gamma = (two * k);
             auto const &defl = [&](fp_type x) { return (one + d(x)); };
@@ -261,7 +261,7 @@ class explicit_wave_svc_scheme
                 auto const &b = cfs->B_;
                 auto const &c = cfs->C_;
                 auto const &d = cfs->D_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_config);
                 auto const k = cfs->k_;
                 auto const &defl = [=](fp_type x) { return (one + d(x)); };
                 auto const &A = [=](fp_type x) { return (a(x) / defl(x)); };
@@ -341,7 +341,7 @@ class explicit_wave_svc_scheme
                 auto const &b = cfs->B_;
                 auto const &c = cfs->C_;
                 auto const &d = cfs->D_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_config);
                 auto const k = cfs->k_;
                 auto const &defl = [=](fp_type x) { return (one + d(x)); };
                 auto const &A = [=](fp_type x) { return (a(x) / defl(x)); };
@@ -407,7 +407,7 @@ class explicit_wave_svc_scheme
                 auto const &b = cfs->B_;
                 auto const &c = cfs->C_;
                 auto const &d = cfs->D_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_config);
                 auto const k = cfs->k_;
                 auto const &defl = [=](fp_type x) { return (one + d(x)); };
                 auto const &A = [=](fp_type x) { return (a(x) / defl(x)); };

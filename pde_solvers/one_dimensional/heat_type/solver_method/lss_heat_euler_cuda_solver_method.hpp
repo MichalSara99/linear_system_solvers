@@ -173,7 +173,7 @@ template <typename fp_type> class explicit_heat_svc_cuda_scheme
                 auto const &a = cfs->A_;
                 auto const &b = cfs->B_;
                 auto const &d = cfs->D_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_config);
                 fp_type x{};
                 // for lower boundaries first:
                 x = grid_1d<fp_type>::value(grid_config, 0);
@@ -228,7 +228,7 @@ template <typename fp_type> class explicit_heat_svc_cuda_scheme
                 auto const &b = cfs->B_;
                 auto const &d = cfs->D_;
                 auto const k = cfs->k_;
-                auto const h = cfs->h_;
+                auto const h = grid_1d<fp_type>::step(grid_config);
                 fp_type x{};
 
                 // for lower boundaries first:

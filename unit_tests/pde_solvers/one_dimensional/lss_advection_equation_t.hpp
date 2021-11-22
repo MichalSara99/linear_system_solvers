@@ -22,7 +22,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -102,12 +104,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 30);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 30);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -117,7 +123,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -197,12 +205,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 30);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 30);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -226,7 +238,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -309,12 +323,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -324,7 +342,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -407,12 +427,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -436,7 +460,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -519,12 +545,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -534,7 +564,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -617,12 +649,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -646,7 +682,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -724,12 +762,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -739,7 +781,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -819,12 +863,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -848,7 +896,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -928,12 +978,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -943,7 +997,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1023,12 +1079,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -1052,7 +1112,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1131,12 +1193,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
         }
         return (first * sum);
     };
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -1146,7 +1212,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::heat_coefficient_data_config_1d;
     using lss_pde_solvers::heat_data_config_1d;
     using lss_pde_solvers::heat_implicit_solver_config;
@@ -1226,12 +1294,16 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
         return (first * sum);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }

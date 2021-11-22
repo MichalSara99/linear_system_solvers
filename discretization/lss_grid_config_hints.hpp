@@ -21,31 +21,25 @@ template <dimension_enum dimension, typename fp_type> struct grid_config_hints
 template <typename fp_type> struct grid_config_hints<dimension_enum::One, fp_type>
 {
   private:
-    fp_type strike_;
-    fp_type p_scale_;
-    fp_type c_scale_;
+    fp_type accumulation_point_;
+    fp_type alpha_scale_;
     grid_enum grid_;
 
   public:
-    explicit grid_config_hints(fp_type strike = fp_type(0.0), fp_type p_scale = fp_type(8.4216),
-                               fp_type c_scale = fp_type(0.1), grid_enum grid_type = grid_enum::Uniform)
-        : strike_{strike}, p_scale_{p_scale}, c_scale_{c_scale}, grid_{grid_type}
+    explicit grid_config_hints(fp_type accumulation_point = fp_type(0.0), fp_type alpha_scale = fp_type(3.0),
+                               grid_enum grid_type = grid_enum::Uniform)
+        : accumulation_point_{accumulation_point}, alpha_scale_{alpha_scale}, grid_{grid_type}
     {
     }
 
-    inline fp_type strike() const
+    inline fp_type accumulation_point() const
     {
-        return strike_;
+        return accumulation_point_;
     }
 
-    inline fp_type p_scale() const
+    inline fp_type alpha_scale() const
     {
-        return p_scale_;
-    }
-
-    inline fp_type c_scale() const
-    {
-        return c_scale_;
+        return alpha_scale_;
     }
 
     inline grid_enum grid() const
@@ -60,38 +54,31 @@ template <typename fp_type> struct grid_config_hints<dimension_enum::One, fp_typ
 template <typename fp_type> struct grid_config_hints<dimension_enum::Two, fp_type>
 {
   private:
-    fp_type strike_;
-    fp_type p_scale_;
-    fp_type c_scale_;
-    fp_type d_scale_;
+    fp_type accumulation_point_;
+    fp_type alpha_scale_;
+    fp_type beta_scale_;
     grid_enum grid_;
 
   public:
-    explicit grid_config_hints(fp_type strike = fp_type(0.0), fp_type p_scale = fp_type(8.4216),
-                               fp_type c_scale = fp_type(0.1), fp_type d_scale = fp_type(2.0),
-                               grid_enum grid_type = grid_enum::Uniform)
-        : strike_{strike}, p_scale_{p_scale}, c_scale_{c_scale}, d_scale_{d_scale}, grid_{grid_type}
+    explicit grid_config_hints(fp_type accumulation_point = fp_type(0.0), fp_type alpha_scale = fp_type(3.0),
+                               fp_type beta_scale = fp_type(50.0), grid_enum grid_type = grid_enum::Uniform)
+        : accumulation_point_{accumulation_point}, alpha_scale_{alpha_scale}, beta_scale_{beta_scale}, grid_{grid_type}
     {
     }
 
-    inline fp_type strike() const
+    inline fp_type accumulation_point() const
     {
-        return strike_;
+        return accumulation_point_;
     }
 
-    inline fp_type p_scale() const
+    inline fp_type alpha_scale() const
     {
-        return p_scale_;
+        return alpha_scale_;
     }
 
-    inline fp_type c_scale() const
+    inline fp_type beta_scale() const
     {
-        return c_scale_;
-    }
-
-    inline fp_type d_scale() const
-    {
-        return d_scale_;
+        return beta_scale_;
     }
 
     inline grid_enum grid() const

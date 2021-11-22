@@ -13,6 +13,8 @@
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_data_config.hpp"
 #include "pde_solvers/lss_wave_solver_config.hpp"
+#include "pde_solvers/transformation/lss_boundary_transform.hpp"
+#include "pde_solvers/transformation/lss_wave_data_transform.hpp"
 
 namespace lss_pde_solvers
 {
@@ -54,40 +56,50 @@ class general_svc_wave_equation
 {
 
   private:
-    boundary_1d_pair<fp_type> boundary_pair_;
-    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
+    wave_data_transform_1d_ptr<fp_type> wave_data_trans_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    boundary_transform_1d_ptr<fp_type> boundary_;
+    grid_transform_config_1d_ptr<fp_type> grid_trans_cfg_; // this may be removed as it is not used later
     wave_implicit_solver_config_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
     explicit general_svc_wave_equation() = delete;
 
-    void initialize()
+    void initialize(wave_data_config_1d_ptr<fp_type> const &wave_data_cfg,
+                    grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
+                    boundary_1d_pair<fp_type> const &boundary_pair)
     {
-        LSS_VERIFY(wave_data_cfg_, "wave_data_config must not be null");
+        LSS_VERIFY(wave_data_cfg, "wave_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
+        LSS_VERIFY(std::get<0>(boundary_pair), "boundary_pair.first must not be null");
+        LSS_VERIFY(std::get<1>(boundary_pair), "boundary_pair.second must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
         if (!solver_config_details_.empty())
         {
             auto const &it = solver_config_details_.find("sor_omega");
             LSS_ASSERT(it != solver_config_details_.end(), "sor_omega is not defined");
         }
+        // make necessary transformations:
+        // create grid_transform_config:
+        grid_trans_cfg_ = std::make_shared<grid_transform_config_1d<fp_type>>(discretization_cfg_, grid_config_hints);
+        // transform original wave data:
+        wave_data_trans_cfg_ = std::make_shared<wave_data_transform_1d<fp_type>>(wave_data_cfg, grid_trans_cfg_);
+        // transform original boundary:
+        boundary_ = std::make_shared<boundary_transform_1d<fp_type>>(boundary_pair, grid_trans_cfg_);
     }
 
   public:
     explicit general_svc_wave_equation(
         wave_data_config_1d_ptr<fp_type> const &wave_data_config,
         pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-        boundary_1d_pair<fp_type> const &boundary_pair,
+        boundary_1d_pair<fp_type> const &boundary_pair, grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
         wave_implicit_solver_config_ptr const &solver_config =
             default_wave_solver_configs::dev_fwd_cusolver_qr_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
-        : wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
-          solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
+        : discretization_cfg_{discretization_config}, solver_cfg_{solver_config}, solver_config_details_{
+                                                                                      solver_config_details}
     {
-        initialize();
+        initialize(wave_data_config, grid_config_hints, boundary_pair);
     }
 
     ~general_svc_wave_equation()
@@ -121,34 +133,27 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     typedef container<fp_type, allocator> container_t;
 
     LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized");
-
-    // get space range:
-    const range<fp_type> space = discretization_cfg_->space_range();
-    // get space step:
-    const fp_type h = discretization_cfg_->space_step();
-    // time step:
-    const fp_type k = discretization_cfg_->time_step();
     // size of space discretization:
     const std::size_t space_size = discretization_cfg_->number_of_space_points();
     // This is the proper size of the container:
     LSS_ASSERT(solution.size() == space_size, "The input solution container must have the correct size");
     // grid:
-    // for now lets stick to uniform:
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &boundary_pair = boundary_->boundary_pair();
     // create container to carry previous solution:
     container_t prev_sol_0(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(grid_cfg, wave_data_cfg_->first_initial_condition(), prev_sol_0);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->first_initial_condition(), prev_sol_0);
     // create container to carry second initial condition:
     container_t prev_sol_1(space_size, fp_type{});
     // discretize first order initial condition:
-    d_1d::of_function(grid_cfg, wave_data_cfg_->second_initial_condition(), prev_sol_1);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->second_initial_condition(), prev_sol_1);
     // create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
     // get heat_source:
-    const bool is_wave_source_set = wave_data_cfg_->is_wave_source_set();
+    const bool is_wave_source_set = wave_data_trans_cfg_->is_wave_source_set();
     // get heat_source:
-    auto const &wave_source = wave_data_cfg_->wave_source();
+    auto const &wave_source = wave_data_trans_cfg_->wave_source();
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
@@ -158,7 +163,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
-            dev_cu_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            dev_cu_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source);
             std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
@@ -169,7 +174,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            dev_sor_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            dev_sor_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, omega_value);
             std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
@@ -185,7 +190,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 host_cu_solver;
-            host_cu_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_cu_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source);
             std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
@@ -197,7 +202,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            host_sor_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_sor_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, omega_value);
             std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
@@ -206,7 +211,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
-            host_dss_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_dss_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source);
             std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
@@ -215,7 +220,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
-            host_lus_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_lus_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source);
             std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
         }
@@ -239,13 +244,6 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
 
     LSS_ASSERT(((solutions.columns() > 0) && (solutions.rows() > 0)),
                "The input solution 2D container must be initialized");
-
-    // get space range:
-    const range<fp_type> space = discretization_cfg_->space_range();
-    // get space step:
-    const fp_type h = discretization_cfg_->space_step();
-    // time step:
-    const fp_type k = discretization_cfg_->time_step();
     // size of space discretization:
     const std::size_t space_size = discretization_cfg_->number_of_space_points();
     // size of time discretization:
@@ -254,22 +252,22 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
                "The input solution 2D container must have the correct size");
     // grid:
-    // for now lets stick to uniform:
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &boundary_pair = boundary_->boundary_pair();
     // create container to carry previous solution:
     container_t prev_sol_0(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(grid_cfg, wave_data_cfg_->first_initial_condition(), prev_sol_0);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->first_initial_condition(), prev_sol_0);
     // create container to carry second initial condition:
     container_t prev_sol_1(space_size, fp_type{});
     // discretize first order initial condition:
-    d_1d::of_function(grid_cfg, wave_data_cfg_->second_initial_condition(), prev_sol_1);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->second_initial_condition(), prev_sol_1);
     // create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
     // get heat_source:
-    const bool is_wave_source_set = wave_data_cfg_->is_wave_source_set();
+    const bool is_wave_source_set = wave_data_trans_cfg_->is_wave_source_set();
     // get heat_source:
-    auto const &wave_source = wave_data_cfg_->wave_source();
+    auto const &wave_source = wave_data_trans_cfg_->wave_source();
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
@@ -279,7 +277,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
-            dev_cu_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            dev_cu_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
@@ -289,7 +287,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            dev_sor_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            dev_sor_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, omega_value, solutions);
         }
         else
@@ -305,7 +303,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 host_cu_solver;
-            host_cu_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_cu_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
@@ -316,7 +314,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
-            host_sor_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_sor_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, omega_value, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
@@ -324,7 +322,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
-            host_dss_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_dss_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, solutions);
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
@@ -332,7 +330,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
             typedef general_svc_wave_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
-            host_lus_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+            host_lus_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, solutions);
         }
         else
@@ -356,32 +354,43 @@ template <typename fp_type, template <typename, typename> typename container = s
 class general_svc_wave_equation
 {
   private:
-    boundary_1d_pair<fp_type> boundary_pair_;
-    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
+    wave_data_transform_1d_ptr<fp_type> wave_data_trans_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
+    boundary_transform_1d_ptr<fp_type> boundary_;
+    grid_transform_config_1d_ptr<fp_type> grid_trans_cfg_; // this may be removed as it is not used later
     wave_explicit_solver_config_ptr solver_cfg_;
 
     explicit general_svc_wave_equation() = delete;
 
-    void initialize()
+    void initialize(wave_data_config_1d_ptr<fp_type> const &wave_data_cfg,
+                    grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
+                    boundary_1d_pair<fp_type> const &boundary_pair)
     {
-        LSS_VERIFY(wave_data_cfg_, "wave_data_config must not be null");
+        LSS_VERIFY(wave_data_cfg, "wave_data_config must not be null");
         LSS_VERIFY(discretization_cfg_, "discretization_config must not be null");
-        LSS_VERIFY(std::get<0>(boundary_pair_), "boundary_pair.first must not be null");
-        LSS_VERIFY(std::get<1>(boundary_pair_), "boundary_pair.second must not be null");
+        LSS_VERIFY(std::get<0>(boundary_pair), "boundary_pair.first must not be null");
+        LSS_VERIFY(std::get<1>(boundary_pair), "boundary_pair.second must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
+
+        // make necessary transformations:
+        // create grid_transform_config:
+        grid_trans_cfg_ = std::make_shared<grid_transform_config_1d<fp_type>>(discretization_cfg_, grid_config_hints);
+        // transform original wave data:
+        wave_data_trans_cfg_ = std::make_shared<wave_data_transform_1d<fp_type>>(wave_data_cfg, grid_trans_cfg_);
+        // transform original boundary:
+        boundary_ = std::make_shared<boundary_transform_1d<fp_type>>(boundary_pair, grid_trans_cfg_);
     }
 
   public:
     explicit general_svc_wave_equation(wave_data_config_1d_ptr<fp_type> const &wave_data_config,
                                        pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                        boundary_1d_pair<fp_type> const &boundary_pair,
+                                       grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
                                        wave_explicit_solver_config_ptr const &solver_config =
                                            default_wave_solver_configs::dev_expl_fwd_solver_config_ptr)
-        : wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config}, boundary_pair_{boundary_pair},
-          solver_cfg_{solver_config}
+        : discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {
-        initialize();
+        initialize(wave_data_config, grid_config_hints, boundary_pair);
     }
 
     ~general_svc_wave_equation()
@@ -415,31 +424,25 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     typedef container<fp_type, allocator> container_t;
 
     LSS_ASSERT(solution.size() > 0, "The input solution container must be initialized");
-    // get space range:
-    const range<fp_type> space = discretization_cfg_->space_range();
-    // get space step:
-    const fp_type h = discretization_cfg_->space_step();
-    // time step:
-    const fp_type k = discretization_cfg_->time_step();
     // size of space discretization:
     const std::size_t space_size = discretization_cfg_->number_of_space_points();
     // This is the proper size of the container:
     LSS_ASSERT((solution.size() == space_size), "The input solution container must have the correct size");
     // grid:
-    // for now lets stick to uniform:
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &boundary_pair = boundary_->boundary_pair();
     // create container to carry previous solution:
     container_t prev_sol_0(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(grid_cfg, wave_data_cfg_->first_initial_condition(), prev_sol_0);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->first_initial_condition(), prev_sol_0);
     // create container to carry second initial condition:
     container_t prev_sol_1(space_size, fp_type{});
     // discretize first order initial condition:
-    d_1d::of_function(grid_cfg, wave_data_cfg_->second_initial_condition(), prev_sol_1);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->second_initial_condition(), prev_sol_1);
     // get wave_source:
-    auto const &wave_source = wave_data_cfg_->wave_source();
+    auto const &wave_source = wave_data_trans_cfg_->wave_source();
     // is wave_source set:
-    const bool is_wave_source_set = wave_data_cfg_->is_wave_source_set();
+    const bool is_wave_source_set = wave_data_trans_cfg_->is_wave_source_set();
     // create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
 
@@ -447,7 +450,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     {
         typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
-        device_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+        device_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source);
         std::copy(next_sol.begin(), next_sol.end(), solution.begin());
     }
@@ -455,7 +458,7 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(container<f
     {
         typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
-        host_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+        host_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source);
         std::copy(prev_sol_1.begin(), prev_sol_1.end(), solution.begin());
     }
@@ -474,13 +477,6 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
 
     LSS_ASSERT(((solutions.columns() > 0) && (solutions.rows() > 0)),
                "The input solution 2D container must be initialized");
-
-    // get space range:
-    const range<fp_type> space = discretization_cfg_->space_range();
-    // get space step:
-    const fp_type h = discretization_cfg_->space_step();
-    // time step:
-    const fp_type k = discretization_cfg_->time_step();
     // size of space discretization:
     const std::size_t space_size = discretization_cfg_->number_of_space_points();
     // size of time discretization:
@@ -489,20 +485,20 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     LSS_ASSERT((solutions.rows() == time_size) && (solutions.columns() == space_size),
                "The input solution 2D container must have the correct size");
     // grid:
-    // for now lets stick to uniform:
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<fp_type>>(discretization_cfg_);
+    auto const &boundary_pair = boundary_->boundary_pair();
     // create container to carry previous solution:
     container_t prev_sol_0(space_size, fp_type{});
     // discretize initial condition
-    d_1d::of_function(grid_cfg, wave_data_cfg_->first_initial_condition(), prev_sol_0);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->first_initial_condition(), prev_sol_0);
     // create container to carry second initial condition:
     container_t prev_sol_1(space_size, fp_type{});
     // discretize first order initial condition:
-    d_1d::of_function(grid_cfg, wave_data_cfg_->second_initial_condition(), prev_sol_1);
+    d_1d::of_function(grid_cfg, wave_data_trans_cfg_->second_initial_condition(), prev_sol_1);
     // get wave_source:
-    auto const &wave_source = wave_data_cfg_->wave_source();
+    auto const &wave_source = wave_data_trans_cfg_->wave_source();
     // is wave_source set:
-    const bool is_wave_source_set = wave_data_cfg_->is_wave_source_set();
+    const bool is_wave_source_set = wave_data_trans_cfg_->is_wave_source_set();
     // create container to carry new solution:
     container_t next_sol(space_size, fp_type{});
 
@@ -510,14 +506,14 @@ void general_svc_wave_equation<fp_type, container, allocator>::solve(
     {
         typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
-        device_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+        device_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, solutions);
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
         typedef general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
-        host_solver solver(boundary_pair_, wave_data_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
+        host_solver solver(boundary_pair, wave_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol_0, prev_sol_1, next_sol, is_wave_source_set, wave_source, solutions);
     }
     else

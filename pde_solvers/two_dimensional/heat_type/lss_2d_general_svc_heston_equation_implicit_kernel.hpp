@@ -9,14 +9,16 @@
 #include "containers/lss_container_2d.hpp"
 #include "containers/lss_container_3d.hpp"
 #include "discretization/lss_discretization.hpp"
+#include "discretization/lss_grid.hpp"
+#include "discretization/lss_grid_config.hpp"
 //#include "lss_2d_general_svc_heston_equation_implicit_boundary.hpp"
 #include "lss_2d_general_svc_heston_equation_explicit_boundary.hpp"
-#include "lss_2d_general_svc_heston_equation_implicit_coefficients.hpp"
-#include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_splitting_method_config.hpp"
 #include "pde_solvers/lss_weighted_scheme_config.hpp"
+#include "pde_solvers/transformation/lss_heat_data_transform.hpp"
+#include "pde_solvers/two_dimensional/heat_type/implicit_coefficients/lss_2d_general_svc_heston_equation_coefficients.hpp"
 #include "sparse_solvers/pentadiagonal/karawia_solver/lss_karawia_solver.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
@@ -48,6 +50,8 @@ using lss_enumerations::implicit_pde_schemes_enum;
 using lss_enumerations::memory_space_enum;
 using lss_enumerations::traverse_direction_enum;
 using lss_enumerations::tridiagonal_method_enum;
+using lss_grids::grid_config_1d_ptr;
+using lss_grids::grid_config_2d_ptr;
 using lss_sor_solver::sor_solver;
 using lss_sor_solver_cuda::sor_solver_cuda;
 using lss_thomas_lu_solver::thomas_lu_solver;
@@ -67,15 +71,16 @@ class implicit_heston_solver_boundaries
     typedef container_2d<by_enum::Row, fp_type, container, allocator> container_2d_t;
 
   public:
-    static boundary_2d_pair<fp_type> get_vertical(fp_type start_x, fp_type step_x, container_2d_t const &next_solution)
+    static boundary_2d_pair<fp_type> get_vertical(grid_config_1d_ptr<fp_type> const &grid_config_x,
+                                                  container_2d_t const &next_solution)
     {
         auto const lci = next_solution.columns() - 1;
         auto lower = [=](fp_type t, fp_type x) -> fp_type {
-            const std::size_t i = static_cast<std::size_t>((x - start_x) / step_x);
+            const std::size_t i = grid_config_x->index_of(x);
             return next_solution(i, 0);
         };
         auto upper = [=](fp_type t, fp_type x) -> fp_type {
-            const std::size_t i = static_cast<std::size_t>((x - start_x) / step_x);
+            const std::size_t i = grid_config_x->index_of(x);
             return next_solution(i, lci);
         };
         auto vertical_low = std::make_shared<dirichlet_boundary_2d<fp_type>>(lower);
@@ -83,18 +88,17 @@ class implicit_heston_solver_boundaries
         return std::make_pair(vertical_low, vertical_high);
     }
 
-    static boundary_2d_pair<fp_type> get_intermed_horizontal(fp_type start_y, fp_type step_y,
-                                                             container_2d_t const &solution,
+    static boundary_2d_pair<fp_type> get_intermed_horizontal(grid_config_1d_ptr<fp_type> const &grid_config_y,
                                                              container_2d_t const &next_solution)
     {
-        const std::size_t lri = solution.rows() - 1;
+        const std::size_t lri = next_solution.rows() - 1;
         auto lower = [=](fp_type t, fp_type y) -> fp_type {
-            const std::size_t j = static_cast<std::size_t>((y - start_y) / step_y);
-            return solution(0, j);
+            const std::size_t j = grid_config_y->index_of(y);
+            return next_solution(0, j);
         };
         auto upper = [=](fp_type t, fp_type y) -> fp_type {
-            const std::size_t j = static_cast<std::size_t>((y - start_y) / step_y);
-            return solution(lri, j);
+            const std::size_t j = grid_config_y->index_of(y);
+            return next_solution(lri, j);
         };
         auto horizontal_low = std::make_shared<dirichlet_boundary_2d<fp_type>>(lower);
         auto horizontal_high = std::make_shared<dirichlet_boundary_2d<fp_type>>(upper);
@@ -115,9 +119,9 @@ class implicit_heston_time_loop
     template <typename solver, typename boundary_solver>
     static void run(solver const &solver_ptr, boundary_solver const &boundary_solver_ptr,
                     boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                    boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr, range<fp_type> const &spacex_range,
-                    range<fp_type> const &spacey_range, range<fp_type> const &time_range,
-                    std::size_t const &last_time_idx, std::tuple<fp_type, fp_type, fp_type> const &steps,
+                    boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
+                    grid_config_2d_ptr<fp_type> const &grid_config, range<fp_type> const &time_range,
+                    std::size_t const &last_time_idx, fp_type const time_step,
                     std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                     traverse_direction_enum const &traverse_dir, container_2d_t &prev_solution,
                     container_2d_t &next_solution);
@@ -154,23 +158,17 @@ template <typename solver, typename boundary_solver>
 void implicit_heston_time_loop<fp_type, container, allocator>::run(
     solver const &solver_ptr, boundary_solver const &boundary_solver_ptr,
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-    boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr, range<fp_type> const &spacex_range,
-    range<fp_type> const &spacey_range, range<fp_type> const &time_range, std::size_t const &last_time_idx,
-    std::tuple<fp_type, fp_type, fp_type> const &steps, std::pair<fp_type, fp_type> const &weights,
-    std::pair<fp_type, fp_type> const &weight_values, traverse_direction_enum const &traverse_dir,
-    container_2d_t &prev_solution, container_2d_t &next_solution)
+    boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr, grid_config_2d_ptr<fp_type> const &grid_config,
+    range<fp_type> const &time_range, std::size_t const &last_time_idx, fp_type const time_step,
+    std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
+    traverse_direction_enum const &traverse_dir, container_2d_t &prev_solution, container_2d_t &next_solution)
 {
 
     typedef implicit_heston_solver_boundaries<fp_type, container, allocator> boundaries;
-    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
 
     const fp_type start_time = time_range.lower();
-    const fp_type start_x = spacex_range.lower();
-    const fp_type start_y = spacey_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type h_1 = std::get<0>(steps);
-    const fp_type h_2 = std::get<1>(steps);
-    const fp_type k = std::get<2>(steps);
+    const fp_type k = time_step;
     boundary_2d_pair<fp_type> ver_boundary_pair;
     boundary_2d_pair<fp_type> hor_inter_boundary_pair;
 
@@ -185,8 +183,8 @@ void implicit_heston_time_loop<fp_type, container, allocator>::run(
         {
             boundary_solver_ptr->solve(prev_solution, horizontal_boundary_pair, vertical_upper_boundary_ptr, time,
                                        next_solution);
-            ver_boundary_pair = boundaries::get_vertical(start_x, h_1, next_solution);
-            hor_inter_boundary_pair = boundaries::get_intermed_horizontal(start_y, h_2, prev_solution, next_solution);
+            ver_boundary_pair = boundaries::get_vertical(grid_config->grid_1(), next_solution);
+            hor_inter_boundary_pair = boundaries::get_intermed_horizontal(grid_config->grid_2(), prev_solution);
             solver_ptr->solve(prev_solution, hor_inter_boundary_pair, ver_boundary_pair, time, weights, weight_values,
                               next_solution);
             boundary_solver_ptr->solve(prev_solution, horizontal_boundary_pair, time, next_solution);
@@ -205,8 +203,8 @@ void implicit_heston_time_loop<fp_type, container, allocator>::run(
             time_idx--;
             boundary_solver_ptr->solve(prev_solution, horizontal_boundary_pair, vertical_upper_boundary_ptr, time,
                                        next_solution);
-            ver_boundary_pair = boundaries::get_vertical(start_x, h_1, next_solution);
-            hor_inter_boundary_pair = boundaries::get_intermed_horizontal(start_y, h_2, prev_solution, next_solution);
+            ver_boundary_pair = boundaries::get_vertical(grid_config->grid_1(), next_solution);
+            hor_inter_boundary_pair = boundaries::get_intermed_horizontal(grid_config->grid_2(), prev_solution);
             solver_ptr->solve(prev_solution, hor_inter_boundary_pair, ver_boundary_pair, time, weights, weight_values,
                               next_solution);
             boundary_solver_ptr->solve(prev_solution, horizontal_boundary_pair, time, next_solution);
@@ -244,7 +242,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
   private:
     boundary_2d_ptr<fp_type> boundary_ver_;
     boundary_2d_pair<fp_type> boundary_pair_hor_;
-    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
@@ -254,7 +252,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
   public:
     general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
                                                 splitting_method_config_ptr<fp_type> const &splitting_config,
                                                 weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
@@ -276,18 +274,10 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         const auto space_x = spaces.first;
         // across Y:
         const auto space_y = spaces.second;
-        // get space steps:
-        const auto &hs = discretization_cfg_->space_step();
-        // across X:
-        const fp_type h_1 = hs.first;
-        // across Y:
-        const fp_type h_2 = hs.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
         const fp_type k = discretization_cfg_->time_step();
-        // create step tuple:
-        const auto &steps = std::make_tuple(h_1, h_2, k);
         // size of spaces discretization:
         const auto &space_sizes = discretization_cfg_->number_of_space_points();
         const std::size_t space_size_x = std::get<0>(space_sizes);
@@ -321,7 +311,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
@@ -370,8 +360,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
         else
         {
-            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
+            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, grid_cfg_, time, last_time_idx,
+                      k, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -401,7 +391,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
   private:
     boundary_2d_ptr<fp_type> boundary_ver_;
     boundary_2d_pair<fp_type> boundary_pair_hor_;
-    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
@@ -411,7 +401,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
   public:
     general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
                                                 splitting_method_config_ptr<fp_type> const &splitting_config,
                                                 weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
@@ -433,18 +423,10 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         const auto space_x = spaces.first;
         // across Y:
         const auto space_y = spaces.second;
-        // get space steps:
-        const auto &hs = discretization_cfg_->space_step();
-        // across X:
-        const fp_type h_1 = hs.first;
-        // across Y:
-        const fp_type h_2 = hs.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
         const fp_type k = discretization_cfg_->time_step();
-        // create step tuple:
-        const auto &steps = std::make_tuple(h_1, h_2, k);
         // size of spaces discretization:
         const auto &space_sizes = discretization_cfg_->number_of_space_points();
         const std::size_t space_size_x = std::get<0>(space_sizes);
@@ -478,7 +460,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<sorcusolver>(space_x, space_size_x);
@@ -530,8 +512,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
         else
         {
-            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
+            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, grid_cfg_, time, last_time_idx,
+                      k, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -563,7 +545,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   private:
     boundary_2d_ptr<fp_type> boundary_ver_;
     boundary_2d_pair<fp_type> boundary_pair_hor_;
-    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
@@ -573,7 +555,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   public:
     general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
                                                 splitting_method_config_ptr<fp_type> const &splitting_config,
                                                 weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
@@ -595,18 +577,10 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         const auto space_x = spaces.first;
         // across Y:
         const auto space_y = spaces.second;
-        // get space steps:
-        const auto &hs = discretization_cfg_->space_step();
-        // across X:
-        const fp_type h_1 = hs.first;
-        // across Y:
-        const fp_type h_2 = hs.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
         const fp_type k = discretization_cfg_->time_step();
-        // create step tuple:
-        const auto &steps = std::make_tuple(h_1, h_2, k);
         // size of spaces discretization:
         const auto &space_sizes = discretization_cfg_->number_of_space_points();
         const std::size_t space_size_x = std::get<0>(space_sizes);
@@ -640,7 +614,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
@@ -692,8 +666,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         else
         {
-            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
+            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, grid_cfg_, time, last_time_idx,
+                      k, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -721,7 +695,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   private:
     boundary_2d_ptr<fp_type> boundary_ver_;
     boundary_2d_pair<fp_type> boundary_pair_hor_;
-    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
@@ -731,7 +705,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   public:
     general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
                                                 splitting_method_config_ptr<fp_type> const &splitting_config,
                                                 weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
@@ -753,18 +727,10 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         const auto space_x = spaces.first;
         // across Y:
         const auto space_y = spaces.second;
-        // get space steps:
-        const auto &hs = discretization_cfg_->space_step();
-        // across X:
-        const fp_type h_1 = hs.first;
-        // across Y:
-        const fp_type h_2 = hs.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
         const fp_type k = discretization_cfg_->time_step();
-        // create step tuple:
-        const auto &steps = std::make_tuple(h_1, h_2, k);
         // size of spaces discretization:
         const auto &space_sizes = discretization_cfg_->number_of_space_points();
         const std::size_t space_size_x = std::get<0>(space_sizes);
@@ -798,7 +764,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<sorsolver>(space_x, space_size_x);
@@ -850,8 +816,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         else
         {
-            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
+            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, grid_cfg_, time, last_time_idx,
+                      k, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -880,7 +846,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   private:
     boundary_2d_ptr<fp_type> boundary_ver_;
     boundary_2d_pair<fp_type> boundary_pair_hor_;
-    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
@@ -890,7 +856,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   public:
     general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
                                                 splitting_method_config_ptr<fp_type> const &splitting_config,
                                                 weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
@@ -912,18 +878,10 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         const auto space_x = spaces.first;
         // across Y:
         const auto space_y = spaces.second;
-        // get space steps:
-        const auto &hs = discretization_cfg_->space_step();
-        // across X:
-        const fp_type h_1 = hs.first;
-        // across Y:
-        const fp_type h_2 = hs.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
         const fp_type k = discretization_cfg_->time_step();
-        // create step tuple:
-        const auto &steps = std::make_tuple(h_1, h_2, k);
         // size of spaces discretization:
         const auto &space_sizes = discretization_cfg_->number_of_space_points();
         const std::size_t space_size_x = std::get<0>(space_sizes);
@@ -957,7 +915,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         // create and set up the main solvers:
@@ -1007,8 +965,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         else
         {
-            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
+            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, grid_cfg_, time, last_time_idx,
+                      k, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 
@@ -1036,7 +994,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   private:
     boundary_2d_ptr<fp_type> boundary_ver_;
     boundary_2d_pair<fp_type> boundary_pair_hor_;
-    heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
+    heat_data_transform_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     splitting_method_config_ptr<fp_type> splitting_cfg_;
     weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
@@ -1046,7 +1004,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
   public:
     general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
                                                 boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
                                                 pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
                                                 splitting_method_config_ptr<fp_type> const &splitting_config,
                                                 weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
@@ -1068,18 +1026,10 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         const auto space_x = spaces.first;
         // across Y:
         const auto space_y = spaces.second;
-        // get space steps:
-        const auto &hs = discretization_cfg_->space_step();
-        // across X:
-        const fp_type h_1 = hs.first;
-        // across Y:
-        const fp_type h_2 = hs.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
         const fp_type k = discretization_cfg_->time_step();
-        // create step tuple:
-        const auto &steps = std::make_tuple(h_1, h_2, k);
         // size of spaces discretization:
         const auto &space_sizes = discretization_cfg_->number_of_space_points();
         const std::size_t space_size_x = std::get<0>(space_sizes);
@@ -1113,7 +1063,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_implicit_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         // create and set up the main solvers:
@@ -1163,8 +1113,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
         else
         {
-            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, space_x, space_y, time,
-                      last_time_idx, steps, weights, weight_values, traverse_dir, prev_solution, next_solution);
+            loop::run(splitting_ptr, boundary_solver, boundary_pair_hor_, boundary_ver_, grid_cfg_, time, last_time_idx,
+                      k, weights, weight_values, traverse_dir, prev_solution, next_solution);
         }
     }
 

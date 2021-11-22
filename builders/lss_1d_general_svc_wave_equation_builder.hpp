@@ -52,6 +52,7 @@ class general_svc_wave_equation_builder
     wave_data_config_1d_ptr<fp_type> wave_data_config_;
     pde_discretization_config_1d_ptr<fp_type> discretization_config_;
     boundary_1d_pair<fp_type> boundary_pair_;
+    grid_config_hints_1d_ptr<fp_type> grid_config_hints_;
     wave_implicit_solver_config_ptr solver_config_;
     std::map<std::string, fp_type> solver_config_details_;
 
@@ -75,6 +76,12 @@ class general_svc_wave_equation_builder
         return *this;
     }
 
+    general_svc_wave_equation_builder &grid_config_hints(const grid_config_hints_1d_ptr<fp_type> &grid_config_hints)
+    {
+        grid_config_hints_ = grid_config_hints;
+        return *this;
+    }
+
     general_svc_wave_equation_builder &solver_config(const wave_implicit_solver_config_ptr &solver_config)
     {
         solver_config_ = solver_config;
@@ -91,7 +98,8 @@ class general_svc_wave_equation_builder
     sptr_t<general_svc_wave_equation<fp_type, container, allocator>> build()
     {
         return std::make_shared<general_svc_wave_equation<fp_type, container, allocator>>(
-            wave_data_config_, discretization_config_, boundary_pair_, solver_config_, solver_config_details_);
+            wave_data_config_, discretization_config_, boundary_pair_, grid_config_hints_, solver_config_,
+            solver_config_details_);
     }
 };
 
@@ -108,6 +116,7 @@ class general_svc_wave_equation_builder
     wave_data_config_1d_ptr<fp_type> wave_data_config_;
     pde_discretization_config_1d_ptr<fp_type> discretization_config_;
     boundary_1d_pair<fp_type> boundary_pair_;
+    grid_config_hints_1d_ptr<fp_type> grid_config_hints_;
     wave_explicit_solver_config_ptr solver_config_;
 
   public:
@@ -130,6 +139,12 @@ class general_svc_wave_equation_builder
         return *this;
     }
 
+    general_svc_wave_equation_builder &grid_config_hints(const grid_config_hints_1d_ptr<fp_type> &grid_config_hints)
+    {
+        grid_config_hints_ = grid_config_hints;
+        return *this;
+    }
+
     general_svc_wave_equation_builder &solver_config(const wave_explicit_solver_config_ptr &solver_config)
     {
         solver_config_ = solver_config;
@@ -139,7 +154,7 @@ class general_svc_wave_equation_builder
     sptr_t<general_svc_wave_equation<fp_type, container, allocator>> build()
     {
         return std::make_shared<general_svc_wave_equation<fp_type, container, allocator>>(
-            wave_data_config_, discretization_config_, boundary_pair_, solver_config_);
+            wave_data_config_, discretization_config_, boundary_pair_, grid_config_hints_, solver_config_);
     }
 };
 

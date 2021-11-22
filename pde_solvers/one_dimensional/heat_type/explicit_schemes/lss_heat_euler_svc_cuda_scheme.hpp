@@ -32,7 +32,7 @@ using lss_boundary::neumann_boundary_1d;
 using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::traverse_direction_enum;
-using lss_utility::function_triplet_t;
+using lss_grids::grid_1d;
 using lss_utility::NaN;
 using lss_utility::pair_t;
 using lss_utility::range;
@@ -50,26 +50,25 @@ class heat_euler_svc_cuda_time_loop
   public:
     template <typename solver>
     static void run(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
-                    range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
-                    container_t &solution);
+                    range<fp_type> const &time_range, std::size_t const &last_time_idx, fp_type const time_step,
+                    traverse_direction_enum const &traverse_dir, container_t &solution);
 
     template <typename solver>
     static void run(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
-                    range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                    range<fp_type> const &time_range, std::size_t const &last_time_idx, fp_type const time_step,
+                    traverse_direction_enum const &traverse_dir,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution);
 
     template <typename solver>
     static void run_with_stepping(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                                  std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                                  fp_type const time_step, traverse_direction_enum const &traverse_dir,
                                   container_t &solution, container_2d_t &solutions);
 
     template <typename solver>
     static void run_with_stepping(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                                  std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                                  fp_type const time_step, traverse_direction_enum const &traverse_dir,
                                   std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution,
                                   container_2d_t &solutions);
 };
@@ -78,14 +77,14 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &solution)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &solution)
 {
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::copy(solution.begin(), solution.end(), h_solution.begin());
@@ -127,15 +126,14 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, std::function<fp_type(fp_type, fp_type)> const &heat_source,
-    container_t &solution)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution)
 {
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::copy(solution.begin(), solution.end(), h_solution.begin());
@@ -177,14 +175,14 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &solution, container_2d_t &solutions)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &solution, container_2d_t &solutions)
 {
     const std::size_t sol_size = solution.size();
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::copy(solution.begin(), solution.end(), h_solution.begin());
@@ -233,9 +231,8 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, std::function<fp_type(fp_type, fp_type)> const &heat_source,
-    container_t &solution, container_2d_t &solutions)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution, container_2d_t &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
 
@@ -243,7 +240,7 @@ void heat_euler_svc_cuda_time_loop<fp_type, container, allocator>::run_with_step
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
     // create host vectors:
     thrust::host_vector<fp_type> h_solution(sol_size);
     thrust::host_vector<fp_type> h_next_solution(sol_size);
@@ -307,13 +304,11 @@ class heat_euler_svc_cuda_scheme
     bool is_stable(general_svc_heat_equation_implicit_coefficients_ptr<fp_type> const &coefficients)
     {
         const fp_type zero = static_cast<fp_type>(0.0);
-        const fp_type one = static_cast<fp_type>(1.0);
         const fp_type two = static_cast<fp_type>(2.0);
         auto const &A = coefficients->A_;
         auto const &B = coefficients->B_;
         auto const &D = coefficients->D_;
         const fp_type k = coefficients->k_;
-        const fp_type h = coefficients->h_;
         const fp_type lambda = coefficients->lambda_;
         const fp_type gamma = coefficients->gamma_;
         const fp_type delta = coefficients->delta_;
@@ -327,9 +322,7 @@ class heat_euler_svc_cuda_scheme
             x = grid_1d<fp_type>::value(grid_cfg_, i);
             if (c(x) > zero)
                 return false;
-            if ((two * lambda * a(x) - k * c(x)) > one)
-                return false;
-            if (((gamma * std::abs(b(x))) * (gamma * std::abs(b(x)))) > (two * lambda * a(x)))
+            if ((gamma * gamma * b(x) * b(x)) > (two * lambda * a(x)))
                 return false;
         }
         return true;
@@ -362,20 +355,17 @@ class heat_euler_svc_cuda_scheme
     {
         const range<fp_type> timer = discretization_cfg_->time_range();
         const fp_type k = discretization_cfg_->time_step();
-        const fp_type h = discretization_cfg_->space_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &steps = std::make_pair(k, h);
         auto const &solver_method_ptr =
             std::make_shared<heat_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
         if (is_heat_sourse_set)
         {
-            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir, heat_source,
-                      solution);
+            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, heat_source, solution);
         }
         else
         {
-            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir, solution);
+            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, solution);
         }
     }
 
@@ -385,22 +375,20 @@ class heat_euler_svc_cuda_scheme
     {
         const range<fp_type> timer = discretization_cfg_->time_range();
         const fp_type k = discretization_cfg_->time_step();
-        const fp_type h = discretization_cfg_->space_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &steps = std::make_pair(k, h);
         auto const &solver_method_ptr =
             std::make_shared<heat_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
         if (is_heat_sourse_set)
         {
 
-            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir,
+            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir,
                                     heat_source, solution, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir,
-                                    solution, solutions);
+            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, solution,
+                                    solutions);
         }
     }
 };

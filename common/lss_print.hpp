@@ -14,6 +14,7 @@
 #include "discretization/lss_grid.hpp"
 #include "discretization/lss_grid_config.hpp"
 #include "discretization/lss_grid_config_hints.hpp"
+#include "discretization/lss_grid_transform_config.hpp"
 #include "ode_solvers/lss_ode_discretization_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 
@@ -23,16 +24,13 @@ namespace lss_print
 using lss_containers::container_2d;
 using lss_enumerations::by_enum;
 using lss_enumerations::grid_enum;
-using lss_grids::grid_1d;
-using lss_grids::grid_2d;
-using lss_grids::grid_config_1d_ptr;
-using lss_grids::grid_config_2d_ptr;
+
+using lss_grids::grid_config_1d;
+using lss_grids::grid_config_2d;
 using lss_grids::grid_config_hints_1d_ptr;
 using lss_grids::grid_config_hints_2d_ptr;
-using lss_grids::nonuniform_grid_config_1d;
-using lss_grids::nonuniform_grid_config_2d;
-using lss_grids::uniform_grid_config_1d;
-using lss_grids::uniform_grid_config_2d;
+using lss_grids::grid_transform_config_1d;
+using lss_grids::grid_transform_config_2d;
 using lss_ode_solvers::ode_discretization_config_ptr;
 using lss_pde_solvers::pde_discretization_config_1d_ptr;
 using lss_pde_solvers::pde_discretization_config_2d_ptr;
@@ -87,27 +85,21 @@ void print(pde_discretization_config_1d_ptr<fp_type> const &pde_discretization_c
 {
     const std::size_t space_size = pde_discretization_cfg->number_of_space_points();
     LSS_ASSERT(cont.size() == space_size, "Container size differs from passed discretization");
-    grid_config_1d_ptr<fp_type> grid_cfg;
-    if (grid_hints_cfg->grid() == grid_enum::Uniform)
-    {
-        grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(pde_discretization_cfg);
-    }
-    else if (grid_hints_cfg->grid() == grid_enum::Nonuniform)
-    {
-        grid_cfg = std::make_shared<nonuniform_grid_config_1d<fp_type>>(
-            pde_discretization_cfg, grid_hints_cfg->strike(), grid_hints_cfg->p_scale(), grid_hints_cfg->c_scale());
-    }
-    else
-    {
-        throw std::exception("Unreachable");
-    }
+    // create grid_config:
+    auto const &grid_cfg = std::make_shared<grid_config_1d<fp_type>>(pde_discretization_cfg);
+    // create grid_transform_config:
+    auto const &grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<fp_type>>(pde_discretization_cfg, grid_hints_cfg);
+    fp_type zeta{};
     out << "SPACE_POINTS\n";
     for (std::size_t t = 0; t < space_size - 1; ++t)
     {
-        out << grid_1d<fp_type>::value(grid_cfg, t);
+        zeta = grid_1d<fp_type>::value(grid_cfg, t);
+        out << grid_1d<fp_type>::transformed_value(grid_trans_cfg, zeta);
         out << ",";
     }
-    out << grid_1d<fp_type>::value(grid_cfg, space_size - 1) << "\nVALUES\n";
+    zeta = grid_1d<fp_type>::value(grid_cfg, space_size - 1);
+    out << grid_1d<fp_type>::transformed_value(grid_trans_cfg, zeta) << "\nVALUES\n";
     for (std::size_t t = 0; t < space_size - 1; ++t)
     {
         out << cont[t];
@@ -132,35 +124,29 @@ void print(pde_discretization_config_2d_ptr<fp_type> const &pde_discretization_c
     const auto &space_sizes = pde_discretization_cfg->number_of_space_points();
     LSS_ASSERT((cont.columns() == std::get<1>(space_sizes)) && (cont.rows() == std::get<0>(space_sizes)),
                "The input cont container must have the correct size");
-    grid_config_2d_ptr<fp_type> grid_cfg;
-    if (grid_hints_cfg->grid() == grid_enum::Uniform)
-    {
-        grid_cfg = std::make_shared<uniform_grid_config_2d<fp_type>>(pde_discretization_cfg);
-    }
-    else if (grid_hints_cfg->grid() == grid_enum::Nonuniform)
-    {
-        grid_cfg = std::make_shared<nonuniform_grid_config_2d<fp_type>>(
-            pde_discretization_cfg, grid_hints_cfg->strike(), grid_hints_cfg->p_scale(), grid_hints_cfg->c_scale(),
-            grid_hints_cfg->d_scale());
-    }
-    else
-    {
-        throw std::exception("Unreachable");
-    }
-
+    // create grid_config:
+    auto const &grid_cfg = std::make_shared<grid_config_2d<fp_type>>(pde_discretization_cfg);
+    // create grid_transform_config:
+    auto const &grid_trans_cfg =
+        std::make_shared<grid_transform_config_2d<fp_type>>(pde_discretization_cfg, grid_hints_cfg);
+    fp_type zeta{}, eta{};
     out << "SPACE_POINTS_X\n";
     for (std::size_t t = 0; t < space_sizes.first - 1; ++t)
     {
-        out << grid_2d<fp_type>::value_1(grid_cfg, t);
+        zeta = grid_2d<fp_type>::value_1(grid_cfg, t);
+        out << grid_2d<fp_type>::transformed_value_1(grid_trans_cfg, zeta);
         out << ",";
     }
-    out << grid_2d<fp_type>::value_1(grid_cfg, space_sizes.first - 1) << "\nSPACE_POINTS_Y\n";
+    zeta = grid_2d<fp_type>::value_1(grid_cfg, space_sizes.first - 1);
+    out << grid_2d<fp_type>::transformed_value_1(grid_trans_cfg, zeta) << "\nSPACE_POINTS_Y\n";
     for (std::size_t t = 0; t < space_sizes.second - 1; ++t)
     {
-        out << grid_2d<fp_type>::value_2(grid_cfg, t);
+        eta = grid_2d<fp_type>::value_2(grid_cfg, t);
+        out << grid_2d<fp_type>::transformed_value_2(grid_trans_cfg, eta);
         out << ",";
     }
-    out << grid_2d<fp_type>::value_2(grid_cfg, space_sizes.second - 1) << "\nVALUES\n";
+    eta = grid_2d<fp_type>::value_2(grid_cfg, space_sizes.second - 1);
+    out << grid_2d<fp_type>::transformed_value_2(grid_trans_cfg, eta) << "\nVALUES\n";
     for (std::size_t r = 0; r < cont.rows(); ++r)
     {
         for (std::size_t c = 0; c < cont.columns() - 1; ++c)
@@ -191,33 +177,26 @@ void print(pde_discretization_config_1d_ptr<fp_type> const &pde_discretization_c
     LSS_ASSERT((cont_2d.columns() == space_size) && (cont_2d.rows() == time_size),
                "Container size differs from passed discretization");
 
-    grid_config_1d_ptr<fp_type> grid_cfg;
-    if (grid_hints_cfg->grid() == grid_enum::Uniform)
-    {
-        grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(pde_discretization_cfg);
-    }
-    else if (grid_hints_cfg->grid() == grid_enum::Nonuniform)
-    {
-        grid_cfg = std::make_shared<nonuniform_grid_config_1d<fp_type>>(
-            pde_discretization_cfg, grid_hints_cfg->strike(), grid_hints_cfg->p_scale(), grid_hints_cfg->c_scale());
-    }
-    else
-    {
-        throw std::exception("Unreachable");
-    }
+    // create grid_config:
+    auto const &grid_cfg = std::make_shared<grid_config_1d<fp_type>>(pde_discretization_cfg);
+    // create grid_transform_config:
+    auto const &grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<fp_type>>(pde_discretization_cfg, grid_hints_cfg);
 
     const fp_type k = pde_discretization_cfg->time_step();
     const auto &time = pde_discretization_cfg->time_range();
     const fp_type time_start = time.lower();
 
     out << "SPACE_POINTS\n";
-    fp_type m{};
+    fp_type m{}, zeta{};
     for (std::size_t t = 0; t < space_size - 1; ++t)
     {
-        out << grid_1d<fp_type>::value(grid_cfg, t);
+        zeta = grid_1d<fp_type>::value(grid_cfg, t);
+        out << grid_1d<fp_type>::transformed_value(grid_trans_cfg, zeta);
         out << ",";
     }
-    out << grid_1d<fp_type>::value(grid_cfg, space_size - 1) << "\nTIME_POINTS\n";
+    zeta = grid_1d<fp_type>::value(grid_cfg, space_size - 1);
+    out << grid_1d<fp_type>::transformed_value(grid_trans_cfg, zeta) << "\nTIME_POINTS\n";
     for (std::size_t t = 0; t < time_size - 1; ++t)
     {
         m = static_cast<fp_type>(t);

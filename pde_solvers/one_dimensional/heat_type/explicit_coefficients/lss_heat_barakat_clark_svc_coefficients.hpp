@@ -17,7 +17,7 @@ template <typename fp_type> struct heat_barakat_clark_svc_coefficients
 {
   public:
     // scheme coefficients:
-    fp_type h_, k_;
+    fp_type k_;
     std::size_t space_size_;
     // functional coefficients:
     std::function<fp_type(fp_type)> A_;
@@ -33,7 +33,6 @@ template <typename fp_type> struct heat_barakat_clark_svc_coefficients
         auto const a = coefficients->A_;
         auto const b = coefficients->B_;
         auto const d = coefficients->D_;
-        h_ = coefficients->h_;
         k_ = coefficients->k_;
 
         A_ = [=](fp_type x) { return (a(x) / (one + b(x))); };

@@ -7,7 +7,7 @@
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
-#include "pde_solvers/lss_wave_data_config.hpp"
+#include "pde_solvers/transformation/lss_wave_data_transform.hpp"
 
 namespace lss_pde_solvers
 {
@@ -21,7 +21,7 @@ template <typename fp_type> struct wave_svc_implicit_coefficients
 {
   public:
     // scheme coefficients:
-    fp_type lambda_, gamma_, delta_, rho_, h_, k_;
+    fp_type lambda_, gamma_, delta_, rho_, k_;
     std::size_t space_size_;
     range<fp_type> range_;
     // functional coefficients:
@@ -36,22 +36,21 @@ template <typename fp_type> struct wave_svc_implicit_coefficients
     {
         // get space range:
         range_ = discretization_config->space_range();
-        // get space step:
-        h_ = discretization_config->space_step();
         // get time step:
         k_ = discretization_config->time_step();
         // size of spaces discretization:
         space_size_ = discretization_config->number_of_space_points();
         const fp_type one = static_cast<fp_type>(1.0);
         const fp_type two = static_cast<fp_type>(2.0);
+        const fp_type h = one / (space_size_ - 1);
         // calculate scheme coefficients:
         lambda_ = one / (k_ * k_);
         gamma_ = one / (two * k_);
-        delta_ = one / (h_ * h_);
-        rho_ = one / (two * h_);
+        delta_ = one / (h * h);
+        rho_ = one / (two * h);
     }
 
-    void initialize_coefficients(wave_data_config_1d_ptr<fp_type> const &wave_data_config)
+    void initialize_coefficients(wave_data_transform_1d_ptr<fp_type> const &wave_data_config)
     {
         // save coefficients locally:
         auto const a = wave_data_config->a_coefficient();
@@ -72,7 +71,7 @@ template <typename fp_type> struct wave_svc_implicit_coefficients
   public:
     wave_svc_implicit_coefficients() = delete;
 
-    explicit wave_svc_implicit_coefficients(wave_data_config_1d_ptr<fp_type> const &wave_data_config,
+    explicit wave_svc_implicit_coefficients(wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
                                             pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
     {
         initialize(discretization_config);

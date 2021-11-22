@@ -7,9 +7,10 @@ It also contains some PDE solvers.
 
 ## PDE Solver
 * 1D general heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
-* 1D general wave equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions) - IN TESTING STAGE
-* 2D general Heston type model with variable coefficients in space dimensions (Douglas-Rachford ADI weighted scheme)
-
+* 1D general wave equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
+* 2D general Heston type model with variable coefficients in space dimensions
+ (support for Douglas-Rachford ADI (weighted scheme also available), Craig-Sneyd ADI, Modified Craig-Sneyd ADI, Hundsdorfer-Verwer ADI)
+All solvers support uniform and non-uniform grid with variable scaling
 
 
 ## Some curves from ODE solver

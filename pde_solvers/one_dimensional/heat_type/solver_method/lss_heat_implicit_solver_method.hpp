@@ -27,8 +27,6 @@ using lss_boundary::dirichlet_boundary_1d;
 using lss_boundary::neumann_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::by_enum;
-using lss_utility::coefficient_sevenlet_t;
-using lss_utility::function_2d_sevenlet_t; // ?
 using lss_utility::pair_t;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
@@ -59,8 +57,8 @@ class implicit_heat_scheme
             auto const &A = cfs->A_;
             auto const &B = cfs->B_;
             auto const &D = cfs->D_;
-            auto const h = cfs->h_;
             auto const theta = cfs->theta_;
+            auto const h = grid_1d<fp_type>::step(grid_cfg);
             fp_type x{};
             // for lower boundaries first:
             x = grid_1d<fp_type>::value(grid_cfg, 0);
@@ -114,8 +112,8 @@ class implicit_heat_scheme
             auto const &B = cfs->B_;
             auto const &D = cfs->D_;
             auto const k = cfs->k_;
-            auto const h = cfs->h_;
             auto const theta = cfs->theta_;
+            auto const h = grid_1d<fp_type>::step(grid_cfg);
             fp_type x{};
 
             // for lower boundaries first:

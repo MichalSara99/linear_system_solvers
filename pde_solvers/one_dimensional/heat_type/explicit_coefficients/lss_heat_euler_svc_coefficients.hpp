@@ -17,7 +17,7 @@ template <typename fp_type> struct heat_euler_svc_coefficients
 {
   public:
     // scheme coefficients:
-    fp_type h_, k_;
+    fp_type k_;
     std::size_t space_size_;
     // functional coefficients:
     std::function<fp_type(fp_type)> A_;
@@ -38,7 +38,6 @@ template <typename fp_type> struct heat_euler_svc_coefficients
         A_ = [=](fp_type x) { return a(x); };
         B_ = [=](fp_type x) { return (one - two * b(x)); };
         D_ = [=](fp_type x) { return d(x); };
-        h_ = coefficients->h_;
         k_ = coefficients->k_;
         space_size_ = coefficients->space_size_;
     }

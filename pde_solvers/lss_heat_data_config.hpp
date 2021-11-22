@@ -311,14 +311,9 @@ template <typename fp_type> struct heat_data_config<dimension_enum::One, fp_type
     {
     }
 
-    bool is_heat_source_set() const
+    heat_source_data_config_1d_ptr<fp_type> const &source_data_config() const
     {
-        return (source_data_cfg_ != nullptr) ? true : false;
-    }
-
-    std::function<fp_type(fp_type, fp_type)> const &heat_source() const
-    {
-        return source_data_cfg_->heat_source();
+        return source_data_cfg_;
     }
 
     std::function<fp_type(fp_type)> const &initial_condition() const
@@ -374,14 +369,9 @@ template <typename fp_type> struct heat_data_config<dimension_enum::Two, fp_type
     {
     }
 
-    bool is_heat_source_set() const
+    heat_source_data_config_2d_ptr<fp_type> const &source_data_config() const
     {
-        return (source_data_cfg_ != nullptr) ? true : false;
-    }
-
-    std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source() const
-    {
-        return source_data_cfg_->heat_source();
+        return source_data_cfg_;
     }
 
     std::function<fp_type(fp_type, fp_type)> const &initial_condition() const

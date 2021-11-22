@@ -151,6 +151,15 @@
     <Filter Include="ode_solvers\second_degree\implicit_coefficients">
       <UniqueIdentifier>{58c5c3a2-3f4e-4b60-b53c-e9485b672965}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pde_solvers\two_dimensional\heat_type\implicit_coefficients">
+      <UniqueIdentifier>{332f2b22-956f-45af-8703-47285cc5a727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\two_dimensional\heat_type\transformation">
+      <UniqueIdentifier>{cdc98f33-2ed1-4e92-a021-5d9dc25d4e42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\transformation">
+      <UniqueIdentifier>{a47031d5-67a4-4a25-8a82-3138b112717d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -444,9 +453,6 @@
     <ClInclude Include="pde_solvers\lss_splitting_method_config.hpp">
       <Filter>pde_solvers</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heston_equation_implicit_coefficients.hpp">
-      <Filter>pde_solvers\two_dimensional\heat_type</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_splitting_method.hpp">
       <Filter>pde_solvers\two_dimensional\heat_type\splitting_method</Filter>
     </ClInclude>
@@ -530,6 +536,24 @@
     </ClInclude>
     <ClInclude Include="ode_solvers\second_degree\solver_method\lss_general_ode_implicit_solver_method.hpp">
       <Filter>ode_solvers\second_degree\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\implicit_coefficients\lss_2d_general_svc_heston_equation_coefficients.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\implicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="discretization\lss_grid_transform_config.hpp">
+      <Filter>discretization</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\transformation\lss_heston_boundary_transform.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\transformation\lss_heat_data_transform.hpp">
+      <Filter>pde_solvers\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\transformation\lss_boundary_transform.hpp">
+      <Filter>pde_solvers\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\transformation\lss_wave_data_transform.hpp">
+      <Filter>pde_solvers\transformation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

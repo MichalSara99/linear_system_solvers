@@ -10,8 +10,8 @@
 #include "discretization/lss_discretization.hpp"
 #include "discretization/lss_grid.hpp"
 #include "discretization/lss_grid_config.hpp"
-#include "lss_2d_general_svc_heston_equation_implicit_coefficients.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
+#include "pde_solvers/two_dimensional/heat_type/implicit_coefficients/lss_2d_general_svc_heston_equation_coefficients.hpp"
 
 namespace lss_pde_solvers
 {
@@ -24,14 +24,12 @@ using lss_boundary::dirichlet_boundary_2d;
 using lss_boundary::neumann_boundary_2d;
 using lss_containers::container_2d;
 using lss_enumerations::by_enum;
-using lss_utility::coefficient_sevenlet_t;
-using lss_utility::function_2d_triplet_t;
 using lss_utility::pair_t;
 using lss_utility::range;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
 using explicit_heston_boundary_scheme_function_t =
-    std::function<void(general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &,
+    std::function<void(general_svc_heston_equation_coefficients_ptr<fp_type> const &,
                        grid_config_2d_ptr<fp_type> const &, std::size_t const &, fp_type const &,
                        boundary_2d_pair<fp_type> const &, container_2d<by_enum::Row, fp_type, container, alloc> const &,
                        container_2d<by_enum::Row, fp_type, container, alloc> const &, fp_type const &,
@@ -55,7 +53,7 @@ class explicit_heston_boundary_scheme
         const fp_type two = static_cast<fp_type>(2.0);
         const fp_type one = static_cast<fp_type>(1.0);
 
-        auto scheme_fun_h = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfg,
+        auto scheme_fun_h = [=](general_svc_heston_equation_coefficients_ptr<fp_type> const &cfg,
                                 grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
                                 fp_type const &y, boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                 rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input, fp_type const &time,
@@ -63,17 +61,14 @@ class explicit_heston_boundary_scheme
             auto const &D = cfg->D_;
             auto const &E = cfg->E_;
             auto const &F = cfg->F_;
+            auto const delta = cfg->delta_;
+            auto const ni = cfg->ni_;
+            auto const rho = cfg->rho_;
 
             auto const &first_bnd = horizontal_boundary_pair.first;
             auto const &second_bnd = horizontal_boundary_pair.second;
 
-            auto const &delta = cfg->delta_;
-            auto const &ni = cfg->ni_;
-            auto const &rho = cfg->rho_;
-
-            auto const h_1 = cfg->h_1_;
-
-            fp_type x{};
+            fp_type x{}, h_1{};
             if (auto const &ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(first_bnd))
             {
                 solution[0] = ptr->value(time, y);
@@ -82,8 +77,9 @@ class explicit_heston_boundary_scheme
             const std::size_t N = solution.size() - 1;
             if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_2d<fp_type>>(second_bnd))
             {
-                const fp_type delta_ = two * h_1 * ptr->value(time, y);
                 x = grid_2d<fp_type>::value_1(grid_cfg, N);
+                h_1 = grid_2d<fp_type>::step_1(grid_cfg);
+                const fp_type delta_ = two * h_1 * ptr->value(time, y);
                 solution[N] = ((one - three * ni * E(x, y) + rho * F(x, y)) * input(N, y_index)) +
                               (four * ni * E(x, y) * input(N, y_index + 1)) - (ni * E(x, y) * input(N, y_index + 2)) -
                               (delta * delta_ * D(x, y));
@@ -98,7 +94,7 @@ class explicit_heston_boundary_scheme
                               (four * ni * E(x, y) * input(t, y_index + 1));
             }
         };
-        auto scheme_fun_nh = [=](general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &cfg,
+        auto scheme_fun_nh = [=](general_svc_heston_equation_coefficients_ptr<fp_type> const &cfg,
                                  grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
                                  fp_type const &y, boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                                  rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input, fp_type const &time,
@@ -106,22 +102,25 @@ class explicit_heston_boundary_scheme
             auto const &D = cfg->D_;
             auto const &E = cfg->E_;
             auto const &F = cfg->F_;
+            auto const delta = cfg->delta_;
+            auto const ni = cfg->ni_;
+            auto const rho = cfg->rho_;
 
+            auto const &first_bnd = horizontal_boundary_pair.first;
             auto const &second_bnd = horizontal_boundary_pair.second;
 
-            auto const &delta = cfg->delta_;
-            auto const &ni = cfg->ni_;
-            auto const &rho = cfg->rho_;
-            auto const &theta = cfg->theta_;
+            fp_type x{}, h_1{};
+            if (auto const &ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(first_bnd))
+            {
+                solution[0] = ptr->value(time, y);
+            }
 
-            auto const h_1 = cfg->h_1_;
-
-            fp_type x{};
             const std::size_t N = solution.size() - 1;
             if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_2d<fp_type>>(second_bnd))
             {
-                const fp_type delta_ = two * h_1 * ptr->value(time, y);
                 x = grid_2d<fp_type>::value_1(grid_cfg, N);
+                h_1 = grid_2d<fp_type>::step_1(grid_cfg);
+                const fp_type delta_ = two * h_1 * ptr->value(time, y);
                 solution[N] = ((one - three * ni * E(x, y) + rho * F(x, y)) * input(N, y_index)) +
                               (four * ni * E(x, y) * input(N, y_index + 1)) - (ni * E(x, y) * input(N, y_index + 2)) -
                               (delta * delta_ * D(x, y)) + (rho * inhom_input(N, y_index));
@@ -159,14 +158,14 @@ class general_svc_heston_equation_explicit_boundary
     typedef container<fp_type, allocator> container_t;
 
   private:
-    general_svc_heston_equation_implicit_coefficients_ptr<fp_type> coefficients_;
+    general_svc_heston_equation_coefficients_ptr<fp_type> coefficients_;
     grid_config_2d_ptr<fp_type> grid_cfg_;
 
     explicit general_svc_heston_equation_explicit_boundary() = delete;
 
   public:
     explicit general_svc_heston_equation_explicit_boundary(
-        general_svc_heston_equation_implicit_coefficients_ptr<fp_type> const &coefficients,
+        general_svc_heston_equation_coefficients_ptr<fp_type> const &coefficients,
         grid_config_2d_ptr<fp_type> const &grid_config)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
@@ -209,8 +208,8 @@ void general_svc_heston_equation_explicit_boundary<fp_type, container, allocator
     rcontainer_2d_t curr_source(1, 1, fp_type{});
     // get the right-hand side of the scheme:
     auto scheme = heston_boundary_scheme::get_vertical(true);
-    scheme(coefficients_, grid_cfg_, 0, coefficients_->rangey_.lower(), horizonatal_boundary_pair, prev_solution,
-           curr_source, time, solution_v);
+    scheme(coefficients_, grid_cfg_, 0, fp_type(0.0), horizonatal_boundary_pair, prev_solution, curr_source, time,
+           solution_v);
     csolution(0, solution_v);
 
     auto const &upper_bnd_ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(vertical_upper_boundary_ptr);
@@ -233,26 +232,32 @@ void general_svc_heston_equation_explicit_boundary<fp_type, container, allocator
     container_t solution_v(coefficients_->space_size_y_, fp_type{});
     // some constants:
     auto const &start_y = coefficients_->rangey_.lower();
+    // prepare grid_1:
+    auto const &grid_1 = grid_cfg_->grid_1();
+    // prepare grid_2:
+    auto const &grid_2 = grid_cfg_->grid_2();
     // populating lower horizontal:
     auto const &lower_bnd_ptr =
         std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(horizonatal_boundary_pair.first);
     auto const &lower_bnd = [=](fp_type v, fp_type t) { return lower_bnd_ptr->value(t, v); };
-    d_1d::of_function(grid_cfg_->grid_2(), time, lower_bnd, solution_v);
+    d_1d::of_function(grid_2, time, lower_bnd, solution_v);
     solution(0, solution_v);
     // populating upper horizontal:
     auto const lri = solution.rows() - 1;
     auto const two = static_cast<fp_type>(2.0);
     auto const three = static_cast<fp_type>(3.0);
     auto const four = static_cast<fp_type>(4.0);
+    auto const N_x = coefficients_->space_size_x_;
     auto const &upper_bnd_ptr =
         std::dynamic_pointer_cast<neumann_boundary_2d<fp_type>>(horizonatal_boundary_pair.second);
     auto const &upper_bnd = [=](fp_type v, fp_type t) {
-        const std::size_t j = static_cast<std::size_t>((v - start_y) / coefficients_->h_2_);
+        const std::size_t j = grid_1d<fp_type>::index_of(grid_2, v);
         auto const bnd_val = upper_bnd_ptr->value(t, v);
-        return (((four * solution(lri - 1, j)) - solution(lri - 2, j) - (two * coefficients_->h_1_ * bnd_val)) / three);
+        auto const h_1 = grid_1d<fp_type>::step(grid_1);
+        return (((four * solution(lri - 1, j)) - solution(lri - 2, j) - (two * h_1 * bnd_val)) / three);
     };
-    d_1d::of_function(grid_cfg_->grid_2(), time, upper_bnd, solution_v);
-    solution(coefficients_->space_size_x_ - 1, solution_v);
+    d_1d::of_function(grid_2, time, upper_bnd, solution_v);
+    solution(N_x - 1, solution_v);
 }
 
 } // namespace two_dimensional

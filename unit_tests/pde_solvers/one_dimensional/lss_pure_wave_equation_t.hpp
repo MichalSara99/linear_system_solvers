@@ -21,7 +21,11 @@
 template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQRDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -70,8 +74,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -83,12 +92,16 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -109,7 +122,11 @@ void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR()
 template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceSORDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -161,9 +178,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceSO
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, dev_fwd_sorsolver_solver_config_ptr,
-                         details);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_sorsolver_solver_config_ptr, details);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -175,12 +196,16 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceSO
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -201,7 +226,11 @@ void testImplPureWaveEquationDirichletBCCUDASolverDeviceSOR()
 template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverHostSORDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -253,9 +282,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverHostSORD
     // details:
     std::map<std::string, T> details;
     details["sor_omega"] = static_cast<T>(1.0);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_sorsolver_solver_config_ptr,
-                         details);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_sorsolver_solver_config_ptr, details);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -267,12 +300,16 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverHostSORD
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -293,7 +330,11 @@ void testImplPureWaveEquationDirichletBCCUDASolverHostSOR()
 template <typename T> void testImplPureWaveEquationDirichletBCSolverHostDoubleSweepDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -342,8 +383,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostDoubleSw
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_dssolver_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -355,12 +401,16 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostDoubleSw
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -381,7 +431,11 @@ void testImplPureWaveEquationDirichletBCSolverDoubleSweep()
 template <typename T> void testImplPureWaveEquationDirichletBCSolverHostLUDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -430,8 +484,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostLUDetail
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_tlusolver_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -443,12 +502,16 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostLUDetail
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -469,7 +532,11 @@ void testImplPureWaveEquationDirichletBCSolverLU()
 template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -522,8 +589,13 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetail()
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_0);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_1);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_tlusolver_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_tlusolver_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -534,12 +606,16 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetail()
         return (res);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper());
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper());
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -560,7 +636,11 @@ void testImplWaveEquationDirichletBCSolverLU()
 template <typename T> void testImplDampedWaveEquationDirichletBCSolverHostDoubleSweepDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -612,8 +692,13 @@ template <typename T> void testImplDampedWaveEquationDirichletBCSolverHostDouble
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_0);
     auto const &boundary_high_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet_1);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_fwd_dssolver_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_fwd_dssolver_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -627,12 +712,16 @@ template <typename T> void testImplDampedWaveEquationDirichletBCSolverHostDouble
         return (res);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper());
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper());
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -655,7 +744,11 @@ void testImplDampedWaveEquationDirichletBCSolverDoubleSweep()
 template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDetail()
 {
     using lss_boundary::neumann_boundary_1d;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -706,8 +799,13 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
     auto const &neumann = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, dev_fwd_cusolver_qr_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_fwd_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -719,12 +817,16 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
         return (t + var1 + var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper());
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper());
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -755,6 +857,10 @@ void testImplPureWaveEquationNeumannBCCUDASolverDeviceQR()
 template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -781,9 +887,9 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
-    std::size_t const Sd = 100;
+    std::size_t const Sd = 50;
     // number of time subdivisions:
-    std::size_t const Td = 150;
+    std::size_t const Td = 2000;
     // space range:
     range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
@@ -803,8 +909,13 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, host_expl_fwd_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         host_expl_fwd_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -816,12 +927,16 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper());
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper());
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -842,6 +957,10 @@ void testExplPureWaveEquationDirichletBCCUDAHostSolver()
 template <typename T> void testExplPureWaveEquationDirichletBCCUDADeviceSolverDetail()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::wave_coefficient_data_config_1d;
     using lss_pde_solvers::wave_data_config_1d;
@@ -868,9 +987,9 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDADeviceSolverDe
     typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
-    std::size_t const Sd = 100;
+    std::size_t const Sd = 50;
     // number of time subdivisions:
-    std::size_t const Td = 150;
+    std::size_t const Td = 2000;
     // space range:
     range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range
@@ -890,8 +1009,13 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDADeviceSolverDe
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid:
+    auto const alpha_scale = static_cast<T>(3.);
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(T(0.5), alpha_scale, grid_enum::Nonuniform);
     // initialize pde solver
-    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, dev_expl_fwd_solver_config_ptr);
+    pde_solver pdesolver(wave_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_expl_fwd_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -903,12 +1027,16 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDADeviceSolverDe
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper());
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper());
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }

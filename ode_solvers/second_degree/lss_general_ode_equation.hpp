@@ -20,7 +20,7 @@ namespace lss_ode_solvers
 
 using lss_boundary::boundary_1d_pair;
 using lss_boundary::boundary_1d_ptr;
-using lss_grids::uniform_grid_config_1d;
+using lss_grids::grid_config_1d;
 
 namespace implicit_solvers
 {
@@ -110,7 +110,7 @@ void general_ode_equation<fp_type, container, allocator>::solve(container<fp_typ
     LSS_ASSERT(solution.size() == space_size, "The input solution container must have the correct size");
     // grid:
     // for now lets stick to uniform:
-    auto const &grid_cfg = std::make_shared<uniform_grid_config_1d<fp_type>>(ode_discretization_cfg_);
+    auto const &grid_cfg = std::make_shared<grid_config_1d<fp_type>>(ode_discretization_cfg_);
     const bool is_ode_nonhom_set = ode_data_cfg_->is_nonhom_data_set();
     // get ode_nonhom:
     auto const &ode_nonhom = ode_data_cfg_->nonhom_function();

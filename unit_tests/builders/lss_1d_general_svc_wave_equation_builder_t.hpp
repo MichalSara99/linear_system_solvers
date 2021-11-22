@@ -17,6 +17,9 @@ template <typename T> void test_pure_wave_equation_builder_t()
 
     using lss_boundary::dirichlet_boundary_1d_builder;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d_builder;
     using lss_pde_solvers::wave_coefficient_data_config_1d_builder;
     using lss_pde_solvers::wave_data_config_1d_builder;
@@ -75,6 +78,9 @@ template <typename T> void test_pure_wave_equation_builder_t()
                                .initial_data_config(init_data_ptr)
                                .build();
 
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+
     // boundary conditions builder:
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_low = dirichlet_boundary_1d_builder<T>().value(dirichlet).build();
@@ -85,6 +91,7 @@ template <typename T> void test_pure_wave_equation_builder_t()
     auto const &pde_solver = general_svc_wave_equation_builder<T, std::vector, std::allocator<T>>()
                                  .boundary_pair(boundary_pair)
                                  .discretization_config(discretization_ptr)
+                                 .grid_config_hints(grid_config_hints_ptr)
                                  .solver_config(dev_fwd_cusolver_qr_solver_config_ptr)
                                  .wave_data_config(data_ptr)
                                  .build();
@@ -100,12 +107,16 @@ template <typename T> void test_pure_wave_equation_builder_t()
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper(), 20);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -122,6 +133,9 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
 
     using lss_boundary::dirichlet_boundary_1d_builder;
     using lss_enumerations::implicit_pde_schemes_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d_builder;
     using lss_pde_solvers::wave_coefficient_data_config_1d_builder;
     using lss_pde_solvers::wave_data_config_1d_builder;
@@ -179,6 +193,9 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
                                .initial_data_config(init_data_ptr)
                                .build();
 
+    // grid config:
+    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+
     // boundary conditions builder:
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_low = dirichlet_boundary_1d_builder<T>().value(dirichlet).build();
@@ -189,6 +206,7 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     auto const &pde_solver = general_svc_wave_equation_builder<T, std::vector, std::allocator<T>>()
                                  .boundary_pair(boundary_pair)
                                  .discretization_config(discretization_ptr)
+                                 .grid_config_hints(grid_config_hints_ptr)
                                  .solver_config(dev_expl_fwd_solver_config_ptr)
                                  .wave_data_config(data_ptr)
                                  .build();
@@ -203,12 +221,16 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
         return (var1 * var2);
     };
 
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h, time_range.upper());
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x, time_range.upper());
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }

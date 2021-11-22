@@ -15,6 +15,7 @@
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_data_config.hpp"
 #include "pde_solvers/lss_wave_solver_config.hpp"
+#include "pde_solvers/transformation/lss_wave_data_transform.hpp"
 
 namespace lss_pde_solvers
 {
@@ -48,14 +49,14 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Device, fp_ty
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
+    wave_data_transform_1d_ptr<fp_type> wave_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_explicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_wave_equation_explicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_config_1d_ptr<fp_type> const &wave_data_config,
+                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               wave_explicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)
@@ -118,14 +119,14 @@ class general_svc_wave_equation_explicit_kernel<memory_space_enum::Host, fp_type
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    wave_data_config_1d_ptr<fp_type> wave_data_cfg_;
+    wave_data_transform_1d_ptr<fp_type> wave_data_cfg_;
     pde_discretization_config_1d_ptr<fp_type> discretization_cfg_;
     wave_explicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_svc_wave_equation_explicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_config_1d_ptr<fp_type> const &wave_data_config,
+                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
                                               pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
                                               wave_explicit_solver_config_ptr const &solver_config,
                                               grid_config_1d_ptr<fp_type> const &grid_config)

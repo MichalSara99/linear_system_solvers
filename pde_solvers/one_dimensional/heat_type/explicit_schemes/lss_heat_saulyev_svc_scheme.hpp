@@ -38,26 +38,25 @@ class heat_saulyev_svc_time_loop
   public:
     template <typename solver>
     static void run(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
-                    range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
-                    container_t &solution);
+                    range<fp_type> const &time_range, std::size_t const &last_time_idx, fp_type const time_step,
+                    traverse_direction_enum const &traverse_dir, container_t &solution);
 
     template <typename solver>
     static void run(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
-                    range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                    std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                    range<fp_type> const &time_range, std::size_t const &last_time_idx, fp_type const time_step,
+                    traverse_direction_enum const &traverse_dir,
                     std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution);
 
     template <typename solver>
     static void run_with_stepping(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                                  std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                                  fp_type const time_step, traverse_direction_enum const &traverse_dir,
                                   container_t &solution, container_2d_t &solutions);
 
     template <typename solver>
     static void run_with_stepping(solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair,
                                   range<fp_type> const &time_range, std::size_t const &last_time_idx,
-                                  std::pair<fp_type, fp_type> const &steps, traverse_direction_enum const &traverse_dir,
+                                  fp_type const time_step, traverse_direction_enum const &traverse_dir,
                                   std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution,
                                   container_2d_t &solutions);
 };
@@ -66,13 +65,13 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &solution)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &solution)
 {
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
 
     fp_type time{start_time + k};
     std::size_t time_idx{};
@@ -107,15 +106,14 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, std::function<fp_type(fp_type, fp_type)> const &heat_source,
-    container_t &solution)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution)
 {
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
     // const fp_type start_x = space_range.lower();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
 
     fp_type time{start_time + k};
     fp_type next_time{time + k};
@@ -154,13 +152,13 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, container_t &solution, container_2d_t &solutions)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    container_t &solution, container_2d_t &solutions)
 {
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
 
     fp_type time{start_time + k};
     std::size_t time_idx{};
@@ -201,14 +199,13 @@ template <typename fp_type, template <typename, typename> typename container, ty
 template <typename solver>
 void heat_saulyev_svc_time_loop<fp_type, container, allocator>::run_with_stepping(
     solver const &solver_ptr, boundary_1d_pair<fp_type> const &boundary_pair, range<fp_type> const &time_range,
-    std::size_t const &last_time_idx, std::pair<fp_type, fp_type> const &steps,
-    traverse_direction_enum const &traverse_dir, std::function<fp_type(fp_type, fp_type)> const &heat_source,
-    container_t &solution, container_2d_t &solutions)
+    std::size_t const &last_time_idx, fp_type const time_step, traverse_direction_enum const &traverse_dir,
+    std::function<fp_type(fp_type, fp_type)> const &heat_source, container_t &solution, container_2d_t &solutions)
 {
     // ranges and steps:
     const fp_type start_time = time_range.lower();
     const fp_type end_time = time_range.upper();
-    const fp_type k = std::get<0>(steps);
+    const fp_type k = time_step;
 
     fp_type time{start_time + k};
     fp_type next_time{time + k};
@@ -305,20 +302,17 @@ class heat_saulyev_svc_scheme
     {
         const range<fp_type> timer = discretization_cfg_->time_range();
         const fp_type k = discretization_cfg_->time_step();
-        const fp_type h = discretization_cfg_->space_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &steps = std::make_pair(k, h);
         auto const &solver_method_ptr =
             std::make_shared<heat_saulyev_solver_method<fp_type, container, allocator>>(s_coeffs_, grid_cfg_);
         if (is_heat_sourse_set)
         {
-            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir, heat_source,
-                      solution);
+            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, heat_source, solution);
         }
         else
         {
-            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir, solution);
+            loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, solution);
         }
     }
 
@@ -328,21 +322,19 @@ class heat_saulyev_svc_scheme
     {
         const range<fp_type> timer = discretization_cfg_->time_range();
         const fp_type k = discretization_cfg_->time_step();
-        const fp_type h = discretization_cfg_->space_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &steps = std::make_pair(k, h);
         auto const &solver_method_ptr =
             std::make_shared<heat_saulyev_solver_method<fp_type, container, allocator>>(s_coeffs_, grid_cfg_);
         if (is_heat_sourse_set)
         {
-            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir,
+            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir,
                                     heat_source, solution, solutions);
         }
         else
         {
-            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, steps, traverse_dir,
-                                    solution, solutions);
+            loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, solution,
+                                    solutions);
         }
     }
 };
