@@ -10,7 +10,7 @@ It also contains some PDE solvers.
 * 1D general wave equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
 * 2D general Heston type model with variable coefficients in space dimensions
  (support for Douglas-Rachford ADI (weighted scheme also available), Craig-Sneyd ADI, Modified Craig-Sneyd ADI, Hundsdorfer-Verwer ADI)
-All solvers support uniform and non-uniform grid with variable scaling
+* All solvers support uniform and non-uniform grid with variable scaling
 
 
 ## Some curves from ODE solver
@@ -20,7 +20,7 @@ Simple Two-point BVP (u''(x) = -2 with Dirichlet and Robin BC)
 ## Some surfaces from PDE solver
 
 Heat equation (Dirichlet BC)
-![Pure heat equation](/outputs/temp_heat_equ_numerical.png)
+![Pure heat equation](/outputs/temp_heat_equ_numerical_nonuniform.png)
 
 Wave equation (Dirichlet BC)
 ![Pure wave equation](/outputs/wave_pure_dir_equ_numerical.png)
@@ -38,7 +38,7 @@ Advection equation
 ![Advection equation](/outputs/temp_advection_equ_numerical.png)
 
 Black-Scholes equation
-![Black-Scholes equation](/outputs/call_option_price_surface_numerical.png)
+![Black-Scholes equation](/outputs/call_option_price_surface_numerical_nonuniform.png)
 
 Heston equation DR
 ![Heston equation DR](/outputs/impl_heston_dr_numerical.png)
