@@ -19,7 +19,7 @@
 #include "unit_tests/pde_solvers/one_dimensional/lss_pure_heat_equation_t.hpp"
 #include "unit_tests/pde_solvers/one_dimensional/lss_pure_wave_equation_t.hpp"
 #include "unit_tests/pde_solvers/two_dimensional/lss_heston_equation_t.hpp"
-//#include "unit_tests/pde_solvers/two_dimensional/lss_sabr_equation_t.hpp"
+#include "unit_tests/pde_solvers/two_dimensional/lss_sabr_equation_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_cuda_solver_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_sor_solver_cuda_t.hpp"
 #include "unit_tests/sparse_solvers/lss_core_sor_solver_t.hpp"
@@ -257,8 +257,8 @@ int main(int argc, char const *argv[])
     // =================== TWO_DIM: lss_heston_equation_t.hpp =============
     // ====================================================================
 
-    // testImplHestonEquationCUDAQRSolver();                        // -- tested
-    // testImplHestonEquationThomasLUSolver();                      // -- tested
+    // testImplHestonEquationCUDAQRSolver();                                        // -- tested
+    // testImplHestonEquationThomasLUSolver();                                      // -- tested
 
     // ====================================================================
 
@@ -266,7 +266,7 @@ int main(int argc, char const *argv[])
     // =================== TWO_DIM: lss_sabr_equation_t.hpp ===============
     // ====================================================================
 
-    // testImplSABREquationDoubleSweepSolver();
+    // testImplSABREquationDoubleSweepSolver();                                     // -- tested
 
     // ====================================================================
 
@@ -274,8 +274,8 @@ int main(int argc, char const *argv[])
     // ============= lss_wave_solver_config_builder_t.hpp =================
     // ====================================================================
 
-    // test_wave_solver_config_implicit_builder();              // -- tested
-    // test_wave_solver_config_explicit_builder();              // -- tested
+    // test_wave_solver_config_implicit_builder();                                  // -- tested
+    // test_wave_solver_config_explicit_builder();                                  // -- tested
 
     // ====================================================================
 
@@ -283,8 +283,8 @@ int main(int argc, char const *argv[])
     // ============= lss_heat_solver_config_builder_t.hpp =================
     // ====================================================================
 
-    // test_heat_solver_config_implicit_builder();              // -- tested
-    // test_heat_solver_config_explicit_builder();              // -- tested
+    // test_heat_solver_config_implicit_builder();                                  // -- tested
+    // test_heat_solver_config_explicit_builder();                                  // -- tested
 
     // ====================================================================
 
@@ -292,7 +292,7 @@ int main(int argc, char const *argv[])
     // ============= lss_pde_discretization_config_builder_t.hpp ==========
     // ====================================================================
 
-    // test_pde_discretization_config_builder();                // -- tested
+    // test_pde_discretization_config_builder();                                    // -- tested
 
     // ====================================================================
 
@@ -300,7 +300,7 @@ int main(int argc, char const *argv[])
     // ================== lss_heat_data_config_builder_t.hpp ==============
     // ====================================================================
 
-    // test_heat_data_config_builder();                         // -- tested
+    // test_heat_data_config_builder();                                             // -- tested
 
     // ====================================================================
 
@@ -308,7 +308,7 @@ int main(int argc, char const *argv[])
     // ================== lss_wave_data_config_builder_t.hpp ==============
     // ====================================================================
 
-    // test_wave_data_config_builder();                         // -- tested
+    // test_wave_data_config_builder();                                             // -- tested
 
     // ====================================================================
 
@@ -316,7 +316,7 @@ int main(int argc, char const *argv[])
     // ================== lss_robin_boundary_builder_t.hpp ================
     // ====================================================================
 
-    // test_robin_boundary_builder();                           // -- tested
+    // test_robin_boundary_builder();                                               // -- tested
 
     // ====================================================================
 
@@ -324,7 +324,7 @@ int main(int argc, char const *argv[])
     // ================== lss_neumann_boundary_builder_t.hpp ==============
     // ====================================================================
 
-    // test_neumann_boundary_builder();                         // -- tested
+    // test_neumann_boundary_builder();                                             // -- tested
 
     // ====================================================================
 
@@ -332,7 +332,7 @@ int main(int argc, char const *argv[])
     // ================ lss_dirichlet_boundary_builder_t.hpp ==============
     // ====================================================================
 
-    // test_neumann_boundary_builder();                         // -- tested
+    // test_neumann_boundary_builder();                                             // -- tested
 
     // ====================================================================
 
@@ -340,8 +340,8 @@ int main(int argc, char const *argv[])
     // ========= lss_1d_general_svc_wave_equation_builder_t.hpp ===========
     // ====================================================================
 
-    // test_pure_wave_equation_builder();                       // -- tested
-    // test_expl_pure_wave_equation_builder();                  // -- tested
+    // test_pure_wave_equation_builder();                                           // -- tested
+    // test_expl_pure_wave_equation_builder();                                      // -- tested
 
     // ====================================================================
 
@@ -349,7 +349,7 @@ int main(int argc, char const *argv[])
     // ========= lss_1d_general_svc_heat_equation_builder_t.hpp ===========
     // ====================================================================
 
-    // test_pure_heat_equation_builder();                       // -- tested
+    // test_pure_heat_equation_builder();                                           // -- tested
 
     // ====================================================================
 

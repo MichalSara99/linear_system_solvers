@@ -137,7 +137,7 @@ void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>
 
     f_[N] = solver_boundary.upper_boundary(boundary, K_[N - 1], K_[N], L_[N - 1], L_[N], time, space_args...);
 
-    for (long long t = N - 1; t >= start_index && t >= 0; --t)
+    for (std::size_t t = N; t-- > start_index /*&& t >= 0*/; /* --t*/)
     {
         f_[t] = (L_[t] * f_[t + 1]) + K_[t];
     }

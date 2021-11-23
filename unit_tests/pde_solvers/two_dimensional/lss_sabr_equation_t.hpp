@@ -85,29 +85,29 @@ template <typename T> void testImplSABREquationDoubleSweepSolverCrankNicolson()
     // coeffs:
     auto D = [=](T s, T alpha) { return std::exp(-rate * half); };
     auto a = [=](T s, T alpha) {
-        return (half * alpha * alpha * std::pow(s, two * beta) * std::pow(D, two * (one - beta)));
+        return (0.5 * alpha * alpha * std::pow(s, two * beta) * std::pow(D(s, alpha), two * (one - beta)));
     };
     auto b = [=](T s, T alpha) { return (half * sig_sig * sig_sig * alpha * alpha); };
     auto c = [=](T s, T alpha) {
-        return (rho * sig_sig * alpha * alpha * std::pow(s, beta) * std::pow(D, (one - beta)));
+        return (rho * sig_sig * alpha * alpha * std::pow(s, beta) * std::pow(D(s, alpha), (one - beta)));
     };
     auto d = [=](T s, T alpha) { return (rate * s); };
     auto e = [=](T s, T alpha) { return 0.0; };
     auto f = [=](T s, T alpha) { return (-rate); };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_2d<T>>(a, b, c, d, e, f);
     // terminal condition:
-    auto terminal_condition = [=](T s, T v) { return std::max<T>(0.0, s - strike); };
+    auto terminal_condition = [=](T s, T v) -> T { return std::max<T>(0.0, s - strike); };
     auto const heat_init_data_ptr = std::make_shared<heat_initial_data_config_2d<T>>(terminal_condition);
     // heat data config:
     auto const heat_data_ptr = std::make_shared<heat_data_config_2d<T>>(heat_coeffs_data_ptr, heat_init_data_ptr);
     // horizontal spot boundary conditions:
-    auto const &dirichlet_low = [=](T t, T v) { return 0.0; };
-    auto const &neumann_high = [=](T t, T s) { return -1.0; };
+    auto const &dirichlet_low = [=](T t, T v) -> T { return 0.0; };
+    auto const &neumann_high = [=](T t, T s) -> T { return -1.0; };
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_2d<T>>(dirichlet_low);
     auto const &boundary_high_ptr = std::make_shared<neumann_boundary_2d<T>>(neumann_high);
     auto const &horizontal_boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
     // vertical upper vol boundary:
-    auto const &dirichlet_high = [=](T t, T s) { return s; };
+    auto const &dirichlet_high = [=](T t, T s) -> T { return s; };
     auto const &vertical_upper_boundary_ptr = std::make_shared<dirichlet_boundary_2d<T>>(dirichlet_high);
     // splitting method configuration:
     auto const &splitting_config_ptr =

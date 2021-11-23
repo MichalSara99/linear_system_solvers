@@ -158,9 +158,9 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     std::cout << "============================================================\n";
 
     // number of space subdivisions:
-    std::size_t const Sd = 100;
+    std::size_t const Sd = 50;
     // number of time subdivisions:
-    std::size_t const Td = 100;
+    std::size_t const Td = 2000;
     // space range:
     range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
     // time range

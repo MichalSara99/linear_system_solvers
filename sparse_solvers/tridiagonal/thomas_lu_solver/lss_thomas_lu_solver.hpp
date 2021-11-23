@@ -167,7 +167,7 @@ void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::kern
     solution[end_idx] = (r - (a * solution[end_idx - 1])) / beta_[end_idx];
 
     f_[end_idx] = solution[end_idx];
-    for (long long t = end_idx - 1; t >= start_idx && t >= 0; t--)
+    for (std::size_t t = end_idx; t-- > start_idx /*&& t >= 0*/; /*t--*/)
     {
         f_[t] = solution[t] - (gamma_[t] * f_[t + 1]);
     }

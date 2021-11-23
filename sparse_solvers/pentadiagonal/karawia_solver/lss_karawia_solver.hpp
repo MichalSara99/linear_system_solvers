@@ -196,7 +196,7 @@ void lss_karawia_solver::karawia_solver<fp_type, container, allocator>::kernel(
 
     solution[end_idx] = f_[end_idx];
     solution[end_idx - 1] = f_[end_idx - 1] - alpha_[end_idx - 1] * solution[end_idx];
-    for (long long t = end_idx - 2; t >= start_idx && t >= 0; t--)
+    for (std::size_t t = end_idx - 1; t-- > start_idx /*&& t >= 0*/; /*t--*/)
     {
         solution[t] = f_[t] - alpha_[t] * solution[t + 1] - beta_[t] * solution[t + 2];
     }
