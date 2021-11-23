@@ -4,6 +4,8 @@ It also contains some PDE solvers.
 
 ## ODE Solver
 * general 2nd degree equation with variable coefficients (supports all Dirichlet, Neumann, Robin boundary conditions)
+* All solvers support uniform and non-uniform grid with variable scaling
+
 
 ## PDE Solver
 * 1D general heat equation with variable coefficients in space dimension (supports all Dirichlet, Neumann, Robin boundary conditions)
