@@ -6,8 +6,8 @@
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
-#include "ode_solvers/lss_ode_data_config.hpp"
 #include "ode_solvers/lss_ode_discretization_config.hpp"
+#include "ode_solvers/transformation/lss_ode_data_transform.hpp"
 
 namespace lss_ode_solvers
 {
@@ -19,7 +19,7 @@ template <typename fp_type> struct general_ode_implicit_coefficients
 {
   public:
     // scheme coefficients:
-    fp_type lambda_, gamma_, h_;
+    fp_type lambda_, gamma_;
     std::size_t space_size_;
     range<fp_type> range_;
     // functional coefficients:
@@ -32,18 +32,17 @@ template <typename fp_type> struct general_ode_implicit_coefficients
     {
         // get space range:
         range_ = discretization_config->space_range();
-        // get space step:
-        h_ = discretization_config->space_step();
         // size of spaces discretization:
         space_size_ = discretization_config->number_of_space_points();
         const fp_type one = static_cast<fp_type>(1.0);
         const fp_type two = static_cast<fp_type>(2.0);
+        const fp_type h = one / (space_size_ - 1);
         // calculate scheme coefficients:
-        lambda_ = one / (h_ * h_);
-        gamma_ = one / (two * h_);
+        lambda_ = one / (h * h);
+        gamma_ = one / (two * h);
     }
 
-    void initialize_coefficients(ode_data_config_ptr<fp_type> const &ode_data_config)
+    void initialize_coefficients(ode_data_transform_ptr<fp_type> const &ode_data_config)
     {
         // save coefficients locally:
         auto const a = ode_data_config->a_coefficient();
@@ -57,7 +56,7 @@ template <typename fp_type> struct general_ode_implicit_coefficients
   public:
     general_ode_implicit_coefficients() = delete;
 
-    explicit general_ode_implicit_coefficients(ode_data_config_ptr<fp_type> const &ode_data_config,
+    explicit general_ode_implicit_coefficients(ode_data_transform_ptr<fp_type> const &ode_data_config,
                                                ode_discretization_config_ptr<fp_type> const &discretization_config)
     {
         initialize(discretization_config);

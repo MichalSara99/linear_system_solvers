@@ -160,6 +160,12 @@
     <Filter Include="pde_solvers\transformation">
       <UniqueIdentifier>{a47031d5-67a4-4a25-8a82-3138b112717d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ode_solvers\transformation">
+      <UniqueIdentifier>{4c0acfde-c9d2-44cc-abc2-88fa4178e842}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="transformation">
+      <UniqueIdentifier>{57b694e6-f8e6-4360-a731-d2e2b2873bf5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -549,11 +555,14 @@
     <ClInclude Include="pde_solvers\transformation\lss_heat_data_transform.hpp">
       <Filter>pde_solvers\transformation</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\transformation\lss_boundary_transform.hpp">
-      <Filter>pde_solvers\transformation</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\transformation\lss_wave_data_transform.hpp">
       <Filter>pde_solvers\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="ode_solvers\transformation\lss_ode_data_transform.hpp">
+      <Filter>ode_solvers\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="transformation\lss_boundary_transform.hpp">
+      <Filter>transformation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

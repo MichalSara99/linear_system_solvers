@@ -268,12 +268,6 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     void operator()(rcontainer_2d_t &prev_solution, rcontainer_2d_t &next_solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source)
     {
-        // get space ranges:
-        const auto &spaces = discretization_cfg_->space_range();
-        // across X:
-        const auto space_x = spaces.first;
-        // across Y:
-        const auto space_y = spaces.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -314,9 +308,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
-        auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
+        auto solver_y = std::make_shared<cusolver>(space_size_x);
         solver_y->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto solver_u = std::make_shared<cusolver>(space_y, space_size_y);
+        auto solver_u = std::make_shared<cusolver>(space_size_y);
         solver_u->set_factorization(solver_cfg_->tridiagonal_factorization());
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
@@ -417,12 +411,6 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     void operator()(rcontainer_2d_t &prev_solution, rcontainer_2d_t &next_solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source, fp_type omega_value)
     {
-        // get space ranges:
-        const auto &spaces = discretization_cfg_->space_range();
-        // across X:
-        const auto space_x = spaces.first;
-        // across Y:
-        const auto space_y = spaces.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -463,9 +451,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
-        auto solver_y = std::make_shared<sorcusolver>(space_x, space_size_x);
+        auto solver_y = std::make_shared<sorcusolver>(space_size_x);
         solver_y->set_omega(omega_value);
-        auto solver_u = std::make_shared<sorcusolver>(space_y, space_size_y);
+        auto solver_u = std::make_shared<sorcusolver>(space_size_y);
         solver_u->set_omega(omega_value);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
@@ -571,12 +559,6 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     void operator()(rcontainer_2d_t &prev_solution, rcontainer_2d_t &next_solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source)
     {
-        // get space ranges:
-        const auto &spaces = discretization_cfg_->space_range();
-        // across X:
-        const auto space_x = spaces.first;
-        // across Y:
-        const auto space_y = spaces.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -617,9 +599,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
-        auto solver_y = std::make_shared<cusolver>(space_x, space_size_x);
+        auto solver_y = std::make_shared<cusolver>(space_size_x);
         solver_y->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto solver_u = std::make_shared<cusolver>(space_y, space_size_y);
+        auto solver_u = std::make_shared<cusolver>(space_size_y);
         solver_u->set_factorization(solver_cfg_->tridiagonal_factorization());
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
@@ -721,12 +703,6 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     void operator()(rcontainer_2d_t &prev_solution, rcontainer_2d_t &next_solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source, fp_type omega_value)
     {
-        // get space ranges:
-        const auto &spaces = discretization_cfg_->space_range();
-        // across X:
-        const auto space_x = spaces.first;
-        // across Y:
-        const auto space_y = spaces.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -767,9 +743,9 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
-        auto solver_y = std::make_shared<sorsolver>(space_x, space_size_x);
+        auto solver_y = std::make_shared<sorsolver>(space_size_x);
         solver_y->set_omega(omega_value);
-        auto solver_u = std::make_shared<sorsolver>(space_y, space_size_y);
+        auto solver_u = std::make_shared<sorsolver>(space_size_y);
         solver_u->set_omega(omega_value);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
@@ -872,12 +848,6 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     void operator()(rcontainer_2d_t &prev_solution, rcontainer_2d_t &next_solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source)
     {
-        // get space ranges:
-        const auto &spaces = discretization_cfg_->space_range();
-        // across X:
-        const auto space_x = spaces.first;
-        // across Y:
-        const auto space_y = spaces.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -919,8 +889,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         // create and set up the main solvers:
-        auto solver_y = std::make_shared<ds_solver>(space_x, space_size_x);
-        auto solver_u = std::make_shared<ds_solver>(space_y, space_size_y);
+        auto solver_y = std::make_shared<ds_solver>(space_size_x);
+        auto solver_u = std::make_shared<ds_solver>(space_size_y);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {
@@ -1020,12 +990,6 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     void operator()(rcontainer_2d_t &prev_solution, rcontainer_2d_t &next_solution, bool is_heat_sourse_set,
                     std::function<fp_type(fp_type, fp_type, fp_type)> const &heat_source)
     {
-        // get space ranges:
-        const auto &spaces = discretization_cfg_->space_range();
-        // across X:
-        const auto space_x = spaces.first;
-        // across Y:
-        const auto space_y = spaces.second;
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -1067,8 +1031,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         // create and set up the main solvers:
-        auto solver_y = std::make_shared<tlu_solver>(space_x, space_size_x);
-        auto solver_u = std::make_shared<tlu_solver>(space_y, space_size_y);
+        auto solver_y = std::make_shared<tlu_solver>(space_size_x);
+        auto solver_u = std::make_shared<tlu_solver>(space_size_y);
         // splitting method:
         if (splitting_cfg_->splitting_method() == splitting_method_enum::DouglasRachford)
         {

@@ -12,6 +12,10 @@
 template <typename T> void testImplSimpleODEDirichletBCCUDASolverDeviceQR()
 {
     using lss_boundary::dirichlet_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
@@ -53,8 +57,13 @@ template <typename T> void testImplSimpleODEDirichletBCCUDASolverDeviceQR()
     auto const &dirichlet = [](T t) { return 0.0; };
     auto const &boundary_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_pair = std::make_pair(boundary_ptr, boundary_ptr);
+    // grid config:
+    auto const &alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(0.5, alpha_scale, grid_enum::Nonuniform);
     // initialize ode solver
-    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, dev_cusolver_qr_solver_config_ptr);
+    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -62,12 +71,16 @@ template <typename T> void testImplSimpleODEDirichletBCCUDASolverDeviceQR()
 
     // exact value:
     auto exact = [](T x) { return x * (static_cast<T>(1.0) - x); };
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -89,6 +102,10 @@ template <typename T> void testImplSimpleODEDirichletNeumannBCCUDASolverDeviceQR
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::neumann_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
@@ -133,8 +150,13 @@ template <typename T> void testImplSimpleODEDirichletNeumannBCCUDASolverDeviceQR
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_high_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid config:
+    auto const &alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(0.5, alpha_scale, grid_enum::Nonuniform);
     // initialize ode solver
-    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, dev_cusolver_qr_solver_config_ptr);
+    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -143,12 +165,16 @@ template <typename T> void testImplSimpleODEDirichletNeumannBCCUDASolverDeviceQR
     // exact value:
     auto exact = [](T x) { return (x * x * x - 12.0 * x + 1.0); };
 
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     std::cout << "tp : FDM | Exact | Abs Diff\n";
-    T const h = discretization_ptr->space_step();
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -170,6 +196,10 @@ template <typename T> void testImplSimpleODEDirichletRobinBCCUDASolverDeviceQR()
 {
     using lss_boundary::dirichlet_boundary_1d;
     using lss_boundary::robin_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
@@ -215,8 +245,13 @@ template <typename T> void testImplSimpleODEDirichletRobinBCCUDASolverDeviceQR()
     auto const &boundary_low_ptr = std::make_shared<dirichlet_boundary_1d<T>>(dirichlet);
     auto const &boundary_high_ptr = std::make_shared<robin_boundary_1d<T>>(robin_first, robin_second);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid config:
+    auto const &alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(0.5, alpha_scale, grid_enum::Nonuniform);
     // initialize ode solver
-    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, dev_cusolver_qr_solver_config_ptr);
+    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -226,11 +261,15 @@ template <typename T> void testImplSimpleODEDirichletRobinBCCUDASolverDeviceQR()
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(1.0)); };
 
     std::cout << "tp : FDM | Exact | Abs Diff\n";
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -252,6 +291,10 @@ template <typename T> void testImplSimpleODENeumannRobinBCCUDASolverDeviceQR()
 {
     using lss_boundary::neumann_boundary_1d;
     using lss_boundary::robin_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
@@ -297,8 +340,13 @@ template <typename T> void testImplSimpleODENeumannRobinBCCUDASolverDeviceQR()
     auto const &boundary_low_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
     auto const &boundary_high_ptr = std::make_shared<robin_boundary_1d<T>>(robin_first, robin_second);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid config:
+    auto const &alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(0.5, alpha_scale, grid_enum::Nonuniform);
     // initialize ode solver
-    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, dev_cusolver_qr_solver_config_ptr);
+    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -308,11 +356,15 @@ template <typename T> void testImplSimpleODENeumannRobinBCCUDASolverDeviceQR()
     auto exact = [](T x) { return (x * x * x - static_cast<T>(14.0)); };
 
     std::cout << "tp : FDM | Exact | Abs Diff\n";
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -334,6 +386,10 @@ template <typename T> void testImplSimpleODE1NeumannRobinBCCUDASolverDeviceQR()
 {
     using lss_boundary::neumann_boundary_1d;
     using lss_boundary::robin_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
@@ -379,8 +435,13 @@ template <typename T> void testImplSimpleODE1NeumannRobinBCCUDASolverDeviceQR()
     auto const &boundary_low_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
     auto const &boundary_high_ptr = std::make_shared<robin_boundary_1d<T>>(robin_first, robin_second);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid config:
+    auto const &alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(0.5, alpha_scale, grid_enum::Nonuniform);
     // initialize ode solver
-    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, dev_cusolver_qr_solver_config_ptr);
+    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:
@@ -390,11 +451,15 @@ template <typename T> void testImplSimpleODE1NeumannRobinBCCUDASolverDeviceQR()
     auto exact = [](T x) { return (-x * x + x + static_cast<T>(0.5)); };
 
     std::cout << "tp : FDM | Exact | Abs Diff\n";
-    T const h = discretization_ptr->space_step();
+    T x{};
+    auto const grid_cfg = std::make_shared<grid_config_1d<T>>(discretization_ptr);
+    auto const grid_trans_cfg =
+        std::make_shared<grid_transform_config_1d<T>>(discretization_ptr, grid_config_hints_ptr);
     T benchmark{};
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
-        benchmark = exact(j * h);
+        x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
+        benchmark = exact(x);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }

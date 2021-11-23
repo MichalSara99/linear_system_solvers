@@ -30,7 +30,6 @@ class double_sweep_solver
 {
   private:
     std::size_t discretization_size_;
-    range<fp_type> space_range_;
     container<fp_type, allocator> a_, b_, c_, f_;
     container<fp_type, allocator> L_, K_;
 
@@ -43,8 +42,7 @@ class double_sweep_solver
   public:
     typedef fp_type value_type;
     typedef container<fp_type, allocator> container_type;
-    explicit double_sweep_solver(range<fp_type> const &space_range, std::size_t discretization_size)
-        : space_range_{space_range}, discretization_size_{discretization_size}
+    explicit double_sweep_solver(std::size_t discretization_size) : discretization_size_{discretization_size}
     {
     }
 
@@ -116,8 +114,9 @@ void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>
     L_.resize(discretization_size_);
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
+    const fp_type one = static_cast<fp_type>(1.0);
     const auto &low_quad = std::make_tuple(a_[0], b_[0], c_[0], f_[0]);
-    const fp_type step = space_range_.spread() / static_cast<fp_type>(N);
+    const fp_type step = one / static_cast<fp_type>(N);
     double_sweep_boundary<fp_type> solver_boundary(low_quad, discretization_size_, step);
     // init coefficients:
     const auto pair = solver_boundary.coefficients(boundary, time, space_args...);

@@ -13,8 +13,8 @@
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_data_config.hpp"
 #include "pde_solvers/lss_wave_solver_config.hpp"
-#include "pde_solvers/transformation/lss_boundary_transform.hpp"
 #include "pde_solvers/transformation/lss_wave_data_transform.hpp"
+#include "transformation/lss_boundary_transform.hpp"
 
 namespace lss_pde_solvers
 {
@@ -24,6 +24,13 @@ namespace one_dimensional
 using lss_boundary::boundary_1d_pair;
 using lss_boundary::boundary_1d_ptr;
 using lss_containers::container_2d;
+using lss_enumerations::grid_enum;
+using lss_grids::grid_config_1d;
+using lss_grids::grid_config_hints_1d_ptr;
+using lss_grids::grid_transform_config_1d;
+using lss_grids::grid_transform_config_1d_ptr;
+using lss_transformation::boundary_transform_1d;
+using lss_transformation::boundary_transform_1d_ptr;
 
 namespace implicit_solvers
 {

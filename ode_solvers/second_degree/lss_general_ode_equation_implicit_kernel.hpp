@@ -12,6 +12,7 @@
 #include "ode_solvers/lss_ode_solver_config.hpp"
 #include "ode_solvers/second_degree/implicit_coefficients/lss_general_ode_implicit_coefficients.hpp"
 #include "ode_solvers/second_degree/solver_method/lss_general_ode_implicit_solver_method.hpp"
+#include "ode_solvers/transformation/lss_ode_data_transform.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
 #include "sparse_solvers/tridiagonal/sor_solver/lss_sor_solver.hpp"
@@ -32,7 +33,6 @@ using lss_grids::grid_config_1d_ptr;
 using lss_sor_solver::sor_solver;
 using lss_sor_solver_cuda::sor_solver_cuda;
 using lss_thomas_lu_solver::thomas_lu_solver;
-using lss_utility::diagonal_triplet_t;
 using lss_utility::NaN;
 using lss_utility::pair_t;
 using lss_utility::range;
@@ -57,14 +57,14 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Device, tridiagona
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    ode_data_config_ptr<fp_type> ode_data_cfg_;
+    ode_data_transform_ptr<fp_type> ode_data_cfg_;
     ode_discretization_config_ptr<fp_type> discretization_cfg_;
     ode_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_ode_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                         ode_data_config_ptr<fp_type> const &ode_data_config,
+                                         ode_data_transform_ptr<fp_type> const &ode_data_config,
                                          ode_discretization_config_ptr<fp_type> const &discretization_config,
                                          ode_implicit_solver_config_ptr const &solver_config,
                                          grid_config_1d_ptr<fp_type> const &grid_config)
@@ -83,7 +83,7 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Device, tridiagona
         auto const ode_coeff_holder =
             std::make_shared<general_ode_implicit_coefficients<fp_type>>(ode_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, ode_coeff_holder, grid_cfg_);
         if (is_ode_nonhom_set)
@@ -108,14 +108,14 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Device, tridiagona
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    ode_data_config_ptr<fp_type> ode_data_cfg_;
+    ode_data_transform_ptr<fp_type> ode_data_cfg_;
     ode_discretization_config_ptr<fp_type> discretization_cfg_;
     ode_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_ode_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                         ode_data_config_ptr<fp_type> const &ode_data_config,
+                                         ode_data_transform_ptr<fp_type> const &ode_data_config,
                                          ode_discretization_config_ptr<fp_type> const &discretization_config,
                                          ode_implicit_solver_config_ptr const &solver_config,
                                          grid_config_1d_ptr<fp_type> const &grid_config)
@@ -135,7 +135,7 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Device, tridiagona
         auto const ode_coeff_holder =
             std::make_shared<general_ode_implicit_coefficients<fp_type>>(ode_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<sorcusolver>(space, space_size);
+        auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, ode_coeff_holder, grid_cfg_);
         if (is_ode_nonhom_set)
@@ -163,14 +163,14 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    ode_data_config_ptr<fp_type> ode_data_cfg_;
+    ode_data_transform_ptr<fp_type> ode_data_cfg_;
     ode_discretization_config_ptr<fp_type> discretization_cfg_;
     ode_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_ode_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                         ode_data_config_ptr<fp_type> const &ode_data_config,
+                                         ode_data_transform_ptr<fp_type> const &ode_data_config,
                                          ode_discretization_config_ptr<fp_type> const &discretization_config,
                                          ode_implicit_solver_config_ptr const &solver_config,
                                          grid_config_1d_ptr<fp_type> const &grid_config)
@@ -189,7 +189,7 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
         auto const ode_coeff_holder =
             std::make_shared<general_ode_implicit_coefficients<fp_type>>(ode_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, ode_coeff_holder, grid_cfg_);
         if (is_ode_nonhom_set)
@@ -214,14 +214,14 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    ode_data_config_ptr<fp_type> ode_data_cfg_;
+    ode_data_transform_ptr<fp_type> ode_data_cfg_;
     ode_discretization_config_ptr<fp_type> discretization_cfg_;
     ode_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_ode_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                         ode_data_config_ptr<fp_type> const &ode_data_config,
+                                         ode_data_transform_ptr<fp_type> const &ode_data_config,
                                          ode_discretization_config_ptr<fp_type> const &discretization_config,
                                          ode_implicit_solver_config_ptr const &solver_config,
                                          grid_config_1d_ptr<fp_type> const &grid_config)
@@ -241,7 +241,7 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
         auto const ode_coeff_holder =
             std::make_shared<general_ode_implicit_coefficients<fp_type>>(ode_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<sorsolver>(space, space_size);
+        auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, ode_coeff_holder, grid_cfg_);
         if (is_ode_nonhom_set)
@@ -266,14 +266,14 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    ode_data_config_ptr<fp_type> ode_data_cfg_;
+    ode_data_transform_ptr<fp_type> ode_data_cfg_;
     ode_discretization_config_ptr<fp_type> discretization_cfg_;
     ode_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_ode_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                         ode_data_config_ptr<fp_type> const &ode_data_config,
+                                         ode_data_transform_ptr<fp_type> const &ode_data_config,
                                          ode_discretization_config_ptr<fp_type> const &discretization_config,
                                          ode_implicit_solver_config_ptr const &solver_config,
                                          grid_config_1d_ptr<fp_type> const &grid_config)
@@ -292,7 +292,7 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
         auto const ode_coeff_holder =
             std::make_shared<general_ode_implicit_coefficients<fp_type>>(ode_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<ds_solver>(space, space_size);
+        auto const &solver = std::make_shared<ds_solver>(space_size);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, ode_coeff_holder, grid_cfg_);
         if (is_ode_nonhom_set)
         {
@@ -316,14 +316,14 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
 
   private:
     boundary_1d_pair<fp_type> boundary_pair_;
-    ode_data_config_ptr<fp_type> ode_data_cfg_;
+    ode_data_transform_ptr<fp_type> ode_data_cfg_;
     ode_discretization_config_ptr<fp_type> discretization_cfg_;
     ode_implicit_solver_config_ptr solver_cfg_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
     general_ode_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                         ode_data_config_ptr<fp_type> const &ode_data_config,
+                                         ode_data_transform_ptr<fp_type> const &ode_data_config,
                                          ode_discretization_config_ptr<fp_type> const &discretization_config,
                                          ode_implicit_solver_config_ptr const &solver_config,
                                          grid_config_1d_ptr<fp_type> const &grid_config)
@@ -342,7 +342,7 @@ class general_ode_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_
         auto const ode_coeff_holder =
             std::make_shared<general_ode_implicit_coefficients<fp_type>>(ode_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<tlu_solver>(space, space_size);
+        auto const &solver = std::make_shared<tlu_solver>(space_size);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, ode_coeff_holder, grid_cfg_);
         if (is_ode_nonhom_set)
         {

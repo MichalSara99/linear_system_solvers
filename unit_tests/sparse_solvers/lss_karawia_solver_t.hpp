@@ -65,9 +65,8 @@ template <typename T> void testBVPKarawiaDirichletBC()
     auto const &upper_ptr = std::make_shared<dirichlet_boundary_1d<T>>([](T t) { return 0.0; });
     auto const &other_lower_ptr = std::make_shared<dirichlet_boundary_1d<T>>([&](T t) { return exact(h); });
     auto const &other_upper_ptr = std::make_shared<dirichlet_boundary_1d<T>>([&](T t) { return exact(1.0 - h); });
-    // constriuct space range:
-    range<T> space_range(0.0, 1.0);
-    auto dss = std::make_shared<karawia_solver<T, std::vector, std::allocator<T>>>(space_range, N);
+
+    auto dss = std::make_shared<karawia_solver<T, std::vector, std::allocator<T>>>(N);
     dss->set_diagonals(std::move(lowest_diag), std::move(lower_diag), std::move(diagonal), std::move(upper_diag),
                        std::move(uppest_diag));
     dss->set_rhs(rhs);

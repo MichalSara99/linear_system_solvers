@@ -17,6 +17,10 @@ template <typename T> void testImplSimpleODEThomesLUQRPrint()
 {
     using lss_boundary::neumann_boundary_1d;
     using lss_boundary::robin_boundary_1d;
+    using lss_enumerations::grid_enum;
+    using lss_grids::grid_config_1d;
+    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_transform_config_1d;
     using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
@@ -63,8 +67,13 @@ template <typename T> void testImplSimpleODEThomesLUQRPrint()
     auto const &boundary_low_ptr = std::make_shared<neumann_boundary_1d<T>>(neumann);
     auto const &boundary_high_ptr = std::make_shared<robin_boundary_1d<T>>(robin_first, robin_second);
     auto const &boundary_pair = std::make_pair(boundary_low_ptr, boundary_high_ptr);
+    // grid config:
+    auto const &alpha_scale = 3.0;
+    auto const &grid_config_hints_ptr =
+        std::make_shared<grid_config_hints_1d<T>>(0.5, alpha_scale, grid_enum::Nonuniform);
     // initialize ode solver
-    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, dev_cusolver_qr_solver_config_ptr);
+    ode_solver odesolver(ode_data_ptr, discretization_ptr, boundary_pair, grid_config_hints_ptr,
+                         dev_cusolver_qr_solver_config_ptr);
     // prepare container for solution:
     std::vector<T> solution(Sd, T{});
     // get the solution:

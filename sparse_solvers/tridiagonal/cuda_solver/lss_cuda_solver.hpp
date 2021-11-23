@@ -29,7 +29,6 @@ class cuda_solver
   private:
     factorization_enum factorization_;
     std::size_t discretization_size_;
-    range<fp_type> space_range_;
     container<fp_type, allocator> a_, b_, c_, f_;
 
     template <typename... fp_space_types>
@@ -40,9 +39,8 @@ class cuda_solver
 
   public:
     typedef fp_type value_type;
-    explicit cuda_solver(range<fp_type> const &space_range, std::size_t discretization_size)
-        : space_range_{space_range}, discretization_size_{discretization_size}, factorization_{
-                                                                                    factorization_enum::QRMethod}
+    explicit cuda_solver(std::size_t discretization_size)
+        : discretization_size_{discretization_size}, factorization_{factorization_enum::QRMethod}
     {
     }
 
@@ -120,11 +118,12 @@ void cuda_solver<memory_space, fp_type, container, allocator>::kernel(
 {
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
+    const fp_type one = static_cast<fp_type>(1.0);
     const auto &lowest_quad = std::make_tuple(a_[0], b_[0], c_[0], f_[0]);
     const auto &lower_quad = std::make_tuple(a_[1], b_[1], c_[1], f_[1]);
     const auto &higher_quad = std::make_tuple(a_[N - 1], b_[N - 1], c_[N - 1], f_[N - 1]);
     const auto &highest_quad = std::make_tuple(a_[N], b_[N], c_[N], f_[N]);
-    const fp_type step = space_range_.spread() / static_cast<fp_type>(N);
+    const fp_type step = one / static_cast<fp_type>(N);
     cuda_boundary<fp_type> solver_boundary(lowest_quad, lower_quad, higher_quad, highest_quad, discretization_size_,
                                            step);
     const auto &init_coeffs = solver_boundary.init_coefficients(boundary, time, space_args...);

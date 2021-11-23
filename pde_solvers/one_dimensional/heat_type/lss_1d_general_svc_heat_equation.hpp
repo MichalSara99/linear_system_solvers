@@ -18,8 +18,8 @@
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
-#include "pde_solvers/transformation/lss_boundary_transform.hpp"
 #include "pde_solvers/transformation/lss_heat_data_transform.hpp"
+#include "transformation/lss_boundary_transform.hpp"
 
 namespace lss_pde_solvers
 {
@@ -34,6 +34,8 @@ using lss_grids::grid_config_1d;
 using lss_grids::grid_config_hints_1d_ptr;
 using lss_grids::grid_transform_config_1d;
 using lss_grids::grid_transform_config_1d_ptr;
+using lss_transformation::boundary_transform_1d;
+using lss_transformation::boundary_transform_1d_ptr;
 
 namespace implicit_solvers
 {

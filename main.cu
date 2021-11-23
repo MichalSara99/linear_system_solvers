@@ -37,9 +37,9 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // testContainer2d();                                       // -- tested
-    // testCopyContainer2d();                                   // -- tested
-    // testNotSymetricalContainer2d();                          // -- tested
+    // testContainer2d();                                                           // -- tested
+    // testCopyContainer2d();                                                       // -- tested
+    // testNotSymetricalContainer2d();                                              // -- tested
 
     // ====================================================================
 
@@ -48,19 +48,13 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // testDoubleSweepDirichletBC();                            // -- tested
-    // testKarawiaDirichletBC();                                // -- tested
-    // testDoubleSweepRobinBC();                                // -- tested
-    // testDoubleSweepDirichletNeumannBC();                     // -- tested
-    // testDoubleSweepNeumannDirichletBC();                     // -- tested
-    // testDoubleSweepNeumannRobinBC();                         // -- tested
-    // testDoubleSweepMixBC();                                  // -- tested
-    // testThomasLUDirichletBC();                               // -- tested
-    // testThomasLURobinBC();                                   // -- tested
-    // testThomasLUNeumannDirichletBC();                        // -- tested
-    // testThomasLUDirichletNeumannBC();                        // -- tested
-    // testThomasLUNeumannRobinBC();                            // -- tested
-    // testThomasLUMixBC();                                     // -- tested
+    // testDoubleSweepDirichletBC();                                                // -- tested
+    // testKarawiaDirichletBC();                                                    // -- tested
+    // testDoubleSweepRobinBC();                                                    // -- tested
+    // testDoubleSweepMixBC();                                                      // -- tested
+    // testThomasLUDirichletBC();                                                   // -- tested
+    // testThomasLURobinBC();                                                       // -- tested
+    // testThomasLUMixBC();                                                         // -- tested
 
     // ====================================================================
 
@@ -69,12 +63,12 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // deviceSparseQRTest();                                    // -- tested
-    // hostSparseQRTest();                                      // -- tested
-    // testDirichletBCBVPOnHost();                              // -- tested
-    // testDirichletBCBVPOnDevice();                            // -- tested
-    // testRobinBCBVPOnHost();                                  // -- tested
-    // testRobinBCBVPOnDevice();                                // -- tested
+    // deviceSparseQRTest();                                                        // -- tested
+    // hostSparseQRTest();                                                          // -- tested
+    // testDirichletBCBVPOnHost();                                                  // -- tested
+    // testDirichletBCBVPOnDevice();                                                // -- tested
+    // testRobinBCBVPOnHost();                                                      // -- tested
+    // testRobinBCBVPOnDevice();                                                    // -- tested
 
     // ====================================================================
 
@@ -83,12 +77,9 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // testCUDADirichletBC();                                   // -- tested
-    // testCUDARobinBC();                                       // -- tested
-    // testCUDADirichletNeumannBC();                            // -- tested
-    // testCUDANeumannDirichletBC();                            // -- tested
-    // testCUDANeumannRobinBC();                                // -- tested
-    // testCUDAMixBC();                                         // -- tested
+    // testCUDADirichletBC();                                                       // -- tested
+    // testCUDARobinBC();                                                           // -- tested                            // -- tested
+    // testCUDAMixBC();                                                             // -- tested
 
     // ====================================================================
 
@@ -97,9 +88,9 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // testSOR();                                               // -- tested
-    // testBVPDirichletBCSOR();                                 // -- tested
-    // testBVPRobinBCSOR();                                     // -- tested
+    // testSOR();                                                                   // -- tested
+    // testBVPDirichletBCSOR();                                                     // -- tested
+    // testBVPRobinBCSOR();                                                         // -- tested
 
     // ====================================================================
 
@@ -108,8 +99,8 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // testSORCUDA();                                           // -- tested
-    // testBVPDirichletBCSORCUDA();                             // -- tested
+    // testSORCUDA();                                                               // -- tested
+    // testBVPDirichletBCSORCUDA();                                                 // -- tested
 
     // ====================================================================
 
@@ -118,12 +109,9 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // tested:
 
-    // testSORDirichletBC();                                    // -- tested
-    // testSORRobinBC();                                        // -- tested
-    // testSORDirichletNeumannBC();                             // -- tested
-    // testSORNeumannDirichletBC();                             // -- tested
-    // testSORNeumannRobinBC();                                 // -- tested
-    // testSORMixBC();                                          // -- tested
+    // testSORDirichletBC();                                                        // -- tested
+    // testSORRobinBC();                                                            // -- tested
+    // testSORMixBC();                                                              // -- tested
 
     // ====================================================================
 
@@ -134,9 +122,6 @@ int main(int argc, char const *argv[])
 
     // testSORCUDADirichletBC();                                                    // -- tested
     // testSORRobinBC();                                                            // -- tested
-    // testSORCUDADirichletNeumannBC();                                             // -- tested
-    // testSORCUDANeumannDirichletBC();                                             // -- tested
-    // testSORCUDANeumannRobinBC();                                                 // -- tested
     // testSORMixBC();                                                              // -- tested
 
     // ====================================================================
@@ -165,7 +150,7 @@ int main(int argc, char const *argv[])
     // testImplPureHeatEquationSourceDirichletBCCUDASolverDeviceQR();               // -- tested
     // testImplPureHeatEquationSourceDirichletBCSORSolverDeviceEuler();             // -- tested
     // neumann bc:
-    // testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();                       // -- tested
+    //testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();                        // -- tested
     // testImplPureHeatEquationNeumannBCThomasLUSolver();                           // -- tested
     // testImplPureHeatEquationNeumannBCDoubleSweepSolver();                        // -- tested
 

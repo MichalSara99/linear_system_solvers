@@ -28,7 +28,6 @@ class karawia_solver
 
   private:
     std::size_t discretization_size_;
-    range<fp_type> space_range_;
     container<fp_type, allocator> a_, b_, c_, d_, e_;
     container<fp_type, allocator> alpha_, beta_, gamma_, mu_, f_;
 
@@ -43,8 +42,7 @@ class karawia_solver
   public:
     typedef fp_type value_type;
     typedef container<fp_type, allocator> container_type;
-    explicit karawia_solver(range<fp_type> const &space_range, std::size_t discretization_size)
-        : space_range_{space_range}, discretization_size_{discretization_size}
+    explicit karawia_solver(std::size_t discretization_size) : discretization_size_{discretization_size}
     {
     }
 
@@ -148,11 +146,12 @@ void lss_karawia_solver::karawia_solver<fp_type, container, allocator>::kernel(
 
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
+    const fp_type one = static_cast<fp_type>(1.0);
     const auto &lowest_sixta = std::make_tuple(a_[2], b_[2], c_[2], d_[2], e_[2], f_[2]);
     const auto &lower_sixta = std::make_tuple(a_[3], b_[3], c_[3], d_[3], e_[3], f_[3]);
     const auto &higher_sixta = std::make_tuple(a_[N - 3], b_[N - 3], c_[N - 3], d_[N - 3], e_[N - 3], f_[N - 3]);
     const auto &highest_sixta = std::make_tuple(a_[N - 2], b_[N - 2], c_[N - 2], d_[N - 2], e_[N - 2], f_[N - 2]);
-    const fp_type step = space_range_.spread() / static_cast<fp_type>(N);
+    const fp_type step = one / static_cast<fp_type>(N);
     karawia_solver_boundary<fp_type> solver_boundary(lowest_sixta, lower_sixta, higher_sixta, highest_sixta,
                                                      discretization_size_, step);
     const auto &init_coeffs = solver_boundary.init_coefficients(boundary, other_boundary, time, space_args...);

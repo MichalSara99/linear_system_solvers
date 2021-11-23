@@ -12,9 +12,8 @@
 #include "common/lss_utility.hpp"
 #include "discretization/lss_grid.hpp"
 #include "discretization/lss_grid_transform_config.hpp"
-#include "pde_solvers/lss_heat_data_config.hpp"
 
-namespace lss_pde_solvers
+namespace lss_transformation
 {
 
 using lss_boundary::boundary_1d_pair;
@@ -122,6 +121,6 @@ template <typename fp_type> using boundary_transform_1d = boundary_transform<dim
 
 template <typename fp_type> using boundary_transform_1d_ptr = sptr_t<boundary_transform_1d<fp_type>>;
 
-} // namespace lss_pde_solvers
+} // namespace lss_transformation
 
 #endif ///_LSS_BOUNDARY_TRANSFORM_HPP_

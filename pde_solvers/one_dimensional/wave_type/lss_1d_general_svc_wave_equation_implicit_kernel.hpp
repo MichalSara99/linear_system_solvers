@@ -388,8 +388,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -404,7 +402,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -423,8 +421,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -439,7 +435,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -486,8 +482,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     fp_type omega_value)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -502,7 +496,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<sorcusolver>(space, space_size);
+        auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -521,8 +515,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     fp_type omega_value, container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -537,7 +529,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<sorcusolver>(space, space_size);
+        auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -586,8 +578,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -602,7 +592,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -621,8 +611,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -637,7 +625,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<cusolver>(space, space_size);
+        auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -684,8 +672,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     fp_type omega_value)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // get space step:
@@ -700,7 +686,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<sorsolver>(space, space_size);
+        auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -719,8 +705,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     fp_type omega_value, container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -735,7 +719,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<sorsolver>(space, space_size);
+        auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
@@ -781,8 +765,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -797,7 +779,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<ds_solver>(space, space_size);
+        auto const &solver = std::make_shared<ds_solver>(space_size);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
         {
@@ -815,8 +797,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -831,7 +811,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<ds_solver>(space, space_size);
+        auto const &solver = std::make_shared<ds_solver>(space_size);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
         {
@@ -876,8 +856,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     void operator()(container_t &prev_solution_0, container_t &prev_solution_1, container_t &next_solution,
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -892,7 +870,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<tlu_solver>(space, space_size);
+        auto const &solver = std::make_shared<tlu_solver>(space_size);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
         {
@@ -910,8 +888,6 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
                     bool is_wave_sourse_set, std::function<fp_type(fp_type, fp_type)> const &wave_source,
                     container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
     {
-        // get space range:
-        const range<fp_type> space = discretization_cfg_->space_range();
         // get time range:
         const range<fp_type> time = discretization_cfg_->time_range();
         // time step:
@@ -926,7 +902,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         auto const wave_coeff_holder =
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
-        auto const &solver = std::make_shared<tlu_solver>(space, space_size);
+        auto const &solver = std::make_shared<tlu_solver>(space_size);
         auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
         if (is_wave_sourse_set)
         {

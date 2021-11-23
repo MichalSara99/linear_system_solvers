@@ -112,14 +112,9 @@ template <typename fp_type> struct ode_data_config
     {
     }
 
-    bool is_nonhom_data_set() const
+    ode_nonhom_data_config_ptr<fp_type> const &nonhom_data_config() const
     {
-        return (nonhom_data_cfg_ != nullptr) ? true : false;
-    }
-
-    std::function<fp_type(fp_type)> const &nonhom_function() const
-    {
-        return nonhom_data_cfg_->nonhom_function();
+        return nonhom_data_cfg_;
     }
 
     std::function<fp_type(fp_type)> const &a_coefficient() const

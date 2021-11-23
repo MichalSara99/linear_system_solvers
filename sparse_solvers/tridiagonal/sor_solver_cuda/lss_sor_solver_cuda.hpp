@@ -27,7 +27,6 @@ class sor_solver_cuda
 {
   private:
     std::size_t discretization_size_;
-    range<fp_type> space_range_;
     container<fp_type, allocator> a_, b_, c_, f_;
     fp_type omega_;
 
@@ -39,8 +38,7 @@ class sor_solver_cuda
 
   public:
     typedef fp_type value_type;
-    explicit sor_solver_cuda(range<fp_type> const &space_range, std::size_t discretization_size)
-        : discretization_size_{discretization_size}
+    explicit sor_solver_cuda(std::size_t discretization_size) : discretization_size_{discretization_size}
     {
     }
 
@@ -113,11 +111,12 @@ void sor_solver_cuda<fp_type, container, allocator>::kernel(boundary_pair<fp_typ
 {
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
+    const fp_type one = static_cast<fp_type>(1.0);
     const auto &lowest_quad = std::make_tuple(a_[0], b_[0], c_[0], f_[0]);
     const auto &lower_quad = std::make_tuple(a_[1], b_[1], c_[1], f_[1]);
     const auto &higher_quad = std::make_tuple(a_[N - 1], b_[N - 1], c_[N - 1], f_[N - 1]);
     const auto &highest_quad = std::make_tuple(a_[N], b_[N], c_[N], f_[N]);
-    const fp_type step = space_range_.spread() / static_cast<fp_type>(N);
+    const fp_type step = one / static_cast<fp_type>(N);
     sor_cuda_boundary<fp_type> solver_boundary(lowest_quad, lower_quad, higher_quad, highest_quad, discretization_size_,
                                                step);
     const auto &init_coeffs = solver_boundary.init_coefficients(boundary, time, space_args...);
