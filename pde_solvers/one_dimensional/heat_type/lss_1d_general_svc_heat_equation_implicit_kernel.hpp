@@ -41,10 +41,7 @@ using lss_enumerations::tridiagonal_method_enum;
 using lss_sor_solver::sor_solver;
 using lss_sor_solver_cuda::sor_solver_cuda;
 using lss_thomas_lu_solver::thomas_lu_solver;
-using lss_utility::diagonal_triplet_t;
-using lss_utility::function_triplet_t;
 using lss_utility::NaN;
-using lss_utility::pair_t;
 using lss_utility::range;
 
 /**

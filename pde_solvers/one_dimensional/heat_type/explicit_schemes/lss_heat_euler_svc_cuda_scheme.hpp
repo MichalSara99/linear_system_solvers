@@ -34,7 +34,6 @@ using lss_containers::container_2d;
 using lss_enumerations::traverse_direction_enum;
 using lss_grids::grid_1d;
 using lss_utility::NaN;
-using lss_utility::pair_t;
 using lss_utility::range;
 using lss_utility::sptr_t;
 

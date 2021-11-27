@@ -24,7 +24,6 @@ using lss_boundary::dirichlet_boundary_2d;
 using lss_boundary::neumann_boundary_2d;
 using lss_containers::container_2d;
 using lss_enumerations::by_enum;
-using lss_utility::pair_t;
 using lss_utility::range;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>

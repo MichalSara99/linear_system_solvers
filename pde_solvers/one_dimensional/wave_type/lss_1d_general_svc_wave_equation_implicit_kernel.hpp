@@ -39,7 +39,6 @@ using lss_sor_solver::sor_solver;
 using lss_sor_solver_cuda::sor_solver_cuda;
 using lss_thomas_lu_solver::thomas_lu_solver;
 using lss_utility::NaN;
-using lss_utility::pair_t;
 using lss_utility::range;
 
 /**
@@ -404,7 +403,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, prev_solution_0,
@@ -437,7 +437,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -498,7 +499,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, prev_solution_0,
@@ -531,7 +533,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -594,7 +597,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, prev_solution_0,
@@ -627,7 +631,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -688,7 +693,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, prev_solution_0,
@@ -721,7 +727,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -780,7 +787,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, prev_solution_0,
@@ -812,7 +820,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -871,7 +880,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, prev_solution_0,
@@ -903,7 +913,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
             std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, wave_coeff_holder, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,

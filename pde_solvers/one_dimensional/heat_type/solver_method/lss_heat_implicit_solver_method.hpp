@@ -27,7 +27,6 @@ using lss_boundary::dirichlet_boundary_1d;
 using lss_boundary::neumann_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::by_enum;
-using lss_utility::pair_t;
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 class implicit_heat_scheme

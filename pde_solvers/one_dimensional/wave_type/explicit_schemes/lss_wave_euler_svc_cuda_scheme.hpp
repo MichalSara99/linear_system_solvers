@@ -32,9 +32,7 @@ using lss_boundary::neumann_boundary_1d;
 using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::traverse_direction_enum;
-using lss_utility::function_quintuple_t;
 using lss_utility::NaN;
-using lss_utility::pair_t;
 using lss_utility::range;
 
 /**
@@ -457,7 +455,7 @@ class wave_euler_svc_cuda_scheme
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
         auto const &solver_method_ptr =
-            std::make_shared<wave_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
+            std::make_shared<wave_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
 
@@ -481,7 +479,7 @@ class wave_euler_svc_cuda_scheme
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
         auto const &solver_method_ptr =
-            std::make_shared<wave_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
+            std::make_shared<wave_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
 

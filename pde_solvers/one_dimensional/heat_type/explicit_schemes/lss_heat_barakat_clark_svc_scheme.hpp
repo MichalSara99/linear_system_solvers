@@ -31,8 +31,6 @@ using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::by_enum;
 using lss_enumerations::traverse_direction_enum;
-using lss_utility::function_quad_t;
-using lss_utility::function_triplet_t;
 using lss_utility::NaN;
 using lss_utility::range;
 

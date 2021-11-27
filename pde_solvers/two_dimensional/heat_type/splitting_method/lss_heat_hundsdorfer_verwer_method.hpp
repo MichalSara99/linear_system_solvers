@@ -26,7 +26,6 @@ using lss_containers::container_2d;
 using lss_enumerations::by_enum;
 using lss_grids::grid_2d;
 using lss_grids::grid_config_2d_ptr;
-using lss_utility::pair_t;
 
 template <template <typename, typename> typename container, typename fp_type, typename alloc>
 using implicit_heston_scheme_hv_function_t = std::function<void(

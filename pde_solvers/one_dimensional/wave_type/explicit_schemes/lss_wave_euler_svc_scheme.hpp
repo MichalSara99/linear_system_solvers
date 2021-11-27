@@ -26,10 +26,7 @@ using lss_boundary::neumann_boundary_1d;
 using lss_boundary::robin_boundary_1d;
 using lss_containers::container_2d;
 using lss_enumerations::traverse_direction_enum;
-using lss_utility::function_quintuple_t;
-using lss_utility::function_triplet_t;
 using lss_utility::NaN;
-using lss_utility::pair_t;
 using lss_utility::range;
 
 /**
@@ -415,8 +412,8 @@ class wave_euler_svc_scheme
         const fp_type k = discretization_cfg_->time_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &solver_method_ptr =
-            std::make_shared<wave_euler_solver_method<fp_type, container, allocator>>(euler_coeffs_, grid_cfg_);
+        auto const &solver_method_ptr = std::make_shared<wave_euler_solver_method<fp_type, container, allocator>>(
+            euler_coeffs_, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, prev_solution_0,
@@ -438,8 +435,8 @@ class wave_euler_svc_scheme
         const fp_type k = discretization_cfg_->time_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &solver_method_ptr =
-            std::make_shared<wave_euler_solver_method<fp_type, container, allocator>>(euler_coeffs_, grid_cfg_);
+        auto const &solver_method_ptr = std::make_shared<wave_euler_solver_method<fp_type, container, allocator>>(
+            euler_coeffs_, grid_cfg_, is_wave_sourse_set);
         if (is_wave_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir,

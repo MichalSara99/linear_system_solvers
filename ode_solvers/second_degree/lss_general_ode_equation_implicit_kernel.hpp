@@ -34,7 +34,6 @@ using lss_sor_solver::sor_solver;
 using lss_sor_solver_cuda::sor_solver_cuda;
 using lss_thomas_lu_solver::thomas_lu_solver;
 using lss_utility::NaN;
-using lss_utility::pair_t;
 using lss_utility::range;
 
 template <memory_space_enum memory_enum, tridiagonal_method_enum tridiagonal_method, typename fp_type,
