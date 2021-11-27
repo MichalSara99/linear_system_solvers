@@ -42,15 +42,21 @@ class heat_barakat_clark_solver_method
     typedef std::function<void(container_t &, container_t const &, fp_type)> sweeper_fun;
 
   private:
+    // constant coeffs:
+    const fp_type cone_ = static_cast<fp_type>(1.0);
+    const fp_type chalf_ = static_cast<fp_type>(0.5);
+    const fp_type czero_ = static_cast<fp_type>(0.0);
     // scheme coefficients:
     heat_barakat_clark_svc_coefficients_ptr<fp_type> coefficients_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
     // sweepers:
     sweeper_fun up_sweeper_, down_sweeper_;
+    // containers:
+    container_t source_dummy_, source_, source_next_;
 
     explicit heat_barakat_clark_solver_method() = delete;
 
-    void initialize()
+    void initialize(bool is_heat_sourse_set)
     {
         auto a = coefficients_->A_;
         auto b = coefficients_->B_;
@@ -76,14 +82,24 @@ class heat_barakat_clark_solver_method
                                     a(x) * down_component[t - 1] + K(x) * rhs_coeff * rhs[t];
             }
         };
+
+        if (is_heat_sourse_set)
+        {
+            source_.resize(coefficients_->space_size_);
+            source_next_.resize(coefficients_->space_size_);
+        }
+        else
+        {
+            source_dummy_.resize(coefficients_->space_size_);
+        }
     }
 
   public:
     explicit heat_barakat_clark_solver_method(heat_barakat_clark_svc_coefficients_ptr<fp_type> const &coefficients,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+                                              grid_config_1d_ptr<fp_type> const &grid_config, bool is_heat_sourse_set)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
-        initialize();
+        initialize(is_heat_sourse_set);
     }
 
     ~heat_barakat_clark_solver_method()
@@ -111,19 +127,16 @@ void heat_barakat_clark_solver_method<fp_type, container, allocator>::solve(
     //  components of the solution:
     container_t cont_up(solution);
     container_t cont_down(solution);
-    container_t source_dummy(solution);
-    const fp_type zero = static_cast<fp_type>(0.0);
-    const fp_type half = static_cast<fp_type>(0.5);
-    std::future<void> sweep_up = std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_dummy, zero);
+    std::future<void> sweep_up = std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_dummy_, czero_);
     std::future<void> sweep_down =
-        std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source_dummy, zero);
+        std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source_dummy_, czero_);
     sweep_up.wait();
     sweep_down.wait();
     cont_up[0] = cont_down[0] = boundary_pair.first->value(time);
     cont_up[sol_size - 1] = cont_down[sol_size - 1] = boundary_pair.second->value(time);
     for (std::size_t t = 0; t < sol_size; ++t)
     {
-        solution[t] = half * (cont_up[t] + cont_down[t]);
+        solution[t] = chalf_ * (cont_up[t] + cont_down[t]);
     }
 }
 
@@ -138,22 +151,17 @@ void heat_barakat_clark_solver_method<fp_type, container, allocator>::solve(
     //  components of the solution:
     container_t cont_up(solution);
     container_t cont_down(solution);
-    container_t source(solution);
-    container_t source_next(solution);
-    const fp_type one = static_cast<fp_type>(1.0);
-    const fp_type half = static_cast<fp_type>(0.5);
-    d_1d::of_function(grid_cfg_, time, heat_source, source);
-    d_1d::of_function(grid_cfg_, next_time, heat_source, source_next);
-
-    std::future<void> sweep_up = std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_next, one);
-    std::future<void> sweep_down = std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source, one);
+    d_1d::of_function(grid_cfg_, time, heat_source, source_);
+    d_1d::of_function(grid_cfg_, next_time, heat_source, source_next_);
+    std::future<void> sweep_up = std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_next_, cone_);
+    std::future<void> sweep_down = std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source_, cone_);
     sweep_up.wait();
     sweep_down.wait();
     cont_up[0] = cont_down[0] = boundary_pair.first->value(time);
     cont_up[sol_size - 1] = cont_down[sol_size - 1] = boundary_pair.second->value(time);
     for (std::size_t t = 0; t < sol_size; ++t)
     {
-        solution[t] = half * (cont_up[t] + cont_down[t]);
+        solution[t] = chalf_ * (cont_up[t] + cont_down[t]);
     }
 }
 } // namespace one_dimensional

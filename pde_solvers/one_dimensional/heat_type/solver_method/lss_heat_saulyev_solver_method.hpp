@@ -42,15 +42,20 @@ class heat_saulyev_solver_method
     typedef std::function<void(container_t &, container_t const &, fp_type)> sweeper_fun;
 
   private:
+    // constant coeffs:
+    const fp_type czero_ = static_cast<fp_type>(0.0);
+    const fp_type cone_ = static_cast<fp_type>(1.0);
     // scheme coefficients:
     heat_saulyev_svc_coefficients_ptr<fp_type> coefficients_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
     // sweepers:
     sweeper_fun up_sweeper_, down_sweeper_;
+    // containers for source:
+    container_t source_dummy_, source_, source_next_;
 
     explicit heat_saulyev_solver_method() = delete;
 
-    void initialize()
+    void initialize(bool is_heat_sourse_set)
     {
         auto a = coefficients_->A_;
         auto b = coefficients_->B_;
@@ -76,14 +81,24 @@ class heat_saulyev_solver_method
                                     a(x) * down_component[t - 1] + K(x) * rhs_coeff * rhs[t];
             }
         };
+
+        if (is_heat_sourse_set)
+        {
+            source_.resize(coefficients_->space_size_);
+            source_next_.resize(coefficients_->space_size_);
+        }
+        else
+        {
+            source_dummy_.resize(coefficients_->space_size_);
+        }
     }
 
   public:
     explicit heat_saulyev_solver_method(heat_saulyev_svc_coefficients_ptr<fp_type> const &coefficients,
-                                        grid_config_1d_ptr<fp_type> const &grid_config)
+                                        grid_config_1d_ptr<fp_type> const &grid_config, bool is_heat_sourse_set)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
-        initialize();
+        initialize(is_heat_sourse_set);
     }
 
     ~heat_saulyev_solver_method()
@@ -108,21 +123,16 @@ void heat_saulyev_solver_method<fp_type, container, allocator>::solve(boundary_1
                                                                       std::size_t const &time_idx, fp_type const &time,
                                                                       container<fp_type, allocator> &solution)
 {
-    // solution size:
-    const std::size_t sol_size = solution.size();
-    //  dummy source:
-    container_t source_dummy(solution);
-    const fp_type zero = static_cast<fp_type>(0.0);
     if (time_idx % 2 == 0)
     {
-        down_sweeper_(solution, source_dummy, zero);
+        down_sweeper_(solution, source_dummy_, czero_);
     }
     else
     {
-        up_sweeper_(solution, source_dummy, zero);
+        up_sweeper_(solution, source_dummy_, czero_);
     }
     solution[0] = boundary_pair.first->value(time);
-    solution[sol_size - 1] = boundary_pair.second->value(time);
+    solution[coefficients_->space_size_ - 1] = boundary_pair.second->value(time);
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
@@ -132,24 +142,18 @@ void heat_saulyev_solver_method<fp_type, container, allocator>::solve(
     container<fp_type, allocator> &solution)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
-    // solution size:
-    const std::size_t sol_size = solution.size();
-    //  source:
-    container_t source(solution);
-    container_t source_next(solution);
-    const fp_type one = static_cast<fp_type>(1.0);
     if (time_idx % 2 == 0)
     {
-        d_1d::of_function(grid_cfg_, time, heat_source, source);
-        down_sweeper_(solution, source, one);
+        d_1d::of_function(grid_cfg_, time, heat_source, source_);
+        down_sweeper_(solution, source_, cone_);
     }
     else
     {
-        d_1d::of_function(grid_cfg_, next_time, heat_source, source_next);
-        up_sweeper_(solution, source_next, one);
+        d_1d::of_function(grid_cfg_, next_time, heat_source, source_next_);
+        up_sweeper_(solution, source_next_, cone_);
     }
     solution[0] = boundary_pair.first->value(time);
-    solution[sol_size - 1] = boundary_pair.second->value(time);
+    solution[coefficients_->space_size_ - 1] = boundary_pair.second->value(time);
 }
 } // namespace one_dimensional
 

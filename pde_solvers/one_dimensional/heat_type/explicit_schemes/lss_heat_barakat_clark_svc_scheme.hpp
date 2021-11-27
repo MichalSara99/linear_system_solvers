@@ -313,7 +313,8 @@ class heat_barakat_clark_svc_scheme
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
         auto const &solver_method_ptr =
-            std::make_shared<heat_barakat_clark_solver_method<fp_type, container, allocator>>(bc_coeffs_, grid_cfg_);
+            std::make_shared<heat_barakat_clark_solver_method<fp_type, container, allocator>>(bc_coeffs_, grid_cfg_,
+                                                                                              is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
 
@@ -334,7 +335,8 @@ class heat_barakat_clark_svc_scheme
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
         auto const &solver_method_ptr =
-            std::make_shared<heat_barakat_clark_solver_method<fp_type, container, allocator>>(bc_coeffs_, grid_cfg_);
+            std::make_shared<heat_barakat_clark_solver_method<fp_type, container, allocator>>(bc_coeffs_, grid_cfg_,
+                                                                                              is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir,

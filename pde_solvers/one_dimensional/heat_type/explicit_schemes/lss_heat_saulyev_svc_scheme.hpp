@@ -304,8 +304,8 @@ class heat_saulyev_svc_scheme
         const fp_type k = discretization_cfg_->time_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &solver_method_ptr =
-            std::make_shared<heat_saulyev_solver_method<fp_type, container, allocator>>(s_coeffs_, grid_cfg_);
+        auto const &solver_method_ptr = std::make_shared<heat_saulyev_solver_method<fp_type, container, allocator>>(
+            s_coeffs_, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, heat_source, solution);
@@ -324,8 +324,8 @@ class heat_saulyev_svc_scheme
         const fp_type k = discretization_cfg_->time_step();
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
-        auto const &solver_method_ptr =
-            std::make_shared<heat_saulyev_solver_method<fp_type, container, allocator>>(s_coeffs_, grid_cfg_);
+        auto const &solver_method_ptr = std::make_shared<heat_saulyev_solver_method<fp_type, container, allocator>>(
+            s_coeffs_, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir,

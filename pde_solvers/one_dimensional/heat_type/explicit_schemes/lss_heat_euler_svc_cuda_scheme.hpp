@@ -358,7 +358,7 @@ class heat_euler_svc_cuda_scheme
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
         auto const &solver_method_ptr =
-            std::make_shared<heat_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
+            std::make_shared<heat_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, timer, last_time_idx, k, traverse_dir, heat_source, solution);
@@ -378,7 +378,7 @@ class heat_euler_svc_cuda_scheme
         // last time index:
         const std::size_t last_time_idx = discretization_cfg_->number_of_time_points() - 1;
         auto const &solver_method_ptr =
-            std::make_shared<heat_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_);
+            std::make_shared<heat_euler_cuda_solver_method<fp_type>>(euler_coeffs_, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
 

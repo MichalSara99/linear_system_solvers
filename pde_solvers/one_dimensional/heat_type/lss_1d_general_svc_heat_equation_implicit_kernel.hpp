@@ -327,7 +327,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
 
         if (is_heat_sourse_set)
         {
@@ -377,7 +378,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
 
@@ -453,7 +455,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, heat_source,
@@ -500,7 +503,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -577,7 +581,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, heat_source,
@@ -624,7 +629,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -698,7 +704,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir, heat_source,
@@ -745,7 +752,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
         if (is_heat_sourse_set)
         {
             loop::run_with_stepping(solver_method_ptr, boundary_pair_, time, last_time_idx, k, traverse_dir,
@@ -818,7 +826,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
 
         if (is_heat_sourse_set)
         {
@@ -865,7 +874,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
 
         if (is_heat_sourse_set)
         {
@@ -940,7 +950,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
 
         if (is_heat_sourse_set)
         {
@@ -988,7 +999,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
-        auto const &solver_method_ptr = std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_);
+        auto const &solver_method_ptr =
+            std::make_shared<solver_method>(solver, heat_coeff_holder, grid_cfg_, is_heat_sourse_set);
 
         if (is_heat_sourse_set)
         {
