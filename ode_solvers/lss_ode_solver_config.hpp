@@ -107,7 +107,8 @@ using ode_implicit_solver_config_ptr = sptr_t<ode_implicit_solver_config>;
 // =================================================
 // ===== some default implicit solver configs ======
 // =================================================
-
+namespace default_ode_solver_configs
+{
 auto dev_cusolver_qr_solver_config_ptr = std::make_shared<ode_implicit_solver_config>(
     memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, factorization_enum::QRMethod);
 
@@ -131,7 +132,7 @@ auto host_dssolver_solver_config_ptr = std::make_shared<ode_implicit_solver_conf
 
 auto host_tlusolver_solver_config_ptr = std::make_shared<ode_implicit_solver_config>(
     memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, factorization_enum::None);
-
+} // namespace default_ode_solver_configs
 } // namespace lss_ode_solvers
 
 #endif ///_LSS_ODE_SOLVER_CONFIG_HPP_

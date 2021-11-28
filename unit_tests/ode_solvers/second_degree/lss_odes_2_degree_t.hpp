@@ -16,11 +16,11 @@ template <typename T> void testImplSimpleODEDirichletBCCUDASolverDeviceQR()
     using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
     using lss_grids::grid_transform_config_1d;
-    using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
     using lss_ode_solvers::ode_discretization_config;
     using lss_ode_solvers::ode_nonhom_data_config;
+    using lss_ode_solvers::default_ode_solver_configs::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::implicit_solvers::general_ode_equation;
     using lss_utility::range;
 
@@ -106,11 +106,11 @@ template <typename T> void testImplSimpleODEDirichletNeumannBCCUDASolverDeviceQR
     using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
     using lss_grids::grid_transform_config_1d;
-    using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
     using lss_ode_solvers::ode_discretization_config;
     using lss_ode_solvers::ode_nonhom_data_config;
+    using lss_ode_solvers::default_ode_solver_configs::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::implicit_solvers::general_ode_equation;
     using lss_utility::range;
 
@@ -200,11 +200,11 @@ template <typename T> void testImplSimpleODEDirichletRobinBCCUDASolverDeviceQR()
     using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
     using lss_grids::grid_transform_config_1d;
-    using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
     using lss_ode_solvers::ode_discretization_config;
     using lss_ode_solvers::ode_nonhom_data_config;
+    using lss_ode_solvers::default_ode_solver_configs::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::implicit_solvers::general_ode_equation;
     using lss_utility::range;
 
@@ -295,11 +295,11 @@ template <typename T> void testImplSimpleODENeumannRobinBCCUDASolverDeviceQR()
     using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
     using lss_grids::grid_transform_config_1d;
-    using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
     using lss_ode_solvers::ode_discretization_config;
     using lss_ode_solvers::ode_nonhom_data_config;
+    using lss_ode_solvers::default_ode_solver_configs::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::implicit_solvers::general_ode_equation;
     using lss_utility::range;
 
@@ -390,11 +390,11 @@ template <typename T> void testImplSimpleODE1NeumannRobinBCCUDASolverDeviceQR()
     using lss_grids::grid_config_1d;
     using lss_grids::grid_config_hints_1d;
     using lss_grids::grid_transform_config_1d;
-    using lss_ode_solvers::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::ode_coefficient_data_config;
     using lss_ode_solvers::ode_data_config;
     using lss_ode_solvers::ode_discretization_config;
     using lss_ode_solvers::ode_nonhom_data_config;
+    using lss_ode_solvers::default_ode_solver_configs::dev_cusolver_qr_solver_config_ptr;
     using lss_ode_solvers::implicit_solvers::general_ode_equation;
     using lss_utility::range;
 

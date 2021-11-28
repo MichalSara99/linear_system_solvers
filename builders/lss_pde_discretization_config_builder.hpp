@@ -1,5 +1,5 @@
-#if !defined(_LSS_DISCRETIZATION_CONFIG_BUILDER_HPP_)
-#define _LSS_DISCRETIZATION_CONFIG_BUILDER_HPP_
+#if !defined(_LSS_PDE_DISCRETIZATION_CONFIG_BUILDER_HPP_)
+#define _LSS_PDE_DISCRETIZATION_CONFIG_BUILDER_HPP_
 
 #include "common/lss_enumerations.hpp"
 #include "common/lss_utility.hpp"
@@ -133,4 +133,4 @@ using pde_discretization_config_2d_builder_ptr =
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_DISCRETIZATION_CONFIG_BUILDER_HPP_
+#endif ///_LSS_PDE_DISCRETIZATION_CONFIG_BUILDER_HPP_

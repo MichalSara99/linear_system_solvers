@@ -85,7 +85,8 @@ class general_ode_equation
         ode_data_config_ptr<fp_type> const &ode_data_config,
         ode_discretization_config_ptr<fp_type> const &ode_discretization_config,
         boundary_1d_pair<fp_type> const &boundary_pair, grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
-        ode_implicit_solver_config_ptr const &ode_solver_config = dev_cusolver_qr_solver_config_ptr,
+        ode_implicit_solver_config_ptr const &ode_solver_config =
+            default_ode_solver_configs::dev_cusolver_qr_solver_config_ptr,
         std::map<std::string, fp_type> const &ode_solver_config_details = std::map<std::string, fp_type>())
         : ode_discretization_cfg_{ode_discretization_config}, ode_solver_cfg_{ode_solver_config},
           ode_solver_config_details_{ode_solver_config_details}

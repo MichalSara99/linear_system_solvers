@@ -564,6 +564,33 @@
     <ClInclude Include="transformation\lss_boundary_transform.hpp">
       <Filter>transformation</Filter>
     </ClInclude>
+    <ClInclude Include="builders\lss_2d_general_svc_heston_equation_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\builders\lss_2d_general_svc_heston_equation_builder_t.hpp">
+      <Filter>unit_tests\builders</Filter>
+    </ClInclude>
+    <ClInclude Include="builders\lss_grid_config_hints_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="builders\lss_splitting_method_config_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="builders\lss_ode_discretization_config_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="builders\lss_general_2nd_ode_equation_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\builders\lss_general_2nd_ode_equation_builder_t.hpp">
+      <Filter>unit_tests\builders</Filter>
+    </ClInclude>
+    <ClInclude Include="builders\lss_ode_data_config_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="builders\lss_ode_solver_config_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
