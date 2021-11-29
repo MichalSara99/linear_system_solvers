@@ -16,7 +16,6 @@
 #include "common/lss_print.hpp"
 #include "common/lss_utility.hpp"
 #include "discretization/lss_discretization.hpp"
-#include "pde_solvers/lss_weighted_scheme_config.hpp"
 
 template <typename T> void test_heston_equation_builder_t()
 {
@@ -33,7 +32,6 @@ template <typename T> void test_heston_equation_builder_t()
     using lss_pde_solvers::heat_initial_data_config_2d_builder;
     using lss_pde_solvers::pde_discretization_config_2d_builder;
     using lss_pde_solvers::splitting_method_config_builder;
-    using lss_pde_solvers::weighted_scheme_config;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_dssolver_cn_solver_config_ptr;
     using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation_builder;
     using lss_print::print;
@@ -139,9 +137,6 @@ template <typename T> void test_heston_equation_builder_t()
                                            .weighting_value(T(0.5))
                                            .build();
 
-    // default weighted scheme config (=no builder for this one yet - may be deleted in the future):
-    auto const &weighted_config_ptr = std::make_shared<weighted_scheme_config<T>>();
-
     // pde solver builder:
     auto const &pde_solver = general_svc_heston_equation_builder<T, std::vector, std::allocator<T>>()
                                  .heat_data_config(data_ptr)
@@ -149,7 +144,6 @@ template <typename T> void test_heston_equation_builder_t()
                                  .vertical_upper_boundary(vertical_upper_boundary_ptr)
                                  .horizontal_boundary(horizontal_boundary_pair)
                                  .splitting_method_config(splitting_config_ptr)
-                                 .weighted_scheme_config(weighted_config_ptr)
                                  .grid_hints(grid_config_hints_ptr)
                                  .solver_config(host_bwd_dssolver_cn_solver_config_ptr)
                                  .build();

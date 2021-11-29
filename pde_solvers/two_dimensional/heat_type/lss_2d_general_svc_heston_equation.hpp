@@ -22,7 +22,6 @@
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_splitting_method_config.hpp"
-#include "pde_solvers/lss_weighted_scheme_config.hpp"
 #include "pde_solvers/transformation/lss_heat_data_transform.hpp"
 #include "transformation/lss_heston_boundary_transform.hpp"
 
@@ -91,7 +90,6 @@ class general_svc_heston_equation
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
     heston_boundary_transform_ptr<fp_type> heston_boundary_;
     splitting_method_config_ptr<fp_type> splitting_method_cfg_;
-    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     grid_transform_config_2d_ptr<fp_type> grid_trans_cfg_; // this may be removed as it is not used later
     heat_implicit_solver_config_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
@@ -124,7 +122,6 @@ class general_svc_heston_equation
         }
 
         LSS_VERIFY(splitting_method_cfg_, "splitting_method_config must not be null");
-        LSS_VERIFY(weighted_scheme_cfg_, "weighted_scheme_config must not be null");
         LSS_VERIFY(solver_cfg_, "solver_config must not be null");
         LSS_VERIFY(grid_config_hints, "grid_config_hints must not be null");
         if (!solver_config_details_.empty())
@@ -149,14 +146,12 @@ class general_svc_heston_equation
         boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
         boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
         splitting_method_config_ptr<fp_type> const &splitting_method_config,
-        weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
         grid_config_hints_2d_ptr<fp_type> const &grid_config_hints,
         heat_implicit_solver_config_ptr const &solver_config =
             default_heat_solver_configs::host_fwd_dssolver_euler_solver_config_ptr,
         std::map<std::string, fp_type> const &solver_config_details = std::map<std::string, fp_type>())
         : discretization_cfg_{discretization_config}, splitting_method_cfg_{splitting_method_config},
-          weighted_scheme_cfg_{weighted_scheme_config}, solver_cfg_{solver_config}, solver_config_details_{
-                                                                                        solver_config_details}
+          solver_cfg_{solver_config}, solver_config_details_{solver_config_details}
     {
         initialize(heat_data_config, grid_config_hints, vertical_upper_boundary_ptr, horizontal_boundary_pair);
     }
@@ -232,7 +227,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 dev_cu_solver;
 
             dev_cu_solver solver(ver_boundary_ptr, hor_boundary_pair_ptr, heat_data_trans_cfg_, discretization_cfg_,
-                                 splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
+                                 splitting_method_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = prev_sol;
         }
@@ -245,7 +240,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
             dev_sor_solver solver(ver_boundary_ptr, hor_boundary_pair_ptr, heat_data_trans_cfg_, discretization_cfg_,
-                                  splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
+                                  splitting_method_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             solution = prev_sol;
         }
@@ -263,7 +258,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 host_cu_solver;
 
             host_cu_solver solver(ver_boundary_ptr, hor_boundary_pair_ptr, heat_data_trans_cfg_, discretization_cfg_,
-                                  splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
+                                  splitting_method_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
         }
@@ -276,7 +271,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
             host_sor_solver solver(ver_boundary_ptr, hor_boundary_pair_ptr, heat_data_trans_cfg_, discretization_cfg_,
-                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
+                                   splitting_method_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source, omega_value);
             solution = next_sol;
         }
@@ -286,7 +281,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
             host_dss_solver solver(ver_boundary_ptr, hor_boundary_pair_ptr, heat_data_trans_cfg_, discretization_cfg_,
-                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
+                                   splitting_method_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
         }
@@ -296,7 +291,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
             host_lus_solver solver(ver_boundary_ptr, hor_boundary_pair_ptr, heat_data_trans_cfg_, discretization_cfg_,
-                                   splitting_method_cfg_, weighted_scheme_cfg_, solver_cfg_, grid_cfg);
+                                   splitting_method_cfg_, solver_cfg_, grid_cfg);
             solver(prev_sol, next_sol, is_heat_source_set, heat_source);
             solution = next_sol;
         }
@@ -352,7 +347,6 @@ class general_svc_heston_equation
     boundary_2d_pair<fp_type> boundary_pair_ver_;
     heat_data_config_2d_ptr<fp_type> heat_data_cfg_;
     pde_discretization_config_2d_ptr<fp_type> discretization_cfg_;
-    weighted_scheme_config_ptr<fp_type> weighted_scheme_cfg_;
     grid_config_hints_2d_ptr<fp_type> grid_hints_cfg_;
     heat_explicit_solver_config_ptr solver_cfg_;
 
@@ -386,13 +380,12 @@ class general_svc_heston_equation
                                          pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
                                          boundary_2d_ptr<fp_type> const &horizontal_upper_boundary_ptr,
                                          boundary_2d_pair<fp_type> const &vertical_boundary_pair,
-                                         weighted_scheme_config_ptr<fp_type> const &weighted_scheme_config,
                                          grid_config_hints_2d_ptr<fp_type> const &grid_config_hints,
                                          heat_explicit_solver_config_ptr const &solver_config =
                                              default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           boundary_hor_{horizontal_upper_boundary_ptr}, boundary_pair_ver_{vertical_boundary_pair},
-          weighted_scheme_cfg_{weighted_scheme_config}, grid_hints_cfg_{grid_config_hints}, solver_cfg_{solver_config}
+          grid_hints_cfg_{grid_config_hints}, solver_cfg_{solver_config}
     {
         initialize();
     }

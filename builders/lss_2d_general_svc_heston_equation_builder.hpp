@@ -64,7 +64,6 @@ class general_svc_heston_equation_builder
     boundary_2d_ptr<fp_type> vertical_upper_boundary_;
     boundary_2d_pair<fp_type> horizontal_boundary_pair_;
     splitting_method_config_ptr<fp_type> splitting_method_config_;
-    weighted_scheme_config_ptr<fp_type> weighted_scheme_config_;
     grid_config_hints_2d_ptr<fp_type> grid_hints_cfg_;
     heat_implicit_solver_config_ptr solver_config_;
     std::map<std::string, fp_type> solver_config_details_;
@@ -102,13 +101,6 @@ class general_svc_heston_equation_builder
         return *this;
     }
 
-    general_svc_heston_equation_builder &weighted_scheme_config(
-        const weighted_scheme_config_ptr<fp_type> &weighted_scheme_config)
-    {
-        weighted_scheme_config_ = weighted_scheme_config;
-        return *this;
-    }
-
     general_svc_heston_equation_builder &grid_hints(const grid_config_hints_2d_ptr<fp_type> &grid_hints)
     {
         grid_hints_cfg_ = grid_hints;
@@ -132,7 +124,7 @@ class general_svc_heston_equation_builder
     {
         return std::make_shared<general_svc_heston_equation<fp_type, container, allocator>>(
             heat_data_config_, discretization_config_, vertical_upper_boundary_, horizontal_boundary_pair_,
-            splitting_method_config_, weighted_scheme_config_, grid_hints_cfg_, solver_config_, solver_config_details_);
+            splitting_method_config_, grid_hints_cfg_, solver_config_, solver_config_details_);
     }
 };
 

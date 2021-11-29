@@ -367,7 +367,7 @@ int main(int argc, char const *argv[])
     // ========== lss_general_2nd_ode_equation_builder_t.hpp ==============
     // ====================================================================
 
-    test_general_2nd_ode_equation_builder();
+    // test_general_2nd_ode_equation_builder();                                     // -- tested
 
     // ====================================================================
 

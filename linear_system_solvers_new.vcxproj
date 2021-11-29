@@ -67,7 +67,6 @@
     <ClInclude Include="pde_solvers\lss_splitting_method_config.hpp" />
     <ClInclude Include="pde_solvers\lss_wave_data_config.hpp" />
     <ClInclude Include="pde_solvers\lss_wave_solver_config.hpp" />
-    <ClInclude Include="pde_solvers\lss_weighted_scheme_config.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_barakat_clark_svc_coefficients.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_euler_svc_coefficients.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_saulyev_svc_coefficients.hpp" />

@@ -27,187 +27,153 @@ using lss_enumerations::by_enum;
 using lss_grids::grid_2d;
 using lss_grids::grid_config_2d_ptr;
 
-template <template <typename, typename> typename container, typename fp_type, typename alloc>
-using implicit_heston_scheme_cs_function_t = std::function<void(
-    general_svc_heston_equation_coefficients_ptr<fp_type> const &, grid_config_2d_ptr<fp_type> const &,
-    std::size_t const &, fp_type const &, container_2d<by_enum::Row, fp_type, container, alloc> const &,
-    container_2d<by_enum::Row, fp_type, container, alloc> const &,
-    container_2d<by_enum::Row, fp_type, container, alloc> const &, fp_type const &, container<fp_type, alloc> &)>;
-
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 class implicit_heston_scheme_cs
 {
     typedef container<fp_type, allocator> container_t;
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
-    typedef implicit_heston_scheme_cs_function_t<container, fp_type, allocator> scheme_function_t;
 
   public:
-    static scheme_function_t const get_intermediate_1(bool is_homogeneus)
+    static void rhs_intermed_1(general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
+                               grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
+                               fp_type const &y, rcontainer_2d_t const &input, fp_type const &time,
+                               container_t &solution)
     {
-        const fp_type one = static_cast<fp_type>(1.0);
+        auto const one = static_cast<fp_type>(1.0);
+        auto const &M = cfs->M_;
+        auto const &M_tilde = cfs->M_tilde_;
+        auto const &P = cfs->P_;
+        auto const &P_tilde = cfs->P_tilde_;
+        auto const &Z = cfs->Z_;
+        auto const &W = cfs->W_;
+        auto const &C = cfs->C_;
 
-        auto scheme_fun_h = [=](general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
-                                grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
-                                fp_type const &y, rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
-                                rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
-            auto M = cfs->M_;
-            auto M_tilde = cfs->M_tilde_;
-            auto P = cfs->P_;
-            auto P_tilde = cfs->P_tilde_;
-            auto Z = cfs->Z_;
-            auto W = cfs->W_;
-            auto C = cfs->C_;
+        auto const gamma = cfs->gamma_;
+        auto const theta = cfs->theta_;
 
-            auto const gamma = cfs->gamma_;
-            auto const theta = cfs->theta_;
-
-            const std::size_t N = solution.size() - 1;
-            fp_type x{};
-            for (std::size_t t = 1; t < N; ++t)
-            {
-                x = grid_2d<fp_type>::value_1(grid_cfg, t);
-                solution[t] =
-                    (gamma * C(x, y) * input(t - 1, y_index - 1)) +
-                    ((one - theta) * M(x, y, one) * input(t - 1, y_index)) -
-                    (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y, one) * input(t, y_index - 1)) +
-                    ((one - W(x, y, one) - (one - theta) * Z(x, y, one)) * input(t, y_index)) +
-                    (P_tilde(x, y, one) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
-                    ((one - theta) * P(x, y, one) * input(t + 1, y_index)) +
-                    (gamma * C(x, y) * input(t + 1, y_index + 1));
-            }
-        };
-        auto scheme_fun_nh = [=](general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
-                                 grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
-                                 fp_type const &y, rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
-                                 rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
-            auto M = cfs->M_;
-            auto M_tilde = cfs->M_tilde_;
-            auto P = cfs->P_;
-            auto P_tilde = cfs->P_tilde_;
-            auto Z = cfs->Z_;
-            auto W = cfs->W_;
-            auto C = cfs->C_;
-
-            auto const gamma = cfs->gamma_;
-            auto const theta = cfs->theta_;
-            auto const rho = cfs->rho_;
-
-            const std::size_t N = solution.size() - 1;
-            fp_type x{};
-            for (std::size_t t = 1; t < N; ++t)
-            {
-                x = grid_2d<fp_type>::value_1(grid_cfg, t);
-                solution[t] =
-                    (gamma * C(x, y) * input(t - 1, y_index - 1)) +
-                    ((one - theta) * M(x, y, one) * input(t - 1, y_index)) -
-                    (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y, one) * input(t, y_index - 1)) +
-                    ((one - W(x, y, one) - (one - theta) * Z(x, y, one)) * input(t, y_index)) +
-                    (P_tilde(x, y, one) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
-                    ((one - theta) * P(x, y, one) * input(t + 1, y_index)) +
-                    (gamma * C(x, y) * input(t + 1, y_index + 1)) + (theta * rho * inhom_input_next(t, y_index)) +
-                    ((one - theta) * rho * inhom_input(t, y_index));
-            }
-        };
-        if (is_homogeneus)
+        const std::size_t N = solution.size() - 1;
+        fp_type x{};
+        for (std::size_t t = 1; t < N; ++t)
         {
-            return scheme_fun_h;
-        }
-        else
-        {
-            return scheme_fun_nh;
+            x = grid_2d<fp_type>::value_1(grid_cfg, t);
+            solution[t] =
+                (gamma * C(x, y) * input(t - 1, y_index - 1)) + ((one - theta) * M(x, y, one) * input(t - 1, y_index)) -
+                (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y, one) * input(t, y_index - 1)) +
+                ((one - W(x, y, one) - (one - theta) * Z(x, y, one)) * input(t, y_index)) +
+                (P_tilde(x, y, one) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
+                ((one - theta) * P(x, y, one) * input(t + 1, y_index)) + (gamma * C(x, y) * input(t + 1, y_index + 1));
         }
     }
 
-    static scheme_function_t const get_intermediate_2()
+    static void rhs_intermed_1_source(general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
+                                      grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
+                                      fp_type const &y, rcontainer_2d_t const &input,
+                                      rcontainer_2d_t const &inhom_input, rcontainer_2d_t const &inhom_input_next,
+                                      fp_type const &time, container_t &solution)
     {
-        const fp_type one = static_cast<fp_type>(1.0);
+        auto const one = static_cast<fp_type>(1.0);
+        auto const &M = cfs->M_;
+        auto const &M_tilde = cfs->M_tilde_;
+        auto const &P = cfs->P_;
+        auto const &P_tilde = cfs->P_tilde_;
+        auto const &Z = cfs->Z_;
+        auto const &W = cfs->W_;
+        auto const &C = cfs->C_;
 
-        auto scheme_fun = [=](general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
-                              grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &x_index, fp_type const &x,
-                              rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
-                              rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
-            auto const M_tilde = cfs->M_tilde_;
-            auto const P_tilde = cfs->P_tilde_;
-            auto const W = cfs->W_;
+        auto const gamma = cfs->gamma_;
+        auto const theta = cfs->theta_;
+        auto const rho = cfs->rho_;
 
-            auto const theta = cfs->theta_;
-
-            const std::size_t N = solution.size() - 1;
-            fp_type y{};
-            for (std::size_t t = 1; t < N; ++t)
-            {
-                y = grid_2d<fp_type>::value_2(grid_cfg, t);
-                solution[t] = (-theta * M_tilde(x, y, one) * input(x_index, t - 1)) +
-                              (theta * W(x, y, one) * input(x_index, t)) -
-                              (theta * P_tilde(x, y, one) * input(x_index, t + 1)) + inhom_input(x_index, t);
-            }
-        };
-
-        return scheme_fun;
+        const std::size_t N = solution.size() - 1;
+        fp_type x{};
+        for (std::size_t t = 1; t < N; ++t)
+        {
+            x = grid_2d<fp_type>::value_1(grid_cfg, t);
+            solution[t] =
+                (gamma * C(x, y) * input(t - 1, y_index - 1)) + ((one - theta) * M(x, y, one) * input(t - 1, y_index)) -
+                (gamma * C(x, y) * input(t - 1, y_index + 1)) + (M_tilde(x, y, one) * input(t, y_index - 1)) +
+                ((one - W(x, y, one) - (one - theta) * Z(x, y, one)) * input(t, y_index)) +
+                (P_tilde(x, y, one) * input(t, y_index + 1)) - (gamma * C(x, y) * input(t + 1, y_index - 1)) +
+                ((one - theta) * P(x, y, one) * input(t + 1, y_index)) + (gamma * C(x, y) * input(t + 1, y_index + 1)) +
+                (theta * rho * inhom_input_next(t, y_index)) + ((one - theta) * rho * inhom_input(t, y_index));
+        }
     }
 
-    static scheme_function_t const get_intermediate_3()
+    static void rhs_intermed_2(general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
+                               grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &x_index,
+                               fp_type const &x, rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
+                               fp_type const &time, container_t &solution)
     {
-        const fp_type one = static_cast<fp_type>(1.0);
+        auto const one = static_cast<fp_type>(1.0);
+        auto const &M_tilde = cfs->M_tilde_;
+        auto const &P_tilde = cfs->P_tilde_;
+        auto const &W = cfs->W_;
 
-        auto scheme_fun = [=](general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
-                              grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index, fp_type const &y,
-                              rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
-                              rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
-            auto M = cfs->M_;
-            auto P = cfs->P_;
-            auto Z = cfs->Z_;
-            auto C = cfs->C_;
+        auto const theta = cfs->theta_;
 
-            auto const gamma = cfs->gamma_;
-            auto const theta = cfs->theta_;
-            auto const zeta = cfs->zeta_;
-
-            const std::size_t N = solution.size() - 1;
-            fp_type x{};
-            for (std::size_t t = 1; t < N; ++t)
-            {
-                x = grid_2d<fp_type>::value_1(grid_cfg, t);
-                solution[t] = (-theta * M(x, y, one) * input(t - 1, y_index)) +
-                              (theta * Z(x, y, one) * input(t, y_index)) -
-                              (theta * P(x, y, one) * input(t + 1, y_index)) + (inhom_input(t, y_index)) +
-                              (zeta * gamma * C(x, y) *
-                               ((inhom_input_next(t + 1, y_index + 1) - input(t + 1, y_index + 1)) -
-                                (inhom_input_next(t + 1, y_index - 1) - input(t + 1, y_index - 1)) -
-                                (inhom_input_next(t - 1, y_index + 1) - input(t - 1, y_index + 1)) +
-                                (inhom_input_next(t - 1, y_index - 1) - input(t - 1, y_index - 1))));
-            }
-        };
-
-        return scheme_fun;
+        const std::size_t N = solution.size() - 1;
+        fp_type y{};
+        for (std::size_t t = 1; t < N; ++t)
+        {
+            y = grid_2d<fp_type>::value_2(grid_cfg, t);
+            solution[t] = (-theta * M_tilde(x, y, one) * input(x_index, t - 1)) +
+                          (theta * W(x, y, one) * input(x_index, t)) -
+                          (theta * P_tilde(x, y, one) * input(x_index, t + 1)) + inhom_input(x_index, t);
+        }
     }
 
-    static scheme_function_t const get()
+    static void rhs_intermed_3(general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
+                               grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &y_index,
+                               fp_type const &y, rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
+                               rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution)
+    {
+        auto const one = static_cast<fp_type>(1.0);
+        auto const &M = cfs->M_;
+        auto const &P = cfs->P_;
+        auto const &Z = cfs->Z_;
+        auto const &C = cfs->C_;
+
+        auto const gamma = cfs->gamma_;
+        auto const theta = cfs->theta_;
+        auto const zeta = cfs->zeta_;
+
+        const std::size_t N = solution.size() - 1;
+        fp_type x{};
+        for (std::size_t t = 1; t < N; ++t)
+        {
+            x = grid_2d<fp_type>::value_1(grid_cfg, t);
+            solution[t] = (-theta * M(x, y, one) * input(t - 1, y_index)) + (theta * Z(x, y, one) * input(t, y_index)) -
+                          (theta * P(x, y, one) * input(t + 1, y_index)) + (inhom_input(t, y_index)) +
+                          (zeta * gamma * C(x, y) *
+                           ((inhom_input_next(t + 1, y_index + 1) - input(t + 1, y_index + 1)) -
+                            (inhom_input_next(t + 1, y_index - 1) - input(t + 1, y_index - 1)) -
+                            (inhom_input_next(t - 1, y_index + 1) - input(t - 1, y_index + 1)) +
+                            (inhom_input_next(t - 1, y_index - 1) - input(t - 1, y_index - 1))));
+        }
+    }
+
+    static void rhs_final(general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
+                          grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &x_index, fp_type const &x,
+                          rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input, fp_type const &time,
+                          container_t &solution)
     {
 
-        const fp_type one = static_cast<fp_type>(1.0);
-        auto scheme_fun = [=](general_svc_heston_equation_coefficients_ptr<fp_type> const &cfs,
-                              grid_config_2d_ptr<fp_type> const &grid_cfg, std::size_t const &x_index, fp_type const &x,
-                              rcontainer_2d_t const &input, rcontainer_2d_t const &inhom_input,
-                              rcontainer_2d_t const &inhom_input_next, fp_type const &time, container_t &solution) {
-            auto const M_tilde = cfs->M_tilde_;
-            auto const P_tilde = cfs->P_tilde_;
-            auto const W = cfs->W_;
+        auto const one = static_cast<fp_type>(1.0);
+        auto const &M_tilde = cfs->M_tilde_;
+        auto const &P_tilde = cfs->P_tilde_;
+        auto const &W = cfs->W_;
 
-            auto const theta = cfs->theta_;
+        auto const theta = cfs->theta_;
 
-            const std::size_t N = solution.size() - 1;
-            fp_type y{};
-            for (std::size_t t = 1; t < N; ++t)
-            {
-                y = grid_2d<fp_type>::value_2(grid_cfg, t);
-                solution[t] = (-theta * M_tilde(x, y, one) * input(x_index, t - 1)) +
-                              (theta * W(x, y, one) * input(x_index, t)) -
-                              (theta * P_tilde(x, y, one) * input(x_index, t + 1)) + inhom_input(x_index, t);
-            }
-        };
-
-        return scheme_fun;
+        const std::size_t N = solution.size() - 1;
+        fp_type y{};
+        for (std::size_t t = 1; t < N; ++t)
+        {
+            y = grid_2d<fp_type>::value_2(grid_cfg, t);
+            solution[t] = (-theta * M_tilde(x, y, one) * input(x_index, t - 1)) +
+                          (theta * W(x, y, one) * input(x_index, t)) -
+                          (theta * P_tilde(x, y, one) * input(x_index, t + 1)) + inhom_input(x_index, t);
+        }
     }
 };
 
@@ -220,55 +186,58 @@ class heat_craig_sneyd_method : public heat_splitting_method<fp_type, container,
 {
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
     typedef container_2d<by_enum::Column, fp_type, container, allocator> ccontainer_2d_t;
+    typedef implicit_heston_scheme_cs<fp_type, container, allocator> heston_scheme;
     typedef container<fp_type, allocator> container_t;
 
   private:
+    // constants:
+    const fp_type cone_ = static_cast<fp_type>(1.0);
     // solvers:
     solver solvery_ptr_;
     solver solveru_ptr_;
     // scheme coefficients:
     general_svc_heston_equation_coefficients_ptr<fp_type> coefficients_;
     grid_config_2d_ptr<fp_type> grid_cfg_;
+    // containers:
+    container_t low_, diag_, high_, rhs_;
 
     explicit heat_craig_sneyd_method() = delete;
 
-    void initialize()
+    void initialize(bool is_heat_source_set)
     {
     }
 
     void split_0(fp_type const &y, container_t &low, container_t &diag, container_t &high)
     {
         fp_type x{};
-        const fp_type one = static_cast<fp_type>(1.0);
         for (std::size_t t = 0; t < low.size(); ++t)
         {
             x = grid_2d<fp_type>::value_1(grid_cfg_, t);
-            low[t] = (-coefficients_->theta_ * coefficients_->M_(x, y, one));
-            diag[t] = (one + coefficients_->theta_ * coefficients_->Z_(x, y, one));
-            high[t] = (-coefficients_->theta_ * coefficients_->P_(x, y, one));
+            low[t] = (-coefficients_->theta_ * coefficients_->M_(x, y, cone_));
+            diag[t] = (cone_ + coefficients_->theta_ * coefficients_->Z_(x, y, cone_));
+            high[t] = (-coefficients_->theta_ * coefficients_->P_(x, y, cone_));
         }
     }
 
     void split_1(fp_type const &x, container_t &low, container_t &diag, container_t &high)
     {
         fp_type y{};
-        const fp_type one = static_cast<fp_type>(1.0);
         for (std::size_t t = 0; t < low.size(); ++t)
         {
             y = grid_2d<fp_type>::value_2(grid_cfg_, t);
-            low[t] = (-coefficients_->theta_ * coefficients_->M_tilde_(x, y, one));
-            diag[t] = (one + coefficients_->theta_ * coefficients_->W_(x, y, one));
-            high[t] = (-coefficients_->theta_ * coefficients_->P_tilde_(x, y, one));
+            low[t] = (-coefficients_->theta_ * coefficients_->M_tilde_(x, y, cone_));
+            diag[t] = (cone_ + coefficients_->theta_ * coefficients_->W_(x, y, cone_));
+            high[t] = (-coefficients_->theta_ * coefficients_->P_tilde_(x, y, cone_));
         }
     }
 
   public:
     explicit heat_craig_sneyd_method(solver const &solvery_ptr, solver const &solveru_ptr,
                                      general_svc_heston_equation_coefficients_ptr<fp_type> const &coefficients,
-                                     grid_config_2d_ptr<fp_type> const grid_config)
+                                     grid_config_2d_ptr<fp_type> const grid_config, bool is_heat_source_set)
         : solvery_ptr_{solvery_ptr}, solveru_ptr_{solveru_ptr}, coefficients_{coefficients}, grid_cfg_{grid_config}
     {
-        initialize();
+        initialize(is_heat_source_set);
     }
 
     ~heat_craig_sneyd_method()
@@ -283,13 +252,11 @@ class heat_craig_sneyd_method : public heat_splitting_method<fp_type, container,
     void solve(container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                boundary_2d_pair<fp_type> const &vertical_boundary_pair, fp_type const &time,
-               std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                container_2d<by_enum::Row, fp_type, container, allocator> &solution) override;
 
     void solve(container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
                boundary_2d_pair<fp_type> const &vertical_boundary_pair, fp_type const &time,
-               std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
                std::function<fp_type(fp_type, fp_type)> const &heat_source,
                container_2d<by_enum::Row, fp_type, container, allocator> &solution) override;
 };
@@ -298,32 +265,25 @@ template <typename fp_type, typename solver, template <typename, typename> typen
 void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair, boundary_2d_pair<fp_type> const &vertical_boundary_pair,
-    fp_type const &time, std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
-    container_2d<by_enum::Row, fp_type, container, allocator> &solution)
+    fp_type const &time, container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
-    typedef implicit_heston_scheme_cs<fp_type, container, allocator> heston_scheme;
-
     // 2D container for intermediate solution Y_1:
     ccontainer_2d_t inter_solution_1(coefficients_->space_size_x_, coefficients_->space_size_y_, fp_type{});
-    // 1D container for intermediate solution Y_1:
+    // 1D container for vector solution:
     container_t solution_v(coefficients_->space_size_x_, fp_type{});
-    // container for current source:
-    rcontainer_2d_t curr_source(1, 1, fp_type{});
-    // containers for first split solver:
-    container_t low(coefficients_->space_size_x_, fp_type{});
-    container_t diag(coefficients_->space_size_x_, fp_type{});
-    container_t high(coefficients_->space_size_x_, fp_type{});
-    container_t rhs(coefficients_->space_size_x_, fp_type{});
-    // get the right-hand side of the scheme:
-    auto scheme_y1 = heston_scheme::get_intermediate_1(true);
+    // containers for second split solver:
+    low_.resize(coefficients_->space_size_x_);
+    diag_.resize(coefficients_->space_size_x_);
+    high_.resize(coefficients_->space_size_x_);
+    rhs_.resize(coefficients_->space_size_x_);
     fp_type y{};
     for (std::size_t j = 1; j < coefficients_->space_size_y_ - 1; ++j)
     {
         y = grid_2d<fp_type>::value_2(grid_cfg_, j);
-        split_0(y, low, diag, high);
-        scheme_y1(coefficients_, grid_cfg_, j, y, prev_solution, curr_source, curr_source, time, rhs);
-        solvery_ptr_->set_diagonals(low, diag, high);
-        solvery_ptr_->set_rhs(rhs);
+        split_0(y, low_, diag_, high_);
+        heston_scheme::rhs_intermed_1(coefficients_, grid_cfg_, j, y, prev_solution, time, rhs_);
+        solvery_ptr_->set_diagonals(low_, diag_, high_);
+        solvery_ptr_->set_rhs(rhs_);
         solvery_ptr_->solve(horizontal_boundary_pair, solution_v, time, y);
         inter_solution_1(j, solution_v);
     }
@@ -333,21 +293,18 @@ void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
     // 1D container for intermediate solution Y_2:
     solution_v.resize(coefficients_->space_size_y_);
     // containers for second split solver:
-    low.resize(coefficients_->space_size_y_);
-    diag.resize(coefficients_->space_size_y_);
-    high.resize(coefficients_->space_size_y_);
-    rhs.resize(coefficients_->space_size_y_);
-    // get the right-hand side of the scheme:
-    auto scheme_y2 = heston_scheme::get_intermediate_2();
+    low_.resize(coefficients_->space_size_y_);
+    diag_.resize(coefficients_->space_size_y_);
+    high_.resize(coefficients_->space_size_y_);
+    rhs_.resize(coefficients_->space_size_y_);
     fp_type x{};
-
     for (std::size_t i = 1; i < coefficients_->space_size_x_ - 1; ++i)
     {
         x = grid_2d<fp_type>::value_1(grid_cfg_, i);
-        split_1(x, low, diag, high);
-        scheme_y2(coefficients_, grid_cfg_, i, x, prev_solution, inter_solution_1, curr_source, time, rhs);
-        solveru_ptr_->set_diagonals(low, diag, high);
-        solveru_ptr_->set_rhs(rhs);
+        split_1(x, low_, diag_, high_);
+        heston_scheme::rhs_intermed_2(coefficients_, grid_cfg_, i, x, prev_solution, inter_solution_1, time, rhs_);
+        solveru_ptr_->set_diagonals(low_, diag_, high_);
+        solveru_ptr_->set_rhs(rhs_);
         solveru_ptr_->solve(vertical_boundary_pair, solution_v, time, x);
         inter_solution_2(i, solution_v);
     }
@@ -357,19 +314,18 @@ void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
     // 1D container for intermediate solution Y_3:
     solution_v.resize(coefficients_->space_size_x_);
     // containers for second split solver:
-    low.resize(coefficients_->space_size_x_);
-    diag.resize(coefficients_->space_size_x_);
-    high.resize(coefficients_->space_size_x_);
-    rhs.resize(coefficients_->space_size_x_);
-    // get the right-hand side of the scheme:
-    auto scheme_y3 = heston_scheme::get_intermediate_3();
+    low_.resize(coefficients_->space_size_x_);
+    diag_.resize(coefficients_->space_size_x_);
+    high_.resize(coefficients_->space_size_x_);
+    rhs_.resize(coefficients_->space_size_x_);
     for (std::size_t j = 1; j < coefficients_->space_size_y_ - 1; ++j)
     {
         y = grid_2d<fp_type>::value_2(grid_cfg_, j);
-        split_0(y, low, diag, high);
-        scheme_y3(coefficients_, grid_cfg_, j, y, prev_solution, inter_solution_1, inter_solution_2, time, rhs);
-        solvery_ptr_->set_diagonals(low, diag, high);
-        solvery_ptr_->set_rhs(rhs);
+        split_0(y, low_, diag_, high_);
+        heston_scheme::rhs_intermed_3(coefficients_, grid_cfg_, j, y, prev_solution, inter_solution_1, inter_solution_2,
+                                      time, rhs_);
+        solvery_ptr_->set_diagonals(low_, diag_, high_);
+        solvery_ptr_->set_rhs(rhs_);
         solvery_ptr_->solve(horizontal_boundary_pair, solution_v, time, y);
         inter_solution_3(j, solution_v);
     }
@@ -377,19 +333,17 @@ void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
     // 1D container for final solution:
     solution_v.resize(coefficients_->space_size_y_);
     // containers for second split solver:
-    low.resize(coefficients_->space_size_y_);
-    diag.resize(coefficients_->space_size_y_);
-    high.resize(coefficients_->space_size_y_);
-    rhs.resize(coefficients_->space_size_y_);
-    // get the right-hand side of the scheme:
-    auto scheme_u = heston_scheme::get();
+    low_.resize(coefficients_->space_size_y_);
+    diag_.resize(coefficients_->space_size_y_);
+    high_.resize(coefficients_->space_size_y_);
+    rhs_.resize(coefficients_->space_size_y_);
     for (std::size_t i = 1; i < coefficients_->space_size_x_ - 1; ++i)
     {
         x = grid_2d<fp_type>::value_1(grid_cfg_, i);
-        split_1(x, low, diag, high);
-        scheme_u(coefficients_, grid_cfg_, i, x, prev_solution, inter_solution_3, curr_source, time, rhs);
-        solveru_ptr_->set_diagonals(low, diag, high);
-        solveru_ptr_->set_rhs(rhs);
+        split_1(x, low_, diag_, high_);
+        heston_scheme::rhs_final(coefficients_, grid_cfg_, i, x, prev_solution, inter_solution_3, time, rhs_);
+        solveru_ptr_->set_diagonals(low_, diag_, high_);
+        solveru_ptr_->set_rhs(rhs_);
         solveru_ptr_->solve(vertical_boundary_pair, solution_v, time, x);
         solution(i, solution_v);
     }
@@ -399,8 +353,7 @@ template <typename fp_type, typename solver, template <typename, typename> typen
 void heat_craig_sneyd_method<fp_type, solver, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> const &prev_solution,
     boundary_2d_pair<fp_type> const &horizontal_boundary_pair, boundary_2d_pair<fp_type> const &vertical_boundary_pair,
-    fp_type const &time, std::pair<fp_type, fp_type> const &weights, std::pair<fp_type, fp_type> const &weight_values,
-    std::function<fp_type(fp_type, fp_type)> const &heat_source,
+    fp_type const &time, std::function<fp_type(fp_type, fp_type)> const &heat_source,
     container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
 }
