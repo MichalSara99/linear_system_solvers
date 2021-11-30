@@ -1,11 +1,11 @@
-#if !defined(_LSS_2D_GENERAL_SVC_HESTON_EQUATION_BUILDER_T_HPP_)
-#define _LSS_2D_GENERAL_SVC_HESTON_EQUATION_BUILDER_T_HPP_
+#if !defined(_LSS_2D_GENERAL_HESTON_EQUATION_BUILDER_T_HPP_)
+#define _LSS_2D_GENERAL_HESTON_EQUATION_BUILDER_T_HPP_
 
 #include <functional>
 #include <map>
 #include <sstream>
 
-#include "builders/lss_2d_general_svc_heston_equation_builder.hpp"
+#include "builders/lss_2d_general_heston_equation_builder.hpp"
 #include "builders/lss_dirichlet_boundary_builder.hpp"
 #include "builders/lss_grid_config_hints_builder.hpp"
 #include "builders/lss_heat_data_config_builder.hpp"
@@ -33,7 +33,7 @@ template <typename T> void test_heston_equation_builder_t()
     using lss_pde_solvers::pde_discretization_config_2d_builder;
     using lss_pde_solvers::splitting_method_config_builder;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_dssolver_cn_solver_config_ptr;
-    using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation_builder;
+    using lss_pde_solvers::two_dimensional::implicit_solvers::general_heston_equation_builder;
     using lss_print::print;
     using lss_utility::pi;
     using lss_utility::range;
@@ -86,12 +86,12 @@ template <typename T> void test_heston_equation_builder_t()
                                          .number_of_time_points(Td)
                                          .build();
     // coefficient builder:
-    auto a = [=](T s, T v) { return (0.5 * v * s * s); };
-    auto b = [=](T s, T v) { return (0.5 * sig_sig * sig_sig * v); };
-    auto c = [=](T s, T v) { return (rho * sig_sig * v * s); };
-    auto d = [=](T s, T v) { return (rate * s); };
-    auto e = [=](T s, T v) { return (sig_kappa * (sig_theta - v)); };
-    auto f = [=](T s, T v) { return (-rate); };
+    auto a = [=](T t, T s, T v) { return (0.5 * v * s * s); };
+    auto b = [=](T t, T s, T v) { return (0.5 * sig_sig * sig_sig * v); };
+    auto c = [=](T t, T s, T v) { return (rho * sig_sig * v * s); };
+    auto d = [=](T t, T s, T v) { return (rate * s); };
+    auto e = [=](T t, T s, T v) { return (sig_kappa * (sig_theta - v)); };
+    auto f = [=](T t, T s, T v) { return (-rate); };
     auto const &coefficients_ptr = heat_coefficient_data_config_2d_builder<T>()
                                        .a_coefficient(a)
                                        .b_coefficient(b)
@@ -138,7 +138,7 @@ template <typename T> void test_heston_equation_builder_t()
                                            .build();
 
     // pde solver builder:
-    auto const &pde_solver = general_svc_heston_equation_builder<T, std::vector, std::allocator<T>>()
+    auto const &pde_solver = general_heston_equation_builder<T, std::vector, std::allocator<T>>()
                                  .heat_data_config(data_ptr)
                                  .discretization_config(discretization_ptr)
                                  .vertical_upper_boundary(vertical_upper_boundary_ptr)
@@ -169,4 +169,4 @@ void test_heston_equation_builder()
     test_heston_equation_builder_t<double>();
 }
 
-#endif ///_LSS_2D_GENERAL_SVC_HESTON_EQUATION_BUILDER_T_HPP_
+#endif ///_LSS_2D_GENERAL_HESTON_EQUATION_BUILDER_T_HPP_

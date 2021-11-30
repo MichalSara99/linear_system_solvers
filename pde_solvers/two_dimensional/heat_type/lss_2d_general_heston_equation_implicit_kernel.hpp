@@ -1,5 +1,5 @@
-#if !defined(_LSS_2D_GENERAL_SVC_HESTON_EQUATION_IMPLICIT_KERNEL_HPP_)
-#define _LSS_2D_GENERAL_SVC_HESTON_EQUATION_IMPLICIT_KERNEL_HPP_
+#if !defined(_LSS_2D_GENERAL_HESTON_EQUATION_IMPLICIT_KERNEL_HPP_)
+#define _LSS_2D_GENERAL_HESTON_EQUATION_IMPLICIT_KERNEL_HPP_
 
 #include <vector>
 
@@ -12,12 +12,12 @@
 #include "discretization/lss_grid.hpp"
 #include "discretization/lss_grid_config.hpp"
 //#include "lss_2d_general_svc_heston_equation_implicit_boundary.hpp"
-#include "lss_2d_general_svc_heston_equation_explicit_boundary.hpp"
+#include "lss_2d_general_heston_equation_explicit_boundary.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_splitting_method_config.hpp"
 #include "pde_solvers/transformation/lss_heat_data_transform.hpp"
-#include "pde_solvers/two_dimensional/heat_type/implicit_coefficients/lss_2d_general_svc_heston_equation_coefficients.hpp"
+#include "pde_solvers/two_dimensional/heat_type/implicit_coefficients/lss_2d_general_heston_equation_coefficients.hpp"
 #include "sparse_solvers/pentadiagonal/karawia_solver/lss_karawia_solver.hpp"
 #include "sparse_solvers/tridiagonal/cuda_solver/lss_cuda_solver.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
@@ -37,8 +37,7 @@ namespace two_dimensional
 
 using lss_boundary::boundary_2d_pair;
 using lss_boundary::boundary_2d_ptr;
-using lss_boundary::neumann_boundary_1d;
-using lss_boundary::robin_boundary_1d;
+using lss_boundary::dirichlet_boundary_2d;
 using lss_containers::container_2d;
 using lss_containers::container_3d;
 using lss_cuda_solver::cuda_solver;
@@ -228,7 +227,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     typedef heat_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> craig_sneyd_method;
     typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> m_craig_sneyd_method;
     typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<cusolver>, container, allocator> hundsdorfer_verwer_method;
-    typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
+    typedef general_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
   private:
@@ -294,7 +293,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<cusolver>(space_size_x);
@@ -367,7 +366,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<sorcusolver>, container, allocator> m_craig_sneyd_method;
     typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<sorcusolver>, container, allocator>
         hundsdorfer_verwer_method;
-    typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
+    typedef general_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
   private:
@@ -433,7 +432,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<sorcusolver>(space_size_x);
@@ -511,7 +510,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef heat_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> craig_sneyd_method;
     typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<cusolver>, container, allocator> m_craig_sneyd_method;
     typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<cusolver>, container, allocator> hundsdorfer_verwer_method;
-    typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
+    typedef general_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
   private:
@@ -577,7 +576,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<cusolver>(space_size_x);
@@ -651,7 +650,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef heat_craig_sneyd_method<fp_type, sptr_t<sorsolver>, container, allocator> craig_sneyd_method;
     typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<sorsolver>, container, allocator> m_craig_sneyd_method;
     typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<sorsolver>, container, allocator> hundsdorfer_verwer_method;
-    typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
+    typedef general_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
   private:
@@ -717,7 +716,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         auto solver_y = std::make_shared<sorsolver>(space_size_x);
@@ -792,7 +791,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef heat_craig_sneyd_method<fp_type, sptr_t<ds_solver>, container, allocator> craig_sneyd_method;
     typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<ds_solver>, container, allocator> m_craig_sneyd_method;
     typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<ds_solver>, container, allocator> hundsdorfer_verwer_method;
-    typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
+    typedef general_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
   private:
@@ -858,7 +857,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         // create and set up the main solvers:
@@ -930,7 +929,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     typedef heat_craig_sneyd_method<fp_type, sptr_t<tlu_solver>, container, allocator> craig_sneyd_method;
     typedef heat_modified_craig_sneyd_method<fp_type, sptr_t<tlu_solver>, container, allocator> m_craig_sneyd_method;
     typedef heat_hundsdorfer_verwer_method<fp_type, sptr_t<tlu_solver>, container, allocator> hundsdorfer_verwer_method;
-    typedef general_svc_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
+    typedef general_heston_equation_explicit_boundary<fp_type, container, allocator> explicit_boundary;
     typedef implicit_heston_time_loop<fp_type, container, allocator> loop;
 
   private:
@@ -996,7 +995,7 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
         }
 
         // create a Heston coefficient holder:
-        auto const heston_coeff_holder = std::make_shared<general_svc_heston_equation_coefficients<fp_type>>(
+        auto const heston_coeff_holder = std::make_shared<general_heston_equation_coefficients<fp_type>>(
             heat_data_cfg_, discretization_cfg_, splitting_cfg_, theta);
         heat_splitting_method_ptr<fp_type, container, allocator> splitting_ptr;
         // create and set up the main solvers:
@@ -1059,4 +1058,4 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_2D_GENERAL_SVC_HESTON_EQUATION_IMPLICIT_KERNEL_HPP_
+#endif ///_LSS_2D_GENERAL_HESTON_EQUATION_IMPLICIT_KERNEL_HPP_

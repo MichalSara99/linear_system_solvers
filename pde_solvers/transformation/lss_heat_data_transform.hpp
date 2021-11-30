@@ -136,12 +136,12 @@ template <typename fp_type> struct heat_data_transform<dimension_enum::Two, fp_t
 {
   private:
     bool is_heat_source_set_{false};
-    std::function<fp_type(fp_type, fp_type)> a_coeff_{nullptr};
-    std::function<fp_type(fp_type, fp_type)> b_coeff_{nullptr};
-    std::function<fp_type(fp_type, fp_type)> c_coeff_{nullptr};
-    std::function<fp_type(fp_type, fp_type)> d_coeff_{nullptr};
-    std::function<fp_type(fp_type, fp_type)> e_coeff_{nullptr};
-    std::function<fp_type(fp_type, fp_type)> f_coeff_{nullptr};
+    std::function<fp_type(fp_type, fp_type, fp_type)> a_coeff_{nullptr};
+    std::function<fp_type(fp_type, fp_type, fp_type)> b_coeff_{nullptr};
+    std::function<fp_type(fp_type, fp_type, fp_type)> c_coeff_{nullptr};
+    std::function<fp_type(fp_type, fp_type, fp_type)> d_coeff_{nullptr};
+    std::function<fp_type(fp_type, fp_type, fp_type)> e_coeff_{nullptr};
+    std::function<fp_type(fp_type, fp_type, fp_type)> f_coeff_{nullptr};
     std::function<fp_type(fp_type, fp_type)> init_coeff_{nullptr};
     std::function<fp_type(fp_type, fp_type, fp_type)> src_coeff_{nullptr};
 
@@ -171,46 +171,46 @@ template <typename fp_type> struct heat_data_transform<dimension_enum::Two, fp_t
                 return src(t, x, y);
             };
         }
-        a_coeff_ = [=](fp_type zeta, fp_type eta) {
+        a_coeff_ = [=](fp_type t, fp_type zeta, fp_type eta) {
             auto const x = grid_2d<fp_type>::transformed_value_1(grid_transform_config, zeta);
             auto const y = grid_2d<fp_type>::transformed_value_2(grid_transform_config, eta);
-            return (A(x, y) / (a(zeta) * a(zeta)));
+            return (A(t, x, y) / (a(zeta) * a(zeta)));
         };
 
-        b_coeff_ = [=](fp_type zeta, fp_type eta) {
+        b_coeff_ = [=](fp_type t, fp_type zeta, fp_type eta) {
             auto const x = grid_2d<fp_type>::transformed_value_1(grid_transform_config, zeta);
             auto const y = grid_2d<fp_type>::transformed_value_2(grid_transform_config, eta);
-            return (B(x, y) / (b(eta) * b(eta)));
+            return (B(t, x, y) / (b(eta) * b(eta)));
         };
 
-        c_coeff_ = [=](fp_type zeta, fp_type eta) {
+        c_coeff_ = [=](fp_type t, fp_type zeta, fp_type eta) {
             auto const x = grid_2d<fp_type>::transformed_value_1(grid_transform_config, zeta);
             auto const y = grid_2d<fp_type>::transformed_value_2(grid_transform_config, eta);
-            return (C(x, y) / (a(zeta) * b(eta)));
+            return (C(t, x, y) / (a(zeta) * b(eta)));
         };
 
-        d_coeff_ = [=](fp_type zeta, fp_type eta) {
+        d_coeff_ = [=](fp_type t, fp_type zeta, fp_type eta) {
             auto const x = grid_2d<fp_type>::transformed_value_1(grid_transform_config, zeta);
             auto const y = grid_2d<fp_type>::transformed_value_2(grid_transform_config, eta);
             auto const a_val = a(zeta);
-            auto const first = D(x, y) / a_val;
-            auto const second = (A(x, y) * c(zeta)) / (a_val * a_val * a_val);
+            auto const first = D(t, x, y) / a_val;
+            auto const second = (A(t, x, y) * c(zeta)) / (a_val * a_val * a_val);
             return (first - second);
         };
 
-        e_coeff_ = [=](fp_type zeta, fp_type eta) {
+        e_coeff_ = [=](fp_type t, fp_type zeta, fp_type eta) {
             auto const x = grid_2d<fp_type>::transformed_value_1(grid_transform_config, zeta);
             auto const y = grid_2d<fp_type>::transformed_value_2(grid_transform_config, eta);
             auto const b_val = b(eta);
-            auto const first = E(x, y) / b_val;
-            auto const second = (B(x, y) * d(eta)) / (b_val * b_val * b_val);
+            auto const first = E(t, x, y) / b_val;
+            auto const second = (B(t, x, y) * d(eta)) / (b_val * b_val * b_val);
             return (first - second);
         };
 
-        f_coeff_ = [=](fp_type zeta, fp_type eta) {
+        f_coeff_ = [=](fp_type t, fp_type zeta, fp_type eta) {
             auto const x = grid_2d<fp_type>::transformed_value_1(grid_transform_config, zeta);
             auto const y = grid_2d<fp_type>::transformed_value_2(grid_transform_config, eta);
-            return F(x, y);
+            return F(t, x, y);
         };
 
         init_coeff_ = [=](fp_type zeta, fp_type eta) {
@@ -248,32 +248,32 @@ template <typename fp_type> struct heat_data_transform<dimension_enum::Two, fp_t
         return init_coeff_;
     }
 
-    std::function<fp_type(fp_type, fp_type)> const &a_coefficient() const
+    std::function<fp_type(fp_type, fp_type, fp_type)> const &a_coefficient() const
     {
         return a_coeff_;
     }
 
-    std::function<fp_type(fp_type, fp_type)> const &b_coefficient() const
+    std::function<fp_type(fp_type, fp_type, fp_type)> const &b_coefficient() const
     {
         return b_coeff_;
     }
 
-    std::function<fp_type(fp_type, fp_type)> const &c_coefficient() const
+    std::function<fp_type(fp_type, fp_type, fp_type)> const &c_coefficient() const
     {
         return c_coeff_;
     }
 
-    std::function<fp_type(fp_type, fp_type)> const &d_coefficient() const
+    std::function<fp_type(fp_type, fp_type, fp_type)> const &d_coefficient() const
     {
         return d_coeff_;
     }
 
-    std::function<fp_type(fp_type, fp_type)> const &e_coefficient() const
+    std::function<fp_type(fp_type, fp_type, fp_type)> const &e_coefficient() const
     {
         return e_coeff_;
     }
 
-    std::function<fp_type(fp_type, fp_type)> const &f_coefficient() const
+    std::function<fp_type(fp_type, fp_type, fp_type)> const &f_coefficient() const
     {
         return f_coeff_;
     }

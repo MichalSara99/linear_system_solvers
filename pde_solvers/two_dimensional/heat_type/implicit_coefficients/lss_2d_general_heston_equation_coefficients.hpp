@@ -1,5 +1,5 @@
-#if !defined(_LSS_2D_GENERAL_SVC_HESTON_EQUATION_COEFFICIENTS_HPP_)
-#define _LSS_2D_GENERAL_SVC_HESTON_EQUATION_COEFFICIENTS_HPP_
+#if !defined(_LSS_2D_GENERAL_HESTON_EQUATION_COEFFICIENTS_HPP_)
+#define _LSS_2D_GENERAL_HESTON_EQUATION_COEFFICIENTS_HPP_
 
 #include "common/lss_utility.hpp"
 #include "discretization/lss_discretization.hpp"
@@ -16,9 +16,9 @@ using lss_utility::range;
 using lss_utility::sptr_t;
 
 /**
-    general_svc_heston_equation_coefficients object
+    general_heston_equation_coefficients object
  */
-template <typename fp_type> struct general_svc_heston_equation_coefficients
+template <typename fp_type> struct general_heston_equation_coefficients
 {
   public:
     // scheme constant coefficients:
@@ -34,10 +34,10 @@ template <typename fp_type> struct general_svc_heston_equation_coefficients
     std::function<fp_type(fp_type, fp_type, fp_type)> P_tilde_;
     std::function<fp_type(fp_type, fp_type, fp_type)> Z_;
     std::function<fp_type(fp_type, fp_type, fp_type)> W_;
-    std::function<fp_type(fp_type, fp_type)> C_;
-    std::function<fp_type(fp_type, fp_type)> D_;
-    std::function<fp_type(fp_type, fp_type)> E_;
-    std::function<fp_type(fp_type, fp_type)> F_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> C_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> D_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> E_;
+    std::function<fp_type(fp_type, fp_type, fp_type)> F_;
 
   private:
     void initialize(pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
@@ -82,33 +82,28 @@ template <typename fp_type> struct general_svc_heston_equation_coefficients
         auto const e = heat_data_config->e_coefficient();
         auto const f = heat_data_config->f_coefficient();
 
-        const fp_type one = static_cast<fp_type>(1.0);
         const fp_type two = static_cast<fp_type>(2.0);
         const fp_type half = static_cast<fp_type>(0.5);
 
-        M_ = [=](fp_type x, fp_type y, fp_type w_x) { return (alpha_ * a(x, y) - (two - w_x) * delta_ * d(x, y)); };
-        M_tilde_ = [=](fp_type x, fp_type y, fp_type w_y) { return (beta_ * b(x, y) - (two - w_y) * ni_ * e(x, y)); };
-        P_ = [=](fp_type x, fp_type y, fp_type w_x) { return (alpha_ * a(x, y) + w_x * delta_ * d(x, y)); };
-        P_tilde_ = [=](fp_type x, fp_type y, fp_type w_y) { return (beta_ * b(x, y) + w_y * ni_ * e(x, y)); };
-        Z_ = [=](fp_type x, fp_type y, fp_type w_x) {
-            return (two * alpha_ * a(x, y) - two * (one - w_x) * delta_ * d(x, y) - half * rho_ * f(x, y));
-        };
-        W_ = [=](fp_type x, fp_type y, fp_type w_y) {
-            return (two * beta_ * b(x, y) - two * (one - w_y) * ni_ * e(x, y) - half * rho_ * f(x, y));
-        };
-        C_ = [=](fp_type x, fp_type y) { return c(x, y); };
-        D_ = [=](fp_type x, fp_type y) { return d(x, y); };
-        E_ = [=](fp_type x, fp_type y) { return e(x, y); };
-        F_ = [=](fp_type x, fp_type y) { return f(x, y); };
+        M_ = [=](fp_type t, fp_type x, fp_type y) { return (alpha_ * a(t, x, y) - delta_ * d(t, x, y)); };
+        M_tilde_ = [=](fp_type t, fp_type x, fp_type y) { return (beta_ * b(t, x, y) - ni_ * e(t, x, y)); };
+        P_ = [=](fp_type t, fp_type x, fp_type y) { return (alpha_ * a(t, x, y) + delta_ * d(t, x, y)); };
+        P_tilde_ = [=](fp_type t, fp_type x, fp_type y) { return (beta_ * b(t, x, y) + ni_ * e(t, x, y)); };
+        Z_ = [=](fp_type t, fp_type x, fp_type y) { return (two * alpha_ * a(t, x, y) - half * rho_ * f(t, x, y)); };
+        W_ = [=](fp_type t, fp_type x, fp_type y) { return (two * beta_ * b(t, x, y) - half * rho_ * f(t, x, y)); };
+        C_ = [=](fp_type t, fp_type x, fp_type y) { return c(t, x, y); };
+        D_ = [=](fp_type t, fp_type x, fp_type y) { return d(t, x, y); };
+        E_ = [=](fp_type t, fp_type x, fp_type y) { return e(t, x, y); };
+        F_ = [=](fp_type t, fp_type x, fp_type y) { return f(t, x, y); };
     }
 
   public:
-    general_svc_heston_equation_coefficients() = delete;
+    general_heston_equation_coefficients() = delete;
 
-    general_svc_heston_equation_coefficients(heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
-                                             pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                             splitting_method_config_ptr<fp_type> const splitting_config,
-                                             fp_type const &theta)
+    general_heston_equation_coefficients(heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
+                                         pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                         splitting_method_config_ptr<fp_type> const splitting_config,
+                                         fp_type const &theta)
         : theta_{theta}
     {
         initialize(discretization_config, splitting_config);
@@ -117,10 +112,10 @@ template <typename fp_type> struct general_svc_heston_equation_coefficients
 };
 
 template <typename fp_type>
-using general_svc_heston_equation_coefficients_ptr = sptr_t<general_svc_heston_equation_coefficients<fp_type>>;
+using general_heston_equation_coefficients_ptr = sptr_t<general_heston_equation_coefficients<fp_type>>;
 
 } // namespace two_dimensional
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_2D_GENERAL_SVC_HESTON_EQUATION_COEFFICIENTS_HPP_
+#endif ///_LSS_2D_GENERAL_HESTON_EQUATION_COEFFICIENTS_HPP_

@@ -1,7 +1,7 @@
 #if !defined(_LSS_HESTON_EQUATION_T_HPP_)
 #define _LSS_HESTON_EQUATION_T_HPP_
 
-#include "pde_solvers/two_dimensional/heat_type/lss_2d_general_svc_heston_equation.hpp"
+#include "pde_solvers/two_dimensional/heat_type/lss_2d_general_heston_equation.hpp"
 #include "sparse_solvers/tridiagonal/double_sweep_solver/lss_double_sweep_solver.hpp"
 #include <map>
 
@@ -28,7 +28,7 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolson()
     using lss_pde_solvers::pde_discretization_config_2d;
     using lss_pde_solvers::splitting_method_config;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_cusolver_qr_cn_solver_config_ptr;
-    using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation;
+    using lss_pde_solvers::two_dimensional::implicit_solvers::general_heston_equation;
     using lss_print::print;
     using lss_utility::range;
 
@@ -50,7 +50,7 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolson()
 
     typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> rcontainer_2d_t;
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heston_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heston_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10.0;
     auto const &maturity = 1.0;
@@ -75,12 +75,12 @@ template <typename T> void testImplHestonEquationCUDAQRSolverCrankNicolson()
     auto const discretization_ptr =
         std::make_shared<pde_discretization_config_2d<T>>(spacex_range, spacey_range, Sd, Vd, time_range, Td);
     // coeffs:
-    auto a = [=](T s, T v) { return (0.5 * v * s * s); };
-    auto b = [=](T s, T v) { return (0.5 * sig_sig * sig_sig * v); };
-    auto c = [=](T s, T v) { return (rho * sig_sig * v * s); };
-    auto d = [=](T s, T v) { return (rate * s); };
-    auto e = [=](T s, T v) { return (sig_kappa * (sig_theta - v)); };
-    auto f = [=](T s, T v) { return (-rate); };
+    auto a = [=](T t, T s, T v) { return (0.5 * v * s * s); };
+    auto b = [=](T t, T s, T v) { return (0.5 * sig_sig * sig_sig * v); };
+    auto c = [=](T t, T s, T v) { return (rho * sig_sig * v * s); };
+    auto d = [=](T t, T s, T v) { return (rate * s); };
+    auto e = [=](T t, T s, T v) { return (sig_kappa * (sig_theta - v)); };
+    auto f = [=](T t, T s, T v) { return (-rate); };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_2d<T>>(a, b, c, d, e, f);
     // terminal condition:
     auto terminal_condition = [=](T s, T v) { return std::max<T>(0.0, s - strike); };
@@ -140,7 +140,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolson()
     using lss_pde_solvers::pde_discretization_config_2d;
     using lss_pde_solvers::splitting_method_config;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_cn_solver_config_ptr;
-    using lss_pde_solvers::two_dimensional::implicit_solvers::general_svc_heston_equation;
+    using lss_pde_solvers::two_dimensional::implicit_solvers::general_heston_equation;
     using lss_print::print;
     using lss_utility::range;
 
@@ -162,7 +162,7 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolson()
 
     typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> rcontainer_2d_t;
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heston_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heston_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10.0;
     auto const &maturity = 1.0;
@@ -187,12 +187,12 @@ template <typename T> void testImplHestonEquationThomasLUSolverCrankNicolson()
     auto const discretization_ptr =
         std::make_shared<pde_discretization_config_2d<T>>(spacex_range, spacey_range, Sd, Vd, time_range, Td);
     // coeffs:
-    auto a = [=](T s, T v) { return (0.5 * v * s * s); };
-    auto b = [=](T s, T v) { return (0.5 * sig_sig * sig_sig * v); };
-    auto c = [=](T s, T v) { return (rho * sig_sig * v * s); };
-    auto d = [=](T s, T v) { return (rate * s); };
-    auto e = [=](T s, T v) { return (sig_kappa * (sig_theta - v)); };
-    auto f = [=](T s, T v) { return (-rate); };
+    auto a = [=](T t, T s, T v) { return (0.5 * v * s * s); };
+    auto b = [=](T t, T s, T v) { return (0.5 * sig_sig * sig_sig * v); };
+    auto c = [=](T t, T s, T v) { return (rho * sig_sig * v * s); };
+    auto d = [=](T t, T s, T v) { return (rate * s); };
+    auto e = [=](T t, T s, T v) { return (sig_kappa * (sig_theta - v)); };
+    auto f = [=](T t, T s, T v) { return (-rate); };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_2d<T>>(a, b, c, d, e, f);
     // terminal condition:
     auto terminal_condition = [=](T s, T v) { return std::max<T>(0.0, s - strike); };

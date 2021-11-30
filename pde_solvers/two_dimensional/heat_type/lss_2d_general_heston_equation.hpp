@@ -1,5 +1,5 @@
-#if !defined(_LSS_2D_GENERAL_SVC_HESTON_EQUATION_HPP_)
-#define _LSS_2D_GENERAL_SVC_HESTON_EQUATION_HPP_
+#if !defined(_LSS_2D_GENERAL_HESTON_EQUATION_HPP_)
+#define _LSS_2D_GENERAL_HESTON_EQUATION_HPP_
 
 #include <functional>
 #include <map>
@@ -11,13 +11,13 @@
 #include "common/lss_macros.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "containers/lss_container_3d.hpp"
-//#include "lss_general_svc_heat_equation_explicit_kernel.hpp"
+//#include "lss_general_heat_equation_explicit_kernel.hpp"
 #include "discretization/lss_discretization.hpp"
 #include "discretization/lss_grid.hpp"
 #include "discretization/lss_grid_config.hpp"
 #include "discretization/lss_grid_config_hints.hpp"
 #include "discretization/lss_grid_transform_config.hpp"
-#include "lss_2d_general_svc_heston_equation_implicit_kernel.hpp"
+#include "lss_2d_general_heston_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
@@ -48,20 +48,20 @@ namespace implicit_solvers
 
 /*!
 ============================================================================
-Represents general spacial variable coefficient Heston type equation
+Represents general variable coefficient Heston type equation
 
-u_t = a(x,y)*u_xx + b(x,y)*u_yy + c(x,y)*u_xy + d(x,y)*u_x + e(x,y)*u_y +
-        f(x,y)*u + F(t,x,y)
+u_t = a(t,x,y)*u_xx + b(t,x,y)*u_yy + c(t,x,y)*u_xy + d(t,x,y)*u_x + e(t,x,y)*u_y +
+        f(t,x,y)*u + F(t,x,y)
 
 t > 0, x_1 < x < x_2, y_1 < y < y_2
 
 with initial condition:
 
-u(x,y,0) = G(x,y)
+u(0,x,y) = G(x,y)
 
 or terminal condition:
 
-u(x,y,T) = G(x,y)
+u(T,x,y) = G(x,y)
 
 horizontal_boundary_pair = S = (S_1,S_2) boundary
 
@@ -82,7 +82,7 @@ S (X)   |               |
 */
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class general_svc_heston_equation
+class general_heston_equation
 {
 
   private:
@@ -94,7 +94,7 @@ class general_svc_heston_equation
     heat_implicit_solver_config_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
-    explicit general_svc_heston_equation() = delete;
+    explicit general_heston_equation() = delete;
 
     void initialize(heat_data_config_2d_ptr<fp_type> const &heat_data_cfg,
                     grid_config_hints_2d_ptr<fp_type> const &grid_config_hints,
@@ -140,7 +140,7 @@ class general_svc_heston_equation
     }
 
   public:
-    explicit general_svc_heston_equation(
+    explicit general_heston_equation(
         heat_data_config_2d_ptr<fp_type> const &heat_data_config,
         pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
         boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
@@ -156,14 +156,14 @@ class general_svc_heston_equation
         initialize(heat_data_config, grid_config_hints, vertical_upper_boundary_ptr, horizontal_boundary_pair);
     }
 
-    ~general_svc_heston_equation()
+    ~general_heston_equation()
     {
     }
 
-    general_svc_heston_equation(general_svc_heston_equation const &) = delete;
-    general_svc_heston_equation(general_svc_heston_equation &&) = delete;
-    general_svc_heston_equation &operator=(general_svc_heston_equation const &) = delete;
-    general_svc_heston_equation &operator=(general_svc_heston_equation &&) = delete;
+    general_heston_equation(general_heston_equation const &) = delete;
+    general_heston_equation(general_heston_equation &&) = delete;
+    general_heston_equation &operator=(general_heston_equation const &) = delete;
+    general_heston_equation &operator=(general_heston_equation &&) = delete;
 
     /**
      * Get the final solution of the PDE
@@ -181,7 +181,7 @@ class general_svc_heston_equation
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heston_equation<fp_type, container, allocator>::solve(
+void general_heston_equation<fp_type, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
     typedef discretization<dimension_enum::Two, fp_type, container, allocator> d_2d;
@@ -307,7 +307,7 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heston_equation<fp_type, container, allocator>::solve(
+void general_heston_equation<fp_type, container, allocator>::solve(
     container_3d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
 }
@@ -340,7 +340,7 @@ u(x,y,T) = G(x,y)
 
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class general_svc_heston_equation
+class general_heston_equation
 {
   private:
     boundary_2d_ptr<fp_type> boundary_hor_;
@@ -350,7 +350,7 @@ class general_svc_heston_equation
     grid_config_hints_2d_ptr<fp_type> grid_hints_cfg_;
     heat_explicit_solver_config_ptr solver_cfg_;
 
-    explicit general_svc_heston_equation() = delete;
+    explicit general_heston_equation() = delete;
 
     void initialize()
     {
@@ -376,13 +376,13 @@ class general_svc_heston_equation
     }
 
   public:
-    explicit general_svc_heston_equation(heat_data_config_2d_ptr<fp_type> const &heat_data_config,
-                                         pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                         boundary_2d_ptr<fp_type> const &horizontal_upper_boundary_ptr,
-                                         boundary_2d_pair<fp_type> const &vertical_boundary_pair,
-                                         grid_config_hints_2d_ptr<fp_type> const &grid_config_hints,
-                                         heat_explicit_solver_config_ptr const &solver_config =
-                                             default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
+    explicit general_heston_equation(heat_data_config_2d_ptr<fp_type> const &heat_data_config,
+                                     pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                     boundary_2d_ptr<fp_type> const &horizontal_upper_boundary_ptr,
+                                     boundary_2d_pair<fp_type> const &vertical_boundary_pair,
+                                     grid_config_hints_2d_ptr<fp_type> const &grid_config_hints,
+                                     heat_explicit_solver_config_ptr const &solver_config =
+                                         default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
         : heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           boundary_hor_{horizontal_upper_boundary_ptr}, boundary_pair_ver_{vertical_boundary_pair},
           grid_hints_cfg_{grid_config_hints}, solver_cfg_{solver_config}
@@ -390,14 +390,14 @@ class general_svc_heston_equation
         initialize();
     }
 
-    ~general_svc_heston_equation()
+    ~general_heston_equation()
     {
     }
 
-    general_svc_heston_equation(general_svc_heston_equation const &) = delete;
-    general_svc_heston_equation(general_svc_heston_equation &&) = delete;
-    general_svc_heston_equation &operator=(general_svc_heston_equation const &) = delete;
-    general_svc_heston_equation &operator=(general_svc_heston_equation &&) = delete;
+    general_heston_equation(general_heston_equation const &) = delete;
+    general_heston_equation(general_heston_equation &&) = delete;
+    general_heston_equation &operator=(general_heston_equation const &) = delete;
+    general_heston_equation &operator=(general_heston_equation &&) = delete;
 
     /**
      * Get the final solution of the PDE
@@ -415,13 +415,13 @@ class general_svc_heston_equation
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heston_equation<fp_type, container, allocator>::solve(
+void general_heston_equation<fp_type, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> &solution)
 {
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heston_equation<fp_type, container, allocator>::solve(
+void general_heston_equation<fp_type, container, allocator>::solve(
     container_3d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
 }
@@ -432,4 +432,4 @@ void general_svc_heston_equation<fp_type, container, allocator>::solve(
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_2D_GENERAL_SVC_HESTON_EQUATION_HPP_
+#endif ///_LSS_2D_GENERAL_HESTON_EQUATION_HPP_

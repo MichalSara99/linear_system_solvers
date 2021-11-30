@@ -10,7 +10,7 @@
 #include "unit_tests/builders/lss_robin_boundary_builder_t.hpp"
 #include "unit_tests/builders/lss_wave_data_config_builder_t.hpp"
 #include "unit_tests/builders/lss_wave_solver_config_builder_t.hpp"
-#include "unit_tests/builders/lss_2d_general_svc_heston_equation_builder_t.hpp"
+#include "unit_tests/builders/lss_2d_general_heston_equation_builder_t.hpp"
 #include "unit_tests/builders/lss_general_2nd_ode_equation_builder_t.hpp"
 #include "unit_tests/common/lss_print_t.hpp"
 #include "unit_tests/containers/lss_container_2d_t.hpp"

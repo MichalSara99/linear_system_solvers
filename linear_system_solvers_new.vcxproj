@@ -21,7 +21,7 @@
     <ClInclude Include="boundaries\lss_robin_boundary.hpp" />
     <ClInclude Include="builders\lss_1d_general_svc_heat_equation_builder.hpp" />
     <ClInclude Include="builders\lss_1d_general_svc_wave_equation_builder.hpp" />
-    <ClInclude Include="builders\lss_2d_general_svc_heston_equation_builder.hpp" />
+    <ClInclude Include="builders\lss_2d_general_heston_equation_builder.hpp" />
     <ClInclude Include="builders\lss_dirichlet_boundary_builder.hpp" />
     <ClInclude Include="builders\lss_general_2nd_ode_equation_builder.hpp" />
     <ClInclude Include="builders\lss_grid_config_hints_builder.hpp" />
@@ -95,10 +95,10 @@
     <ClInclude Include="pde_solvers\one_dimensional\wave_type\solver_method\lss_wave_euler_solver_method.hpp" />
     <ClInclude Include="pde_solvers\transformation\lss_heat_data_transform.hpp" />
     <ClInclude Include="pde_solvers\transformation\lss_wave_data_transform.hpp" />
-    <ClInclude Include="pde_solvers\two_dimensional\heat_type\implicit_coefficients\lss_2d_general_svc_heston_equation_coefficients.hpp" />
-    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heston_equation.hpp" />
-    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heston_equation_explicit_boundary.hpp" />
-    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_svc_heston_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\implicit_coefficients\lss_2d_general_heston_equation_coefficients.hpp" />
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation.hpp" />
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation_explicit_boundary.hpp" />
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation_implicit_kernel.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_craig_sneyd_method.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_douglas_rachford_method.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_hundsdorfer_verwer_method.hpp" />
@@ -126,7 +126,7 @@
     <ClInclude Include="transformation\lss_boundary_transform.hpp" />
     <ClInclude Include="unit_tests\builders\lss_1d_general_svc_heat_equation_builder_t.hpp" />
     <ClInclude Include="unit_tests\builders\lss_1d_general_svc_wave_equation_builder_t.hpp" />
-    <ClInclude Include="unit_tests\builders\lss_2d_general_svc_heston_equation_builder_t.hpp" />
+    <ClInclude Include="unit_tests\builders\lss_2d_general_heston_equation_builder_t.hpp" />
     <ClInclude Include="unit_tests\builders\lss_dirichlet_boundary_builder_t.hpp" />
     <ClInclude Include="unit_tests\builders\lss_general_2nd_ode_equation_builder_t.hpp" />
     <ClInclude Include="unit_tests\builders\lss_heat_data_config_builder_t.hpp" />
