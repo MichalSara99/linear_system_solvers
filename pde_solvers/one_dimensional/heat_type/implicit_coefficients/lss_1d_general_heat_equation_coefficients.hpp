@@ -1,5 +1,5 @@
-#if !defined(_LSS_1D_GENERAL_SVC_HEAT_EQUATION_IMPLICIT_COEFFICIENTS_HPP_)
-#define _LSS_1D_GENERAL_SVC_HEAT_EQUATION_IMPLICIT_COEFFICIENTS_HPP_
+#if !defined(_LSS_1D_GENERAL_HEAT_EQUATION_COEFFICIENTS_HPP_)
+#define _LSS_1D_GENERAL_HEAT_EQUATION_COEFFICIENTS_HPP_
 
 #include <functional>
 
@@ -17,7 +17,7 @@ namespace one_dimensional
 using lss_utility::range;
 using lss_utility::sptr_t;
 
-template <typename fp_type> struct general_svc_heat_equation_implicit_coefficients
+template <typename fp_type> struct general_heat_equation_coefficients
 {
   public:
     // scheme coefficients:
@@ -27,9 +27,9 @@ template <typename fp_type> struct general_svc_heat_equation_implicit_coefficien
     // theta variable:
     fp_type theta_;
     // functional coefficients:
-    std::function<fp_type(fp_type)> A_;
-    std::function<fp_type(fp_type)> B_;
-    std::function<fp_type(fp_type)> D_;
+    std::function<fp_type(fp_type, fp_type)> A_;
+    std::function<fp_type(fp_type, fp_type)> B_;
+    std::function<fp_type(fp_type, fp_type)> D_;
 
   private:
     void initialize(pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
@@ -57,17 +57,17 @@ template <typename fp_type> struct general_svc_heat_equation_implicit_coefficien
         auto const b = heat_data_config->b_coefficient();
         auto const c = heat_data_config->c_coefficient();
 
-        A_ = [=](fp_type x) { return (lambda_ * a(x) - gamma_ * b(x)); };
-        B_ = [=](fp_type x) { return (lambda_ * a(x) - delta_ * c(x)); };
-        D_ = [=](fp_type x) { return (lambda_ * a(x) + gamma_ * b(x)); };
+        A_ = [=](fp_type t, fp_type x) { return (lambda_ * a(t, x) - gamma_ * b(t, x)); };
+        B_ = [=](fp_type t, fp_type x) { return (lambda_ * a(t, x) - delta_ * c(t, x)); };
+        D_ = [=](fp_type t, fp_type x) { return (lambda_ * a(t, x) + gamma_ * b(t, x)); };
     }
 
   public:
-    general_svc_heat_equation_implicit_coefficients() = delete;
+    general_heat_equation_coefficients() = delete;
 
-    explicit general_svc_heat_equation_implicit_coefficients(
-        heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
-        pde_discretization_config_1d_ptr<fp_type> const &discretization_config, fp_type const &theta)
+    explicit general_heat_equation_coefficients(heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
+                                                pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                                fp_type const &theta)
         : theta_{theta}
     {
         initialize(discretization_config);
@@ -76,11 +76,10 @@ template <typename fp_type> struct general_svc_heat_equation_implicit_coefficien
 };
 
 template <typename fp_type>
-using general_svc_heat_equation_implicit_coefficients_ptr =
-    sptr_t<general_svc_heat_equation_implicit_coefficients<fp_type>>;
+using general_heat_equation_coefficients_ptr = sptr_t<general_heat_equation_coefficients<fp_type>>;
 
 } // namespace one_dimensional
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_1D_GENERAL_SVC_HEAT_EQUATION_IMPLICIT_COEFFICIENTS_HPP_
+#endif ///_LSS_1D_GENERAL_HEAT_EQUATION_COEFFICIENTS_HPP_

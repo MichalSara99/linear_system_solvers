@@ -18,7 +18,7 @@
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
-#include "pde_solvers/one_dimensional/heat_type/explicit_coefficients/lss_heat_euler_svc_coefficients.hpp"
+#include "pde_solvers/one_dimensional/heat_type/explicit_coefficients/lss_heat_euler_coefficients.hpp"
 
 namespace lss_pde_solvers
 {
@@ -38,15 +38,15 @@ using lss_utility::range;
 using lss_utility::sptr_t;
 
 /**
-    explicit_heat_svc_scheme object
+    explicit_heat_scheme object
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class explicit_heat_svc_scheme
+class explicit_heat_scheme
 {
     typedef container<fp_type, allocator> container_t;
 
   public:
-    static void rhs(heat_euler_svc_coefficients_ptr<fp_type> const &cfs, grid_config_1d_ptr<fp_type> const &grid_config,
+    static void rhs(heat_euler_coefficients_ptr<fp_type> const &cfs, grid_config_1d_ptr<fp_type> const &grid_config,
                     container_t const &input, boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
                     container_t &solution)
     {
@@ -67,13 +67,14 @@ class explicit_heat_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * a(x) + b(x) * input[0] + (a(x) + d(x)) * input[1];
+            solution[0] = beta * a(time, x) + b(time, x) * input[0] + (a(time, x) + d(time, x)) * input[1];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] = (b(x) + alpha * a(x)) * input[0] + (a(x) + d(x)) * input[1] + beta * a(x);
+            solution[0] =
+                (b(time, x) + alpha * a(time, x)) * input[0] + (a(time, x) + d(time, x)) * input[1] + beta * a(time, x);
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -85,23 +86,24 @@ class explicit_heat_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (a(x) + d(x)) * input[N - 1] + b(x) * input[N] - delta * d(x);
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + b(time, x) * input[N] - delta * d(time, x);
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (a(x) + d(x)) * input[N - 1] + (b(x) - gamma * d(x)) * input[N] - delta * d(x);
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + (b(time, x) - gamma * d(time, x)) * input[N] -
+                          delta * d(time, x);
         }
 
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (d(x) * input[t + 1]) + (b(x) * input[t]) + (a(x) * input[t - 1]);
+            solution[t] = (d(time, x) * input[t + 1]) + (b(time, x) * input[t]) + (a(time, x) * input[t - 1]);
         }
     }
 
-    static void rhs_source(heat_euler_svc_coefficients_ptr<fp_type> const &cfs,
+    static void rhs_source(heat_euler_coefficients_ptr<fp_type> const &cfs,
                            grid_config_1d_ptr<fp_type> const &grid_config, container_t const &input,
                            container_t const &inhom_input, boundary_1d_pair<fp_type> const &boundary_pair,
                            fp_type const &time, container_t &solution)
@@ -121,14 +123,15 @@ class explicit_heat_svc_scheme
         if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * a(x) + b(x) * input[0] + (a(x) + d(x)) * input[1] + k * inhom_input[0];
+            solution[0] =
+                beta * a(time, x) + b(time, x) * input[0] + (a(time, x) + d(time, x)) * input[1] + k * inhom_input[0];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] =
-                (b(x) + alpha * a(x)) * input[0] + (a(x) + d(x)) * input[1] + beta * a(x) + k * inhom_input[0];
+            solution[0] = (b(time, x) + alpha * a(time, x)) * input[0] + (a(time, x) + d(time, x)) * input[1] +
+                          beta * a(time, x) + k * inhom_input[0];
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -136,20 +139,22 @@ class explicit_heat_svc_scheme
         if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (a(x) + d(x)) * input[N - 1] + b(x) * input[N] - delta * d(x) + k * inhom_input[N];
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + b(time, x) * input[N] - delta * d(time, x) +
+                          k * inhom_input[N];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] =
-                (a(x) + d(x)) * input[N - 1] + (b(x) - gamma * d(x)) * input[N] - delta * d(x) + k * inhom_input[N];
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + (b(time, x) - gamma * d(time, x)) * input[N] -
+                          delta * d(time, x) + k * inhom_input[N];
             ;
         }
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (d(x) * input[t + 1]) + (b(x) * input[t]) + (a(x) * input[t - 1]) + (k * inhom_input[t]);
+            solution[t] = (d(time, x) * input[t + 1]) + (b(time, x) * input[t]) + (a(time, x) * input[t - 1]) +
+                          (k * inhom_input[t]);
         }
     }
 };
@@ -162,10 +167,12 @@ template <typename fp_type, template <typename, typename> typename container, ty
 class heat_euler_solver_method
 {
     typedef container<fp_type, allocator> container_t;
+    typedef explicit_heat_scheme<fp_type, container, allocator> heat_scheme;
+    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
 
   private:
     // scheme coefficients:
-    heat_euler_svc_coefficients_ptr<fp_type> coefficients_;
+    heat_euler_coefficients_ptr<fp_type> coefficients_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
     container_t source_;
 
@@ -180,7 +187,7 @@ class heat_euler_solver_method
     }
 
   public:
-    explicit heat_euler_solver_method(heat_euler_svc_coefficients_ptr<fp_type> const &coefficients,
+    explicit heat_euler_solver_method(heat_euler_coefficients_ptr<fp_type> const &coefficients,
                                       grid_config_1d_ptr<fp_type> const &grid_config, bool is_heat_source_set)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
@@ -210,7 +217,6 @@ void heat_euler_solver_method<fp_type, container, allocator>::solve(container<fp
                                                                     fp_type const &time,
                                                                     container<fp_type, allocator> &solution)
 {
-    typedef explicit_heat_svc_scheme<fp_type, container, allocator> heat_scheme;
     heat_scheme::rhs(coefficients_, grid_cfg_, prev_solution, boundary_pair, time, solution);
 }
 
@@ -219,8 +225,6 @@ void heat_euler_solver_method<fp_type, container, allocator>::solve(
     container<fp_type, allocator> &prev_solution, boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
     std::function<fp_type(fp_type, fp_type)> const &heat_source, container<fp_type, allocator> &solution)
 {
-    typedef explicit_heat_svc_scheme<fp_type, container, allocator> heat_scheme;
-    typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     d_1d::of_function(grid_cfg_, time, heat_source, source_);
     heat_scheme::rhs_source(coefficients_, grid_cfg_, prev_solution, source_, boundary_pair, time, solution);
 }

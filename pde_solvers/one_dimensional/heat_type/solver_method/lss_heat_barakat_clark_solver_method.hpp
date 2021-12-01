@@ -16,7 +16,7 @@
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
-#include "pde_solvers/one_dimensional/heat_type/explicit_coefficients/lss_heat_barakat_clark_svc_coefficients.hpp"
+#include "pde_solvers/one_dimensional/heat_type/explicit_coefficients/lss_heat_barakat_clark_coefficients.hpp"
 
 namespace lss_pde_solvers
 {
@@ -39,7 +39,7 @@ template <typename fp_type, template <typename, typename> typename container, ty
 class heat_barakat_clark_solver_method
 {
     typedef container<fp_type, allocator> container_t;
-    typedef std::function<void(container_t &, container_t const &, fp_type)> sweeper_fun;
+    typedef std::function<void(container_t &, container_t const &, fp_type, fp_type)> sweeper_fun;
 
   private:
     // constant coeffs:
@@ -47,7 +47,7 @@ class heat_barakat_clark_solver_method
     const fp_type chalf_ = static_cast<fp_type>(0.5);
     const fp_type czero_ = static_cast<fp_type>(0.0);
     // scheme coefficients:
-    heat_barakat_clark_svc_coefficients_ptr<fp_type> coefficients_;
+    heat_barakat_clark_coefficients_ptr<fp_type> coefficients_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
     // sweepers:
     sweeper_fun up_sweeper_, down_sweeper_;
@@ -63,23 +63,23 @@ class heat_barakat_clark_solver_method
         auto d = coefficients_->D_;
         auto K = coefficients_->K_;
 
-        up_sweeper_ = [=](container_t &up_component, container_t const &rhs, fp_type rhs_coeff) {
+        up_sweeper_ = [=](container_t &up_component, container_t const &rhs, fp_type time, fp_type rhs_coeff) {
             fp_type x{};
             for (std::size_t t = 1; t < up_component.size() - 1; ++t)
             {
                 x = grid_1d<fp_type>::value(grid_cfg_, t);
-                up_component[t] = b(x) * up_component[t] + d(x) * up_component[t + 1] + a(x) * up_component[t - 1] +
-                                  K(x) * rhs_coeff * rhs[t];
+                up_component[t] = b(time, x) * up_component[t] + d(time, x) * up_component[t + 1] +
+                                  a(time, x) * up_component[t - 1] + K(time, x) * rhs_coeff * rhs[t];
             }
         };
 
-        down_sweeper_ = [=](container_t &down_component, container_t const &rhs, fp_type rhs_coeff) {
+        down_sweeper_ = [=](container_t &down_component, container_t const &rhs, fp_type time, fp_type rhs_coeff) {
             fp_type x{};
             for (std::size_t t = down_component.size() - 2; t >= 1; --t)
             {
                 x = grid_1d<fp_type>::value(grid_cfg_, t);
-                down_component[t] = b(x) * down_component[t] + d(x) * down_component[t + 1] +
-                                    a(x) * down_component[t - 1] + K(x) * rhs_coeff * rhs[t];
+                down_component[t] = b(time, x) * down_component[t] + d(time, x) * down_component[t + 1] +
+                                    a(time, x) * down_component[t - 1] + K(time, x) * rhs_coeff * rhs[t];
             }
         };
 
@@ -95,7 +95,7 @@ class heat_barakat_clark_solver_method
     }
 
   public:
-    explicit heat_barakat_clark_solver_method(heat_barakat_clark_svc_coefficients_ptr<fp_type> const &coefficients,
+    explicit heat_barakat_clark_solver_method(heat_barakat_clark_coefficients_ptr<fp_type> const &coefficients,
                                               grid_config_1d_ptr<fp_type> const &grid_config, bool is_heat_sourse_set)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
@@ -127,9 +127,10 @@ void heat_barakat_clark_solver_method<fp_type, container, allocator>::solve(
     //  components of the solution:
     container_t cont_up(solution);
     container_t cont_down(solution);
-    std::future<void> sweep_up = std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_dummy_, czero_);
+    std::future<void> sweep_up =
+        std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_dummy_, time, czero_);
     std::future<void> sweep_down =
-        std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source_dummy_, czero_);
+        std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source_dummy_, time, czero_);
     sweep_up.wait();
     sweep_down.wait();
     cont_up[0] = cont_down[0] = boundary_pair.first->value(time);
@@ -153,8 +154,10 @@ void heat_barakat_clark_solver_method<fp_type, container, allocator>::solve(
     container_t cont_down(solution);
     d_1d::of_function(grid_cfg_, time, heat_source, source_);
     d_1d::of_function(grid_cfg_, next_time, heat_source, source_next_);
-    std::future<void> sweep_up = std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_next_, cone_);
-    std::future<void> sweep_down = std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source_, cone_);
+    std::future<void> sweep_up =
+        std::async(std::launch::async, up_sweeper_, std::ref(cont_up), source_next_, time, cone_);
+    std::future<void> sweep_down =
+        std::async(std::launch::async, down_sweeper_, std::ref(cont_down), source_, time, cone_);
     sweep_up.wait();
     sweep_down.wait();
     cont_up[0] = cont_down[0] = boundary_pair.first->value(time);

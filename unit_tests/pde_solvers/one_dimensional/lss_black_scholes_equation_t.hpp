@@ -1,7 +1,7 @@
 #if !defined(_LSS_BLACK_SCHOLES_EQUATION_T_HPP_)
 #define _LSS_BLACK_SCHOLES_EQUATION_T_HPP_
 
-#include "pde_solvers/one_dimensional/heat_type/lss_1d_general_svc_heat_equation.hpp"
+#include "pde_solvers/one_dimensional/heat_type/lss_1d_general_heat_equation.hpp"
 #include <map>
 
 #define PI 3.14159265359
@@ -30,7 +30,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_cusolver_qr_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -47,7 +47,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -64,9 +64,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -122,7 +122,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_cusolver_qr_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -139,7 +139,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -156,9 +156,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCCUDASolverDevi
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -228,7 +228,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_sorsolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -245,7 +245,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -262,9 +262,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -323,7 +323,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_sorsolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -340,7 +340,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -357,9 +357,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverDevic
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -432,7 +432,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostE
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_sorsolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -449,7 +449,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostE
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -466,9 +466,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostE
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -527,7 +527,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostC
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_sorsolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -544,7 +544,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostC
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -561,9 +561,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCSORSolverHostC
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -636,7 +636,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_dssolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -653,7 +653,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -670,9 +670,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -728,7 +728,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_dssolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -745,7 +745,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -762,9 +762,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCDoubleSweepSol
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -833,7 +833,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -850,7 +850,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -867,9 +867,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -922,7 +922,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -939,7 +939,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -956,9 +956,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -1026,7 +1026,7 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_cusolver_qr_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -1043,7 +1043,7 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -1061,9 +1061,9 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -1116,7 +1116,7 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_bwd_cusolver_qr_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -1133,7 +1133,7 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -1151,9 +1151,9 @@ template <typename T> void testImplFwdBlackScholesEquationDirichletBCCUDASolverD
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -1223,7 +1223,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -1242,7 +1242,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // typedef the constiner_2d:
     typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -1259,9 +1259,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -1321,7 +1321,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_bwd_tlusolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -1341,7 +1341,7 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     typedef container_2d<by_enum::Row, T, std::vector, std::allocator<T>> container_2d_t;
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -1358,9 +1358,9 @@ template <typename T> void testImplBlackScholesEquationDirichletBCThomasLUSolver
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -1438,7 +1438,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCBarakatClark()
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_expl_bwd_bc_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::explicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::explicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -1455,7 +1455,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCBarakatClark()
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -1472,9 +1472,9 @@ template <typename T> void testExplBlackScholesEquationDirichletBCBarakatClark()
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -1527,7 +1527,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCSaulyev()
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_expl_bwd_s_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::explicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::explicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -1544,7 +1544,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCSaulyev()
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -1561,9 +1561,9 @@ template <typename T> void testExplBlackScholesEquationDirichletBCSaulyev()
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };
@@ -1616,7 +1616,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCEuler()
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_expl_bwd_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::explicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::explicit_solvers::general_heat_equation;
     using lss_utility::black_scholes_exact;
     using lss_utility::range;
 
@@ -1633,7 +1633,7 @@ template <typename T> void testExplBlackScholesEquationDirichletBCEuler()
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // set up call option parameters:
     auto const &strike = 10;
     auto const &maturity = 1.0;
@@ -1650,9 +1650,9 @@ template <typename T> void testExplBlackScholesEquationDirichletBCEuler()
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [=](T x) { return 0.5 * sig * sig * x * x; };
-    auto b = [=](T x) { return rate * x; };
-    auto c = [=](T x) { return -rate; };
+    auto a = [=](T t, T x) { return 0.5 * sig * sig * x * x; };
+    auto b = [=](T t, T x) { return rate * x; };
+    auto c = [=](T t, T x) { return -rate; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, c);
     // terminal condition:
     auto terminal_condition = [=](T x) { return std::max<T>(0.0, x - strike); };

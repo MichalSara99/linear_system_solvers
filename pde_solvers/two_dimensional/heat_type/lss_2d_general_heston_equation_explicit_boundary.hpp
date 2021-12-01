@@ -193,7 +193,7 @@ void general_heston_equation_explicit_boundary<fp_type, container, allocator>::s
                                 time, solution_v);
     csolution(0, solution_v);
     auto const &upper_bnd_ptr = std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(vertical_upper_boundary_ptr);
-    auto const &upper_bnd = [=](fp_type s, fp_type t) { return upper_bnd_ptr->value(t, s); };
+    auto const &upper_bnd = [=](fp_type t, fp_type s) { return upper_bnd_ptr->value(t, s); };
     d_1d::of_function(grid_cfg_->grid_1(), time, upper_bnd, solution_v);
     csolution(coefficients_->space_size_y_ - 1, solution_v);
     solution = csolution;
@@ -216,7 +216,7 @@ void general_heston_equation_explicit_boundary<fp_type, container, allocator>::s
     // populating lower horizontal:
     auto const &lower_bnd_ptr =
         std::dynamic_pointer_cast<dirichlet_boundary_2d<fp_type>>(horizonatal_boundary_pair.first);
-    auto const &lower_bnd = [=](fp_type v, fp_type t) { return lower_bnd_ptr->value(t, v); };
+    auto const &lower_bnd = [=](fp_type t, fp_type v) { return lower_bnd_ptr->value(t, v); };
     d_1d::of_function(grid_2, time, lower_bnd, solution_v);
     solution(0, solution_v);
     // populating upper horizontal:
@@ -227,7 +227,7 @@ void general_heston_equation_explicit_boundary<fp_type, container, allocator>::s
     auto const N_x = coefficients_->space_size_x_;
     auto const &upper_bnd_ptr =
         std::dynamic_pointer_cast<neumann_boundary_2d<fp_type>>(horizonatal_boundary_pair.second);
-    auto const &upper_bnd = [=](fp_type v, fp_type t) {
+    auto const &upper_bnd = [=](fp_type t, fp_type v) {
         const std::size_t j = grid_1d<fp_type>::index_of(grid_2, v);
         auto const bnd_val = upper_bnd_ptr->value(t, v);
         auto const h_1 = grid_1d<fp_type>::step(grid_1);

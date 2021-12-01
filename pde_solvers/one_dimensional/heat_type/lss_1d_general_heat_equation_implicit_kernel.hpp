@@ -1,5 +1,5 @@
-#if !defined(_LSS_1D_GENERAL_SVC_HEAT_EQUATION_IMPLICIT_KERNEL_HPP_)
-#define _LSS_1D_GENERAL_SVC_HEAT_EQUATION_IMPLICIT_KERNEL_HPP_
+#if !defined(_LSS_1D_GENERAL_HEAT_EQUATION_IMPLICIT_KERNEL_HPP_)
+#define _LSS_1D_GENERAL_HEAT_EQUATION_IMPLICIT_KERNEL_HPP_
 
 #include <vector>
 
@@ -10,7 +10,7 @@
 #include "discretization/lss_discretization.hpp"
 #include "discretization/lss_grid.hpp"
 #include "discretization/lss_grid_config.hpp"
-#include "implicit_coefficients/lss_1d_general_svc_heat_equation_implicit_coefficients.hpp"
+#include "implicit_coefficients/lss_1d_general_heat_equation_coefficients.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/transformation/lss_heat_data_transform.hpp"
@@ -257,7 +257,7 @@ void heat_time_loop<fp_type, container, allocator>::run_with_stepping(
 
 template <memory_space_enum memory_enum, tridiagonal_method_enum tridiagonal_method, typename fp_type,
           template <typename, typename> typename container = std::vector, typename allocator = std::allocator<fp_type>>
-class general_svc_heat_equation_implicit_kernel
+class general_heat_equation_implicit_kernel
 {
 };
 
@@ -265,8 +265,8 @@ class general_svc_heat_equation_implicit_kernel
 // ============================== DEVICE =============================
 // ===================================================================
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type,
-                                                container, allocator>
+class general_heat_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Device, fp_type, container, allocator> cusolver;
@@ -281,11 +281,11 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              heat_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          heat_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -319,8 +319,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -370,8 +370,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
         }
 
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -393,8 +393,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type,
-                                                container, allocator>
+class general_heat_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver_cuda<fp_type, container, allocator> sorcusolver;
@@ -409,11 +409,11 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              heat_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          heat_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -447,8 +447,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
@@ -495,8 +495,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
@@ -519,8 +519,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Device, tridi
 // ================================ HOST =============================
 // ===================================================================
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type,
-                                                container, allocator>
+class general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Host, fp_type, container, allocator> cusolver;
@@ -535,11 +535,11 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              heat_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          heat_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -573,8 +573,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -621,8 +621,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -642,8 +642,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type,
-                                                container, allocator>
+class general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver<fp_type, container, allocator> sorsolver;
@@ -658,11 +658,11 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              heat_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          heat_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -696,8 +696,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
@@ -744,8 +744,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
@@ -765,8 +765,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver,
-                                                fp_type, container, allocator>
+class general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver,
+                                            fp_type, container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef double_sweep_solver<fp_type, container, allocator> ds_solver;
@@ -781,11 +781,11 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              heat_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          heat_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -819,8 +819,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
         auto const &solver_method_ptr =
@@ -867,8 +867,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
         auto const &solver_method_ptr =
@@ -889,8 +889,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver,
-                                                fp_type, container, allocator>
+class general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef thomas_lu_solver<fp_type, container, allocator> tlu_solver;
@@ -905,11 +905,11 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              heat_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_heat_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          heat_data_transform_1d_ptr<fp_type> const &heat_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          heat_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -943,8 +943,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
         auto const &solver_method_ptr =
@@ -992,8 +992,8 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
             throw std::exception("Unreachable");
         }
         // create a heat coefficient holder:
-        auto const heat_coeff_holder = std::make_shared<general_svc_heat_equation_implicit_coefficients<fp_type>>(
-            heat_data_cfg_, discretization_cfg_, theta);
+        auto const heat_coeff_holder =
+            std::make_shared<general_heat_equation_coefficients<fp_type>>(heat_data_cfg_, discretization_cfg_, theta);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
         auto const &solver_method_ptr =
@@ -1017,4 +1017,4 @@ class general_svc_heat_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_1D_GENERAL_SVC_HEAT_EQUATION_IMPLICIT_KERNEL_HPP_
+#endif ///_LSS_1D_GENERAL_HEAT_EQUATION_IMPLICIT_KERNEL_HPP_

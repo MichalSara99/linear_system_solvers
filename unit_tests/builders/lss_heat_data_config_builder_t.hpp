@@ -16,9 +16,9 @@ template <typename T> void test_heat_data_config_builder_t()
 {
 
     auto const &coeff_data_ptr = heat_coefficient_data_config_1d_builder<T>()
-                                     .a_coefficient([](T x) { return 1.0; })
-                                     .b_coefficient([](T x) { return 0.0; })
-                                     .c_coefficient([](T x) { return 1.0; })
+                                     .a_coefficient([](T t, T x) { return 1.0; })
+                                     .b_coefficient([](T t, T x) { return 0.0; })
+                                     .c_coefficient([](T t, T x) { return 1.0; })
                                      .build();
 
     auto const &init_data_ptr =

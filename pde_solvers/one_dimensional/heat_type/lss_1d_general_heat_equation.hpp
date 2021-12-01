@@ -1,5 +1,5 @@
-#if !defined(_LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_)
-#define _LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_
+#if !defined(_LSS_1D_GENERAL_HEAT_EQUATION_HPP_)
+#define _LSS_1D_GENERAL_HEAT_EQUATION_HPP_
 
 #include <functional>
 #include <map>
@@ -13,8 +13,8 @@
 #include "discretization/lss_grid_config.hpp"
 #include "discretization/lss_grid_config_hints.hpp"
 #include "discretization/lss_grid_transform_config.hpp"
-#include "lss_1d_general_svc_heat_equation_explicit_kernel.hpp"
-#include "lss_1d_general_svc_heat_equation_implicit_kernel.hpp"
+#include "lss_1d_general_heat_equation_explicit_kernel.hpp"
+#include "lss_1d_general_heat_equation_implicit_kernel.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
@@ -42,26 +42,26 @@ namespace implicit_solvers
 
 /*!
 ============================================================================
-Represents general spacial variable coefficient 1D heat equation solver
+Represents general variable coefficient 1D heat equation solver
 
-u_t = a(x)*u_xx + b(x)*u_x + c(x)*u + F(x,t),
+u_t = a(t,x)*u_xx + b(t,x)*u_x + c(t,x)*u + F(t,x),
 x_1 < x < x_2
 t_1 < t < t_2
 
 with initial condition:
 
-u(x,t_1) = f(x)
+u(t_1,x) = f(x)
 
 or terminal condition:
 
-u(x,t_2) = f(x)
+u(t_2,x) = f(x)
 
 
 // ============================================================================
 */
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class general_svc_heat_equation
+class general_heat_equation
 {
 
   private:
@@ -72,7 +72,7 @@ class general_svc_heat_equation
     heat_implicit_solver_config_ptr solver_cfg_;
     std::map<std::string, fp_type> solver_config_details_;
 
-    explicit general_svc_heat_equation() = delete;
+    explicit general_heat_equation() = delete;
 
     void initialize(heat_data_config_1d_ptr<fp_type> const &heat_data_cfg,
                     grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
@@ -100,7 +100,7 @@ class general_svc_heat_equation
     }
 
   public:
-    explicit general_svc_heat_equation(
+    explicit general_heat_equation(
         heat_data_config_1d_ptr<fp_type> const &heat_data_config,
         pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
         boundary_1d_pair<fp_type> const &boundary_pair, grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
@@ -113,14 +113,14 @@ class general_svc_heat_equation
         initialize(heat_data_config, grid_config_hints, boundary_pair);
     }
 
-    ~general_svc_heat_equation()
+    ~general_heat_equation()
     {
     }
 
-    general_svc_heat_equation(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation(general_svc_heat_equation &&) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation &&) = delete;
+    general_heat_equation(general_heat_equation const &) = delete;
+    general_heat_equation(general_heat_equation &&) = delete;
+    general_heat_equation &operator=(general_heat_equation const &) = delete;
+    general_heat_equation &operator=(general_heat_equation &&) = delete;
 
     /**
      * Get the final solution of the PDE
@@ -138,7 +138,7 @@ class general_svc_heat_equation
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
+void general_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
@@ -165,7 +165,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     {
         if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_heat_equation_implicit_kernel<
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
@@ -175,8 +175,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
-                memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
+            typedef general_heat_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver,
+                                                          fp_type, container, allocator>
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
@@ -194,8 +194,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     {
         if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
-                memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
+            typedef general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver,
+                                                          fp_type, container, allocator>
                 host_cu_solver;
 
             host_cu_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
@@ -204,8 +204,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
-                memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
+            typedef general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver,
+                                                          fp_type, container, allocator>
                 host_sor_solver;
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
@@ -217,7 +217,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
 
@@ -227,7 +227,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
 
@@ -247,7 +247,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(
+void general_heat_equation<fp_type, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -280,7 +280,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
     {
         if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_heat_equation_implicit_kernel<
                 memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
                 dev_cu_solver;
 
@@ -289,8 +289,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
-                memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
+            typedef general_heat_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver,
+                                                          fp_type, container, allocator>
                 dev_sor_solver;
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
             fp_type omega_value = solver_config_details_["sor_omega"];
@@ -307,8 +307,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
     {
         if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::CUDASolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
-                memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type, container, allocator>
+            typedef general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver,
+                                                          fp_type, container, allocator>
                 host_cu_solver;
 
             host_cu_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
@@ -316,8 +316,8 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::SORSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
-                memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type, container, allocator>
+            typedef general_heat_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver,
+                                                          fp_type, container, allocator>
                 host_sor_solver;
 
             LSS_ASSERT(!solver_config_details_.empty(), "solver_config_details map must not be empty");
@@ -327,7 +327,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::DoubleSweepSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver, fp_type, container, allocator>
                 host_dss_solver;
             host_dss_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
@@ -335,7 +335,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
         }
         else if (solver_cfg_->tridiagonal_method() == tridiagonal_method_enum::ThomasLUSolver)
         {
-            typedef general_svc_heat_equation_implicit_kernel<
+            typedef general_heat_equation_implicit_kernel<
                 memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type, container, allocator>
                 host_lus_solver;
             host_lus_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
@@ -359,7 +359,7 @@ namespace explicit_solvers
 
 template <typename fp_type, template <typename, typename> typename container = std::vector,
           typename allocator = std::allocator<fp_type>>
-class general_svc_heat_equation
+class general_heat_equation
 {
   private:
     heat_data_transform_1d_ptr<fp_type> heat_data_trans_cfg_;
@@ -368,7 +368,7 @@ class general_svc_heat_equation
     grid_transform_config_1d_ptr<fp_type> grid_trans_cfg_; // this may be removed as it is not used later
     heat_explicit_solver_config_ptr solver_cfg_;
 
-    explicit general_svc_heat_equation() = delete;
+    explicit general_heat_equation() = delete;
 
     void initialize(heat_data_config_1d_ptr<fp_type> const &heat_data_cfg,
                     grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
@@ -391,25 +391,25 @@ class general_svc_heat_equation
     }
 
   public:
-    explicit general_svc_heat_equation(heat_data_config_1d_ptr<fp_type> const &heat_data_config,
-                                       pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                       boundary_1d_pair<fp_type> const &boundary_pair,
-                                       grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
-                                       heat_explicit_solver_config_ptr const &solver_config =
-                                           default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
+    explicit general_heat_equation(heat_data_config_1d_ptr<fp_type> const &heat_data_config,
+                                   pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                   boundary_1d_pair<fp_type> const &boundary_pair,
+                                   grid_config_hints_1d_ptr<fp_type> const &grid_config_hints,
+                                   heat_explicit_solver_config_ptr const &solver_config =
+                                       default_heat_solver_configs::dev_expl_fwd_euler_solver_config_ptr)
         : discretization_cfg_{discretization_config}, solver_cfg_{solver_config}
     {
         initialize(heat_data_config, grid_config_hints, boundary_pair);
     }
 
-    ~general_svc_heat_equation()
+    ~general_heat_equation()
     {
     }
 
-    general_svc_heat_equation(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation(general_svc_heat_equation &&) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation const &) = delete;
-    general_svc_heat_equation &operator=(general_svc_heat_equation &&) = delete;
+    general_heat_equation(general_heat_equation const &) = delete;
+    general_heat_equation(general_heat_equation &&) = delete;
+    general_heat_equation &operator=(general_heat_equation const &) = delete;
+    general_heat_equation &operator=(general_heat_equation &&) = delete;
 
     /**
      * Get the final solution of the PDE
@@ -427,7 +427,7 @@ class general_svc_heat_equation
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
+void general_heat_equation<fp_type, container, allocator>::solve(container<fp_type, allocator> &solution)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container<fp_type, allocator> container_t;
@@ -451,7 +451,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
+        typedef general_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
         device_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source);
@@ -459,7 +459,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
+        typedef general_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
         host_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source);
@@ -472,7 +472,7 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(container<f
 }
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-void general_svc_heat_equation<fp_type, container, allocator>::solve(
+void general_heat_equation<fp_type, container, allocator>::solve(
     container_2d<by_enum::Row, fp_type, container, allocator> &solutions)
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -501,14 +501,14 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
 
     if (solver_cfg_->memory_space() == memory_space_enum::Device)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
+        typedef general_heat_equation_explicit_kernel<memory_space_enum::Device, fp_type, container, allocator>
             device_solver;
         device_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source, solutions);
     }
     else if (solver_cfg_->memory_space() == memory_space_enum::Host)
     {
-        typedef general_svc_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
+        typedef general_heat_equation_explicit_kernel<memory_space_enum::Host, fp_type, container, allocator>
             host_solver;
         host_solver solver(boundary_pair, heat_data_trans_cfg_, discretization_cfg_, solver_cfg_, grid_cfg);
         solver(prev_sol, is_heat_source_set, heat_source, solutions);
@@ -525,4 +525,4 @@ void general_svc_heat_equation<fp_type, container, allocator>::solve(
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_1D_GENERAL_SVC_HEAT_EQUATION_HPP_
+#endif ///_LSS_1D_GENERAL_HEAT_EQUATION_HPP_

@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 
-#include "unit_tests/builders/lss_1d_general_svc_heat_equation_builder_t.hpp"
+#include "unit_tests/builders/lss_1d_general_heat_equation_builder_t.hpp"
 #include "unit_tests/builders/lss_1d_general_svc_wave_equation_builder_t.hpp"
 #include "unit_tests/builders/lss_dirichlet_boundary_builder_t.hpp"
 #include "unit_tests/builders/lss_heat_data_config_builder_t.hpp"
@@ -152,7 +152,7 @@ int main(int argc, char const *argv[])
     // testImplPureHeatEquationSourceDirichletBCCUDASolverDeviceQR();               // -- tested
     // testImplPureHeatEquationSourceDirichletBCSORSolverDeviceEuler();             // -- tested
     // neumann bc:
-    //testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();                        // -- tested
+    // testImplPureHeatEquationNeumannBCCUDASolverDeviceQR();                        // -- tested
     // testImplPureHeatEquationNeumannBCThomasLUSolver();                           // -- tested
     // testImplPureHeatEquationNeumannBCDoubleSweepSolver();                        // -- tested
 

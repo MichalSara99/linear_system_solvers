@@ -28,24 +28,24 @@ template <dimension_enum dimension, typename fp_type> struct heat_coefficient_da
 template <typename fp_type> struct heat_coefficient_data_config_builder<dimension_enum::One, fp_type>
 {
   private:
-    std::function<fp_type(fp_type)> a_coefficient_;
-    std::function<fp_type(fp_type)> b_coefficient_;
-    std::function<fp_type(fp_type)> c_coefficient_;
+    std::function<fp_type(fp_type, fp_type)> a_coefficient_;
+    std::function<fp_type(fp_type, fp_type)> b_coefficient_;
+    std::function<fp_type(fp_type, fp_type)> c_coefficient_;
 
   public:
-    heat_coefficient_data_config_builder &a_coefficient(std::function<fp_type(fp_type)> const &a_coefficient)
+    heat_coefficient_data_config_builder &a_coefficient(std::function<fp_type(fp_type, fp_type)> const &a_coefficient)
     {
         a_coefficient_ = a_coefficient;
         return *this;
     }
 
-    heat_coefficient_data_config_builder &b_coefficient(std::function<fp_type(fp_type)> const &b_coefficient)
+    heat_coefficient_data_config_builder &b_coefficient(std::function<fp_type(fp_type, fp_type)> const &b_coefficient)
     {
         b_coefficient_ = b_coefficient;
         return *this;
     }
 
-    heat_coefficient_data_config_builder &c_coefficient(std::function<fp_type(fp_type)> const &c_coefficient)
+    heat_coefficient_data_config_builder &c_coefficient(std::function<fp_type(fp_type, fp_type)> const &c_coefficient)
     {
         c_coefficient_ = c_coefficient;
         return *this;

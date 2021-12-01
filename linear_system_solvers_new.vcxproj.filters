@@ -288,15 +288,6 @@
     <ClInclude Include="unit_tests\common\lss_print_t.hpp">
       <Filter>unit_tests\common</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_explicit_kernel.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_implicit_kernel.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
-    </ClInclude>
     <ClInclude Include="boundaries\lss_boundary.hpp">
       <Filter>boundaries</Filter>
     </ClInclude>
@@ -366,9 +357,6 @@
     <ClInclude Include="pde_solvers\one_dimensional\wave_type\explicit_schemes\lss_wave_euler_svc_scheme.hpp">
       <Filter>pde_solvers\one_dimensional\wave_type\explicit_schemes</Filter>
     </ClInclude>
-    <ClInclude Include="builders\lss_1d_general_svc_heat_equation_builder.hpp">
-      <Filter>builders</Filter>
-    </ClInclude>
     <ClInclude Include="builders\lss_1d_general_svc_wave_equation_builder.hpp">
       <Filter>builders</Filter>
     </ClInclude>
@@ -420,26 +408,11 @@
     <ClInclude Include="builders\lss_robin_boundary_builder.hpp">
       <Filter>builders</Filter>
     </ClInclude>
-    <ClInclude Include="unit_tests\builders\lss_1d_general_svc_heat_equation_builder_t.hpp">
-      <Filter>unit_tests\builders</Filter>
-    </ClInclude>
     <ClInclude Include="unit_tests\builders\lss_1d_general_svc_wave_equation_builder_t.hpp">
       <Filter>unit_tests\builders</Filter>
     </ClInclude>
     <ClInclude Include="pde_solvers\one_dimensional\wave_type\explicit_schemes\lss_wave_euler_svc_cuda_scheme.hpp">
       <Filter>pde_solvers\one_dimensional\wave_type\explicit_schemes</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_barakat_clark_svc_scheme.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_svc_cuda_scheme.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_svc_scheme.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_saulyev_svc_scheme.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
     </ClInclude>
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_douglas_rachford_method.hpp">
       <Filter>pde_solvers\two_dimensional\heat_type\splitting_method</Filter>
@@ -483,14 +456,8 @@
     <ClInclude Include="discretization\lss_grid_config_hints.hpp">
       <Filter>discretization</Filter>
     </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\implicit_coefficients\lss_1d_general_svc_heat_equation_implicit_coefficients.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\implicit_coefficients</Filter>
-    </ClInclude>
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_implicit_solver_method.hpp">
       <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_euler_svc_coefficients.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
     </ClInclude>
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_euler_cuda_solver_method.hpp">
       <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
@@ -500,12 +467,6 @@
     </ClInclude>
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_barakat_clark_solver_method.hpp">
       <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_barakat_clark_svc_coefficients.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
-    </ClInclude>
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_saulyev_svc_coefficients.hpp">
-      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
     </ClInclude>
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_saulyev_solver_method.hpp">
       <Filter>pde_solvers\one_dimensional\heat_type\solver_method</Filter>
@@ -588,6 +549,45 @@
     <ClInclude Include="unit_tests\builders\lss_2d_general_heston_equation_builder_t.hpp">
       <Filter>unit_tests\builders</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_heat_equation.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_heat_equation_explicit_kernel.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_heat_equation_implicit_kernel.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\implicit_coefficients\lss_1d_general_heat_equation_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\implicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_saulyev_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_saulyev_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_barakat_clark_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_euler_coefficients.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_barakat_clark_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_cuda_scheme.hpp">
+      <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="builders\lss_1d_general_heat_equation_builder.hpp">
+      <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_tests\builders\lss_1d_general_heat_equation_builder_t.hpp">
+      <Filter>unit_tests\builders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
@@ -597,7 +597,7 @@
     <CudaCompile Include="pde_solvers\one_dimensional\wave_type\explicit_schemes\lss_wave_euler_svc_cuda_scheme.cu">
       <Filter>pde_solvers\one_dimensional\wave_type\explicit_schemes</Filter>
     </CudaCompile>
-    <CudaCompile Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_svc_cuda_scheme.cu">
+    <CudaCompile Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_cuda_scheme.cu">
       <Filter>pde_solvers\one_dimensional\heat_type\explicit_schemes</Filter>
     </CudaCompile>
   </ItemGroup>

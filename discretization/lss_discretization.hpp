@@ -29,16 +29,43 @@ template <typename fp_type, template <typename, typename> typename container, ty
 struct discretization<dimension_enum::One, fp_type, container, allocator>
 {
   public:
+    /**
+     * Discretize 1D space
+     *
+     * \param grid_config - 1D grid config object
+     * \param container_x - 1D container for output
+     */
     static void of_space(grid_config_1d_ptr<fp_type> const &grid_config, container<fp_type, allocator> &container_x);
 
+    /**
+     * Discretize function F(x) where x = first dim variable
+     *
+     * \param grid_config - 1D grid config object
+     * \param fun - function F(x)
+     * \param container_fun - 1D container for output
+     */
     static void of_function(grid_config_1d_ptr<fp_type> const &grid_config, std::function<fp_type(fp_type)> const &fun,
                             container<fp_type, allocator> &container_fun);
 
+    /**
+     * Discretize function F(t,x) where t = time, x = first dim variable
+     *
+     * \param grid_config - 1D grid config object
+     * \param time - time valraible t
+     * \param fun - function F(t,x)
+     * \param container_fun_t = 1D container for output
+     */
     static void of_function(grid_config_1d_ptr<fp_type> const &grid_config, fp_type const &time,
                             std::function<fp_type(fp_type, fp_type)> const &fun,
                             container<fp_type, allocator> &container_fun_t);
 };
 
+/**
+ * Discretize 1D space
+ *
+ * \param grid_config - 1D grid config object
+ * \param container_x - 1D container for output
+ */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void discretization<dimension_enum::One, fp_type, container, allocator>::of_space(
     grid_config_1d_ptr<fp_type> const &grid_config, container<fp_type, allocator> &container_x)
@@ -50,6 +77,13 @@ void discretization<dimension_enum::One, fp_type, container, allocator>::of_spac
     }
 }
 
+/**
+ * Discretize function F(x) where x = first dim variable
+ *
+ * \param grid_config - 1D grid config object
+ * \param fun - function F(x)
+ * \param container_fun - 1D container for output
+ */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void discretization<dimension_enum::One, fp_type, container, allocator>::of_function(
     grid_config_1d_ptr<fp_type> const &grid_config, std::function<fp_type(fp_type)> const &fun,
@@ -62,6 +96,14 @@ void discretization<dimension_enum::One, fp_type, container, allocator>::of_func
     }
 }
 
+/**
+ * Discretize function F(t,x) where t = time, x = first dim variable
+ *
+ * \param grid_config - 1D grid config object
+ * \param time - time valraible t
+ * \param fun - function F(t,x)
+ * \param container_fun_t - 1D container for output
+ */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void discretization<dimension_enum::One, fp_type, container, allocator>::of_function(
     grid_config_1d_ptr<fp_type> const &grid_config, fp_type const &time,
@@ -70,7 +112,7 @@ void discretization<dimension_enum::One, fp_type, container, allocator>::of_func
     LSS_ASSERT(container_fun_t.size() > 0, "The input container must be initialized.");
     for (std::size_t t = 0; t < container_fun_t.size(); ++t)
     {
-        container_fun_t[t] = fun(grid_1d<fp_type>::value(grid_config, t), time);
+        container_fun_t[t] = fun(time, grid_1d<fp_type>::value(grid_config, t));
     }
 }
 
@@ -84,15 +126,40 @@ template <typename fp_type, template <typename, typename> typename container, ty
 struct discretization<dimension_enum::Two, fp_type, container, allocator>
 {
   public:
+    /**
+     * Discretize function F(x,y) where x=first dim variable,
+     *  y = second dim variable
+     *
+     * \param grid_config - 2D grid config object
+     * \param fun - function F(x,y)
+     * \param container_fun - 2D container for output
+     */
     static void of_function(grid_config_2d_ptr<fp_type> const &grid_config,
                             std::function<fp_type(fp_type, fp_type)> const &fun,
                             container_2d<by_enum::Row, fp_type, container, allocator> &container_fun);
 
+    /**
+     * Discretize function F(t,x,y) where t=time, x=first dim variable,
+     *  y = second dim variable
+     *
+     * \param grid_config - 2D grid config object
+     * \param time  - time valraible t
+     * \param fun - function F(t,x,y)
+     * \param container_fun_t - 2D container for output
+     */
     static void of_function(grid_config_2d_ptr<fp_type> const &grid_config, fp_type const &time,
                             std::function<fp_type(fp_type, fp_type, fp_type)> const &fun,
                             container_2d<by_enum::Row, fp_type, container, allocator> &container_fun_t);
 };
 
+/**
+ * Discretize function F(x,y) where x=first dim variable,
+ *  y = second dim variable
+ *
+ * \param grid_config - 2D grid config object
+ * \param fun - function F(x,y)
+ * \param container_fun - 2D container for output
+ */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void discretization<dimension_enum::Two, fp_type, container, allocator>::of_function(
     grid_config_2d_ptr<fp_type> const &grid_config, std::function<fp_type(fp_type, fp_type)> const &fun,
@@ -111,6 +178,15 @@ void discretization<dimension_enum::Two, fp_type, container, allocator>::of_func
     }
 }
 
+/**
+ * Discretize function F(t,x,y) where t=time, x=first dim variable,
+ *  y = second dim variable
+ *
+ * \param grid_config - 2D grid config object
+ * \param time  - time valraible t
+ * \param fun - function F(t,x,y)
+ * \param container_fun_t - 2D container for output
+ */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
 void discretization<dimension_enum::Two, fp_type, container, allocator>::of_function(
     grid_config_2d_ptr<fp_type> const &grid_config, fp_type const &time,
@@ -124,7 +200,7 @@ void discretization<dimension_enum::Two, fp_type, container, allocator>::of_func
     {
         for (std::size_t c = 0; c < container_fun_t.columns(); ++c)
         {
-            value = fun(grid_2d<fp_type>::value_1(grid_config, r), grid_2d<fp_type>::value_2(grid_config, c), time);
+            value = fun(time, grid_2d<fp_type>::value_1(grid_config, r), grid_2d<fp_type>::value_2(grid_config, c));
             container_fun_t(r, c, value);
         }
     }

@@ -1,7 +1,7 @@
 #if !defined(_LSS_ADVECTION_EQUATION_T_HPP_)
 #define _LSS_ADVECTION_EQUATION_T_HPP_
 
-#include "pde_solvers/one_dimensional/heat_type/lss_1d_general_svc_heat_equation.hpp"
+#include "pde_solvers/one_dimensional/heat_type/lss_1d_general_heat_equation.hpp"
 #include <map>
 
 #define PI 3.14159265359
@@ -31,7 +31,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_fwd_cusolver_qr_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -47,7 +47,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
     std::cout << "============================================================\n";
 
     // typedef the general_heat_equation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -60,9 +60,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRE
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -132,7 +132,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_fwd_cusolver_qr_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -148,7 +148,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
     std::cout << "============================================================\n";
 
     // typedef the general_heat_equation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -161,9 +161,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverDeviceQRC
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -247,7 +247,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_fwd_sorsolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -263,7 +263,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
     std::cout << "============================================================\n";
 
     // typedef the general_heat_equation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -276,9 +276,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceEule
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -351,7 +351,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::dev_fwd_sorsolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -367,7 +367,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
     std::cout << "============================================================\n";
 
     // typedef the general_heat_equation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -380,9 +380,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverDeviceCran
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -469,7 +469,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_sorsolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -485,7 +485,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -498,9 +498,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostEuler(
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -573,7 +573,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_sorsolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -589,7 +589,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -602,9 +602,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCSORSolverHostCrankN
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -691,7 +691,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_cusolver_qr_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -706,7 +706,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
     std::cout << " U(x,0) = 1, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
     // number of space subdivisions:
     std::size_t const Sd = 100;
     // number of time subdivisions:
@@ -718,9 +718,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQREul
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -790,7 +790,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_cusolver_qr_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -806,7 +806,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -819,9 +819,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCCUDASolverHostQRCra
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -905,7 +905,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_dssolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -921,7 +921,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -934,9 +934,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverEu
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -1006,7 +1006,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_dssolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -1022,7 +1022,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -1035,9 +1035,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCDoubleSweepSolverCr
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -1121,7 +1121,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_tlusolver_euler_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -1137,7 +1137,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -1150,9 +1150,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverEuler
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };
@@ -1221,7 +1221,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
     using lss_pde_solvers::heat_initial_data_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d;
     using lss_pde_solvers::default_heat_solver_configs::host_fwd_tlusolver_cn_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_heat_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_heat_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -1237,7 +1237,7 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
     std::cout << "============================================================\n";
 
     // typedef the Implicit1DHeatEquation
-    typedef general_svc_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
+    typedef general_heat_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -1250,9 +1250,9 @@ template <typename T> void testImplAdvDiffEquationDirichletBCThomasLUSolverCrank
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return -1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return -1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const heat_coeffs_data_ptr = std::make_shared<heat_coefficient_data_config_1d<T>>(a, b, other);
     // initial condition:
     auto initial_condition = [](T x) { return 1.0; };

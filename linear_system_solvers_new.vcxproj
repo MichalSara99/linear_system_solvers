@@ -19,7 +19,7 @@
     <ClInclude Include="boundaries\lss_dirichlet_boundary.hpp" />
     <ClInclude Include="boundaries\lss_neumann_boundary.hpp" />
     <ClInclude Include="boundaries\lss_robin_boundary.hpp" />
-    <ClInclude Include="builders\lss_1d_general_svc_heat_equation_builder.hpp" />
+    <ClInclude Include="builders\lss_1d_general_heat_equation_builder.hpp" />
     <ClInclude Include="builders\lss_1d_general_svc_wave_equation_builder.hpp" />
     <ClInclude Include="builders\lss_2d_general_heston_equation_builder.hpp" />
     <ClInclude Include="builders\lss_dirichlet_boundary_builder.hpp" />
@@ -67,17 +67,17 @@
     <ClInclude Include="pde_solvers\lss_splitting_method_config.hpp" />
     <ClInclude Include="pde_solvers\lss_wave_data_config.hpp" />
     <ClInclude Include="pde_solvers\lss_wave_solver_config.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_barakat_clark_svc_coefficients.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_euler_svc_coefficients.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_saulyev_svc_coefficients.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_barakat_clark_svc_scheme.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_svc_cuda_scheme.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_svc_scheme.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_saulyev_svc_scheme.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\implicit_coefficients\lss_1d_general_svc_heat_equation_implicit_coefficients.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_explicit_kernel.hpp" />
-    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_svc_heat_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_barakat_clark_coefficients.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_euler_coefficients.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_coefficients\lss_heat_saulyev_coefficients.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_barakat_clark_scheme.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_cuda_scheme.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_scheme.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_saulyev_scheme.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\implicit_coefficients\lss_1d_general_heat_equation_coefficients.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_heat_equation.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_heat_equation_explicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\one_dimensional\heat_type\lss_1d_general_heat_equation_implicit_kernel.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_barakat_clark_solver_method.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_euler_cuda_solver_method.hpp" />
     <ClInclude Include="pde_solvers\one_dimensional\heat_type\solver_method\lss_heat_euler_solver_method.hpp" />
@@ -124,7 +124,7 @@
     <ClInclude Include="sparse_solvers\tridiagonal\thomas_lu_solver\lss_thomas_lu_boundary.hpp" />
     <ClInclude Include="sparse_solvers\tridiagonal\thomas_lu_solver\lss_thomas_lu_solver.hpp" />
     <ClInclude Include="transformation\lss_boundary_transform.hpp" />
-    <ClInclude Include="unit_tests\builders\lss_1d_general_svc_heat_equation_builder_t.hpp" />
+    <ClInclude Include="unit_tests\builders\lss_1d_general_heat_equation_builder_t.hpp" />
     <ClInclude Include="unit_tests\builders\lss_1d_general_svc_wave_equation_builder_t.hpp" />
     <ClInclude Include="unit_tests\builders\lss_2d_general_heston_equation_builder_t.hpp" />
     <ClInclude Include="unit_tests\builders\lss_dirichlet_boundary_builder_t.hpp" />
@@ -160,7 +160,7 @@
     <CudaCompile Include="main.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug unit_tests|x64'">true</ExcludedFromBuild>
     </CudaCompile>
-    <CudaCompile Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_svc_cuda_scheme.cu" />
+    <CudaCompile Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_cuda_scheme.cu" />
     <CudaCompile Include="pde_solvers\one_dimensional\wave_type\explicit_schemes\lss_wave_euler_svc_cuda_scheme.cu" />
     <CudaCompile Include="sparse_solvers\general\core_sor_solver_cuda\lss_core_sor_solver_cuda.cu" />
   </ItemGroup>

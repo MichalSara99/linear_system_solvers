@@ -17,7 +17,7 @@
 #include "discretization/lss_grid_config.hpp"
 #include "pde_solvers/lss_heat_data_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
-#include "pde_solvers/one_dimensional/heat_type/explicit_coefficients/lss_heat_euler_svc_coefficients.hpp"
+#include "pde_solvers/one_dimensional/heat_type/explicit_coefficients/lss_heat_euler_coefficients.hpp"
 
 namespace lss_pde_solvers
 {
@@ -87,9 +87,9 @@ __global__ void heat_core_kernel(fp_type const *a_coeff, fp_type const *b_coeff,
 }
 
 /**
- * heat_euler_svc_cuda_kernel object
+ * heat_euler_cuda_kernel object
  */
-template <typename fp_type> class heat_euler_svc_cuda_kernel
+template <typename fp_type> class heat_euler_cuda_kernel
 {
     typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
 
@@ -98,57 +98,68 @@ template <typename fp_type> class heat_euler_svc_cuda_kernel
     thrust::device_vector<fp_type> d_a_;
     thrust::device_vector<fp_type> d_b_;
     thrust::device_vector<fp_type> d_d_;
+    thrust::host_vector<fp_type> h_a_;
+    thrust::host_vector<fp_type> h_b_;
+    thrust::host_vector<fp_type> h_d_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
+    // coefficients:
+    std::function<fp_type(fp_type, fp_type)> a_;
+    std::function<fp_type(fp_type, fp_type)> b_;
+    std::function<fp_type(fp_type, fp_type)> d_;
+    heat_euler_coefficients_ptr<fp_type> coefficients_;
 
-    void initialize(heat_euler_svc_coefficients_ptr<fp_type> const &coefficients)
+    void initialize(heat_euler_coefficients_ptr<fp_type> const &coefficients)
     {
-        k_ = coefficients->k_;
         const std::size_t space_size = coefficients->space_size_;
-        auto const &a = coefficients->A_;
-        auto const &b = coefficients->B_;
-        auto const &d = coefficients->D_;
-        thrust::host_vector<fp_type> h_a(space_size);
-        thrust::host_vector<fp_type> h_b(space_size);
-        thrust::host_vector<fp_type> h_d(space_size);
-        // discretize on host
-        d_1d::of_function(grid_cfg_, a, h_a);
-        d_1d::of_function(grid_cfg_, b, h_b);
-        d_1d::of_function(grid_cfg_, d, h_d);
-        // copy to device
+        k_ = coefficients->k_;
+        a_ = coefficients->A_;
+        b_ = coefficients->B_;
+        d_ = coefficients->D_;
+        h_a_.resize(space_size);
+        h_b_.resize(space_size);
+        h_d_.resize(space_size);
         d_a_.resize(space_size);
         d_b_.resize(space_size);
         d_d_.resize(space_size);
-        thrust::copy(h_a.begin(), h_a.end(), d_a_.begin());
-        thrust::copy(h_b.begin(), h_b.end(), d_b_.begin());
-        thrust::copy(h_d.begin(), h_d.end(), d_d_.begin());
+    }
+
+    void discretize_coefficients(fp_type time)
+    {
+        // discretize on host
+        d_1d::of_function(grid_cfg_, time, a_, h_a_);
+        d_1d::of_function(grid_cfg_, time, b_, h_b_);
+        d_1d::of_function(grid_cfg_, time, d_, h_d_);
+        // copy to device
+        thrust::copy(h_a_.begin(), h_a_.end(), d_a_.begin());
+        thrust::copy(h_b_.begin(), h_b_.end(), d_b_.begin());
+        thrust::copy(h_d_.begin(), h_d_.end(), d_d_.begin());
     }
 
   public:
-    explicit heat_euler_svc_cuda_kernel(heat_euler_svc_coefficients_ptr<fp_type> const &coefficients,
-                                        grid_config_1d_ptr<fp_type> const &grid_config)
-        : grid_cfg_{grid_config}
+    explicit heat_euler_cuda_kernel(heat_euler_coefficients_ptr<fp_type> const &coefficients,
+                                    grid_config_1d_ptr<fp_type> const &grid_config)
+        : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
         initialize(coefficients);
     }
-    ~heat_euler_svc_cuda_kernel()
+    ~heat_euler_cuda_kernel()
     {
     }
-    void launch(thrust::device_vector<fp_type> const &input, thrust::device_vector<fp_type> &solution);
+    void launch(fp_type time, thrust::device_vector<fp_type> const &input, thrust::device_vector<fp_type> &solution);
 
-    void launch(thrust::device_vector<fp_type> const &input, thrust::device_vector<fp_type> const &source,
+    void launch(fp_type time, thrust::device_vector<fp_type> const &input, thrust::device_vector<fp_type> const &source,
                 thrust::device_vector<fp_type> &solution);
 };
 
-template <typename fp_type> using heat_euler_svc_cuda_kernel_ptr = sptr_t<heat_euler_svc_cuda_kernel<fp_type>>;
+template <typename fp_type> using heat_euler_cuda_kernel_ptr = sptr_t<heat_euler_cuda_kernel<fp_type>>;
 
 /**
- * explicit_svc_cuda_scheme object
+ * explicit_cuda_scheme object
  */
-template <typename fp_type> class explicit_heat_svc_cuda_scheme
+template <typename fp_type> class explicit_cuda_scheme
 {
   public:
-    static void rhs(heat_euler_svc_coefficients_ptr<fp_type> const &cfs,
-                    heat_euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
+    static void rhs(heat_euler_coefficients_ptr<fp_type> const &cfs, heat_euler_cuda_kernel_ptr<fp_type> const &kernel,
                     grid_config_1d_ptr<fp_type> const &grid_config, thrust::host_vector<fp_type> const &input,
                     boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
                     thrust::host_vector<fp_type> &solution)
@@ -170,13 +181,14 @@ template <typename fp_type> class explicit_heat_svc_cuda_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * a(x) + b(x) * input[0] + (a(x) + d(x)) * input[1];
+            solution[0] = beta * a(time, x) + b(time, x) * input[0] + (a(time, x) + d(time, x)) * input[1];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] = (b(x) + alpha * a(x)) * input[0] + (a(x) + d(x)) * input[1] + beta * a(x);
+            solution[0] =
+                (b(time, x) + alpha * a(time, x)) * input[0] + (a(time, x) + d(time, x)) * input[1] + beta * a(time, x);
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -188,23 +200,24 @@ template <typename fp_type> class explicit_heat_svc_cuda_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (a(x) + d(x)) * input[N - 1] + b(x) * input[N] - delta * d(x);
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + b(time, x) * input[N] - delta * d(time, x);
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (a(x) + d(x)) * input[N - 1] + (b(x) - gamma * d(x)) * input[N] - delta * d(x);
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + (b(time, x) - gamma * d(time, x)) * input[N] -
+                          delta * d(time, x);
         }
         // light-weight object with cuda kernel computing the solution:
         thrust::device_vector<fp_type> d_input(input);
         thrust::device_vector<fp_type> d_solution(solution);
-        kernel->launch(d_input, d_solution);
+        kernel->launch(time, d_input, d_solution);
         thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
     }
 
-    static void rhs_source(heat_euler_svc_coefficients_ptr<fp_type> const &cfs,
-                           heat_euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
+    static void rhs_source(heat_euler_coefficients_ptr<fp_type> const &cfs,
+                           heat_euler_cuda_kernel_ptr<fp_type> const &kernel,
                            grid_config_1d_ptr<fp_type> const &grid_config, thrust::host_vector<fp_type> const &input,
                            thrust::host_vector<fp_type> const &inhom_input,
                            boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
@@ -225,14 +238,15 @@ template <typename fp_type> class explicit_heat_svc_cuda_scheme
         if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * a(x) + b(x) * input[0] + (a(x) + d(x)) * input[1] + k * inhom_input[0];
+            solution[0] =
+                beta * a(time, x) + b(time, x) * input[0] + (a(time, x) + d(time, x)) * input[1] + k * inhom_input[0];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] =
-                (b(x) + alpha * a(x)) * input[0] + (a(x) + d(x)) * input[1] + beta * a(x) + k * inhom_input[0];
+            solution[0] = (b(time, x) + alpha * a(time, x)) * input[0] + (a(time, x) + d(time, x)) * input[1] +
+                          beta * a(time, x) + k * inhom_input[0];
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -240,20 +254,21 @@ template <typename fp_type> class explicit_heat_svc_cuda_scheme
         if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (a(x) + d(x)) * input[N - 1] + b(x) * input[N] - delta * d(x) + k * inhom_input[N];
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + b(time, x) * input[N] - delta * d(time, x) +
+                          k * inhom_input[N];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] =
-                (a(x) + d(x)) * input[N - 1] + (b(x) - gamma * d(x)) * input[N] - delta * d(x) + k * inhom_input[N];
+            solution[N] = (a(time, x) + d(time, x)) * input[N - 1] + (b(time, x) - gamma * d(time, x)) * input[N] -
+                          delta * d(time, x) + k * inhom_input[N];
         }
         // light-weight object with cuda kernel computing the solution:
         thrust::device_vector<fp_type> d_input(input);
         thrust::device_vector<fp_type> d_inhom_input(inhom_input);
         thrust::device_vector<fp_type> d_solution(solution);
-        kernel->launch(d_input, d_inhom_input, d_solution);
+        kernel->launch(time, d_input, d_inhom_input, d_solution);
         thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
     }
 };
@@ -263,12 +278,15 @@ heat_euler_cuda_solver_method object
 */
 template <typename fp_type> class heat_euler_cuda_solver_method
 {
+    typedef explicit_cuda_scheme<fp_type> heat_scheme;
+    typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
+
   private:
     // scheme coefficients:
-    heat_euler_svc_coefficients_ptr<fp_type> coefficients_;
+    heat_euler_coefficients_ptr<fp_type> coefficients_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
     // cuda kernel:
-    heat_euler_svc_cuda_kernel_ptr<fp_type> kernel_;
+    heat_euler_cuda_kernel_ptr<fp_type> kernel_;
     // containers:
     thrust::host_vector<fp_type> source_;
 
@@ -276,7 +294,7 @@ template <typename fp_type> class heat_euler_cuda_solver_method
 
     void initialize(bool is_heat_source_set)
     {
-        kernel_ = std::make_shared<heat_euler_svc_cuda_kernel<fp_type>>(coefficients_, grid_cfg_);
+        kernel_ = std::make_shared<heat_euler_cuda_kernel<fp_type>>(coefficients_, grid_cfg_);
         if (is_heat_source_set)
         {
             source_.resize(coefficients_->space_size_);
@@ -284,7 +302,7 @@ template <typename fp_type> class heat_euler_cuda_solver_method
     }
 
   public:
-    explicit heat_euler_cuda_solver_method(heat_euler_svc_coefficients_ptr<fp_type> const &coefficients,
+    explicit heat_euler_cuda_solver_method(heat_euler_coefficients_ptr<fp_type> const &coefficients,
                                            grid_config_1d_ptr<fp_type> const &grid_config, bool is_heat_source_set)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
@@ -313,7 +331,6 @@ void heat_euler_cuda_solver_method<fp_type>::solve(thrust::host_vector<fp_type> 
                                                    boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
                                                    thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_heat_svc_cuda_scheme<fp_type> heat_scheme;
     heat_scheme::rhs(coefficients_, kernel_, grid_cfg_, prev_solution, boundary_pair, time, solution);
 }
 
@@ -323,8 +340,6 @@ void heat_euler_cuda_solver_method<fp_type>::solve(thrust::host_vector<fp_type> 
                                                    std::function<fp_type(fp_type, fp_type)> const &heat_source,
                                                    thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_heat_svc_cuda_scheme<fp_type> heat_scheme;
-    typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
     d_1d::of_function(grid_cfg_, time, heat_source, source_);
     heat_scheme::rhs_source(coefficients_, kernel_, grid_cfg_, prev_solution, source_, boundary_pair, time, solution);
 }
