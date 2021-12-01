@@ -1,10 +1,10 @@
-#if !defined(_LSS_1D_GENERAL_SVC_WAVE_EQUATION_BUILDER_T_HPP_)
-#define _LSS_1D_GENERAL_SVC_WAVE_EQUATION_BUILDER_T_HPP_
+#if !defined(_LSS_1D_GENERAL_WAVE_EQUATION_BUILDER_T_HPP_)
+#define _LSS_1D_GENERAL_WAVE_EQUATION_BUILDER_T_HPP_
 
 #include <functional>
 #include <map>
 
-#include "builders/lss_1d_general_svc_wave_equation_builder.hpp"
+#include "builders/lss_1d_general_wave_equation_builder.hpp"
 #include "builders/lss_dirichlet_boundary_builder.hpp"
 #include "builders/lss_pde_discretization_config_builder.hpp"
 #include "builders/lss_wave_data_config_builder.hpp"
@@ -26,7 +26,7 @@ template <typename T> void test_pure_wave_equation_builder_t()
     using lss_pde_solvers::wave_implicit_solver_config_builder;
     using lss_pde_solvers::wave_initial_data_config_1d_builder;
     using lss_pde_solvers::default_wave_solver_configs::dev_fwd_cusolver_qr_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation_builder;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation_builder;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -59,8 +59,8 @@ template <typename T> void test_pure_wave_equation_builder_t()
                                          .build();
     // coefficient builder:
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto zero = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto zero = [](T t, T x) { return 0.0; };
     auto const &coefficients_ptr = wave_coefficient_data_config_1d_builder<T>()
                                        .a_coefficient(zero)
                                        .b_coefficient(b)
@@ -70,7 +70,7 @@ template <typename T> void test_pure_wave_equation_builder_t()
     // initial condition builder:
     auto const &init_data_ptr = wave_initial_data_config_1d_builder<T>()
                                     .first_initial_condition([](T x) { return std::sin(pi<T>() * x); })
-                                    .second_initial_condition(zero)
+                                    .second_initial_condition([](T x) { return 0.0; })
                                     .build();
     // wave data config builder:
     auto const &data_ptr = wave_data_config_1d_builder<T>()
@@ -88,7 +88,7 @@ template <typename T> void test_pure_wave_equation_builder_t()
     auto const &boundary_pair = std::make_pair(boundary_low, boundary_high);
 
     // pde solver builder:
-    auto const &pde_solver = general_svc_wave_equation_builder<T, std::vector, std::allocator<T>>()
+    auto const &pde_solver = general_wave_equation_builder<T, std::vector, std::allocator<T>>()
                                  .boundary_pair(boundary_pair)
                                  .discretization_config(discretization_ptr)
                                  .grid_config_hints(grid_config_hints_ptr)
@@ -141,7 +141,7 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     using lss_pde_solvers::wave_data_config_1d_builder;
     using lss_pde_solvers::wave_initial_data_config_1d_builder;
     using lss_pde_solvers::default_wave_solver_configs::dev_expl_fwd_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::explicit_solvers::general_svc_wave_equation_builder;
+    using lss_pde_solvers::one_dimensional::explicit_solvers::general_wave_equation_builder;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -174,8 +174,8 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
                                          .build();
     // coefficient builder:
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto zero = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto zero = [](T t, T x) { return 0.0; };
     auto const &coefficients_ptr = wave_coefficient_data_config_1d_builder<T>()
                                        .a_coefficient(zero)
                                        .b_coefficient(b)
@@ -185,7 +185,7 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     // initial condition builder:
     auto const &init_data_ptr = wave_initial_data_config_1d_builder<T>()
                                     .first_initial_condition([](T x) { return std::sin(pi<T>() * x); })
-                                    .second_initial_condition(zero)
+                                    .second_initial_condition([](T x) { return 0.0; })
                                     .build();
     // wave data config builder:
     auto const &data_ptr = wave_data_config_1d_builder<T>()
@@ -203,7 +203,7 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     auto const &boundary_pair = std::make_pair(boundary_low, boundary_high);
 
     // pde solver builder:
-    auto const &pde_solver = general_svc_wave_equation_builder<T, std::vector, std::allocator<T>>()
+    auto const &pde_solver = general_wave_equation_builder<T, std::vector, std::allocator<T>>()
                                  .boundary_pair(boundary_pair)
                                  .discretization_config(discretization_ptr)
                                  .grid_config_hints(grid_config_hints_ptr)
@@ -242,4 +242,4 @@ void test_expl_pure_wave_equation_builder()
     test_expl_pure_wave_equation_builder_t<double>();
 }
 
-#endif ///_LSS_1D_GENERAL_SVC_WAVE_EQUATION_BUILDER_T_HPP_
+#endif ///_LSS_1D_GENERAL_WAVE_EQUATION_BUILDER_T_HPP_

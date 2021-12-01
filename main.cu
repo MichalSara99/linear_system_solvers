@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 
 #include "unit_tests/builders/lss_1d_general_heat_equation_builder_t.hpp"
-#include "unit_tests/builders/lss_1d_general_svc_wave_equation_builder_t.hpp"
+#include "unit_tests/builders/lss_1d_general_wave_equation_builder_t.hpp"
 #include "unit_tests/builders/lss_dirichlet_boundary_builder_t.hpp"
 #include "unit_tests/builders/lss_heat_data_config_builder_t.hpp"
 #include "unit_tests/builders/lss_heat_solver_config_builder_t.hpp"

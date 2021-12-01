@@ -1,5 +1,5 @@
-#if !defined(_LSS_WAVE_SVC_IMPLICIT_COEFFICIENTS_HPP_)
-#define _LSS_WAVE_SVC_IMPLICIT_COEFFICIENTS_HPP_
+#if !defined(_LSS_WAVE_IMPLICIT_COEFFICIENTS_HPP_)
+#define _LSS_WAVE_IMPLICIT_COEFFICIENTS_HPP_
 
 #include <functional>
 
@@ -17,7 +17,7 @@ namespace one_dimensional
 using lss_utility::range;
 using lss_utility::sptr_t;
 
-template <typename fp_type> struct wave_svc_implicit_coefficients
+template <typename fp_type> struct wave_implicit_coefficients
 {
   public:
     // scheme coefficients:
@@ -25,11 +25,11 @@ template <typename fp_type> struct wave_svc_implicit_coefficients
     std::size_t space_size_;
     range<fp_type> range_;
     // functional coefficients:
-    std::function<fp_type(fp_type)> A_;
-    std::function<fp_type(fp_type)> B_;
-    std::function<fp_type(fp_type)> C_;
-    std::function<fp_type(fp_type)> D_;
-    std::function<fp_type(fp_type)> E_;
+    std::function<fp_type(fp_type, fp_type)> A_;
+    std::function<fp_type(fp_type, fp_type)> B_;
+    std::function<fp_type(fp_type, fp_type)> C_;
+    std::function<fp_type(fp_type, fp_type)> D_;
+    std::function<fp_type(fp_type, fp_type)> E_;
 
   private:
     void initialize(pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
@@ -61,28 +61,28 @@ template <typename fp_type> struct wave_svc_implicit_coefficients
         const fp_type half = static_cast<fp_type>(0.5);
         const fp_type quater = static_cast<fp_type>(0.25);
 
-        A_ = [=](fp_type x) { return quater * (delta_ * b(x) - rho_ * c(x)); };
-        B_ = [=](fp_type x) { return quater * (delta_ * b(x) + rho_ * c(x)); };
-        C_ = [=](fp_type x) { return half * (delta_ * b(x) - half * d(x)); };
-        D_ = [=](fp_type x) { return (lambda_ - gamma_ * a(x)); };
-        E_ = [=](fp_type x) { return (lambda_ + gamma_ * a(x)); };
+        A_ = [=](fp_type t, fp_type x) { return quater * (delta_ * b(t, x) - rho_ * c(t, x)); };
+        B_ = [=](fp_type t, fp_type x) { return quater * (delta_ * b(t, x) + rho_ * c(t, x)); };
+        C_ = [=](fp_type t, fp_type x) { return half * (delta_ * b(t, x) - half * d(t, x)); };
+        D_ = [=](fp_type t, fp_type x) { return (lambda_ - gamma_ * a(t, x)); };
+        E_ = [=](fp_type t, fp_type x) { return (lambda_ + gamma_ * a(t, x)); };
     }
 
   public:
-    wave_svc_implicit_coefficients() = delete;
+    wave_implicit_coefficients() = delete;
 
-    explicit wave_svc_implicit_coefficients(wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
-                                            pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
+    explicit wave_implicit_coefficients(wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
+                                        pde_discretization_config_1d_ptr<fp_type> const &discretization_config)
     {
         initialize(discretization_config);
         initialize_coefficients(wave_data_config);
     }
 };
 
-template <typename fp_type> using wave_svc_implicit_coefficients_ptr = sptr_t<wave_svc_implicit_coefficients<fp_type>>;
+template <typename fp_type> using wave_implicit_coefficients_ptr = sptr_t<wave_implicit_coefficients<fp_type>>;
 
 } // namespace one_dimensional
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_WAVE_SVC_IMPLICIT_COEFFICIENTS_HPP_
+#endif ///_LSS_WAVE_IMPLICIT_COEFFICIENTS_HPP_

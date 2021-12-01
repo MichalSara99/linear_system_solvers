@@ -15,10 +15,10 @@ using lss_utility::sptr_t;
 template <typename T> void test_wave_data_config_builder_t()
 {
     auto const &coeff_data_ptr = wave_coefficient_data_config_1d_builder<T>()
-                                     .a_coefficient([](T x) { return 1.0; })
-                                     .b_coefficient([](T x) { return 0.0; })
-                                     .c_coefficient([](T x) { return 1.0; })
-                                     .d_coefficient([](T x) { return 0.0; })
+                                     .a_coefficient([](T t, T x) { return 1.0; })
+                                     .b_coefficient([](T t, T x) { return 0.0; })
+                                     .c_coefficient([](T t, T x) { return 1.0; })
+                                     .d_coefficient([](T t, T x) { return 0.0; })
                                      .build();
 
     auto const &init_data_ptr = wave_initial_data_config_1d_builder<T>()

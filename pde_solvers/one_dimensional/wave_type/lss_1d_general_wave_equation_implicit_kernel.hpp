@@ -1,5 +1,5 @@
-#if !defined(_LSS_1D_GENERAL_SVC_WAVE_EQUATION_IMPLICIT_KERNEL_HPP_)
-#define _LSS_1D_GENERAL_SVC_WAVE_EQUATION_IMPLICIT_KERNEL_HPP_
+#if !defined(_LSS_1D_GENERAL_WAVE_EQUATION_IMPLICIT_KERNEL_HPP_)
+#define _LSS_1D_GENERAL_WAVE_EQUATION_IMPLICIT_KERNEL_HPP_
 
 #include <vector>
 
@@ -8,7 +8,7 @@
 #include "common/lss_utility.hpp"
 #include "containers/lss_container_2d.hpp"
 #include "discretization/lss_discretization.hpp"
-#include "implicit_coefficients/lss_wave_svc_implicit_coefficients.hpp"
+#include "implicit_coefficients/lss_wave_implicit_coefficients.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_solver_config.hpp"
 #include "pde_solvers/transformation/lss_wave_data_transform.hpp"
@@ -350,7 +350,7 @@ void wave_time_loop<fp_type, container, allocator>::run_with_stepping(
 
 template <memory_space_enum memory_enum, tridiagonal_method_enum tridiagonal_method, typename fp_type,
           template <typename, typename> typename container = std::vector, typename allocator = std::allocator<fp_type>>
-class general_svc_wave_equation_implicit_kernel
+class general_wave_equation_implicit_kernel
 {
 };
 
@@ -358,8 +358,8 @@ class general_svc_wave_equation_implicit_kernel
 // ============================== DEVICE =============================
 // ===================================================================
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type,
-                                                container, allocator>
+class general_wave_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Device, fp_type, container, allocator> cusolver;
@@ -374,11 +374,11 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              wave_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          wave_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -399,7 +399,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -433,7 +433,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -453,8 +453,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type,
-                                                container, allocator>
+class general_wave_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver_cuda<fp_type, container, allocator> sorcusolver;
@@ -469,11 +469,11 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              wave_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          wave_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -495,7 +495,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
@@ -529,7 +529,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorcusolver>(space_size);
         solver->set_omega(omega_value);
@@ -552,8 +552,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Device, tridi
 // ================================ HOST =============================
 // ===================================================================
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type,
-                                                container, allocator>
+class general_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef cuda_solver<memory_space_enum::Host, fp_type, container, allocator> cusolver;
@@ -568,11 +568,11 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              wave_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          wave_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -593,7 +593,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -627,7 +627,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<cusolver>(space_size);
         solver->set_factorization(solver_cfg_->tridiagonal_factorization());
@@ -647,8 +647,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type,
-                                                container, allocator>
+class general_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef sor_solver<fp_type, container, allocator> sorsolver;
@@ -663,11 +663,11 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              wave_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          wave_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -689,7 +689,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
@@ -723,7 +723,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<sorsolver>(space_size);
         solver->set_omega(omega_value);
@@ -743,8 +743,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver,
-                                                fp_type, container, allocator>
+class general_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver,
+                                            fp_type, container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef double_sweep_solver<fp_type, container, allocator> ds_solver;
@@ -759,11 +759,11 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              wave_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          wave_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -784,7 +784,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
         auto const &solver_method_ptr =
@@ -817,7 +817,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<ds_solver>(space_size);
         auto const &solver_method_ptr =
@@ -836,8 +836,8 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver,
-                                                fp_type, container, allocator>
+class general_wave_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type,
+                                            container, allocator>
 {
     typedef container<fp_type, allocator> container_t;
     typedef thomas_lu_solver<fp_type, container, allocator> tlu_solver;
@@ -852,11 +852,11 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
     grid_config_1d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
-                                              wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
-                                              pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
-                                              wave_implicit_solver_config_ptr const &solver_config,
-                                              grid_config_1d_ptr<fp_type> const &grid_config)
+    general_wave_equation_implicit_kernel(boundary_1d_pair<fp_type> const &boundary_pair,
+                                          wave_data_transform_1d_ptr<fp_type> const &wave_data_config,
+                                          pde_discretization_config_1d_ptr<fp_type> const &discretization_config,
+                                          wave_implicit_solver_config_ptr const &solver_config,
+                                          grid_config_1d_ptr<fp_type> const &grid_config)
         : boundary_pair_{boundary_pair}, wave_data_cfg_{wave_data_config}, discretization_cfg_{discretization_config},
           solver_cfg_{solver_config}, grid_cfg_{grid_config}
     {
@@ -877,7 +877,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
         auto const &solver_method_ptr =
@@ -910,7 +910,7 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
         const traverse_direction_enum traverse_dir = solver_cfg_->traverse_direction();
         // create a wave coefficient holder:
         auto const wave_coeff_holder =
-            std::make_shared<wave_svc_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
+            std::make_shared<wave_implicit_coefficients<fp_type>>(wave_data_cfg_, discretization_cfg_);
         // create and set up the solver:
         auto const &solver = std::make_shared<tlu_solver>(space_size);
         auto const &solver_method_ptr =
@@ -931,4 +931,4 @@ class general_svc_wave_equation_implicit_kernel<memory_space_enum::Host, tridiag
 
 } // namespace lss_pde_solvers
 
-#endif ///_LSS_1D_GENERAL_SVC_WAVE_EQUATION_IMPLICIT_KERNEL_HPP_
+#endif ///_LSS_1D_GENERAL_WAVE_EQUATION_IMPLICIT_KERNEL_HPP_

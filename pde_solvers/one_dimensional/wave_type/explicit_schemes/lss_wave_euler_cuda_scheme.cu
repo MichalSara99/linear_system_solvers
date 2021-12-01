@@ -19,10 +19,11 @@ using lss_utility::NaN;
 using lss_utility::range;
 
 template <>
-void wave_euler_svc_cuda_kernel<float>::launch(thrust::device_vector<float> const &input_0,
-                                               thrust::device_vector<float> const &input_1,
-                                               thrust::device_vector<float> &solution)
+void wave_euler_cuda_kernel<float>::launch(float time, thrust::device_vector<float> const &input_0,
+                                           thrust::device_vector<float> const &input_1,
+                                           thrust::device_vector<float> &solution)
 {
+    discretize_coefficients(time);
     const unsigned int threads_per_block = THREADS_PER_BLOCK;
     const unsigned int blocks_per_grid =
         static_cast<unsigned int>(solution.size() + threads_per_block - 1) / threads_per_block;
@@ -38,10 +39,11 @@ void wave_euler_svc_cuda_kernel<float>::launch(thrust::device_vector<float> cons
 }
 
 template <>
-void wave_euler_svc_cuda_kernel<double>::launch(thrust::device_vector<double> const &input_0,
-                                                thrust::device_vector<double> const &input_1,
-                                                thrust::device_vector<double> &solution)
+void wave_euler_cuda_kernel<double>::launch(double time, thrust::device_vector<double> const &input_0,
+                                            thrust::device_vector<double> const &input_1,
+                                            thrust::device_vector<double> &solution)
 {
+    discretize_coefficients(time);
     const unsigned int threads_per_block = THREADS_PER_BLOCK;
     const unsigned int blocks_per_grid =
         static_cast<unsigned int>(solution.size() + threads_per_block - 1) / threads_per_block;
@@ -57,11 +59,12 @@ void wave_euler_svc_cuda_kernel<double>::launch(thrust::device_vector<double> co
 }
 
 template <>
-void wave_euler_svc_cuda_kernel<float>::launch(thrust::device_vector<float> const &input_0,
-                                               thrust::device_vector<float> const &input_1,
-                                               thrust::device_vector<float> const &source,
-                                               thrust::device_vector<float> &solution)
+void wave_euler_cuda_kernel<float>::launch(float time,thrust::device_vector<float> const &input_0,
+                                           thrust::device_vector<float> const &input_1,
+                                           thrust::device_vector<float> const &source,
+                                           thrust::device_vector<float> &solution)
 {
+    discretize_coefficients(time);
     const unsigned int threads_per_block = THREADS_PER_BLOCK;
     const unsigned int blocks_per_grid =
         static_cast<unsigned int>(solution.size() + threads_per_block - 1) / threads_per_block;
@@ -78,11 +81,12 @@ void wave_euler_svc_cuda_kernel<float>::launch(thrust::device_vector<float> cons
 }
 
 template <>
-void wave_euler_svc_cuda_kernel<double>::launch(thrust::device_vector<double> const &input_0,
+void wave_euler_cuda_kernel<double>::launch(double time,thrust::device_vector<double> const &input_0,
                                                 thrust::device_vector<double> const &input_1,
                                                 thrust::device_vector<double> const &source,
                                                 thrust::device_vector<double> &solution)
 {
+    discretize_coefficients(time);
     const unsigned int threads_per_block = THREADS_PER_BLOCK;
     const unsigned int blocks_per_grid =
         static_cast<unsigned int>(solution.size() + threads_per_block - 1) / threads_per_block;

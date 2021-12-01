@@ -1,7 +1,7 @@
 #if !defined(_LSS_PURE_WAVE_EQUATION_T_HPP_)
 #define _LSS_PURE_WAVE_EQUATION_T_HPP_
 
-#include "pde_solvers/one_dimensional/wave_type/lss_1d_general_svc_wave_equation.hpp"
+#include "pde_solvers/one_dimensional/wave_type/lss_1d_general_wave_equation.hpp"
 #include <map>
 
 // ///////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::dev_fwd_cusolver_qr_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -48,8 +48,8 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -62,12 +62,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceQR
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto initial_condition = [](T x) { return std::sin(pi<T>() * x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:
@@ -133,7 +134,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceSO
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::dev_fwd_sorsolver_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -149,8 +150,8 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceSO
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -163,12 +164,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverDeviceSO
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto initial_condition = [](T x) { return std::sin(pi<T>() * x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:
@@ -237,7 +239,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverHostSORD
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::host_fwd_sorsolver_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -253,8 +255,8 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverHostSORD
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -267,12 +269,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCCUDASolverHostSORD
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto initial_condition = [](T x) { return std::sin(pi<T>() * x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:
@@ -341,7 +344,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostDoubleSw
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::host_fwd_dssolver_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -357,8 +360,8 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostDoubleSw
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -371,12 +374,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostDoubleSw
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto initial_condition = [](T x) { return std::sin(pi<T>() * x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:
@@ -442,7 +446,7 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostLUDetail
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::host_fwd_tlusolver_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -458,8 +462,8 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostLUDetail
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -472,12 +476,13 @@ template <typename T> void testImplPureWaveEquationDirichletBCSolverHostLUDetail
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto initial_condition = [](T x) { return std::sin(pi<T>() * x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:
@@ -543,7 +548,7 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetail()
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::host_fwd_tlusolver_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -559,8 +564,8 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetail()
     std::cout << " U_x(x,0) = 8*x, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -573,8 +578,8 @@ template <typename T> void testImplWaveEquationDirichletBCSolverHostLUDetail()
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 4.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 4.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto first_initial_condition = [](T x) { return (x * (1.0 - x)); };
@@ -647,7 +652,7 @@ template <typename T> void testImplDampedWaveEquationDirichletBCSolverHostDouble
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::host_fwd_dssolver_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -663,8 +668,8 @@ template <typename T> void testImplDampedWaveEquationDirichletBCSolverHostDouble
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -677,13 +682,14 @@ template <typename T> void testImplDampedWaveEquationDirichletBCSolverHostDouble
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto a = [](T x) { return 1.0; };
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto a = [](T t, T x) { return 1.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(a, b, other, other);
     // initial condition:
     auto first_initial_condition = [](T x) { return std::sin(x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(first_initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(first_initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:
@@ -755,7 +761,7 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
     using lss_pde_solvers::wave_implicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::dev_fwd_cusolver_qr_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::implicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -771,8 +777,8 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
     std::cout << " U_x(x,0) = 1 - cos(4*x), x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 100;
@@ -785,8 +791,8 @@ template <typename T> void testImplPureWaveEquationNeumannBCCUDASolverDeviceQRDe
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 4.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 4.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto first_initial_condition = [](T x) { return 3.0 * std::cos(x); };
@@ -867,7 +873,7 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     using lss_pde_solvers::wave_explicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::host_expl_fwd_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::explicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::explicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -883,8 +889,8 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 50;
@@ -897,12 +903,13 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDAHostSolverDeta
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto initial_condition = [](T x) { return std::sin(pi<T>() * x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:
@@ -967,7 +974,7 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDADeviceSolverDe
     using lss_pde_solvers::wave_explicit_solver_config;
     using lss_pde_solvers::wave_initial_data_config_1d;
     using lss_pde_solvers::default_wave_solver_configs::dev_expl_fwd_solver_config_ptr;
-    using lss_pde_solvers::one_dimensional::explicit_solvers::general_svc_wave_equation;
+    using lss_pde_solvers::one_dimensional::explicit_solvers::general_wave_equation;
     using lss_utility::pi;
     using lss_utility::range;
 
@@ -983,8 +990,8 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDADeviceSolverDe
     std::cout << " U_x(x,0) = 0, x in <0,1> \n\n";
     std::cout << "============================================================\n";
 
-    // typedef the general_svc_wave_equation
-    typedef general_svc_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
+    // typedef the general_wave_equation
+    typedef general_wave_equation<T, std::vector, std::allocator<T>> pde_solver;
 
     // number of space subdivisions:
     std::size_t const Sd = 50;
@@ -997,12 +1004,13 @@ template <typename T> void testExplPureWaveEquationDirichletBCCUDADeviceSolverDe
     // discretization config:
     auto const discretization_ptr = std::make_shared<pde_discretization_config_1d<T>>(space_range, Sd, time_range, Td);
     // coeffs:
-    auto b = [](T x) { return 1.0; };
-    auto other = [](T x) { return 0.0; };
+    auto b = [](T t, T x) { return 1.0; };
+    auto other = [](T t, T x) { return 0.0; };
     auto const wave_coeffs_data_ptr = std::make_shared<wave_coefficient_data_config_1d<T>>(other, b, other, other);
     // initial condition:
     auto initial_condition = [](T x) { return std::sin(pi<T>() * x); };
-    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, other);
+    auto zero = [](T x) { return 0.0; };
+    auto const wave_init_data_ptr = std::make_shared<wave_initial_data_config_1d<T>>(initial_condition, zero);
     // wave data config:
     auto const wave_data_ptr = std::make_shared<wave_data_config_1d<T>>(wave_coeffs_data_ptr, wave_init_data_ptr);
     // boundary conditions:

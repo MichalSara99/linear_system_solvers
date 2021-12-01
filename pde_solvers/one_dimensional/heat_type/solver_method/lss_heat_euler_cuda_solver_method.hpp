@@ -106,7 +106,6 @@ template <typename fp_type> class heat_euler_cuda_kernel
     std::function<fp_type(fp_type, fp_type)> a_;
     std::function<fp_type(fp_type, fp_type)> b_;
     std::function<fp_type(fp_type, fp_type)> d_;
-    heat_euler_coefficients_ptr<fp_type> coefficients_;
 
     void initialize(heat_euler_coefficients_ptr<fp_type> const &coefficients)
     {
@@ -138,7 +137,7 @@ template <typename fp_type> class heat_euler_cuda_kernel
   public:
     explicit heat_euler_cuda_kernel(heat_euler_coefficients_ptr<fp_type> const &coefficients,
                                     grid_config_1d_ptr<fp_type> const &grid_config)
-        : coefficients_{coefficients}, grid_cfg_{grid_config}
+        : grid_cfg_{grid_config}
     {
         initialize(coefficients);
     }

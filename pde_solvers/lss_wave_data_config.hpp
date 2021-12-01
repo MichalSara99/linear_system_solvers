@@ -27,10 +27,10 @@ template <dimension_enum dimension, typename fp_type> struct wave_coefficient_da
 template <typename fp_type> struct wave_coefficient_data_config<dimension_enum::One, fp_type>
 {
   private:
-    std::function<fp_type(fp_type)> a_coeff_;
-    std::function<fp_type(fp_type)> b_coeff_;
-    std::function<fp_type(fp_type)> c_coeff_;
-    std::function<fp_type(fp_type)> d_coeff_;
+    std::function<fp_type(fp_type, fp_type)> a_coeff_;
+    std::function<fp_type(fp_type, fp_type)> b_coeff_;
+    std::function<fp_type(fp_type, fp_type)> c_coeff_;
+    std::function<fp_type(fp_type, fp_type)> d_coeff_;
 
     explicit wave_coefficient_data_config() = delete;
 
@@ -43,31 +43,31 @@ template <typename fp_type> struct wave_coefficient_data_config<dimension_enum::
     }
 
   public:
-    explicit wave_coefficient_data_config(std::function<fp_type(fp_type)> const &a_coefficient,
-                                          std::function<fp_type(fp_type)> const &b_coefficient,
-                                          std::function<fp_type(fp_type)> const &c_coefficient,
-                                          std::function<fp_type(fp_type)> const &d_coefficient)
+    explicit wave_coefficient_data_config(std::function<fp_type(fp_type, fp_type)> const &a_coefficient,
+                                          std::function<fp_type(fp_type, fp_type)> const &b_coefficient,
+                                          std::function<fp_type(fp_type, fp_type)> const &c_coefficient,
+                                          std::function<fp_type(fp_type, fp_type)> const &d_coefficient)
         : a_coeff_{a_coefficient}, b_coeff_{b_coefficient}, c_coeff_{c_coefficient}, d_coeff_{d_coefficient}
     {
         initialize();
     }
 
-    std::function<fp_type(fp_type)> const &a_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &a_coefficient() const
     {
         return a_coeff_;
     }
 
-    std::function<fp_type(fp_type)> const &b_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &b_coefficient() const
     {
         return b_coeff_;
     }
 
-    std::function<fp_type(fp_type)> const &c_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &c_coefficient() const
     {
         return c_coeff_;
     }
 
-    std::function<fp_type(fp_type)> const &d_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &d_coefficient() const
     {
         return d_coeff_;
     }
@@ -248,22 +248,22 @@ template <typename fp_type> struct wave_data_config<dimension_enum::One, fp_type
         return initial_data_cfg_->second_initial_condition();
     }
 
-    std::function<fp_type(fp_type)> const &a_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &a_coefficient() const
     {
         return coefficient_data_cfg_->a_coefficient();
     }
 
-    std::function<fp_type(fp_type)> const &b_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &b_coefficient() const
     {
         return coefficient_data_cfg_->b_coefficient();
     }
 
-    std::function<fp_type(fp_type)> const &c_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &c_coefficient() const
     {
         return coefficient_data_cfg_->c_coefficient();
     }
 
-    std::function<fp_type(fp_type)> const &d_coefficient() const
+    std::function<fp_type(fp_type, fp_type)> const &d_coefficient() const
     {
         return coefficient_data_cfg_->d_coefficient();
     }

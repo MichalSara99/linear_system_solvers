@@ -18,7 +18,7 @@
 #include "lss_wave_euler_solver_method.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_data_config.hpp"
-#include "pde_solvers/one_dimensional/wave_type/explicit_coefficients/lss_wave_svc_explicit_coefficients.hpp"
+#include "pde_solvers/one_dimensional/wave_type/explicit_coefficients/lss_wave_explicit_coefficients.hpp"
 
 namespace lss_pde_solvers
 {
@@ -94,9 +94,9 @@ __global__ void wave_core_kernel(fp_type const *a_coeff, fp_type const *b_coeff,
 }
 
 /**
- * wave_euler_svc_cuda_kernel object
+ * wave_euler_cuda_kernel object
  */
-template <typename fp_type> class wave_euler_svc_cuda_kernel
+template <typename fp_type> class wave_euler_cuda_kernel
 {
     typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
 
@@ -106,76 +106,80 @@ template <typename fp_type> class wave_euler_svc_cuda_kernel
     thrust::device_vector<fp_type> d_b_;
     thrust::device_vector<fp_type> d_c_;
     thrust::device_vector<fp_type> d_d_;
+    thrust::host_vector<fp_type> h_a_;
+    thrust::host_vector<fp_type> h_b_;
+    thrust::host_vector<fp_type> h_c_;
+    thrust::host_vector<fp_type> h_d_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
+    // coefficients:
+    std::function<fp_type(fp_type, fp_type)> a_;
+    std::function<fp_type(fp_type, fp_type)> b_;
+    std::function<fp_type(fp_type, fp_type)> c_;
+    std::function<fp_type(fp_type, fp_type)> d_;
 
-    void initialize(wave_svc_explicit_coefficients_ptr<fp_type> const &coefficients)
+    void initialize(wave_explicit_coefficients_ptr<fp_type> const &coefficients)
     {
-        k_ = coefficients->k_;
         const std::size_t space_size = coefficients->space_size_;
-        auto const &a = coefficients->A_;
-        auto const &b = coefficients->B_;
-        auto const &c = coefficients->C_;
-        auto const &d = coefficients->D_;
-        thrust::host_vector<fp_type> h_a(space_size);
-        thrust::host_vector<fp_type> h_b(space_size);
-        thrust::host_vector<fp_type> h_c(space_size);
-        thrust::host_vector<fp_type> h_d(space_size);
-        // discretize on host
-        d_1d::of_function(grid_cfg_, a, h_a);
-        d_1d::of_function(grid_cfg_, b, h_b);
-        d_1d::of_function(grid_cfg_, c, h_c);
-        d_1d::of_function(grid_cfg_, d, h_d);
-        // copy to device
+        k_ = coefficients->k_;
+        a_ = coefficients->A_;
+        b_ = coefficients->B_;
+        c_ = coefficients->C_;
+        d_ = coefficients->D_;
+        h_a_.resize(space_size);
+        h_b_.resize(space_size);
+        h_c_.resize(space_size);
+        h_d_.resize(space_size);
         d_a_.resize(space_size);
         d_b_.resize(space_size);
         d_c_.resize(space_size);
         d_d_.resize(space_size);
-        thrust::copy(h_a.begin(), h_a.end(), d_a_.begin());
-        thrust::copy(h_b.begin(), h_b.end(), d_b_.begin());
-        thrust::copy(h_c.begin(), h_c.end(), d_c_.begin());
-        thrust::copy(h_d.begin(), h_d.end(), d_d_.begin());
+    }
+
+    void discretize_coefficients(fp_type time)
+    {
+        // discretize on host
+        d_1d::of_function(grid_cfg_, time, a_, h_a_);
+        d_1d::of_function(grid_cfg_, time, b_, h_b_);
+        d_1d::of_function(grid_cfg_, time, c_, h_c_);
+        d_1d::of_function(grid_cfg_, time, d_, h_d_);
+        thrust::copy(h_a_.begin(), h_a_.end(), d_a_.begin());
+        thrust::copy(h_b_.begin(), h_b_.end(), d_b_.begin());
+        thrust::copy(h_c_.begin(), h_c_.end(), d_c_.begin());
+        thrust::copy(h_d_.begin(), h_d_.end(), d_d_.begin());
     }
 
   public:
-    explicit wave_euler_svc_cuda_kernel(wave_svc_explicit_coefficients_ptr<fp_type> const &coefficients,
-                                        grid_config_1d_ptr<fp_type> const &grid_config)
+    explicit wave_euler_cuda_kernel(wave_explicit_coefficients_ptr<fp_type> const &coefficients,
+                                    grid_config_1d_ptr<fp_type> const &grid_config)
         : grid_cfg_{grid_config}
     {
         initialize(coefficients);
     }
-    ~wave_euler_svc_cuda_kernel()
+    ~wave_euler_cuda_kernel()
     {
     }
-    void launch(thrust::device_vector<fp_type> const &input_0, thrust::device_vector<fp_type> const &input_1,
-                thrust::device_vector<fp_type> &solution);
+    void launch(fp_type time, thrust::device_vector<fp_type> const &input_0,
+                thrust::device_vector<fp_type> const &input_1, thrust::device_vector<fp_type> &solution);
 
-    void launch(thrust::device_vector<fp_type> const &input_0, thrust::device_vector<fp_type> const &input_1,
-                thrust::device_vector<fp_type> const &source, thrust::device_vector<fp_type> &solution);
+    void launch(fp_type time, thrust::device_vector<fp_type> const &input_0,
+                thrust::device_vector<fp_type> const &input_1, thrust::device_vector<fp_type> const &source,
+                thrust::device_vector<fp_type> &solution);
 };
 
-template <typename fp_type> using wave_euler_svc_cuda_kernel_ptr = sptr_t<wave_euler_svc_cuda_kernel<fp_type>>;
-
-template <typename fp_type>
-using explicit_wave_svc_cuda_scheme_function =
-    std::function<void(wave_svc_explicit_coefficients_ptr<fp_type> const &,
-                       wave_euler_svc_cuda_kernel_ptr<fp_type> const &, grid_config_1d_ptr<fp_type> const &,
-                       thrust::host_vector<fp_type> const &, thrust::host_vector<fp_type> const &,
-                       thrust::host_vector<fp_type> const &, boundary_1d_pair<fp_type> const &, fp_type const &,
-                       thrust::host_vector<fp_type> &)>;
+template <typename fp_type> using wave_euler_cuda_kernel_ptr = sptr_t<wave_euler_cuda_kernel<fp_type>>;
 
 /**
- * explicit_wave_svc_cuda_scheme object
+ * explicit_wave_cuda_scheme object
  */
-template <typename fp_type> class explicit_wave_svc_cuda_scheme
+template <typename fp_type> class explicit_wave_cuda_scheme
 {
-    typedef explicit_wave_svc_cuda_scheme_function<fp_type> scheme_function_t;
 
   public:
-    static void rhs(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
-                    wave_euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
-                    grid_config_1d_ptr<fp_type> const &grid_config, thrust::host_vector<fp_type> const &input_0,
-                    thrust::host_vector<fp_type> const &input_1, boundary_1d_pair<fp_type> const &boundary_pair,
-                    fp_type const &time, thrust::host_vector<fp_type> &solution)
+    static void rhs(wave_explicit_coefficients_ptr<fp_type> const &cfs,
+                    wave_euler_cuda_kernel_ptr<fp_type> const &kernel, grid_config_1d_ptr<fp_type> const &grid_config,
+                    thrust::host_vector<fp_type> const &input_0, thrust::host_vector<fp_type> const &input_1,
+                    boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
+                    thrust::host_vector<fp_type> &solution)
     {
         const fp_type two = static_cast<fp_type>(2.0);
         auto const &first_bnd = boundary_pair.first;
@@ -195,14 +199,15 @@ template <typename fp_type> class explicit_wave_svc_cuda_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * a(x) + c(x) * input_1[0] + (a(x) + b(x)) * input_1[1] - d(x) * input_0[0];
+            solution[0] = beta * a(time, x) + c(time, x) * input_1[0] + (a(time, x) + b(time, x)) * input_1[1] -
+                          d(time, x) * input_0[0];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] =
-                beta * a(x) + (c(x) + alpha * a(x)) * input_1[0] + (a(x) + b(x)) * input_1[1] - d(x) * input_0[0];
+            solution[0] = beta * a(time, x) + (c(time, x) + alpha * a(time, x)) * input_1[0] +
+                          (a(time, x) + b(time, x)) * input_1[1] - d(time, x) * input_0[0];
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -214,25 +219,26 @@ template <typename fp_type> class explicit_wave_svc_cuda_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (a(x) + b(x)) * input_1[N - 1] + c(x) * input_1[N] - delta * b(x) - d(x) * input_0[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + c(time, x) * input_1[N] - delta * b(time, x) -
+                          d(time, x) * input_0[N];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] =
-                (a(x) + b(x)) * input_1[N - 1] + (c(x) - gamma * b(x)) * input_1[N] - delta * b(x) - d(x) * input_0[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + (c(time, x) - gamma * b(time, x)) * input_1[N] -
+                          delta * b(time, x) - d(time, x) * input_0[N];
         }
 
         thrust::device_vector<fp_type> d_input_0(input_0);
         thrust::device_vector<fp_type> d_input_1(input_1);
         thrust::device_vector<fp_type> d_solution(solution);
-        kernel->launch(d_input_0, d_input_1, d_solution);
+        kernel->launch(time, d_input_0, d_input_1, d_solution);
         thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
     }
 
-    static void rhs_source(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
-                           wave_euler_svc_cuda_kernel_ptr<fp_type> const &kernel,
+    static void rhs_source(wave_explicit_coefficients_ptr<fp_type> const &cfs,
+                           wave_euler_cuda_kernel_ptr<fp_type> const &kernel,
                            grid_config_1d_ptr<fp_type> const &grid_config, thrust::host_vector<fp_type> const &input_0,
                            thrust::host_vector<fp_type> const &input_1, thrust::host_vector<fp_type> const &inhom_input,
                            boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
@@ -256,15 +262,15 @@ template <typename fp_type> class explicit_wave_svc_cuda_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] =
-                beta * a(x) + c(x) * input_1[0] + (a(x) + b(x)) * input_1[1] - d(x) * input_0[0] + inhom_input[0];
+            solution[0] = beta * a(time, x) + c(time, x) * input_1[0] + (a(time, x) + b(time, x)) * input_1[1] -
+                          d(time, x) * input_0[0] + inhom_input[0];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] = beta * a(x) + (c(x) + alpha * a(x)) * input_1[0] + (a(x) + b(x)) * input_1[1] -
-                          d(x) * input_0[0] + inhom_input[0];
+            solution[0] = beta * a(time, x) + (c(time, x) + alpha * a(time, x)) * input_1[0] +
+                          (a(time, x) + b(time, x)) * input_1[1] - d(time, x) * input_0[0] + inhom_input[0];
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -276,22 +282,22 @@ template <typename fp_type> class explicit_wave_svc_cuda_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] =
-                (a(x) + b(x)) * input_1[N - 1] + c(x) * input_1[N] - delta * b(x) - d(x) * input_0[N] + inhom_input[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + c(time, x) * input_1[N] - delta * b(time, x) -
+                          d(time, x) * input_0[N] + inhom_input[N];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (a(x) + b(x)) * input_1[N - 1] + (c(x) - gamma * b(x)) * input_1[N] - delta * b(x) -
-                          d(x) * input_0[N] + inhom_input[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + (c(time, x) - gamma * b(time, x)) * input_1[N] -
+                          delta * b(time, x) - d(time, x) * input_0[N] + inhom_input[N];
         }
 
         thrust::device_vector<fp_type> d_input_0(input_0);
         thrust::device_vector<fp_type> d_input_1(input_1);
         thrust::device_vector<fp_type> d_source(inhom_input);
         thrust::device_vector<fp_type> d_solution(solution);
-        kernel->launch(d_input_0, d_input_1, d_source, d_solution);
+        kernel->launch(time, d_input_0, d_input_1, d_source, d_solution);
         thrust::copy(d_solution.begin(), d_solution.end(), solution.begin());
     }
 };
@@ -303,17 +309,17 @@ template <typename fp_type> class wave_euler_cuda_solver_method
 {
   private:
     // scheme coefficients:
-    wave_svc_explicit_coefficients_ptr<fp_type> coefficients_;
+    wave_explicit_coefficients_ptr<fp_type> coefficients_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
     // cuda kernel:
-    wave_euler_svc_cuda_kernel_ptr<fp_type> kernel_;
+    wave_euler_cuda_kernel_ptr<fp_type> kernel_;
     thrust::host_vector<fp_type> source_;
 
     explicit wave_euler_cuda_solver_method() = delete;
 
     void initialize(bool is_wave_source_set)
     {
-        kernel_ = std::make_shared<wave_euler_svc_cuda_kernel<fp_type>>(coefficients_, grid_cfg_);
+        kernel_ = std::make_shared<wave_euler_cuda_kernel<fp_type>>(coefficients_, grid_cfg_);
         if (is_wave_source_set)
         {
             source_.resize(coefficients_->space_size_);
@@ -321,7 +327,7 @@ template <typename fp_type> class wave_euler_cuda_solver_method
     }
 
   public:
-    explicit wave_euler_cuda_solver_method(wave_svc_explicit_coefficients_ptr<fp_type> const &coefficients,
+    explicit wave_euler_cuda_solver_method(wave_explicit_coefficients_ptr<fp_type> const &coefficients,
                                            grid_config_1d_ptr<fp_type> const &grid_config, bool is_wave_source_set)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
@@ -371,7 +377,7 @@ void wave_euler_cuda_solver_method<fp_type>::solve_initial(thrust::host_vector<f
                                                            fp_type const &time, fp_type const &next_time,
                                                            thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_wave_svc_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
+    typedef explicit_wave_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
     wave_scheme::rhs_initial(coefficients_, grid_cfg_, prev_solution_0, prev_solution_1, boundary_pair, time, solution);
 }
 
@@ -383,7 +389,7 @@ void wave_euler_cuda_solver_method<fp_type>::solve_initial(thrust::host_vector<f
                                                            std::function<fp_type(fp_type, fp_type)> const &wave_source,
                                                            thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_wave_svc_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
+    typedef explicit_wave_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
     typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
     // get the right-hand side of the scheme:
     d_1d::of_function(grid_cfg_, time, wave_source, source_);
@@ -398,7 +404,7 @@ void wave_euler_cuda_solver_method<fp_type>::solve_terminal(thrust::host_vector<
                                                             fp_type const &time, fp_type const &next_time,
                                                             thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_wave_svc_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
+    typedef explicit_wave_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
     // get the right-hand side of the scheme:
     wave_scheme::rhs_terminal(coefficients_, grid_cfg_, prev_solution_0, prev_solution_1, boundary_pair, time,
                               solution);
@@ -412,7 +418,7 @@ void wave_euler_cuda_solver_method<fp_type>::solve_terminal(thrust::host_vector<
                                                             std::function<fp_type(fp_type, fp_type)> const &wave_source,
                                                             thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_wave_svc_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
+    typedef explicit_wave_scheme<fp_type, thrust::host_vector, std::allocator<fp_type>> wave_scheme;
     typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
     // get the right-hand side of the scheme:
     d_1d::of_function(grid_cfg_, time, wave_source, source_);
@@ -426,7 +432,7 @@ void wave_euler_cuda_solver_method<fp_type>::solve(thrust::host_vector<fp_type> 
                                                    boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
                                                    fp_type const &next_time, thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_wave_svc_cuda_scheme<fp_type> wave_scheme;
+    typedef explicit_wave_cuda_scheme<fp_type> wave_scheme;
     // get the right-hand side of the scheme:
     wave_scheme::rhs(coefficients_, kernel_, grid_cfg_, prev_solution_0, prev_solution_1, boundary_pair, time,
                      solution);
@@ -440,7 +446,7 @@ void wave_euler_cuda_solver_method<fp_type>::solve(thrust::host_vector<fp_type> 
                                                    std::function<fp_type(fp_type, fp_type)> const &wave_source,
                                                    thrust::host_vector<fp_type> &solution)
 {
-    typedef explicit_wave_svc_cuda_scheme<fp_type> wave_scheme;
+    typedef explicit_wave_cuda_scheme<fp_type> wave_scheme;
     typedef discretization<dimension_enum::One, fp_type, thrust::host_vector, std::allocator<fp_type>> d_1d;
     // get the right-hand side of the scheme:
     d_1d::of_function(grid_cfg_, time, wave_source, source_);

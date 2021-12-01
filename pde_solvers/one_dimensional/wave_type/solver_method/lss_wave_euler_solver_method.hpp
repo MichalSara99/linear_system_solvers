@@ -13,7 +13,7 @@
 #include "discretization/lss_grid_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/lss_wave_data_config.hpp"
-#include "pde_solvers/one_dimensional/wave_type/explicit_coefficients/lss_wave_svc_explicit_coefficients.hpp"
+#include "pde_solvers/one_dimensional/wave_type/explicit_coefficients/lss_wave_explicit_coefficients.hpp"
 
 namespace lss_pde_solvers
 {
@@ -33,18 +33,17 @@ using lss_utility::range;
 using lss_utility::sptr_t;
 
 /**
-    explicit_wave_svc_scheme object
+    explicit_wave_scheme object
  */
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class explicit_wave_svc_scheme
+class explicit_wave_scheme
 {
     typedef container<fp_type, allocator> container_t;
 
   public:
-    static void rhs(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
-                    grid_config_1d_ptr<fp_type> const &grid_config, container_t const &input_0,
-                    container_t const &input_1, boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
-                    container_t &solution)
+    static void rhs(wave_explicit_coefficients_ptr<fp_type> const &cfs, grid_config_1d_ptr<fp_type> const &grid_config,
+                    container_t const &input_0, container_t const &input_1,
+                    boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time, container_t &solution)
     {
         const fp_type two = static_cast<fp_type>(2.0);
         auto const &first_bnd = boundary_pair.first;
@@ -64,14 +63,15 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * a(x) + c(x) * input_1[0] + (a(x) + b(x)) * input_1[1] - d(x) * input_0[0];
+            solution[0] = beta * a(time, x) + c(time, x) * input_1[0] + (a(time, x) + b(time, x)) * input_1[1] -
+                          d(time, x) * input_0[0];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] =
-                beta * a(x) + (c(x) + alpha * a(x)) * input_1[0] + (a(x) + b(x)) * input_1[1] - d(x) * input_0[0];
+            solution[0] = beta * a(time, x) + (c(time, x) + alpha * a(time, x)) * input_1[0] +
+                          (a(time, x) + b(time, x)) * input_1[1] - d(time, x) * input_0[0];
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -83,24 +83,26 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (a(x) + b(x)) * input_1[N - 1] + c(x) * input_1[N] - delta * b(x) - d(x) * input_0[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + c(time, x) * input_1[N] - delta * b(time, x) -
+                          d(time, x) * input_0[N];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] =
-                (a(x) + b(x)) * input_1[N - 1] + (c(x) - gamma * b(x)) * input_1[N] - delta * b(x) - d(x) * input_0[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + (c(time, x) - gamma * b(time, x)) * input_1[N] -
+                          delta * b(time, x) - d(time, x) * input_0[N];
         }
 
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (a(x) * input_1[t - 1]) + (c(x) * input_1[t]) + (b(x) * input_1[t + 1]) - (d(x) * input_0[t]);
+            solution[t] = (a(time, x) * input_1[t - 1]) + (c(time, x) * input_1[t]) + (b(time, x) * input_1[t + 1]) -
+                          (d(time, x) * input_0[t]);
         }
     }
 
-    static void rhs_source(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
+    static void rhs_source(wave_explicit_coefficients_ptr<fp_type> const &cfs,
                            grid_config_1d_ptr<fp_type> const &grid_config, container_t const &input_0,
                            container_t const &input_1, container_t const &inhom_input,
                            boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time, container_t &solution)
@@ -123,15 +125,15 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] =
-                beta * a(x) + c(x) * input_1[0] + (a(x) + b(x)) * input_1[1] - d(x) * input_0[0] + inhom_input[0];
+            solution[0] = beta * a(time, x) + c(time, x) * input_1[0] + (a(time, x) + b(time, x)) * input_1[1] -
+                          d(time, x) * input_0[0] + inhom_input[0];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] = beta * a(x) + (c(x) + alpha * a(x)) * input_1[0] + (a(x) + b(x)) * input_1[1] -
-                          d(x) * input_0[0] + inhom_input[0];
+            solution[0] = beta * a(time, x) + (c(time, x) + alpha * a(time, x)) * input_1[0] +
+                          (a(time, x) + b(time, x)) * input_1[1] - d(time, x) * input_0[0] + inhom_input[0];
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -143,26 +145,26 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] =
-                (a(x) + b(x)) * input_1[N - 1] + c(x) * input_1[N] - delta * b(x) - d(x) * input_0[N] + inhom_input[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + c(time, x) * input_1[N] - delta * b(time, x) -
+                          d(time, x) * input_0[N] + inhom_input[N];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (a(x) + b(x)) * input_1[N - 1] + (c(x) - gamma * b(x)) * input_1[N] - delta * b(x) -
-                          d(x) * input_0[N] + inhom_input[N];
+            solution[N] = (a(time, x) + b(time, x)) * input_1[N - 1] + (c(time, x) - gamma * b(time, x)) * input_1[N] -
+                          delta * b(time, x) - d(time, x) * input_0[N] + inhom_input[N];
         }
 
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (a(x) * input_1[t - 1]) + (c(x) * input_1[t]) + (b(x) * input_1[t + 1]) -
-                          (d(x) * input_0[t]) + inhom_input[t];
+            solution[t] = (a(time, x) * input_1[t - 1]) + (c(time, x) * input_1[t]) + (b(time, x) * input_1[t + 1]) -
+                          (d(time, x) * input_0[t]) + inhom_input[t];
         }
     }
 
-    static void rhs_initial(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
+    static void rhs_initial(wave_explicit_coefficients_ptr<fp_type> const &cfs,
                             grid_config_1d_ptr<fp_type> const &grid_config, container_t const &input_0,
                             container_t const &input_1, boundary_1d_pair<fp_type> const &boundary_pair,
                             fp_type const &time, container_t &solution)
@@ -178,11 +180,11 @@ class explicit_wave_svc_scheme
         auto const h = grid_1d<fp_type>::step(grid_config);
         auto const k = cfs->k_;
         auto const one_gamma = (two * k);
-        auto const &defl = [&](fp_type x) { return (one + d(x)); };
-        auto const &A = [&](fp_type x) { return (a(x) / defl(x)); };
-        auto const &B = [&](fp_type x) { return (b(x) / defl(x)); };
-        auto const &C = [&](fp_type x) { return (c(x) / defl(x)); };
-        auto const &D = [&](fp_type x) { return (one_gamma * (d(x) / defl(x))); };
+        auto const &defl = [&](fp_type t, fp_type x) { return (one + d(t, x)); };
+        auto const &A = [&](fp_type t, fp_type x) { return (a(t, x) / defl(t, x)); };
+        auto const &B = [&](fp_type t, fp_type x) { return (b(t, x) / defl(t, x)); };
+        auto const &C = [&](fp_type t, fp_type x) { return (c(t, x) / defl(t, x)); };
+        auto const &D = [&](fp_type t, fp_type x) { return (one_gamma * (d(t, x) / defl(t, x))); };
 
         fp_type x{};
         // for lower boundaries first:
@@ -194,14 +196,15 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * A(x) + (C(x) * input_0[0]) + ((A(x) + B(x)) * input_0[1]) + (D(x) * input_1[0]);
+            solution[0] = beta * A(time, x) + (C(time, x) * input_0[0]) + ((A(time, x) + B(time, x)) * input_0[1]) +
+                          (D(time, x) * input_1[0]);
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] =
-                beta * A(x) + (C(x) + alpha * A(x)) * input_0[0] + (A(x) + B(x)) * input_0[1] + (D(x) * input_1[0]);
+            solution[0] = beta * A(time, x) + (C(time, x) + alpha * A(time, x)) * input_0[0] +
+                          (A(time, x) + B(time, x)) * input_0[1] + (D(time, x) * input_1[0]);
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -213,24 +216,26 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + C(x) * input_0[N] - delta * B(x) + (D(x) * input_1[N]);
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + C(time, x) * input_0[N] - delta * B(time, x) +
+                          (D(time, x) * input_1[N]);
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + (C(x) - gamma * B(x)) * input_0[N] - delta * B(x) +
-                          (D(x) * input_1[N]);
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + (C(time, x) - gamma * B(time, x)) * input_0[N] -
+                          delta * B(time, x) + (D(time, x) * input_1[N]);
         }
 
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (A(x) * input_0[t - 1]) + (C(x) * input_0[t]) + (B(x) * input_0[t + 1]) + (D(x) * input_1[t]);
+            solution[t] = (A(time, x) * input_0[t - 1]) + (C(time, x) * input_0[t]) + (B(time, x) * input_0[t + 1]) +
+                          (D(time, x) * input_1[t]);
         }
     }
 
-    static void rhs_initial_source(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
+    static void rhs_initial_source(wave_explicit_coefficients_ptr<fp_type> const &cfs,
                                    grid_config_1d_ptr<fp_type> const &grid_config, container_t const &input_0,
                                    container_t const &input_1, container_t const &inhom_input,
                                    boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
@@ -246,10 +251,10 @@ class explicit_wave_svc_scheme
         auto const &d = cfs->D_;
         auto const h = grid_1d<fp_type>::step(grid_config);
         auto const k = cfs->k_;
-        auto const &defl = [=](fp_type x) { return (one + d(x)); };
-        auto const &A = [=](fp_type x) { return (a(x) / defl(x)); };
-        auto const &B = [=](fp_type x) { return (b(x) / defl(x)); };
-        auto const &C = [=](fp_type x) { return (c(x) / defl(x)); };
+        auto const &defl = [=](fp_type t, fp_type x) { return (one + d(t, x)); };
+        auto const &A = [=](fp_type t, fp_type x) { return (a(t, x) / defl(t, x)); };
+        auto const &B = [=](fp_type t, fp_type x) { return (b(t, x) / defl(t, x)); };
+        auto const &C = [=](fp_type t, fp_type x) { return (c(t, x) / defl(t, x)); };
         auto const one_gamma = (two * k);
 
         fp_type x{};
@@ -262,15 +267,16 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * A(x) + C(x) * input_0[0] + (A(x) + B(x)) * input_0[1] +
-                          ((one_gamma * d(x)) / defl(x)) * input_1[0] + (inhom_input[0] / defl(x));
+            solution[0] = beta * A(time, x) + C(time, x) * input_0[0] + (A(time, x) + B(time, x)) * input_0[1] +
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[0] + (inhom_input[0] / defl(time, x));
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] = beta * A(x) + (C(x) + alpha * A(x)) * input_0[0] + (A(x) + B(x)) * input_0[1] +
-                          ((one_gamma * d(x)) / defl(x)) * input_1[0] + (inhom_input[0] / defl(x));
+            solution[0] = beta * A(time, x) + (C(time, x) + alpha * A(time, x)) * input_0[0] +
+                          (A(time, x) + B(time, x)) * input_0[1] +
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[0] + (inhom_input[0] / defl(time, x));
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -282,26 +288,27 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + C(x) * input_0[N] - delta * B(x) +
-                          ((one_gamma * d(x)) / defl(x)) * input_1[N] + (inhom_input[N] / defl(x));
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + C(time, x) * input_0[N] - delta * B(time, x) +
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[N] + (inhom_input[N] / defl(time, x));
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + (C(x) - gamma * B(x)) * input_0[N] - delta * B(x) +
-                          ((one_gamma * d(x)) / defl(x)) * input_1[N] + (inhom_input[N] / defl(x));
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + (C(time, x) - gamma * B(time, x)) * input_0[N] -
+                          delta * B(time, x) + ((one_gamma * d(time, x)) / defl(time, x)) * input_1[N] +
+                          (inhom_input[N] / defl(time, x));
         }
 
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (A(x) * input_0[t - 1]) + (C(x) * input_0[t]) + (B(x) * input_0[t + 1]) +
-                          ((one_gamma * d(x) / defl(x)) * input_1[t]) + (inhom_input[t] / defl(x));
+            solution[t] = (A(time, x) * input_0[t - 1]) + (C(time, x) * input_0[t]) + (B(time, x) * input_0[t + 1]) +
+                          ((one_gamma * d(time, x) / defl(time, x)) * input_1[t]) + (inhom_input[t] / defl(time, x));
         }
     }
 
-    static void rhs_terminal(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
+    static void rhs_terminal(wave_explicit_coefficients_ptr<fp_type> const &cfs,
                              grid_config_1d_ptr<fp_type> const &grid_config, container_t const &input_0,
                              container_t const &input_1, boundary_1d_pair<fp_type> const &boundary_pair,
                              fp_type const &time, container_t &solution)
@@ -316,10 +323,10 @@ class explicit_wave_svc_scheme
         auto const &d = cfs->D_;
         auto const h = grid_1d<fp_type>::step(grid_config);
         auto const k = cfs->k_;
-        auto const &defl = [=](fp_type x) { return (one + d(x)); };
-        auto const &A = [=](fp_type x) { return (a(x) / defl(x)); };
-        auto const &B = [=](fp_type x) { return (b(x) / defl(x)); };
-        auto const &C = [=](fp_type x) { return (c(x) / defl(x)); };
+        auto const &defl = [=](fp_type t, fp_type x) { return (one + d(t, x)); };
+        auto const &A = [=](fp_type t, fp_type x) { return (a(t, x) / defl(t, x)); };
+        auto const &B = [=](fp_type t, fp_type x) { return (b(t, x) / defl(t, x)); };
+        auto const &C = [=](fp_type t, fp_type x) { return (c(t, x) / defl(t, x)); };
         auto const one_gamma = (two * k);
 
         fp_type x{};
@@ -332,15 +339,16 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * A(x) + C(x) * input_0[0] + (A(x) + B(x)) * input_0[1] -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[0];
+            solution[0] = beta * A(time, x) + C(time, x) * input_0[0] + (A(time, x) + B(time, x)) * input_0[1] -
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[0];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] = beta * A(x) + (C(x) + alpha * A(x)) * input_0[0] + (A(x) + B(x)) * input_0[1] -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[0];
+            solution[0] = beta * A(time, x) + (C(time, x) + alpha * A(time, x)) * input_0[0] +
+                          (A(time, x) + B(time, x)) * input_0[1] -
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[0];
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -352,26 +360,26 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + C(x) * input_0[N] - delta * B(x) -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[N];
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + C(time, x) * input_0[N] - delta * B(time, x) -
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[N];
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + (C(x) - gamma * B(x)) * input_0[N] - delta * B(x) -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[N];
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + (C(time, x) - gamma * B(time, x)) * input_0[N] -
+                          delta * B(time, x) - ((one_gamma * d(time, x)) / defl(time, x)) * input_1[N];
         }
 
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (A(x) * input_0[t - 1]) + (C(x) * input_0[t]) + (B(x) * input_0[t + 1]) -
-                          ((one_gamma * d(x) / defl(x)) * input_1[t]);
+            solution[t] = (A(time, x) * input_0[t - 1]) + (C(time, x) * input_0[t]) + (B(time, x) * input_0[t + 1]) -
+                          ((one_gamma * d(time, x) / defl(time, x)) * input_1[t]);
         }
     }
 
-    static void rhs_terminal_source(wave_svc_explicit_coefficients_ptr<fp_type> const &cfs,
+    static void rhs_terminal_source(wave_explicit_coefficients_ptr<fp_type> const &cfs,
                                     grid_config_1d_ptr<fp_type> const &grid_config, container_t const &input_0,
                                     container_t const &input_1, container_t const &inhom_input,
                                     boundary_1d_pair<fp_type> const &boundary_pair, fp_type const &time,
@@ -387,10 +395,10 @@ class explicit_wave_svc_scheme
         auto const &d = cfs->D_;
         auto const h = grid_1d<fp_type>::step(grid_config);
         auto const k = cfs->k_;
-        auto const &defl = [=](fp_type x) { return (one + d(x)); };
-        auto const &A = [=](fp_type x) { return (a(x) / defl(x)); };
-        auto const &B = [=](fp_type x) { return (b(x) / defl(x)); };
-        auto const &C = [=](fp_type x) { return (c(x) / defl(x)); };
+        auto const &defl = [=](fp_type t, fp_type x) { return (one + d(t, x)); };
+        auto const &A = [=](fp_type t, fp_type x) { return (a(t, x) / defl(t, x)); };
+        auto const &B = [=](fp_type t, fp_type x) { return (b(t, x) / defl(t, x)); };
+        auto const &C = [=](fp_type t, fp_type x) { return (c(t, x) / defl(t, x)); };
         auto const one_gamma = (two * k);
 
         fp_type x{};
@@ -403,15 +411,16 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
-            solution[0] = beta * A(x) + C(x) * input_0[0] + (A(x) + B(x)) * input_0[1] -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[0] + (inhom_input[0] / defl(x));
+            solution[0] = beta * A(time, x) + C(time, x) * input_0[0] + (A(time, x) + B(time, x)) * input_0[1] -
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[0] + (inhom_input[0] / defl(time, x));
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(first_bnd))
         {
             const fp_type beta = two * h * ptr->value(time);
             const fp_type alpha = two * h * ptr->linear_value(time);
-            solution[0] = beta * A(x) + (C(x) + alpha * A(x)) * input_0[0] + (A(x) + B(x)) * input_0[1] -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[0] + (inhom_input[0] / defl(x));
+            solution[0] = beta * A(time, x) + (C(time, x) + alpha * A(time, x)) * input_0[0] +
+                          (A(time, x) + B(time, x)) * input_0[1] -
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[0] + (inhom_input[0] / defl(time, x));
         }
         // for upper boundaries second:
         const std::size_t N = solution.size() - 1;
@@ -423,22 +432,23 @@ class explicit_wave_svc_scheme
         else if (auto const &ptr = std::dynamic_pointer_cast<neumann_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + C(x) * input_0[N] - delta * B(x) -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[N] + (inhom_input[N] / defl(x));
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + C(time, x) * input_0[N] - delta * B(time, x) -
+                          ((one_gamma * d(time, x)) / defl(time, x)) * input_1[N] + (inhom_input[N] / defl(time, x));
         }
         else if (auto const &ptr = std::dynamic_pointer_cast<robin_boundary_1d<fp_type>>(second_bnd))
         {
             const fp_type delta = two * h * ptr->value(time);
             const fp_type gamma = two * h * ptr->linear_value(time);
-            solution[N] = (A(x) + B(x)) * input_0[N - 1] + (C(x) - gamma * B(x)) * input_0[N] - delta * B(x) -
-                          ((one_gamma * d(x)) / defl(x)) * input_1[N] + (inhom_input[N] / defl(x));
+            solution[N] = (A(time, x) + B(time, x)) * input_0[N - 1] + (C(time, x) - gamma * B(time, x)) * input_0[N] -
+                          delta * B(time, x) - ((one_gamma * d(time, x)) / defl(time, x)) * input_1[N] +
+                          (inhom_input[N] / defl(time, x));
         }
 
         for (std::size_t t = 1; t < N; ++t)
         {
             x = grid_1d<fp_type>::value(grid_config, t);
-            solution[t] = (A(x) * input_0[t - 1]) + (C(x) * input_0[t]) + (B(x) * input_0[t + 1]) -
-                          ((one_gamma * d(x) / defl(x)) * input_1[t]) + (inhom_input[t] / defl(x));
+            solution[t] = (A(time, x) * input_0[t - 1]) + (C(time, x) * input_0[t]) + (B(time, x) * input_0[t + 1]) -
+                          ((one_gamma * d(time, x) / defl(time, x)) * input_1[t]) + (inhom_input[t] / defl(time, x));
         }
     }
 };
@@ -450,12 +460,12 @@ template <typename fp_type, template <typename, typename> typename container, ty
 class wave_euler_solver_method
 {
     typedef container<fp_type, allocator> container_t;
-    typedef explicit_wave_svc_scheme<fp_type, container, allocator> wave_scheme;
+    typedef explicit_wave_scheme<fp_type, container, allocator> wave_scheme;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
 
   private:
     // scheme coefficients:
-    wave_svc_explicit_coefficients_ptr<fp_type> coefficients_;
+    wave_explicit_coefficients_ptr<fp_type> coefficients_;
     grid_config_1d_ptr<fp_type> grid_cfg_;
     // containers:
     container_t source_;
@@ -471,7 +481,7 @@ class wave_euler_solver_method
     }
 
   public:
-    explicit wave_euler_solver_method(wave_svc_explicit_coefficients_ptr<fp_type> const &coefficients,
+    explicit wave_euler_solver_method(wave_explicit_coefficients_ptr<fp_type> const &coefficients,
                                       grid_config_1d_ptr<fp_type> const &grid_config, bool is_wave_source_set)
         : coefficients_{coefficients}, grid_cfg_{grid_config}
     {
