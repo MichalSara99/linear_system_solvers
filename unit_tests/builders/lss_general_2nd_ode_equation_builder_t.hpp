@@ -11,9 +11,9 @@
 #include "builders/lss_ode_data_config_builder.hpp"
 #include "builders/lss_ode_discretization_config_builder.hpp"
 #include "builders/lss_ode_solver_config_builder.hpp"
+#include "builders/lss_range_builder.hpp"
 #include "builders/lss_robin_boundary_builder.hpp"
 #include "common/lss_print.hpp"
-#include "common/lss_utility.hpp"
 #include "discretization/lss_discretization.hpp"
 
 template <typename T> void test_general_2nd_ode_equation_builder_t()
@@ -33,7 +33,7 @@ template <typename T> void test_general_2nd_ode_equation_builder_t()
     using lss_ode_solvers::implicit_solvers::general_2nd_ode_equation_builder;
     using lss_print::print;
     using lss_utility::pi;
-    using lss_utility::range;
+    using lss_utility::range_builder;
 
     std::cout << "=================================\n";
     std::cout << "Solving Boundary-value problem: \n\n";
@@ -50,10 +50,10 @@ template <typename T> void test_general_2nd_ode_equation_builder_t()
     // number of space subdivisions:
     std::size_t Sd{100};
     // space range:
-    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    auto const &space_range = range_builder<T>().lower(T(0.0)).upper(T(1.0)).build();
     // discretization config:
     auto const &discretization_ptr =
-        ode_discretization_config_builder<T>().space_range(space_range).number_of_space_points(Sd).build();
+        ode_discretization_config_builder<T>().space_range(*space_range).number_of_space_points(Sd).build();
     // coeffs:
     auto a = [](T x) { return 0.0; };
     auto b = [](T x) { return 0.0; };

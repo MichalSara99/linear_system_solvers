@@ -32,6 +32,7 @@
     <ClInclude Include="builders\lss_ode_discretization_config_builder.hpp" />
     <ClInclude Include="builders\lss_ode_solver_config_builder.hpp" />
     <ClInclude Include="builders\lss_pde_discretization_config_builder.hpp" />
+    <ClInclude Include="builders\lss_range_builder.hpp" />
     <ClInclude Include="builders\lss_robin_boundary_builder.hpp" />
     <ClInclude Include="builders\lss_splitting_method_config_builder.hpp" />
     <ClInclude Include="builders\lss_wave_data_config_builder.hpp" />

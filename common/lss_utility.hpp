@@ -189,6 +189,8 @@ template <typename T> class range
     }
 };
 
+template <typename fp_type> using range_ptr = sptr_t<range<fp_type>>;
+
 } // namespace lss_utility
 
 #endif ///_LSS_UTILITY_HPP_

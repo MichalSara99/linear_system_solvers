@@ -32,13 +32,13 @@
 #include "unit_tests/sparse_solvers/lss_thomas_lu_solver_t.hpp"
 #include "unit_tests/sparse_solvers/lss_karawia_solver_t.hpp"
 
+
 int main(int argc, char const *argv[])
 {
     // ====================================================================
     // ====================== lss_container_2d_t.hpp ======================
     // ====================================================================
     // tested:
-
     // testContainer2d();                                                           // -- tested
     // testCopyContainer2d();                                                       // -- tested
     // testNotSymetricalContainer2d();                                              // -- tested
@@ -142,7 +142,7 @@ int main(int argc, char const *argv[])
     // ============== ONE_DIM: lss_pure_heat_equation_t.h =================
     // ====================================================================
 
-    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQR();                     // -- tested
+    //testImplPureHeatEquationDirichletBCCUDASolverDeviceQR();                     // -- tested
     // testImplPureHeatEquationDirichletBCCUDASolverHostQR();                       // -- tested
     // testImplPureHeatEquationDirichletBCSORSolverDevice();                        // -- tested
     // testImplPureHeatEquationDirichletBCSORSolverHost();                          // -- tested
@@ -339,7 +339,7 @@ int main(int argc, char const *argv[])
     // ====================================================================
 
     // ====================================================================
-    // ========= lss_1d_general_svc_wave_equation_builder_t.hpp ===========
+    // ============ lss_1d_general_wave_equation_builder_t.hpp ============
     // ====================================================================
 
     // test_pure_wave_equation_builder();                                           // -- tested
@@ -348,7 +348,7 @@ int main(int argc, char const *argv[])
     // ====================================================================
 
     // ====================================================================
-    // ========= lss_1d_general_svc_heat_equation_builder_t.hpp ===========
+    // ============ lss_1d_general_heat_equation_builder_t.hpp ============
     // ====================================================================
 
     // test_pure_heat_equation_builder();                                           // -- tested
@@ -356,7 +356,7 @@ int main(int argc, char const *argv[])
     // ====================================================================
 
     // ====================================================================
-    // ======= lss_2d_general_svc_heston_equation_builder_t.hpp ===========
+    // ========== lss_2d_general_heston_equation_builder_t.hpp ============
     // ====================================================================
 
     // test_heston_equation_builder();                                              // -- tested

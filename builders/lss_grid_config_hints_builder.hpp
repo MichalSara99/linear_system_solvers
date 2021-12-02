@@ -19,6 +19,7 @@ using lss_utility::sptr_t;
 // ============================================================================
 // ======================== grid_config_hints_builder =========================
 // ============================================================================
+
 template <dimension_enum dimension, typename fp_type> struct grid_config_hints_builder
 {
 };

@@ -6,19 +6,21 @@
 
 #include "builders/lss_1d_general_wave_equation_builder.hpp"
 #include "builders/lss_dirichlet_boundary_builder.hpp"
+#include "builders/lss_grid_config_hints_builder.hpp"
 #include "builders/lss_pde_discretization_config_builder.hpp"
+#include "builders/lss_range_builder.hpp"
 #include "builders/lss_wave_data_config_builder.hpp"
 #include "builders/lss_wave_solver_config_builder.hpp"
-#include "common/lss_utility.hpp"
-#include "discretization/lss_discretization.hpp"
+#include "common/lss_enumerations.hpp"
 
 template <typename T> void test_pure_wave_equation_builder_t()
 {
 
     using lss_boundary::dirichlet_boundary_1d_builder;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_grids::grid_config_1d;
-    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_config_hints_1d_builder;
     using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d_builder;
     using lss_pde_solvers::wave_coefficient_data_config_1d_builder;
@@ -28,7 +30,7 @@ template <typename T> void test_pure_wave_equation_builder_t()
     using lss_pde_solvers::default_wave_solver_configs::dev_fwd_cusolver_qr_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::implicit_solvers::general_wave_equation_builder;
     using lss_utility::pi;
-    using lss_utility::range;
+    using lss_utility::range_builder;
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Wave equation: \n\n";
@@ -47,14 +49,14 @@ template <typename T> void test_pure_wave_equation_builder_t()
     // number of time subdivisions:
     std::size_t const Td = 100;
     // space range:
-    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    auto const &space_range = range_builder<T>().lower(T(0.0)).upper(T(1.0)).build();
     // time range
-    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.8));
+    auto const &time_range = range_builder<T>().lower(T(0.0)).upper(T(0.8)).build();
     // discretization config:
     auto const &discretization_ptr = pde_discretization_config_1d_builder<T>()
-                                         .space_range(space_range)
+                                         .space_range(*space_range)
                                          .number_of_space_points(Sd)
-                                         .time_range(time_range)
+                                         .time_range(*time_range)
                                          .number_of_time_points(Td)
                                          .build();
     // coefficient builder:
@@ -79,7 +81,11 @@ template <typename T> void test_pure_wave_equation_builder_t()
                                .build();
 
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    auto const &grid_config_hints_ptr = grid_config_hints_1d_builder<T>()
+                                            .accumulation_point(T(0.5))
+                                            .alpha_scale(T(3.0))
+                                            .grid(grid_enum::Uniform)
+                                            .build();
 
     // boundary conditions builder:
     auto const &dirichlet = [](T t) { return 0.0; };
@@ -116,7 +122,7 @@ template <typename T> void test_pure_wave_equation_builder_t()
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
         x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
-        benchmark = exact(x, time_range.upper(), 20);
+        benchmark = exact(x, time_range->upper(), 20);
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }
@@ -132,9 +138,10 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
 {
 
     using lss_boundary::dirichlet_boundary_1d_builder;
+    using lss_enumerations::grid_enum;
     using lss_enumerations::implicit_pde_schemes_enum;
     using lss_grids::grid_config_1d;
-    using lss_grids::grid_config_hints_1d;
+    using lss_grids::grid_config_hints_1d_builder;
     using lss_grids::grid_transform_config_1d;
     using lss_pde_solvers::pde_discretization_config_1d_builder;
     using lss_pde_solvers::wave_coefficient_data_config_1d_builder;
@@ -143,7 +150,7 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     using lss_pde_solvers::default_wave_solver_configs::dev_expl_fwd_solver_config_ptr;
     using lss_pde_solvers::one_dimensional::explicit_solvers::general_wave_equation_builder;
     using lss_utility::pi;
-    using lss_utility::range;
+    using lss_utility::range_builder;
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Wave equation: \n\n";
@@ -162,14 +169,14 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     // number of time subdivisions:
     std::size_t const Td = 2000;
     // space range:
-    range<T> space_range(static_cast<T>(0.0), static_cast<T>(1.0));
+    auto const &space_range = range_builder<T>().lower(T(0.0)).upper(T(1.0)).build();
     // time range
-    range<T> time_range(static_cast<T>(0.0), static_cast<T>(0.8));
+    auto const &time_range = range_builder<T>().lower(T(0.0)).upper(T(0.8)).build();
     // discretization config:
     auto const &discretization_ptr = pde_discretization_config_1d_builder<T>()
-                                         .space_range(space_range)
+                                         .space_range(*space_range)
                                          .number_of_space_points(Sd)
-                                         .time_range(time_range)
+                                         .time_range(*time_range)
                                          .number_of_time_points(Td)
                                          .build();
     // coefficient builder:
@@ -194,7 +201,12 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
                                .build();
 
     // grid config:
-    auto const &grid_config_hints_ptr = std::make_shared<grid_config_hints_1d<T>>();
+    // grid config:
+    auto const &grid_config_hints_ptr = grid_config_hints_1d_builder<T>()
+                                            .accumulation_point(T(0.5))
+                                            .alpha_scale(T(3.0))
+                                            .grid(grid_enum::Uniform)
+                                            .build();
 
     // boundary conditions builder:
     auto const &dirichlet = [](T t) { return 0.0; };
@@ -230,7 +242,7 @@ template <typename T> void test_expl_pure_wave_equation_builder_t()
     for (std::size_t j = 0; j < solution.size(); ++j)
     {
         x = grid_1d<T>::transformed_value(grid_trans_cfg, grid_1d<T>::value(grid_cfg, j));
-        benchmark = exact(x, time_range.upper());
+        benchmark = exact(x, time_range->upper());
         std::cout << "t_" << j << ": " << solution[j] << " |  " << benchmark << " | " << (solution[j] - benchmark)
                   << '\n';
     }

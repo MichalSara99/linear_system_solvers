@@ -12,10 +12,9 @@
 #include "builders/lss_heat_solver_config_builder.hpp"
 #include "builders/lss_neumann_boundary_builder.hpp"
 #include "builders/lss_pde_discretization_config_builder.hpp"
+#include "builders/lss_range_builder.hpp"
 #include "builders/lss_splitting_method_config_builder.hpp"
 #include "common/lss_print.hpp"
-#include "common/lss_utility.hpp"
-#include "discretization/lss_discretization.hpp"
 
 template <typename T> void test_heston_equation_builder_t()
 {
@@ -36,7 +35,7 @@ template <typename T> void test_heston_equation_builder_t()
     using lss_pde_solvers::two_dimensional::implicit_solvers::general_heston_equation_builder;
     using lss_print::print;
     using lss_utility::pi;
-    using lss_utility::range;
+    using lss_utility::range_builder;
 
     std::cout << "============================================================\n";
     std::cout << "Solving Boundary-value Heston Call equation: \n\n";
@@ -71,18 +70,18 @@ template <typename T> void test_heston_equation_builder_t()
     // number of time subdivisions:
     std::size_t const Td = 150;
     // space Spot range:
-    range<T> stock_range(static_cast<T>(0.0), static_cast<T>(20.0));
+    auto const &stock_range = range_builder<T>().lower(T(0.0)).upper(T(20.0)).build();
     // space Vol range:
-    range<T> vol_range(static_cast<T>(0.0), static_cast<T>(1.5));
+    auto const &vol_range = range_builder<T>().lower(T(0.0)).upper(T(1.5)).build();
     // time range
-    range<T> time_range(static_cast<T>(0.0), static_cast<T>(maturity));
+    auto const &time_range = range_builder<T>().lower(T(0.0)).upper(maturity).build();
     // discretization config:
     auto const &discretization_ptr = pde_discretization_config_2d_builder<T>()
-                                         .space_range_1(stock_range)
-                                         .space_range_2(vol_range)
+                                         .space_range_1(*stock_range)
+                                         .space_range_2(*vol_range)
                                          .number_of_space_points_1(Sd)
                                          .number_of_space_points_2(Vd)
-                                         .time_range(time_range)
+                                         .time_range(*time_range)
                                          .number_of_time_points(Td)
                                          .build();
     // coefficient builder:
