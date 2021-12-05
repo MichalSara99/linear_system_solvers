@@ -32,10 +32,18 @@ class double_sweep_solver
     std::size_t discretization_size_;
     container<fp_type, allocator> a_, b_, c_, f_;
     container<fp_type, allocator> L_, K_;
+    double_sweep_boundary_ptr<fp_type> dss_boundary_;
 
     template <typename... fp_space_types>
     void kernel(boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution,
                 fp_type time, fp_space_types... space_args);
+
+    void initialize()
+    {
+        const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type step = one / static_cast<fp_type>(discretization_size_ - 1);
+        dss_boundary_ = std::make_shared<double_sweep_boundary<fp_type>>(discretization_size_, step);
+    }
 
     explicit double_sweep_solver() = delete;
 
@@ -44,6 +52,7 @@ class double_sweep_solver
     typedef container<fp_type, allocator> container_type;
     explicit double_sweep_solver(std::size_t discretization_size) : discretization_size_{discretization_size}
     {
+        initialize();
     }
 
     ~double_sweep_solver()
@@ -114,14 +123,12 @@ void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>
     L_.resize(discretization_size_);
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
-    const fp_type one = static_cast<fp_type>(1.0);
     const auto &low_quad = std::make_tuple(a_[0], b_[0], c_[0], f_[0]);
-    const fp_type step = one / static_cast<fp_type>(N);
-    double_sweep_boundary<fp_type> solver_boundary(low_quad, discretization_size_, step);
+    dss_boundary_->set_low_quad(low_quad);
     // init coefficients:
-    const auto pair = solver_boundary.coefficients(boundary, time, space_args...);
-    const std::size_t start_index = solver_boundary.start_index();
-    const std::size_t end_index = solver_boundary.end_index(boundary);
+    const auto pair = dss_boundary_->coefficients(boundary, time, space_args...);
+    const std::size_t start_index = dss_boundary_->start_index();
+    const std::size_t end_index = dss_boundary_->end_index(boundary);
 
     L_[0] = std::get<1>(pair);
     K_[0] = std::get<0>(pair);
@@ -135,14 +142,14 @@ void lss_double_sweep_solver::double_sweep_solver<fp_type, container, allocator>
         K_[t] = (f_[t] - (a_[t] * K_[t - 1])) / tmp;
     }
 
-    f_[N] = solver_boundary.upper_boundary(boundary, K_[N - 1], K_[N], L_[N - 1], L_[N], time, space_args...);
+    f_[N] = dss_boundary_->upper_boundary(boundary, K_[N - 1], K_[N], L_[N - 1], L_[N], time, space_args...);
 
-    for (std::size_t t = N; t-- > start_index /*&& t >= 0*/; /* --t*/)
+    for (std::size_t t = N; t-- > start_index;)
     {
         f_[t] = (L_[t] * f_[t + 1]) + K_[t];
     }
     if (start_index == 1)
-        f_[0] = solver_boundary.lower_boundary(boundary, time, space_args...);
+        f_[0] = dss_boundary_->lower_boundary(boundary, time, space_args...);
 
     std::copy(f_.begin(), f_.end(), solution.begin());
 }

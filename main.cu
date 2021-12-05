@@ -142,7 +142,7 @@ int main(int argc, char const *argv[])
     // ============== ONE_DIM: lss_pure_heat_equation_t.h =================
     // ====================================================================
 
-    //testImplPureHeatEquationDirichletBCCUDASolverDeviceQR();                     // -- tested
+    // testImplPureHeatEquationDirichletBCCUDASolverDeviceQR();                     // -- tested
     // testImplPureHeatEquationDirichletBCCUDASolverHostQR();                       // -- tested
     // testImplPureHeatEquationDirichletBCSORSolverDevice();                        // -- tested
     // testImplPureHeatEquationDirichletBCSORSolverHost();                          // -- tested
@@ -168,6 +168,7 @@ int main(int argc, char const *argv[])
     // ====================================================================
     // ============== ONE_DIM: lss_black_scholes_equation_t.h =============
     // ====================================================================
+
 
     // testImplBlackScholesEquationDirichletBCCUDASolverDeviceQR();                 // -- tested
     // testImplBlackScholesEquationDirichletBCSORSolverDevice();                    // -- tested

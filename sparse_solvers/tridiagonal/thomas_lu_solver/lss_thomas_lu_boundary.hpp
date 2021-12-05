@@ -21,6 +21,7 @@ using lss_boundary::boundary_ptr;
 using lss_boundary::dirichlet_boundary;
 using lss_boundary::neumann_boundary;
 using lss_boundary::robin_boundary;
+using lss_utility::sptr_t;
 
 template <typename fp_type> class thomas_lu_solver_boundary
 {
@@ -45,18 +46,33 @@ template <typename fp_type> class thomas_lu_solver_boundary
 
   public:
     typedef fp_type value_type;
-    explicit thomas_lu_solver_boundary(const std::tuple<fp_type, fp_type, fp_type, fp_type> &lowest_quad,
-                                       const std::tuple<fp_type, fp_type, fp_type, fp_type> &lower_quad,
-                                       const std::tuple<fp_type, fp_type, fp_type, fp_type> &higher_quad,
-                                       const std::tuple<fp_type, fp_type, fp_type, fp_type> &highest_quad,
-                                       const std::size_t discretization_size, const fp_type &space_step)
-        : lowest_quad_{lowest_quad}, lower_quad_{lower_quad}, higher_quad_{higher_quad}, highest_quad_{highest_quad},
-          discretization_size_{discretization_size}, space_step_{space_step}
+    explicit thomas_lu_solver_boundary(const std::size_t discretization_size, const fp_type &space_step)
+        : discretization_size_{discretization_size}, space_step_{space_step}
     {
     }
 
     ~thomas_lu_solver_boundary()
     {
+    }
+
+    inline void set_lowest_quad(const std::tuple<fp_type, fp_type, fp_type, fp_type> &lowest_quad)
+    {
+        lowest_quad_ = lowest_quad;
+    }
+
+    inline void set_lower_quad(const std::tuple<fp_type, fp_type, fp_type, fp_type> &lower_quad)
+    {
+        lower_quad_ = lower_quad;
+    }
+
+    inline void set_highest_quad(const std::tuple<fp_type, fp_type, fp_type, fp_type> &highest_quad)
+    {
+        highest_quad_ = highest_quad;
+    }
+
+    inline void set_higher_quad(const std::tuple<fp_type, fp_type, fp_type, fp_type> &higher_quad)
+    {
+        higher_quad_ = higher_quad;
     }
 
     template <typename... fp_space_types>
@@ -215,6 +231,8 @@ const fp_type thomas_lu_solver_boundary<fp_type>::lower_boundary(
     }
     return ret;
 }
+
+template <typename fp_type> using thomas_lu_solver_boundary_ptr = sptr_t<thomas_lu_solver_boundary<fp_type>>;
 
 } // namespace lss_thomas_lu_solver
 

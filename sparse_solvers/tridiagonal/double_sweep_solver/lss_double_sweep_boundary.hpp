@@ -21,6 +21,7 @@ using lss_boundary::boundary_pair;
 using lss_boundary::dirichlet_boundary;
 using lss_boundary::neumann_boundary;
 using lss_boundary::robin_boundary;
+using lss_utility::sptr_t;
 
 template <typename fp_type> class double_sweep_boundary
 {
@@ -42,13 +43,17 @@ template <typename fp_type> class double_sweep_boundary
 
   public:
     typedef fp_type value_type;
-    explicit double_sweep_boundary(const std::tuple<fp_type, fp_type, fp_type, fp_type> &low_quad,
-                                   const std::size_t &discretization_size, const fp_type &space_step)
-        : low_quad_{low_quad}, discretization_size_{discretization_size}, space_step_{space_step}
+    explicit double_sweep_boundary(const std::size_t &discretization_size, const fp_type &space_step)
+        : discretization_size_{discretization_size}, space_step_{space_step}
     {
     }
     ~double_sweep_boundary()
     {
+    }
+
+    inline void set_low_quad(const std::tuple<fp_type, fp_type, fp_type, fp_type> &quad)
+    {
+        low_quad_ = quad;
     }
 
     inline std::size_t start_index() const
@@ -183,6 +188,8 @@ const fp_type double_sweep_boundary<fp_type>::lower_boundary(boundary_pair<fp_ty
     }
     return ret;
 }
+
+template <typename fp_type> using double_sweep_boundary_ptr = sptr_t<double_sweep_boundary<fp_type>>;
 
 } // namespace lss_double_sweep_solver
 

@@ -30,10 +30,18 @@ class thomas_lu_solver
     std::size_t discretization_size_;
     container<fp_type, allocator> a_, b_, c_, f_;
     container<fp_type, allocator> beta_, gamma_;
+    thomas_lu_solver_boundary_ptr<fp_type> tlu_boundary_;
 
     template <typename... fp_space_types>
     void kernel(boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution,
                 fp_type time, fp_space_types... space_args);
+
+    void initialize()
+    {
+        const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type step = one / static_cast<fp_type>(discretization_size_ - 1);
+        tlu_boundary_ = std::make_shared<thomas_lu_solver_boundary<fp_type>>(discretization_size_, step);
+    }
 
     explicit thomas_lu_solver() = delete;
     bool is_diagonally_dominant() const;
@@ -43,6 +51,7 @@ class thomas_lu_solver
     typedef container<fp_type, allocator> container_type;
     explicit thomas_lu_solver(std::size_t discretization_size) : discretization_size_{discretization_size}
     {
+        initialize();
     }
 
     ~thomas_lu_solver()
@@ -132,18 +141,19 @@ void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::kern
 
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
-    const fp_type one = static_cast<fp_type>(1.0);
     const auto &lowest_quad = std::make_tuple(a_[0], b_[0], c_[0], f_[0]);
     const auto &lower_quad = std::make_tuple(a_[1], b_[1], c_[1], f_[1]);
     const auto &higher_quad = std::make_tuple(a_[N - 1], b_[N - 1], c_[N - 1], f_[N - 1]);
     const auto &highest_quad = std::make_tuple(a_[N], b_[N], c_[N], f_[N]);
-    const fp_type step = one / static_cast<fp_type>(N);
-    thomas_lu_solver_boundary<fp_type> solver_boundary(lowest_quad, lower_quad, higher_quad, highest_quad,
-                                                       discretization_size_, step);
-    const auto &init_coeffs = solver_boundary.init_coefficients(boundary, time, space_args...);
-    const std::size_t start_idx = solver_boundary.start_index();
-    const auto &fin_coeffs = solver_boundary.final_coefficients(boundary, time, space_args...);
-    const std::size_t end_idx = solver_boundary.end_index();
+    tlu_boundary_->set_lowest_quad(lowest_quad);
+    tlu_boundary_->set_lower_quad(lower_quad);
+    tlu_boundary_->set_higher_quad(higher_quad);
+    tlu_boundary_->set_highest_quad(highest_quad);
+
+    const auto &init_coeffs = tlu_boundary_->init_coefficients(boundary, time, space_args...);
+    const std::size_t start_idx = tlu_boundary_->start_index();
+    const auto &fin_coeffs = tlu_boundary_->final_coefficients(boundary, time, space_args...);
+    const std::size_t end_idx = tlu_boundary_->end_index();
     const fp_type a = std::get<0>(fin_coeffs);
     const fp_type b = std::get<1>(fin_coeffs);
     const fp_type r = std::get<2>(fin_coeffs);
@@ -167,7 +177,7 @@ void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::kern
     solution[end_idx] = (r - (a * solution[end_idx - 1])) / beta_[end_idx];
 
     f_[end_idx] = solution[end_idx];
-    for (std::size_t t = end_idx; t-- > start_idx /*&& t >= 0*/; /*t--*/)
+    for (std::size_t t = end_idx; t-- > start_idx;)
     {
         f_[t] = solution[t] - (gamma_[t] * f_[t + 1]);
     }
@@ -175,9 +185,9 @@ void lss_thomas_lu_solver::thomas_lu_solver<fp_type, container, allocator>::kern
     std::copy(f_.begin(), f_.end(), solution.begin());
     // fill in the boundary values:
     if (start_idx == 1)
-        solution[0] = solver_boundary.lower_boundary(boundary, time, space_args...);
+        solution[0] = tlu_boundary_->lower_boundary(boundary, time, space_args...);
     if (end_idx == N - 1)
-        solution[N] = solver_boundary.upper_boundary(boundary, time, space_args...);
+        solution[N] = tlu_boundary_->upper_boundary(boundary, time, space_args...);
 }
 
 #endif ///_LSS_THOMAS_LU_SOLVER_HPP_

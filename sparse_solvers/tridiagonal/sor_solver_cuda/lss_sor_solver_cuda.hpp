@@ -29,10 +29,18 @@ class sor_solver_cuda
     std::size_t discretization_size_;
     container<fp_type, allocator> a_, b_, c_, f_;
     fp_type omega_;
+    sor_cuda_boundary_ptr<fp_type> sor_boundary_;
 
     template <typename... fp_space_types>
     void kernel(boundary_pair<fp_type, fp_space_types...> const &boundary, container<fp_type, allocator> &solution,
                 fp_type time, fp_space_types... space_args);
+
+    void initialize()
+    {
+        const fp_type one = static_cast<fp_type>(1.0);
+        const fp_type step = one / static_cast<fp_type>(discretization_size_ - 1);
+        sor_boundary_ = std::make_shared<sor_cuda_boundary<fp_type>>(discretization_size_, step);
+    }
 
     explicit sor_solver_cuda() = delete;
 
@@ -40,6 +48,7 @@ class sor_solver_cuda
     typedef fp_type value_type;
     explicit sor_solver_cuda(std::size_t discretization_size) : discretization_size_{discretization_size}
     {
+        initialize();
     }
 
     ~sor_solver_cuda()
@@ -111,18 +120,20 @@ void sor_solver_cuda<fp_type, container, allocator>::kernel(boundary_pair<fp_typ
 {
     // get proper boundaries:
     const std::size_t N = discretization_size_ - 1;
-    const fp_type one = static_cast<fp_type>(1.0);
     const auto &lowest_quad = std::make_tuple(a_[0], b_[0], c_[0], f_[0]);
     const auto &lower_quad = std::make_tuple(a_[1], b_[1], c_[1], f_[1]);
     const auto &higher_quad = std::make_tuple(a_[N - 1], b_[N - 1], c_[N - 1], f_[N - 1]);
     const auto &highest_quad = std::make_tuple(a_[N], b_[N], c_[N], f_[N]);
-    const fp_type step = one / static_cast<fp_type>(N);
-    sor_cuda_boundary<fp_type> solver_boundary(lowest_quad, lower_quad, higher_quad, highest_quad, discretization_size_,
-                                               step);
-    const auto &init_coeffs = solver_boundary.init_coefficients(boundary, time, space_args...);
-    const std::size_t start_idx = solver_boundary.start_index();
-    const auto &fin_coeffs = solver_boundary.final_coefficients(boundary, time, space_args...);
-    const std::size_t end_idx = solver_boundary.end_index();
+
+    sor_boundary_->set_lowest_quad(lowest_quad);
+    sor_boundary_->set_lower_quad(lower_quad);
+    sor_boundary_->set_higher_quad(higher_quad);
+    sor_boundary_->set_highest_quad(highest_quad);
+
+    const auto &init_coeffs = sor_boundary_->init_coefficients(boundary, time, space_args...);
+    const std::size_t start_idx = sor_boundary_->start_index();
+    const auto &fin_coeffs = sor_boundary_->final_coefficients(boundary, time, space_args...);
+    const std::size_t end_idx = sor_boundary_->end_index();
 
     const std::size_t system_size = end_idx - start_idx + 1;
     flat_matrix<fp_type> mat(system_size, system_size);
@@ -152,9 +163,9 @@ void sor_solver_cuda<fp_type, container, allocator>::kernel(boundary_pair<fp_typ
     std::copy(sub_solution.begin(), sub_solution.end(), std::next(solution.begin(), start_idx));
     // fill in the boundary values:
     if (start_idx == 1)
-        solution[0] = solver_boundary.lower_boundary(boundary, time, space_args...);
+        solution[0] = sor_boundary_->lower_boundary(boundary, time, space_args...);
     if (end_idx == N - 1)
-        solution[N] = solver_boundary.upper_boundary(boundary, time, space_args...);
+        solution[N] = sor_boundary_->upper_boundary(boundary, time, space_args...);
 }
 
 } // namespace lss_sor_solver_cuda
