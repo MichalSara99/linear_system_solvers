@@ -21,41 +21,47 @@ Simple Two-point BVP (u''(x) = -2 with Dirichlet and Robin BC)
 
 ## Some surfaces from PDE solver
 
-Heat equation (Dirichlet BC)
+Heat equation (Dirichlet BC) from implicit solver
 ![Pure heat equation](/outputs/temp_heat_equ_numerical_nonuniform.png)
 
-Wave equation (Dirichlet BC)
+Wave equation (Dirichlet BC) from implicit solver
 ![Pure wave equation](/outputs/wave_pure_dir_equ_numerical.png)
 
-Wave equation (Neumann BC)
+Wave equation (Neumann BC) from implicit solver
 ![Pure wave equation - neumann](/outputs/wave_neu_equ_numerical.png)
 
-Damped wave equation (Dirichlet BC)
+Damped wave equation (Dirichlet BC) from implicit solver
 ![Damped wave equation](/outputs/damped_wave_dir_equ_numerical.png)
 
-Heat equation (Dirichlet and Neumann BC)
+Heat equation (Dirichlet and Neumann BC) from explicit solver
 ![Pure heat equation](/outputs/temp_heat_neu_equ_numerical.png)
 
-Advection equation
+Advection equation from implicit solver
 ![Advection equation](/outputs/temp_advection_equ_numerical.png)
 
-Black-Scholes equation
+Black-Scholes equation from implicit solver
 ![Black-Scholes equation](/outputs/call_option_price_surface_numerical_nonuniform.png)
 
-Heston equation DR
+Heston equation DR from implicit solver
 ![Heston equation DR](/outputs/impl_heston_dr_numerical.png)
 
-Heston equation CS
+Heston equation CS from implicit solver
 ![Heston equation CS](/outputs/impl_heston_cs_numerical.png)
 
-Heston equation MCS
+Heston equation MCS from implicit solver
 ![Heston equation MCS](/outputs/impl_heston_mcs_numerical.png)
 
-Heston equation HV
+Heston equation HV from implicit solver
 ![Heston equation HV](/outputs/impl_heston_hv_numerical.png)
 
-SABR equation
+SABR equation from implicit solver
 ![SABR equation](/outputs/impl_sabr_dr_numerical.png)
+
+Heston equation from explicit solver
+![Heston equation expl](/outputs/expl_heston_euler_host_numerical.png)
+
+SABR equation from explicit solver
+![SABR equation expl](/outputs/expl_sabr_euler_host_numerical.png)
 
 ## Usage
 Just started.
