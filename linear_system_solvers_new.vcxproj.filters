@@ -166,6 +166,18 @@
     <Filter Include="transformation">
       <UniqueIdentifier>{57b694e6-f8e6-4360-a731-d2e2b2873bf5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{08934040-c870-49cd-8a0f-84590817df23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\two_dimensional\heat_type\explicit_coefficients">
+      <UniqueIdentifier>{43f2cd8f-48f9-4842-acfd-854d23edeaba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\two_dimensional\heat_type\explicit_schemes">
+      <UniqueIdentifier>{14f3e98a-8c8d-426b-ac3f-ac5dc413de61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pde_solvers\two_dimensional\heat_type\solver_method">
+      <UniqueIdentifier>{42fb41d2-8da9-4cdf-9bb4-278cfbe5d536}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dense_solvers\lss_dense_solvers.hpp">
@@ -590,6 +602,18 @@
     </ClInclude>
     <ClInclude Include="builders\lss_range_builder.hpp">
       <Filter>builders</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\explicit_coefficients\lss_heston_euler_coefficients.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\explicit_coefficients</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation_explicit_kernel.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\explicit_schemes\lss_heston_euler_solver_scheme.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\solver_method\lss_heston_euler_solver_method.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\solver_method</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

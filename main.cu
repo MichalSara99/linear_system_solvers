@@ -234,6 +234,9 @@ int main(int argc, char const *argv[])
     // testImplHestonEquationThomasLUSolverModCraigSneydCrankNicolsonPrint();       // -- tested
     // testImplHestonEquationThomasLUSolverHundsdorferVerwerCrankNicolsonPrint();   // -- tested
 
+    // testExplHestonEquationSolverEulerHostPrint();                                // -- tested
+    // testExplSABREquationEulerHostPrint();                                        // -- tested
+
     // ====================================================================
 
     // ====================================================================
@@ -360,7 +363,8 @@ int main(int argc, char const *argv[])
     // ========== lss_2d_general_heston_equation_builder_t.hpp ============
     // ====================================================================
 
-    // test_heston_equation_builder();                                              // -- tested
+    // test_impl_heston_equation_builder();                                         // -- tested
+    // test_expl_heston_equation_builder();                                         // -- tested
 
     // ====================================================================
 

@@ -69,7 +69,8 @@ template <typename fp_type> struct general_heston_equation_coefficients
         delta_ = half * k_ / h_1;
         ni_ = half * k_ / h_2;
         rho_ = k;
-        zeta_ = splitting_config->weighting_value();
+        if (splitting_config != nullptr)
+            zeta_ = splitting_config->weighting_value();
     }
 
     void initialize_coefficients(heat_data_transform_2d_ptr<fp_type> const &heat_data_config)

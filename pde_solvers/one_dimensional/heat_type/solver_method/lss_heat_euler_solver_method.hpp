@@ -228,6 +228,7 @@ void heat_euler_solver_method<fp_type, container, allocator>::solve(
     d_1d::of_function(grid_cfg_, time, heat_source, source_);
     heat_scheme::rhs_source(coefficients_, grid_cfg_, prev_solution, source_, boundary_pair, time, solution);
 }
+
 } // namespace one_dimensional
 
 } // namespace lss_pde_solvers

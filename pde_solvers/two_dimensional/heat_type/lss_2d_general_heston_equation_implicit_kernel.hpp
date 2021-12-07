@@ -208,7 +208,7 @@ void implicit_heston_time_loop<fp_type, container, allocator>::run(
 
 template <memory_space_enum memory_enum, tridiagonal_method_enum tridiagonal_method, typename fp_type,
           template <typename, typename> typename container = std::vector, typename allocator = std::allocator<fp_type>>
-class general_svc_heston_equation_implicit_kernel
+class general_heston_equation_implicit_kernel
 {
 };
 
@@ -216,8 +216,8 @@ class general_svc_heston_equation_implicit_kernel
 // ============================== DEVICE =============================
 // ===================================================================
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::CUDASolver,
-                                                  fp_type, container, allocator>
+class general_heston_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::CUDASolver, fp_type,
+                                              container, allocator>
 {
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
     typedef container_2d<by_enum::Row, fp_type, container, allocator> rcontainer_2d_t;
@@ -240,13 +240,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     grid_config_2d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
-                                                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
-                                                pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const &splitting_config,
-                                                heat_implicit_solver_config_ptr const &solver_config,
-                                                grid_config_2d_ptr<fp_type> const &grid_config)
+    general_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
+                                            boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+                                            heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
+                                            pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                            splitting_method_config_ptr<fp_type> const &splitting_config,
+                                            heat_implicit_solver_config_ptr const &solver_config,
+                                            grid_config_2d_ptr<fp_type> const &grid_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           splitting_cfg_{splitting_config}, solver_cfg_{solver_config}, grid_cfg_{grid_config}
@@ -353,8 +353,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver,
-                                                  fp_type, container, allocator>
+class general_heston_equation_implicit_kernel<memory_space_enum::Device, tridiagonal_method_enum::SORSolver, fp_type,
+                                              container, allocator>
 {
 
     typedef sor_solver_cuda<fp_type, container, allocator> sorcusolver;
@@ -379,13 +379,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
     grid_config_2d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
-                                                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
-                                                pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const &splitting_config,
-                                                heat_implicit_solver_config_ptr const &solver_config,
-                                                grid_config_2d_ptr<fp_type> const &grid_config)
+    general_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
+                                            boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+                                            heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
+                                            pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                            splitting_method_config_ptr<fp_type> const &splitting_config,
+                                            heat_implicit_solver_config_ptr const &solver_config,
+                                            grid_config_2d_ptr<fp_type> const &grid_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           splitting_cfg_{splitting_config}, solver_cfg_{solver_config}, grid_cfg_{grid_config}
@@ -499,8 +499,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Device, tri
 // ================================ HOST =============================
 // ===================================================================
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type,
-                                                  container, allocator>
+class general_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::CUDASolver, fp_type,
+                                              container, allocator>
 {
     typedef cuda_solver<memory_space_enum::Host, fp_type, container, allocator> cusolver;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -523,13 +523,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     grid_config_2d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
-                                                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
-                                                pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const &splitting_config,
-                                                heat_implicit_solver_config_ptr const &solver_config,
-                                                grid_config_2d_ptr<fp_type> const &grid_config)
+    general_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
+                                            boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+                                            heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
+                                            pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                            splitting_method_config_ptr<fp_type> const &splitting_config,
+                                            heat_implicit_solver_config_ptr const &solver_config,
+                                            grid_config_2d_ptr<fp_type> const &grid_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           splitting_cfg_{splitting_config}, solver_cfg_{solver_config}, grid_cfg_{grid_config}
@@ -639,8 +639,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type,
-                                                  container, allocator>
+class general_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::SORSolver, fp_type,
+                                              container, allocator>
 {
     typedef sor_solver<fp_type, container, allocator> sorsolver;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -663,13 +663,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     grid_config_2d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
-                                                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
-                                                pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const &splitting_config,
-                                                heat_implicit_solver_config_ptr const &solver_config,
-                                                grid_config_2d_ptr<fp_type> const &grid_config)
+    general_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
+                                            boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+                                            heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
+                                            pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                            splitting_method_config_ptr<fp_type> const &splitting_config,
+                                            heat_implicit_solver_config_ptr const &solver_config,
+                                            grid_config_2d_ptr<fp_type> const &grid_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           splitting_cfg_{splitting_config}, solver_cfg_{solver_config}, grid_cfg_{grid_config}
@@ -780,8 +780,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver,
-                                                  fp_type, container, allocator>
+class general_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::DoubleSweepSolver,
+                                              fp_type, container, allocator>
 {
     typedef double_sweep_solver<fp_type, container, allocator> ds_solver;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -804,13 +804,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     grid_config_2d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
-                                                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
-                                                pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const &splitting_config,
-                                                heat_implicit_solver_config_ptr const &solver_config,
-                                                grid_config_2d_ptr<fp_type> const &grid_config)
+    general_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
+                                            boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+                                            heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
+                                            pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                            splitting_method_config_ptr<fp_type> const &splitting_config,
+                                            heat_implicit_solver_config_ptr const &solver_config,
+                                            grid_config_2d_ptr<fp_type> const &grid_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           splitting_cfg_{splitting_config}, solver_cfg_{solver_config}, grid_cfg_{grid_config}
@@ -918,8 +918,8 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
 };
 
 template <typename fp_type, template <typename, typename> typename container, typename allocator>
-class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver,
-                                                  fp_type, container, allocator>
+class general_heston_equation_implicit_kernel<memory_space_enum::Host, tridiagonal_method_enum::ThomasLUSolver, fp_type,
+                                              container, allocator>
 {
     typedef thomas_lu_solver<fp_type, container, allocator> tlu_solver;
     typedef discretization<dimension_enum::One, fp_type, container, allocator> d_1d;
@@ -942,13 +942,13 @@ class general_svc_heston_equation_implicit_kernel<memory_space_enum::Host, tridi
     grid_config_2d_ptr<fp_type> grid_cfg_;
 
   public:
-    general_svc_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
-                                                boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
-                                                heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
-                                                pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
-                                                splitting_method_config_ptr<fp_type> const &splitting_config,
-                                                heat_implicit_solver_config_ptr const &solver_config,
-                                                grid_config_2d_ptr<fp_type> const &grid_config)
+    general_heston_equation_implicit_kernel(boundary_2d_ptr<fp_type> const &vertical_upper_boundary_ptr,
+                                            boundary_2d_pair<fp_type> const &horizontal_boundary_pair,
+                                            heat_data_transform_2d_ptr<fp_type> const &heat_data_config,
+                                            pde_discretization_config_2d_ptr<fp_type> const &discretization_config,
+                                            splitting_method_config_ptr<fp_type> const &splitting_config,
+                                            heat_implicit_solver_config_ptr const &solver_config,
+                                            grid_config_2d_ptr<fp_type> const &grid_config)
         : boundary_ver_{vertical_upper_boundary_ptr}, boundary_pair_hor_{horizontal_boundary_pair},
           heat_data_cfg_{heat_data_config}, discretization_cfg_{discretization_config},
           splitting_cfg_{splitting_config}, solver_cfg_{solver_config}, grid_cfg_{grid_config}
