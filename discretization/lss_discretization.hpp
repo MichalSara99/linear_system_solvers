@@ -150,6 +150,20 @@ struct discretization<dimension_enum::Two, fp_type, container, allocator>
     static void of_function(grid_config_2d_ptr<fp_type> const &grid_config, fp_type const &time,
                             std::function<fp_type(fp_type, fp_type, fp_type)> const &fun,
                             container_2d<by_enum::Row, fp_type, container, allocator> &container_fun_t);
+    /**
+     * Discretize function F(t,x,y) where t=time, x=first dim variable,
+     *  y = second dim variable
+     *
+     * \param grid_config - 2D grid config object
+     * \param time - time valraible t
+     * \param fun - function F(t,x,y)
+     * \param rows - number of rows of the output
+     * \param cols - number of columns of the output
+     * \param cont - 1D container for output (row-wise)
+     */
+    static void of_function(grid_config_2d_ptr<fp_type> const &grid_config, fp_type const &time,
+                            std::function<fp_type(fp_type, fp_type, fp_type)> const &fun, std::size_t const &rows,
+                            std::size_t const &cols, container<fp_type, allocator> &cont);
 };
 
 /**
@@ -202,6 +216,35 @@ void discretization<dimension_enum::Two, fp_type, container, allocator>::of_func
         {
             value = fun(time, grid_2d<fp_type>::value_1(grid_config, r), grid_2d<fp_type>::value_2(grid_config, c));
             container_fun_t(r, c, value);
+        }
+    }
+}
+
+/**
+ * Discretize function F(t,x,y) where t=time, x=first dim variable,
+ *  y = second dim variable
+ *
+ * \param grid_config - 2D grid config object
+ * \param time  - time valraible t
+ * \param fun - function F(t,x,y)
+ * \param rows - number of rows of the putput
+ * \param columns - number of columns of the output
+ * \param cont - 1D container for output (row-wise)
+ */
+template <typename fp_type, template <typename, typename> typename container, typename allocator>
+void discretization<dimension_enum::Two, fp_type, container, allocator>::of_function(
+    grid_config_2d_ptr<fp_type> const &grid_config, fp_type const &time,
+    std::function<fp_type(fp_type, fp_type, fp_type)> const &fun, std::size_t const &rows, std::size_t const &cols,
+    container<fp_type, allocator> &cont)
+{
+    LSS_ASSERT(cont.size() > 0, "The input container must be initialized.");
+    fp_type value{};
+    for (std::size_t r = 0; r < rows; ++r)
+    {
+        for (std::size_t c = 0; c < cols; ++c)
+        {
+            value = fun(time, grid_2d<fp_type>::value_1(grid_config, r), grid_2d<fp_type>::value_2(grid_config, c));
+            cont[c + r * cols] = value;
         }
     }
 }

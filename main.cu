@@ -236,6 +236,8 @@ int main(int argc, char const *argv[])
 
     // testExplHestonEquationSolverEulerHostPrint();                                // -- tested
     // testExplSABREquationEulerHostPrint();                                        // -- tested
+    // testExplHestonEquationSolverEulerDevicePrint();                              // -- tested
+    // testExplSABREquationEulerDevicePrint();                                      // -- tested
 
     // ====================================================================
 

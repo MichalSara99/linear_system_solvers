@@ -615,6 +615,12 @@
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\solver_method\lss_heston_euler_solver_method.hpp">
       <Filter>pde_solvers\two_dimensional\heat_type\solver_method</Filter>
     </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\solver_method\lss_heston_euler_cuda_solver_method.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\solver_method</Filter>
+    </ClInclude>
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\explicit_schemes\lss_heston_euler_cuda_solver_scheme.hpp">
+      <Filter>pde_solvers\two_dimensional\heat_type\explicit_schemes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu" />
@@ -626,6 +632,9 @@
     </CudaCompile>
     <CudaCompile Include="pde_solvers\one_dimensional\wave_type\explicit_schemes\lss_wave_euler_cuda_scheme.cu">
       <Filter>pde_solvers\one_dimensional\wave_type\explicit_schemes</Filter>
+    </CudaCompile>
+    <CudaCompile Include="pde_solvers\two_dimensional\heat_type\explicit_schemes\lss_heston_euler_cuda_solver_scheme.cu">
+      <Filter>pde_solvers\two_dimensional\heat_type\explicit_schemes</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

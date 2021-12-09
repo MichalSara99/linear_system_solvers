@@ -97,12 +97,14 @@
     <ClInclude Include="pde_solvers\transformation\lss_heat_data_transform.hpp" />
     <ClInclude Include="pde_solvers\transformation\lss_wave_data_transform.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\explicit_coefficients\lss_heston_euler_coefficients.hpp" />
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\explicit_schemes\lss_heston_euler_cuda_solver_scheme.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\explicit_schemes\lss_heston_euler_solver_scheme.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\implicit_coefficients\lss_2d_general_heston_equation_coefficients.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation_explicit_boundary.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation_explicit_kernel.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\lss_2d_general_heston_equation_implicit_kernel.hpp" />
+    <ClInclude Include="pde_solvers\two_dimensional\heat_type\solver_method\lss_heston_euler_cuda_solver_method.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\solver_method\lss_heston_euler_solver_method.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_craig_sneyd_method.hpp" />
     <ClInclude Include="pde_solvers\two_dimensional\heat_type\splitting_method\lss_heat_douglas_rachford_method.hpp" />
@@ -167,6 +169,7 @@
     </CudaCompile>
     <CudaCompile Include="pde_solvers\one_dimensional\heat_type\explicit_schemes\lss_heat_euler_cuda_scheme.cu" />
     <CudaCompile Include="pde_solvers\one_dimensional\wave_type\explicit_schemes\lss_wave_euler_cuda_scheme.cu" />
+    <CudaCompile Include="pde_solvers\two_dimensional\heat_type\explicit_schemes\lss_heston_euler_cuda_solver_scheme.cu" />
     <CudaCompile Include="sparse_solvers\general\core_sor_solver_cuda\lss_core_sor_solver_cuda.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

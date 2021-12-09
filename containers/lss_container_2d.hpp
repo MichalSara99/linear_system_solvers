@@ -118,6 +118,21 @@ class container_2d<by_enum::Row, fp_type, container, allocator>
         return *this;
     }
 
+    void from_data(container<fp_type, allocator> const &data)
+    {
+        auto const total_size = rows_ * columns_;
+        std::size_t tid{};
+        LSS_ASSERT(total_size == data.size(), "Data are not of the correct size");
+        for (std::size_t r = 0; r < rows_; ++r)
+        {
+            for (std::size_t c = 0; c < columns_; ++c)
+            {
+                tid = c + r * columns_;
+                data_[r][c] = data[tid];
+            }
+        }
+    }
+
     std::size_t rows() const
     {
         return rows_;
@@ -299,6 +314,21 @@ class container_2d<by_enum::Column, fp_type, container, allocator>
     std::size_t total_size() const
     {
         return rows_ * columns_;
+    }
+
+    void from_data(container<fp_type, allocator> const &data)
+    {
+        auto const total_size = rows_ * columns_;
+        std::size_t tid{};
+        LSS_ASSERT(total_size == data.size(), "Data are not of the correct size");
+        for (std::size_t c = 0; c < columns_; ++c)
+        {
+            for (std::size_t r = 0; r < rows_; ++r)
+            {
+                tid = r + c * rows_;
+                data_[c][r] = data[tid];
+            }
+        }
     }
 
     // return value from container_2d at potision (row_idx,col_idx)

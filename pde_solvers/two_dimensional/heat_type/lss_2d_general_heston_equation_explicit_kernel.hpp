@@ -14,6 +14,7 @@
 #include "pde_solvers/lss_heat_solver_config.hpp"
 #include "pde_solvers/lss_pde_discretization_config.hpp"
 #include "pde_solvers/transformation/lss_heat_data_transform.hpp"
+#include "pde_solvers/two_dimensional/heat_type/explicit_schemes/lss_heston_euler_cuda_solver_scheme.hpp"
 #include "pde_solvers/two_dimensional/heat_type/explicit_schemes/lss_heston_euler_solver_scheme.hpp"
 #include "pde_solvers/two_dimensional/heat_type/implicit_coefficients/lss_2d_general_heston_equation_coefficients.hpp"
 
@@ -85,12 +86,10 @@ class general_heston_equation_explicit_kernel<memory_space_enum::Device, fp_type
         if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::Euler)
         {
 
-            // TODO: to be implemented
-            throw std::exception("TODO: to be implemented");
-            // typedef heston_euler_cuda_scheme<fp_type, container, allocator> heston_euler_cuda_scheme_t;
-            // heston_euler_cuda_scheme_t euler_scheme(heston_coeff_holder, boundary_ver_, boundary_pair_hor_,
-            //                                         discretization_cfg_, grid_cfg_);
-            // euler_scheme(prev_solution, next_solution, is_heat_sourse_set, heat_source, traverse_dir);
+            typedef heston_euler_cuda_scheme<fp_type, container, allocator> heston_euler_cuda_scheme_t;
+            heston_euler_cuda_scheme_t euler_scheme(heston_coeff_holder, boundary_ver_, boundary_pair_hor_,
+                                                    discretization_cfg_, grid_cfg_);
+            euler_scheme(prev_solution, next_solution, is_heat_sourse_set, heat_source, traverse_dir);
         }
         else if (solver_cfg_->explicit_pde_scheme() == explicit_pde_schemes_enum::ADEBarakatClark)
         {
